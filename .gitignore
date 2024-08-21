@@ -96,3 +96,6 @@ Thumbs.db
 
 # macOS specific data
 .DS_Store
+
+# VS files.
+/.vs
