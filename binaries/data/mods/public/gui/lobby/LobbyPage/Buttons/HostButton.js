@@ -13,12 +13,13 @@ class HostButton
 		let onConnectionStatusChange = this.onConnectionStatusChange.bind(this);
 		xmppMessages.registerXmppMessageHandler("system", "connected", onConnectionStatusChange);
 		xmppMessages.registerXmppMessageHandler("system", "disconnected", onConnectionStatusChange);
+		xmppMessages.registerXmppMessageHandler("chat", "role", onConnectionStatusChange);
 		this.onConnectionStatusChange();
 	}
 
 	onConnectionStatusChange()
 	{
-		this.hostButton.enabled = Engine.IsXmppClientConnected();
+		this.hostButton.enabled = Engine.IsXmppClientConnected() &&  Engine.LobbyGetPlayerRole(g_Nickname) != "visitor";;
 	}
 
 	onPress()
