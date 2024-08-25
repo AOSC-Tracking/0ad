@@ -18,6 +18,8 @@ class TradeButtonManager
 		hideRemaining("tradeResources", resourceCodes.length);
 
 		this.tradeHelp = Engine.GetGUIObjectByName("tradeHelp");
+		this.tradeHelp.tooltip =
+			colorizeHotkey(translate(this.TradeSwapTooltip), "session.fulltradeswap");
 		this.tradeHelp.hidden = false;
 	}
 
@@ -26,8 +28,6 @@ class TradeButtonManager
 		// Observers can change perspective and values can update while viewing the dialog.
 		if (g_IsObserver)
 			this.tradingGoods = Engine.GuiInterfaceCall("GetTradingGoods");
-
-		this.tradeHelp.tooltip = colorizeHotkey(translate(this.TradeSwapTooltip), "session.fulltradeswap");
 
 		let enabled = controlsPlayer(g_ViewedPlayer);
 		for (let button of this.buttons)
