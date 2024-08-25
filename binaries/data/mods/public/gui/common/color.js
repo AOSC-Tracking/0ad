@@ -182,9 +182,20 @@ function colorizeHotkey(text, hotkey)
 	else
 		key = formatHotkeyCombinations(key);
 
-	return sprintf(text, {
-		"hotkey": setStringTags("\\[" + key + "]", g_HotkeyTags)
-	});
+	const tagedString = setStringTags("\\[" + key + "]", g_HotkeyTags);
+	try
+	{
+		return sprintf(text, { "hotkey": tagedString });
+	}
+	catch(e)
+	{
+		if (!(e instanceof SyntaxError))
+			throw e;
+
+		error("The following string is in the wrong format for it's hotkey(s) to be colorized:\n" +
+			text);
+		return text;
+	}
 }
 
 /**
