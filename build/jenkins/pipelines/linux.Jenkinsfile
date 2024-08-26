@@ -39,11 +39,11 @@ pipeline {
 				axes {
 					axis {
 						name 'JENKINS_COMPILER'
-						values 'gcc7' //, 'gcc14', 'clang8', 'clang18'
+						values 'gcc7', 'clang11' //, 'gcc14', 'clang18'
 					}
 					axis {
 						name 'JENKINS_PCH'
-						values 'pch' //, 'no-pch'
+						values 'pch', 'no-pch'
 					}
 				}
 
