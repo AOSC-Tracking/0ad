@@ -33,7 +33,7 @@ import difflib
 import re
 import subprocess
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentError, ArgumentParser
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Sequence
 
 
@@ -49,7 +49,7 @@ def check_copyright_year(
         ["git", "diff", "--cached", "--name-only"], capture_output=True, check=True
     )
     staged_files = diff_process.stdout.decode().split("\n")
-    current_year = datetime.now(tz=UTC).date().year
+    current_year = datetime.now(tz=timezone.utc).date().year
     is_error = False
 
     last_commit = subprocess.run(
