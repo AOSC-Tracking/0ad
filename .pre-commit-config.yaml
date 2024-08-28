@@ -64,3 +64,18 @@ repos:
             ^build/premake/|
             ^source/third_party/
           )
+  - repo: local
+    hooks:
+      - id: check-copyright-year
+        name: check the copyright year is up-to-date
+        description: |
+          Check that the copyright year in the license headers of files is up-to-date
+        entry: ./source/tools/hooks/check_copyright_year.py
+        language: python
+        types: [text]
+        stages: [pre-commit]
+        exclude: |
+          (?x)(
+            ^build/premake/|
+            ^source/third_party/
+          )
