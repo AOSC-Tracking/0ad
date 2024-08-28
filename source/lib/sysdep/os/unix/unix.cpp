@@ -1,4 +1,4 @@
-/* Copyright (c) 2021 Wildfire Games.
+/* Copyright (c) 2024 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
