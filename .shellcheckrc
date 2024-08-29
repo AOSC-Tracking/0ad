@@ -1,0 +1,4 @@
+external-sources=true
+source-path=../..
+
+#enable=require-variable-braces
