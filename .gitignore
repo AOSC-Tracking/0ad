@@ -15,7 +15,7 @@ build/workspaces/vs2017
 
 # Libraries
 libraries/macos
-libraries/source
+libraries/source/*
 libraries/win32
 
 # premake5 build files, adapted from upstream
