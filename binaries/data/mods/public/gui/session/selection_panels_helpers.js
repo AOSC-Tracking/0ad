@@ -386,14 +386,16 @@ function cancelUpgradeEntity()
 }
 
 /**
- * Set the camera to follow the given entity if it's a unit.
- * Otherwise stop following.
+ * Set the camera to follow the given entity.
+ * If that's not possible, abort the current follow if any.
  */
 function setCameraFollow(entity)
 {
-	let entState = entity && GetEntityState(entity);
+	const entState = entity && GetEntityState(entity);
 	if (entState && hasClass(entState, "Unit"))
 		Engine.CameraFollow(entity);
+	else if (entState?.position)
+		Engine.CameraMoveTo(entState.position.x, entState.position.z);
 	else
 		Engine.CameraFollow(0);
 }
