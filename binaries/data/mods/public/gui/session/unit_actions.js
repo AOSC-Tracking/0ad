@@ -1414,9 +1414,6 @@ var g_EntityCommands =
 	"delete": {
 		"getInfo": function(entStates)
 		{
-			if (entStates.every(entState => isUndeletable(entState) === ""))
-				return;
-
 			return entStates.some(entState => !isUndeletable(entState)) ?
 				{
 					"tooltip":
@@ -1898,13 +1895,13 @@ function isUndeletable(entState)
 		return false;
 
 	if (entState.resourceSupply && entState.resourceSupply.killBeforeGather)
-		return "";
+		return translate("The entity has to be killed before it can be gathered from");
 
 	if (entState.capturePoints && entState.capturePoints[entState.player] < entState.maxCapturePoints / 2)
-		return translate("You cannot destroy this entity as you own less than half the capture points.");
+		return translate("You cannot destroy this entity as you own less than half the capture points");
 
 	if (!entState.identity.canDelete)
-		return translate("This entity is undeletable.");
+		return translate("This entity is undeletable");
 
 	return false;
 }
