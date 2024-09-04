@@ -1,4 +1,5 @@
 ---
+fail_fast: false
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
@@ -68,4 +69,89 @@ repos:
             ^.gitea/ISSUE_TEMPLATE/|
             ^build/premake/|
             ^source/third_party/
+          )
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: cppcheck
+        args:
+          - --language=c++
+          - --std=c++17
+          # - --max-configs=40
+          - --force
+          - -I./source
+          - --suppress=arithOperationsOnVoidPointer
+          - --suppress=arrayIndexThenCheck
+          - --suppress=checkLevelNormal
+          - --suppress=checkersReport
+          - --suppress=clarifyCalculation
+          - --suppress=constParameter
+          - --suppress=constParameterCallback
+          - --suppress=constParameterPointer
+          - --suppress=constParameterReference
+          - --suppress=constVariable
+          - --suppress=constVariablePointer
+          - --suppress=constVariableReference
+          - --suppress=containerOutOfBounds
+          - --suppress=cstyleCast
+          - --suppress=ctuOneDefinitionRuleViolation
+          - --suppress=ctunullpointer
+          - --suppress=danglingTemporaryLifetime
+          - --suppress=duplInheritedMember
+          - --suppress=duplicateCondition
+          - --suppress=duplicateExpression
+          - --suppress=ignoredReturnValue
+          - --suppress=incorrectStringBooleanError
+          - --suppress=invalidFunctionArg
+          - --suppress=invalidPointerCast
+          - --suppress=invalidPrintfArgType_sint
+          - --suppress=knownConditionTrueFalse
+          - --suppress=mismatchAllocDealloc
+          - --suppress=mismatchingContainers
+          - --suppress=missingInclude
+          - --suppress=missingIncludeSystem
+          - --suppress=missingOverride
+          - --suppress=missingReturn
+          - --suppress=moduloofone
+          - --suppress=noConstructor
+          - --suppress=noCopyConstructor
+          - --suppress=noExplicitConstructor
+          - --suppress=noOperatorEq
+          - --suppress=noValidConfiguration
+          - --suppress=nullPointer
+          - --suppress=nullPointerArithmetic
+          - --suppress=nullPointerRedundantCheck
+          - --suppress=operatorEqMissingReturnStatement
+          - --suppress=operatorEqMissingReturnStatement
+          - --suppress=operatorEqVarError
+          - --suppress=passedByValue
+          - --suppress=pointerSize
+          - --suppress=preprocessorErrorDirective
+          - --suppress=shadowFunction
+          - --suppress=shadowVariable
+          - --suppress=shiftNegativeLHS
+          - --suppress=stlcstrConstructor
+          - --suppress=syntaxError
+          - --suppress=uninitMemberVar
+          - --suppress=uninitMemberVarPrivate
+          - --suppress=unknownMacro
+          - --suppress=unmatchedSuppression
+          - --suppress=unreachableCode
+          - --suppress=unreadVariable
+          - --suppress=unsignedLessThanZero
+          - --suppress=unusedFunction
+          - --suppress=unusedPrivateFunction
+          - --suppress=unusedStructMember
+          - --suppress=unusedVariable
+          - --suppress=useInitializationList
+          - --suppress=useStlAlgorithm
+          - --suppress=uselessAssignmentArg
+          - --suppress=variableScope
+          - --suppress=virtualCallInConstructor
+        exclude: |
+          (?x)(
+            ^binaries/|
+            ^build/|
+            ^libraries/|
+            ^source/third_party
           )
