@@ -34,6 +34,7 @@
   </Sound>
   <Turretable/>
   <UnitAI>
+	<RangeError>15</RangeError>
     <Formations datatype="tokens">
       special/formations/skirmish
     </Formations>

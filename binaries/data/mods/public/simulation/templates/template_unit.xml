@@ -109,6 +109,7 @@
     <CanPatrol>true</CanPatrol>
     <PatrolWaitTime>1</PatrolWaitTime>
     <CheeringTime>2800</CheeringTime>
+	<RangeError>10</RangeError>
     <Formations datatype="tokens">
       special/formations/null
       special/formations/box

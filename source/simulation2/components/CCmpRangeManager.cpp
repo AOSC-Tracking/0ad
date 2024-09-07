@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2024 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -162,6 +162,7 @@ struct Query
 	u32 ownersMask;
 	i32 interface;
 	u8 flagsMask;
+	u8 rangeError;
 	bool enabled;
 	bool parabolic;
 	bool accountForSize; // If true, the query accounts for unit sizes, otherwise it treats all entities as points.
@@ -255,8 +256,8 @@ static_assert(sizeof(EntityData) == 24);
 class EntityDistanceOrdering
 {
 public:
-	EntityDistanceOrdering(const EntityMap<EntityData>& entities, const CFixedVector2D& source) :
-		m_EntityData(entities), m_Source(source)
+	EntityDistanceOrdering(const EntityMap<EntityData>& entities, const CFixedVector2D& source, const u8 rangeError = 0) :
+		m_EntityData(entities), m_Source(source), m_RangeError(rangeError)
 	{
 	}
 
@@ -268,11 +269,12 @@ public:
 		const EntityData& db = m_EntityData.find(b)->second;
 		CFixedVector2D vecA = CFixedVector2D(da.x, da.z) - m_Source;
 		CFixedVector2D vecB = CFixedVector2D(db.x, db.z) - m_Source;
-		return (vecA.CompareLength(vecB) < 0);
+		return (m_RangeError > 0 ? vecA.CompareLengthRough(vecB, m_RangeError) : vecA.CompareLength(vecB)) < 0;
 	}
 
 	const EntityMap<EntityData>& m_EntityData;
 	CFixedVector2D m_Source;
+	const u8 m_RangeError;
 
 private:
 	EntityDistanceOrdering& operator=(const EntityDistanceOrdering&);
@@ -294,6 +296,7 @@ struct SerializeHelper<Query>
 		serialize.NumberU32_Unbounded("owners mask", value.ownersMask);
 		serialize.NumberI32_Unbounded("interface", value.interface);
 		Serializer(serialize, "last match", value.lastMatch);
+		serialize.NumberU8_Unbounded("range percent error", value.rangeError);
 		serialize.NumberU8_Unbounded("flagsMask", value.flagsMask);
 		serialize.Bool("enabled", value.enabled);
 		serialize.Bool("parabolic",value.parabolic);
@@ -923,20 +926,20 @@ public:
 
 	tag_t CreateActiveQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) override
+		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize, u8 rangeError) override
 	{
 		tag_t id = m_QueryNext++;
-		m_Queries[id] = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flags, accountForSize);
+		m_Queries[id] = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flags, accountForSize, rangeError);
 
 		return id;
 	}
 
 	tag_t CreateActiveParabolicQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flags) override
+		const std::vector<int>& owners, int requiredInterface, u8 flags, u8 rangeError) override
 	{
 		tag_t id = m_QueryNext++;
-		m_Queries[id] = ConstructParabolicQuery(source, minRange, maxRange, yOrigin, owners, requiredInterface, flags, true);
+		m_Queries[id] = ConstructParabolicQuery(source, minRange, maxRange, yOrigin, owners, requiredInterface, flags, true, rangeError);
 
 		return id;
 	}
@@ -993,25 +996,25 @@ public:
 
 	std::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) override
+		const std::vector<int>& owners, int requiredInterface, bool accountForSize, u8 rangeError) override
 	{
-		Query q = ConstructQuery(INVALID_ENTITY, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize);
+		Query q = ConstructQuery(INVALID_ENTITY, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize, rangeError);
 		std::vector<entity_id_t> r;
 		PerformQuery(q, r, pos);
 
 		// Return the list sorted by distance from the entity
-		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos));
+		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos, q.rangeError));
 
 		return r;
 	}
 
 	std::vector<entity_id_t> ExecuteQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) override
+		const std::vector<int>& owners, int requiredInterface, bool accountForSize, u8 rangeError) override
 	{
 		PROFILE("ExecuteQuery");
 
-		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize);
+		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize, rangeError);
 
 		std::vector<entity_id_t> r;
 
@@ -1026,7 +1029,7 @@ public:
 		PerformQuery(q, r, pos);
 
 		// Return the list sorted by distance from the entity
-		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos));
+		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos, q.rangeError));
 
 		return r;
 	}
@@ -1061,7 +1064,7 @@ public:
 		q.lastMatch = r;
 
 		// Return the list sorted by distance from the entity
-		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos));
+		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos, q.rangeError));
 
 		return r;
 	}
@@ -1145,7 +1148,7 @@ public:
 				continue;
 
 			if (cmpSourcePosition && cmpSourcePosition->IsInWorld())
-				std::stable_sort(added.begin(), added.end(), EntityDistanceOrdering(m_EntityData, cmpSourcePosition->GetPosition2D()));
+				std::stable_sort(added.begin(), added.end(), EntityDistanceOrdering(m_EntityData, cmpSourcePosition->GetPosition2D(),query.rangeError));
 
 			messages.resize(messages.size() + 1);
 			std::pair<entity_id_t, CMessageRangeUpdate>& back = messages.back();
@@ -1404,7 +1407,7 @@ public:
 
 	Query ConstructQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
+		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize, u8 rangeError = 0) const
 	{
 		// Min range must be non-negative.
 		if (minRange < entity_pos_t::Zero())
@@ -1453,6 +1456,7 @@ public:
 			LOGWARNING("CCmpRangeManager: No owners in query for entity %u", source);
 
 		q.interface = requiredInterface;
+		q.rangeError = rangeError;
 		q.flagsMask = flagsMask;
 
 		return q;
@@ -1460,9 +1464,9 @@ public:
 
 	Query ConstructParabolicQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
+		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize, u8 rangeError = 0) const
 	{
-		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flagsMask, accountForSize);
+		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flagsMask, accountForSize, rangeError);
 		q.parabolic = true;
 		q.yOrigin = yOrigin;
 		return q;

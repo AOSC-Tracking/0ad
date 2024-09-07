@@ -67,6 +67,7 @@
     </SoundGroups>
   </Sound>
   <UnitAI>
+	<RangeError>3</RangeError>
     <DefaultStance>standground</DefaultStance>
   </UnitAI>
   <UnitMotion>

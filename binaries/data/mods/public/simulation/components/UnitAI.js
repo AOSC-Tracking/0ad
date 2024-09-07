@@ -43,6 +43,11 @@ UnitAI.prototype.Schema =
 		"</element>" +
 	"</optional>" +
 	"<optional>" +
+		"<element name='RangeError'>" +
+			"<data type='nonNegativeInteger'/>" +
+		"</element>" +
+	"</optional>" +
+	"<optional>" +
 		"<interleave>" +
 			"<element name='RoamDistance'>" +
 				"<ref name='positiveDecimal'/>" +
@@ -3489,6 +3494,7 @@ UnitAI.prototype.Init = function()
 
 	this.formationAnimationVariant = undefined;
 	this.cheeringTime = +(this.template.CheeringTime || 0);
+	this.rangeError = +(this.template.RangeError || 0);
 	this.SetStance(this.template.DefaultStance);
 };
 
@@ -3803,7 +3809,7 @@ UnitAI.prototype.SetupLOSRangeQuery = function(enable = true)
 	// Do not compensate for entity sizes: LOS doesn't, and UnitAI relies on that.
 	this.losRangeQuery = cmpRangeManager.CreateActiveQuery(this.entity,
 		range.min, range.max, players, IID_Identity,
-		cmpRangeManager.GetEntityFlagMask("normal"), false);
+		cmpRangeManager.GetEntityFlagMask("normal"), false, this.rangeError);
 
 	if (enable)
 		cmpRangeManager.EnableActiveQuery(this.losRangeQuery);
@@ -3868,7 +3874,7 @@ UnitAI.prototype.SetupAttackRangeQuery = function(enable = true)
 	// Do not compensate for entity sizes: LOS doesn't, and UnitAI relies on that.
 	this.losAttackRangeQuery = cmpRangeManager.CreateActiveQuery(this.entity,
 		range.min, range.max, players, IID_Resistance,
-		cmpRangeManager.GetEntityFlagMask("normal"), false);
+		cmpRangeManager.GetEntityFlagMask("normal"), false, this.rangeError);
 
 	if (enable)
 		cmpRangeManager.EnableActiveQuery(this.losAttackRangeQuery);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2024 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -132,7 +132,7 @@ public:
 	 * @return list of entities matching the query, ordered by increasing distance from the source entity.
 	 */
 	virtual std::vector<entity_id_t> ExecuteQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
+		const std::vector<int>& owners, int requiredInterface, bool accountForSize, u8 rangeError = 0) = 0;
 
 	/**
 	 * Execute a passive query.
@@ -145,7 +145,7 @@ public:
 	 * @return list of entities matching the query, ordered by increasing distance from the source entity.
 	 */
 	virtual std::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
+		const std::vector<int>& owners, int requiredInterface, bool accountForSize, u8 rangeError = 0) = 0;
 
 	/**
 	 * Construct an active query. The query will be disabled by default.
@@ -159,7 +159,7 @@ public:
 	 * @return unique non-zero identifier of query.
 	 */
 	virtual tag_t CreateActiveQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) = 0;
+		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize, u8 rangeError = 0) = 0;
 
     /**
 	 * Construct an active query of a paraboloic form around the unit.
@@ -177,7 +177,7 @@ public:
 	 * @return unique non-zero identifier of query.
 	 */
 	virtual tag_t CreateActiveParabolicQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flags) = 0;
+		const std::vector<int>& owners, int requiredInterface, u8 flags, u8 rangeError = 0) = 0;
 
 
 	/**

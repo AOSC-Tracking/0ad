@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2024 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -166,6 +166,35 @@ public:
 		if (d2 > od2)
 			return +1;
 
+		return 0;
+	}
+
+	/**
+	 * Returns -1, 0, +1 depending on whether length estimate is less/equal/greater
+	 * than the argument's length.
+	 * Uses a percent error parameter to compare lengths with that percent error.
+	 */
+	int CompareLengthRough(const CFixedVector2D& other, const u8 rangeError) const
+	{
+		u64 d2 = SQUARE_U64_FIXED(X) + SQUARE_U64_FIXED(Y);
+		u64 od2 = SQUARE_U64_FIXED(other.X) + SQUARE_U64_FIXED(other.Y);
+
+		//Early return if the difference is beyond the margin of error
+		if (d2 * (rangeError+100) < od2 * 100)
+			return -1;
+		if (od2 * (rangeError+100) < d2 * 100)
+			return +1;
+
+		//overflow risk with long ranges (designed for unit ranges)
+		CheckMultiplicationOverflow(u64, d2, (u64)(100 + rangeError), "Overflow in CFixedVector2D::CompareLengthRough()","Underflow in CFixedVector2D::CompareLengthRough()")
+		d2 *= 100 - rangeError + X.ToInt_RoundToNearest() % (1 + (rangeError * 2));
+		CheckMultiplicationOverflow(u64, od2, (u64)100, "Overflow in CFixedVector2D::CompareLengthRough()", "Underflow in CFixedVector2D::CompareLengthRough()")
+		od2 *= 100;
+
+		if (d2 < od2)
+			return -1;
+		if (d2 > od2)
+			return +1;
 		return 0;
 	}
 
