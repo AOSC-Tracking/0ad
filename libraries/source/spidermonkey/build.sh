@@ -20,6 +20,7 @@ cp -R spidermonkey-svn spidermonkey-build
 # build
 (
 	cd spidermonkey-build
+	patch -Np0 <../SVN-changes.patch
 	mkdir bin lib
 	./build.sh
 )

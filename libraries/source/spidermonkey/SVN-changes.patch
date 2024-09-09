@@ -1,0 +1,20 @@
+Index: build.sh
+===================================================================
+--- build.sh	(révision 28209)
++++ build.sh	(copie de travail)
+@@ -134,6 +134,15 @@
+   # Prevent complaining that configure is outdated.
+   touch ./js/src/configure
+ 
++  # Fix build on recent macOS versions.
++  # According to https://bugzilla.mozilla.org/show_bug.cgi?id=1844694 --enable-boostrap should work but it doesn't.
++  # See https://trac.wildfiregames.com/ticket/6915
++  if [ "${OS}" = "Darwin" ]
++  then
++    sed -i '' 's/\["-Wl,--version"]/["-Wl","--version"]/g' build/moz.configure/toolchain.configure
++    sed -i '' 's/if retcode == 1 and "Logging ld64 options" in stderr:/if retcode == 0 and "Apple clang version" in stdout:/g' build/moz.configure/toolchain.configure
++  fi
++
+   # Apply patches
+   . ../patch.sh
+ else
