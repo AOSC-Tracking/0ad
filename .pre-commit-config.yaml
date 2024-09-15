@@ -43,7 +43,13 @@ repos:
         language: pygrep
         types: [text]
         files: ^binaries/
-        exclude: (^binaries/data/mods/(mod|public)/art/.*\.xml|\.dae$)
+        exclude: |
+          (?x)(
+            ^binaries/data/mods/mod/art/.*\.xml$|
+            ^binaries/data/mods/public/art/.*\.xml$|
+            ^binaries/data/mods/public/maps/.*\.xml$|
+            \.dae$
+          )
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.9.0-1
     hooks:
