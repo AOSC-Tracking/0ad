@@ -5,4 +5,5 @@
   <Ownership merge=""/>
   <Position merge=""/>
   <VisualActor merge=""/>
+  <BiomeReplacer merge=""/>
 </Entity>

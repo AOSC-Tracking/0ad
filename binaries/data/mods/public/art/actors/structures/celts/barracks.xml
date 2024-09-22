@@ -12,10 +12,21 @@
         <prop actor="particle/smoke_blacksmith.xml" attachpoint="smoke"/>
       </props>
       <textures>
-        <texture file="structural/celt_struct_1.dds" name="baseTex"/>
         <texture file="structural/celt_struct_1_norm.png" name="normTex"/>
         <texture file="structural/celt_struct_1_spec.png" name="specTex"/>
         <texture file="structural/ao/celt_barracks.png" name="aoTex"/>
+      </textures>
+    </variant>
+  </group>
+  <group>
+    <variant name="summer" frequency="1">
+      <textures>
+        <texture file="structural/celt_struct_1.dds" name="baseTex"/>
+      </textures>
+    </variant>
+    <variant name="winter" frequency="0">
+      <textures>
+        <texture file="structural/celt_struct_1_snow.dds" name="baseTex"/>
       </textures>
     </variant>
   </group>

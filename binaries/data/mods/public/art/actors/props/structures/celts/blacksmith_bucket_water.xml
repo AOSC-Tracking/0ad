@@ -4,9 +4,18 @@
   <group>
     <variant frequency="1" name="barrels">
       <mesh>props/celt_blacksmith_bucket_water.dae</mesh>
+    </variant>
+  </group>
+  <group>
+    <variant name="summer" frequency="1">
       <textures>
-<texture file="structural/celt_struct_1.dds" name="baseTex"/>
-</textures>
+        <texture file="structural/celt_struct_1.dds" name="baseTex"/>
+      </textures>
+    </variant>
+    <variant name="winter" frequency="0">
+      <textures>
+        <texture file="structural/celt_struct_1_snow.dds" name="baseTex"/>
+      </textures>
     </variant>
   </group>
   <material>player_water.xml</material>

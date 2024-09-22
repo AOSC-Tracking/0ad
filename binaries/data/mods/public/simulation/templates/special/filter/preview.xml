@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Entity filtered="">
+  <BiomeReplacer merge=""/>
   <!-- We only want to include components which are necessary (for the visual previewing of an entity)
        and safe (i.e. won't do anything that affects the synchronised simulation state), so additions
        to this list should be carefully considered -->

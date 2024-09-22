@@ -3,6 +3,7 @@
   <AIProxy merge=""/>
   <AutoBuildable merge=""/>
   <BuildRestrictions merge=""/>
+  <BiomeReplacer merge=""/>
   <Cost merge=""/>
   <Decay merge=""/>
   <Fogging merge=""/>

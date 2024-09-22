@@ -41,6 +41,11 @@ function InitGame(settings)
 			cmpRangeManager.ExploreMap(i);
 	}
 
+	if (settings.Biome)
+	{
+		Engine.QueryInterface(SYSTEM_ENTITY, IID_BiomeManager)?.SetBiome(settings.Biome);
+	}
+
 	const cmpAIManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIManager);
 	for (let i = 0; i < settings.PlayerData.length; ++i)
 	{

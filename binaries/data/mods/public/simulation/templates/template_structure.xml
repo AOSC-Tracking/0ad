@@ -6,6 +6,14 @@
     <Territory>own</Territory>
     <Category>Structure</Category>
   </BuildRestrictions>
+  <BiomeReplacer>
+    <Variants>
+      <Winter>
+        <AffectedBiomes datatype="tokens">generic/arctic generic/alpine</AffectedBiomes>
+        <ActorVariant>winter</ActorVariant>
+      </Winter>
+    </Variants>
+  </BiomeReplacer>
   <Capturable>
     <CapturePoints>500</CapturePoints>
     <RegenRate>0.5</RegenRate>
