@@ -92,7 +92,12 @@ Identity.prototype.Init = function()
 	this.classesList = GetIdentityClasses(this.template);
 	this.visibleClassesList = GetVisibleIdentityClasses(this.template);
 	if (this.template.Phenotype)
-		this.phenotype = pickRandom(this.GetPossiblePhenotypes());
+	{
+		const phenotypes = this.GetPossiblePhenotypes();
+
+		// Avoid calling Math.random to avoid out of sync RNG caused by preview entities
+		this.phenotype = phenotypes[this.entity % phenotypes.length];
+	}
 	else
 		this.phenotype = "default";
 

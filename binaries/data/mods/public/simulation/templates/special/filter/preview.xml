@@ -2,7 +2,11 @@
 <Entity filtered="">
   <!-- We only want to include components which are necessary (for the visual previewing of an entity)
        and safe (i.e. won't do anything that affects the synchronised simulation state), so additions
-       to this list should be carefully considered -->
+       to this list should be carefully considered.
+
+       Any Init function of any component listed here may not call Math.random, otherwise the RNG state
+       would become out of sync with the RNG state of the other clients.
+  -->
   <!-- Attack is needed for the Actor Viewer and attack range overlay -->
   <Attack merge=""/>
   <BuildRestrictions merge=""/>
