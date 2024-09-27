@@ -6,6 +6,7 @@ newoption { trigger = "icc", description = "Use Intel C++ Compiler (Linux only; 
 newoption { trigger = "jenkins-tests", description = "Configure CxxTest to use the XmlPrinter runner which produces Jenkins-compatible output" }
 newoption { trigger = "minimal-flags", description = "Only set compiler/linker flags that are really needed. Has no effect on Windows builds" }
 newoption { trigger = "outpath", description = "Location for generated project files" }
+newoption { trigger = "with-lto", description = "Enable Link Time Optimization (LTO)" }
 newoption { trigger = "with-system-mozjs", description = "Search standard paths for libmozjs91, instead of using bundled copy" }
 newoption { trigger = "with-system-nvtt", description = "Search standard paths for nvidia-texture-tools library, instead of using bundled copy" }
 newoption { trigger = "with-valgrind", description = "Enable Valgrind support (non-Windows only)" }
@@ -190,6 +191,15 @@ function project_set_build_flags()
 	filter "Release"
 		if os.istarget("windows") or not _OPTIONS["minimal-flags"] then
 			optimize "Speed"
+		end
+		if _OPTIONS["with-lto"] then
+			-- premake doesn't provide needed flags for MSVC.
+			if os.istarget("windows") then
+				buildoptions { "/GL" }
+				linkoptions { "/LTCG" }
+			else
+				flags { "LinkTimeOptimization" }
+			end
 		end
 		defines { "NDEBUG", "CONFIG_FINAL=1" }
 
@@ -1084,6 +1094,11 @@ function setup_main_exe ()
 		-- this should not be enabled during development, so that memory issues are easily spotted.
 		if _OPTIONS["large-address-aware"] then
 			linkoptions { "/LARGEADDRESSAWARE" }
+		end
+
+		-- premake doesn't provide needed flags for MSVC.
+		if _OPTIONS["with-lto"] then
+			linkoptions { "/LTCG" }
 		end
 
 		-- see manifest.cpp
