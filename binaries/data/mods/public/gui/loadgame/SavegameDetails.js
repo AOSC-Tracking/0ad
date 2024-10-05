@@ -1,7 +1,7 @@
 /**
  * Needed for formatPlayerInfo to show the player civs in the details.
  */
-const g_CivData = loadCivData(false, false);
+const g_CivData = loadCivData(false, false, false);
 
 /**
  * This class is responsible for showing the map preview, description and other details

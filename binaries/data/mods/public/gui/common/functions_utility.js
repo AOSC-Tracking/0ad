@@ -32,13 +32,13 @@ function fireConfigChangeHandlers(changes)
 /**
  * Returns translated history and gameplay data of all civs, optionally including a mock gaia civ.
  */
-function loadCivData(selectableOnly, gaia)
+function loadCivData(selectableOnly, includeGaia, includeHistory)
 {
-	let civData = loadCivFiles(selectableOnly);
+	let civData = loadCivFiles(selectableOnly, includeHistory);
 
-	translateObjectKeys(civData, ["Name", "Description", "History", "Special"]);
+	translateObjectKeys(civData, ["Name", "Description", "Special"].concat(includeHistory ? ["History"] : []));
 
-	if (gaia)
+	if (includeGaia)
 		civData.gaia = { "Code": "gaia", "Name": translate("Gaia") };
 
 	return deepfreeze(civData);

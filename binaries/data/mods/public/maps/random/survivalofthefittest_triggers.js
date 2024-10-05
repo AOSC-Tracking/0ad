@@ -123,7 +123,7 @@ Trigger.prototype.debugLog = function(txt)
 
 Trigger.prototype.LoadAttackerTemplates = function()
 {
-	for (let civ of ["gaia", ...Object.keys(loadCivFiles(false))])
+	for (let civ of ["gaia", ...Object.keys(loadCivFiles(false, false))])
 		attackerUnitTemplates[civ] = {
 			"heroes": TriggerHelper.GetTemplateNamesByClasses("Hero", civ, undefined, true),
 			"champions": TriggerHelper.GetTemplateNamesByClasses("Champion+!Elephant", civ, undefined, true),

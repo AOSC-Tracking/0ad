@@ -1,6 +1,6 @@
 const g_IsReplay = Engine.IsVisualReplay();
 
-const g_CivData = loadCivData(false, true);
+const g_CivData = loadCivData(false, true, false);
 
 const g_MapSizes = prepareForDropdown(g_Settings && g_Settings.MapSizes);
 const g_MapTypes = prepareForDropdown(g_Settings && g_Settings.MapTypes);

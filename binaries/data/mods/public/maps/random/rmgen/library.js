@@ -34,7 +34,7 @@ const MAX_HEIGHT = MAX_HEIGHT_RANGE - SEA_LEVEL;
  */
 const BUILDING_ORIENTATION = -1/4 * Math.PI;
 
-const g_CivData = deepfreeze(loadCivFiles(false));
+const g_CivData = deepfreeze(loadCivFiles(false, false));
 
 const g_ActorPrefix = "actor|";
 

@@ -6,7 +6,7 @@ const g_EngineInfo = Engine.GetEngineInfo();
 /**
  * Needed for formatPlayerInfo to show the player civs in the details.
  */
-const g_CivData = loadCivData(false, false);
+const g_CivData = loadCivData(false, false, false);
 
 /**
  * Used for creating the mapsize filter.

@@ -21,7 +21,7 @@ class GameSettings
 
 		// Load all possible civ data - don't presume that some will be available.
 		Object.defineProperty(this, "civData", {
-			"value": loadCivData(false, false),
+			"value": loadCivData(false, false, false),
 		});
 
 		Object.defineProperty(this, "isNetworked", {

@@ -5,7 +5,7 @@ class ReferencePage
 {
 	constructor()
 	{
-		this.civData = loadCivData(true, false);
+		this.civData = loadCivData(true, false, true);
 
 		this.TemplateLoader = new TemplateLoader();
 		this.TemplateLister = new TemplateLister(this.TemplateLoader);

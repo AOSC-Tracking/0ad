@@ -1,10 +1,11 @@
 /**
  * Loads history and gameplay data of all civs.
  *
- * @param selectableOnly {boolean} - Only load civs that can be selected
+ * @param {boolean} selectableOnly - Only load civs that can be selected
  *        in the gamesetup. Scenario maps might set non-selectable civs.
+ * @param {boolean} includeHistory - Whether or not to load the civs' history texts.
  */
-function loadCivFiles(selectableOnly)
+function loadCivFiles(selectableOnly, includeHistory)
 {
 	let propertyNames = [
 		"Code", "Culture", "Music", "CivBonuses", "StartEntities",
@@ -26,7 +27,9 @@ function loadCivFiles(selectableOnly)
 		const template = Engine.GetTemplate("special/players/" + data.Code);
 		data.Name = template.Identity.GenericName;
 		data.Emblem = "session/portraits/" + template.Identity.Icon;
-		data.History = template.Identity.History;
+
+		if (includeHistory)
+			data.History = template.Identity.History;
 
 		civData[data.Code] = data;
 	}

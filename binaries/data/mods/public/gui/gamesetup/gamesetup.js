@@ -10,7 +10,7 @@ const g_VictoryConditions = g_Settings && g_Settings.VictoryConditions;
  * Offer users to select playable civs only.
  * Load unselectable civs as they could appear in scenario maps.
  */
-const g_CivData = loadCivData(false, false);
+const g_CivData = loadCivData(false, false, true);
 
 /**
  * Remembers which clients are assigned to which player slots and whether they are ready.

@@ -1,4 +1,4 @@
-const g_CivData = loadCivData(false, false);
+const g_CivData = loadCivData(false, false, false);
 
 var g_ScorePanelsData;
 
