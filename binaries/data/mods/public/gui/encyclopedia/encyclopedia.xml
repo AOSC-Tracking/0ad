@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+	<script directory="gui/common/"/>
+	<script directory="gui/encyclopedia/"/>
+	<script directory="gui/encyclopedia/panels/"/>
+	<script directory="gui/encyclopedia/managers/"/>
+	<script directory="gui/reference/common/Dropdowns/"/>
+	<object name="encyclopediaPage">
+		<object name="background" type="image" sprite="BeigeBackground"/>
+		<!-- the lettering is placed outside the centralSection so it can be horizontally centered on the entire screen -->
+		<object name="lettering" type="image" sprite="stretched:encyclopedia/lettering.png"/>
+		<object name="centralSection" size="12%+115 0 80%+33 100%">
+			<object size="40 11%+60 100%-20 100%-70">
+				<include file="gui/encyclopedia/panels/articlepanel.xml"/>
+				<include file="gui/encyclopedia/panels/selectionpanel.xml"/>
+				<include file="gui/encyclopedia/panels/introductionpanel.xml"/>
+			</object>
+		</object>
+		<object name="leftSection" size="0 0 12%+115 100%">
+			<include file="gui/encyclopedia/panels/navigationpanel.xml"/>
+		</object>
+	</object>
+</objects>

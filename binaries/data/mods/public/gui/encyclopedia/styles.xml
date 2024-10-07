@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<styles>
+	<style name="BrownButton"
+		sprite="WideBrownBorder"
+		sprite_over="WideBrownBorderOver"
+		text_align="center"
+		text_valign="center"
+		font="sans-bold-18"
+		textcolor="blackbrown"
+		textcolor_over="mattbrown"
+		sound_pressed="audio/interface/ui/ui_button_click.ogg"
+	/>
+
+	<style name="BrownDropDown"
+		dropdown_buffer="1"
+		font="sans-bold-14"
+		textcolor="blackbrown"
+		textcolor_selected="blackbrown"
+		text_align="center"
+		text_valign="center"
+		button_width="16"
+		sprite="color:255 240 203 70"
+		sprite_overlay="FadingBrownEdges"
+		sprite2="BrownDropDownArrow"
+		sprite2_pressed="LightBrownDropDownArrow"
+		buffer_zone="8"
+		dropdown_size="440"
+		sprite_list="BeigeDropdownBackground"
+		sprite_list_overlay="ThinBrownBorder"
+		sprite_selectarea="LightBrownBackground"
+		sprite_selectarea_overlay="FadingBrownEdges"
+		scrollbar="true"
+		scrollbar_style="BrownGoldenScrollBar"
+		sound_opened="audio/interface/ui/ui_button_click.ogg"
+		sound_closed="audio/interface/ui/ui_button_click.ogg"
+		sound_selected="audio/interface/ui/ui_button_click.ogg"
+	/>
+</styles>

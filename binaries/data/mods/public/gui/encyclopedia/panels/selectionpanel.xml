@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object  name="selectionPanel">
+	<object name="selectionFrame" type="image" sprite="MediumOrnateFrame"/>
+	<object name="selectionTitle" type="text" ghost="true" font="sans-bold-24" textcolor="blackbrown" size="50%-150 10% 50%+150 10%+50" text_align="center"/>
+	<object name="selectionTitleSeperator" type="image" sprite="BrownSeparator" size="20% 18% 80% 18%+2"/>
+	<object name="selectionWarning" type="text" ghost="true" font="sans-italic-20" textcolor="blackbrown" size="100 25%+30 100%-100 25%+80" text_align="center">
+		<translatableAttribute id="caption">No articles have been written about this topic yet.</translatableAttribute>
+	</object>
+	<object name="selectionListCorners" ghost="true">
+		<object name="selectionListCornerRight" type="image" sprite="BrownCornerRight" size="100%-188 100%-188 100%-60 100%-60"/>
+		<object name="selectionListCornerLeft" type="image" sprite="BrownCornerLeft" size="60 100%-188 188 100%-60"/>
+	</object>
+	<object name="selectionList" type="list" size="100 25% 100%-85 100%-100" buffer_zone="20"
+		font="sans-bold-18"
+		textcolor="blackbrown"
+		textcolor_selected="mattbrown"
+		scrollbar="true"
+		scrollbar_style="BrownScrollBar"
+		sprite_selectarea="WideBrownBorderOver"
+		text_align="center"
+		sound_selected="audio/interface/ui/ui_button_click.ogg">
+	</object>
+</object>

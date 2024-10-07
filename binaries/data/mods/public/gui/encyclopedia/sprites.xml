@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sprites>
+
+	<!--
+	==========================================
+	BACKGROUND SPRITES
+	==========================================
+	-->
+
+	<sprite name="DarkTilesBackgroundLeft">
+		<image texture="global/tile/stone_background.png"
+			real_texture_placement="28 0 292 264"
+			texture_size="0 0 240 240"
+		/>
+
+		<image backcolor="230 190 80"
+			size="100%-3 0 100% 100%"
+		/>
+
+	</sprite>
+
+	<sprite name="LightBrownBackground">
+		<image backcolor="mattbrown"/>
+	</sprite>
+
+	<sprite name="BeigeDropdownBackground">
+		<image texture="encyclopedia/backgrounds/beige.png"
+			real_texture_placement="0 0 1024 2048"
+		/>
+		<image backcolor="255 240 203 70"/>
+	</sprite>
+
+	<sprite name="BeigeBackground">
+		<image texture="encyclopedia/backgrounds/beige.png"
+			real_texture_placement="0 0 2048 2048"
+		/>
+	</sprite>
+
+
+	<!--
+	==========================================
+	DECORATIONS
+	==========================================
+	-->
+
+	<sprite name="WideOrnateFrame">
+
+		<!-- edges -->
+		<image texture="encyclopedia/frames/wide/top-edge.png"
+			texture_size="0 0 128 32"
+			size="32 0 100%-32 32"
+		/>
+		<image texture="encyclopedia/frames/wide/vertical-edge.png"
+			texture_size="0 0 32 128"
+			size="100%-32 32 100% 100%"
+		/>
+		<image texture="encyclopedia/frames/wide/bottom-edge.png"
+			texture_size="0 0 128 32"
+			size="32 100%-32 100%-32 100%"
+		/>
+		<image texture="encyclopedia/frames/wide/vertical-edge.png"
+			texture_size="32 0 0 128"
+			size="0 32 32 100%-32"
+		/>
+
+		<!-- corners -->
+		<image texture="encyclopedia/frames/wide/top-corner.png"
+			size="0 0 32 32"
+		/>
+		<image texture="encyclopedia/frames/wide/top-corner.png"
+			texture_size="32 0 0 32"
+			size="100%-32 0 100% 32"
+		/>
+		<image texture="encyclopedia/frames/wide/bottom-corner.png"
+			texture_size="32 0 0 32"
+			size="100%-32 100%-32 100% 100%"
+		/>
+		<image texture="encyclopedia/frames/wide/bottom-corner.png"
+			size="0 100%-32 32 100%"
+		/>
+
+	</sprite>
+
+	<sprite name="MediumOrnateFrame">
+
+		<!-- edges -->
+		<image texture="encyclopedia/frames/medium/horizontal-edge.png"
+			texture_size="0 0 128 16"
+			size="16 100%-16 100%-16 100%"
+		/>
+		<image texture="encyclopedia/frames/medium/vertical-edge.png"
+			texture_size="16 128 0 0"
+			size="100%-16 16 100% 100%"
+		/>
+		<image texture="encyclopedia/frames/medium/vertical-edge.png"
+			texture_size="0 0 16 128"
+			size="0 16 16 100%-16"
+		/>
+		<image texture="encyclopedia/frames/medium/horizontal-edge.png"
+			texture_size="0 16 128 0"
+			size="16 0 100%-16 16"
+		/>
+
+		<!-- corners -->
+		<image texture="encyclopedia/frames/medium/corner.png"
+			texture_size="0 16 16 0"
+			size="0 0 16 16"
+		/>
+		<image texture="encyclopedia/frames/medium/corner.png"
+			texture_size="16 16 0 0"
+			size="100%-16 0 100% 16"
+		/>
+		<image texture="encyclopedia/frames/medium/corner.png"
+			texture_size="16 0 0 16"
+			size="100%-16 100%-16 100% 100%"
+		/>
+		<image texture="encyclopedia/frames/medium/corner.png"
+			size="0 100%-16 16 100%"
+		/>
+
+	</sprite>
+
+	<sprite name="TextOrnament">
+
+		<!-- overlay -->
+		<effect add_color="mattbrown"/>
+
+		<!-- edges -->
+		<image backcolor="mattbrown" size="58 100%-2 100%-58 100%"/>
+		<image backcolor="mattbrown" size="58 0 100%-58 2"/>
+
+		<!-- decorations -->
+		<image texture="encyclopedia/ornament_deco_bottom.png"
+			size="100%-64 100%-19 100% 100%+13"
+		/>
+		<image texture="encyclopedia/ornament_deco_bottom.png"
+			size="0 100%-19 64 100%+13"
+			texture_size="64 0 0 32"
+		/>
+		<image texture="encyclopedia/ornament_deco_top.png"
+			size="4 -21 68 11"
+			texture_size="64 0 0 32"
+		/>
+		<image texture="encyclopedia/ornament_deco_top.png"
+			size="100%-68 -21 100%-4 11"
+		/>
+
+	</sprite>
+
+
+	<!--
+	==========================================
+	SCROLLBARS
+	==========================================
+	-->
+
+	<sprite name="BrownScrollBack">
+		<image texture="encyclopedia/scrollbar/brown-scrollback.png"
+			size="50%-4 -20 50%+4 100%+20"
+		/>
+	</sprite>
+
+	<sprite name="BrownScrollSlider">
+		<image texture="encyclopedia/scrollbar/brown-scrollslider.png"
+		  	real_texture_placement="0 0 15 15"
+			size="0 0 100% 100%"
+		/>
+	</sprite>
+
+	<sprite name="GoldenScrollSlider">
+		<image texture="encyclopedia/scrollbar/golden-scrollslider.png"
+		  	real_texture_placement="0 0 15 15"
+			size="0 0 100% 100%"
+		/>
+	</sprite>
+
+
+
+	<!--
+	==========================================
+	BORDERS
+	==========================================
+	-->
+
+	<sprite name="WideBrownBorder">
+		<image backcolor="blackbrown" size="0 0 3 100%"/>
+		<image backcolor="blackbrown" size="0 0 100% 3"/>
+		<image backcolor="blackbrown" size="100%-3 0 100% 100%"/>
+		<image backcolor="blackbrown" size="0 100%-3 100% 100%"/>
+	</sprite>
+
+	<sprite name="WideBrownBorderOver">
+		<image backcolor="255 240 203 70"/>
+		<image backcolor="mattbrown" size="0 0 4 100%"/>
+		<image backcolor="mattbrown" size="0 0 100% 4"/>
+		<image backcolor="mattbrown" size="100%-4 0 100% 100%"/>
+		<image backcolor="mattbrown" size="0 100%-4 100% 100%"/>
+	</sprite>
+
+	<sprite name="ThinBrownBorder">
+		<image backcolor="blackbrown" size="0 0 1 100%"/>
+		<image backcolor="blackbrown" size="0 0 100% 1"/>
+		<image backcolor="blackbrown" size="100%-1 0 100% 100%"/>
+		<image backcolor="blackbrown" size="0 100%-1 100% 100%"/>
+	</sprite>
+
+	<sprite name="FadingBrownEdges">
+		<effect add_color="blackbrown"/>
+		<image texture="encyclopedia/gradients/fading_double-sided_horizontal.png"
+			size="0 0 100% 1"
+		/>
+		<image texture="encyclopedia/gradients/fading_double-sided_horizontal.png"
+			size="0 100%-1 100% 100%"
+		/>
+	</sprite>
+
+	<sprite name="BrownSeparator">
+		<effect add_color="blackbrown"/>
+		<image texture="encyclopedia/gradients/fading_double-sided_horizontal.png"/>
+	</sprite>
+
+	<sprite name="BrownCornerLeft">
+		<effect add_color="blackbrown"/>
+		<image texture="encyclopedia/gradients/fading_single-sided_horizontal.png" size="0 100%-2 100% 100%"/>
+		<image texture="encyclopedia/gradients/fading_single-sided_vertical.png" size="0 0 2 100%"/>
+	</sprite>
+
+	<sprite name="BrownCornerRight">
+		<effect add_color="blackbrown"/>
+		<image texture="encyclopedia/gradients/fading_single-sided_horizontal.png" size="0 100%-2 100% 100%" texture_size="128 0 0 2"/>
+		<image texture="encyclopedia/gradients/fading_single-sided_vertical.png" size="100%-2 0 100% 100%"/>
+	</sprite>
+
+	<!--
+	==========================================
+	ARROWS
+	==========================================
+	-->
+
+	<sprite name="BrownDropDownArrow">
+		<effect add_color="blackbrown"/>
+		<image texture="encyclopedia/arrows/dropdown-arrow_black.png"
+			real_texture_placement="0 0 16 16"
+			texture_size="0 0 16 16"
+			size="0 6 16 22"
+		/>
+	</sprite>
+
+	<sprite name="LightBrownDropDownArrow">
+		<effect add_color="mattbrown"/>
+		<image texture="encyclopedia/arrows/dropdown-arrow_black.png"
+			real_texture_placement="0 0 16 16"
+			texture_size="0 0 16 16"
+			size="0 6 16 22"
+		/>
+	</sprite>
+
+
+</sprites>

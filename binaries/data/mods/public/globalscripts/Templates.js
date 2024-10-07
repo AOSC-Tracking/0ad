@@ -4,6 +4,8 @@
  * @param {boolean} selectableOnly - Only load civs that can be selected
  *        in the gamesetup. Scenario maps might set non-selectable civs.
  * @param {boolean} includeHistory - Whether or not to load the civs' history texts.
+ *        They are stored in the encyclopedia directory, where not all parts of the engine have
+ *        permission to read from.
  */
 function loadCivFiles(selectableOnly, includeHistory)
 {
@@ -29,7 +31,8 @@ function loadCivFiles(selectableOnly, includeHistory)
 		data.Emblem = "session/portraits/" + template.Identity.Icon;
 
 		if (includeHistory)
-			data.History = template.Identity.History;
+			// The history text is pulled from the encyclopedia
+			data.History = Engine.ReadJSONFile("gui/encyclopedia/articles/civilizations/" + data.Code + "/introduction.json").text;
 
 		civData[data.Code] = data;
 	}
