@@ -18,6 +18,7 @@ class GameDescription
 		g_GameSettings.ceasefire.watch(update, ["value"]);
 		g_GameSettings.cheats.watch(update, ["enabled"]);
 		g_GameSettings.disableTreasures.watch(update, ["enabled"]);
+		g_GameSettings.structureErosionRate.watch(update, ["value"]);
 		g_GameSettings.lastManStanding.watch(update, ["enabled"]);
 		g_GameSettings.lockedTeams.watch(update, ["enabled"]);
 		g_GameSettings.map.watch(update, ["map", "type"]);

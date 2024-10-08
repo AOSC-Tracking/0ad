@@ -283,6 +283,21 @@ function getGameDescription(initAttributes, mapCache)
 					{ "min": ceasefire })
 	});
 
+	const erosionRate = Math.round(initAttributes.settings.StructureErosionRate * 10) / 10;
+	titles.push({
+		"label": translate("Structure Erosion"),
+		"value":
+			erosionRate > 4.5 ?
+				sprintf(translate("Sandstorm (%(value)s)"), { "value": erosionRate.toFixed(1) }) :
+			erosionRate > 3 ?
+				sprintf(translate("Rapid erosion (%(value)s)"), { "value": erosionRate.toFixed(1) }) :
+			erosionRate > 1.5 ?
+				sprintf(translate("Moderate erosion (%(value)s)"), { "value": erosionRate.toFixed(1) }) :
+			erosionRate > 0 ?
+				sprintf(translate("Slow erosion (%(value)s)"), { "value": erosionRate.toFixed(1) }) :
+				translate("No erosion")
+	});
+
 	if (initAttributes.map == "random")
 		titles.push({
 			"label": translateWithContext("Map Selection", "Random Map"),

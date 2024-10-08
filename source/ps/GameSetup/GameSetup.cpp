@@ -788,6 +788,8 @@ CParamNode GetTemplate(const std::string& templateName)
  * -autostart-team=PLAYER:TEAM     sets the team for PLAYER (e.g. 2:2).
  * -autostart-ceasefire=NUM        sets a ceasefire duration NUM
  *                                 (default 0 minutes)
+ * -autostart-erosionrate=NUM      sets a structure erosion rate NUM
+ *                                 (from disabled 0.0, to sandstorm 5.0, default 0.8)
  * -autostart-nonvisual            disable any graphics and sounds
  * -autostart-victory=SCRIPTNAME   sets the victory conditions with SCRIPTNAME
  *                                 located in simulation/data/settings/victory_conditions/
@@ -1031,6 +1033,11 @@ bool Autostart(const CmdLineArgs& args)
 	if (args.Has("autostart-ceasefire"))
 		ceasefire = args.Get("autostart-ceasefire").ToInt();
 	Script::SetProperty(rq, settings, "Ceasefire", ceasefire);
+
+    float erosionRate = 0.8;
+    if (args.Has("autostart-erosionrate"))
+        erosionRate = args.Get("autostart-erosionrate").ToFloat();
+    Script::SetProperty(rq, settings, "StructureErosionRate", erosionRate);
 
 	if (args.Has("autostart-ai"))
 	{

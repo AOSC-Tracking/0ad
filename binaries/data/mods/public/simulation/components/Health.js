@@ -107,9 +107,25 @@ Health.prototype.SetHitpoints = function(value)
 	this.RegisterHealthChanged(old);
 };
 
+Health.prototype.IsErodible = function()
+{
+	const cmpFoundation = Engine.QueryInterface(this.entity, IID_Foundation);
+	const cmpRepairable = Engine.QueryInterface(this.entity, IID_Repairable);
+	return !cmpFoundation && cmpRepairable?.IsRepairable() && cmpRepairable?.GetNumBuilders() === 0;
+};
+
+Health.prototype.GetErosionRate = function()
+{
+	if (InitAttributes?.settings?.StructureErosionRate)
+		return InitAttributes.settings.StructureErosionRate;
+
+	warn("Health.GetErosionRate(): The structure erosion rate could not be retrieved.");
+	return 0
+}
+
 Health.prototype.IsRepairable = function()
 {
-	let cmpRepairable = Engine.QueryInterface(this.entity, IID_Repairable);
+	const cmpRepairable = Engine.QueryInterface(this.entity, IID_Repairable);
 	return cmpRepairable && cmpRepairable.IsRepairable();
 };
 
@@ -134,9 +150,21 @@ Health.prototype.ExecuteRegeneration = function()
 	let regen = this.GetRegenRate();
 	if (this.GetIdleRegenRate() != 0)
 	{
-		let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
+		const cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
 		if (cmpUnitAI && cmpUnitAI.IsIdle())
 			regen += this.GetIdleRegenRate();
+	}
+
+	// structure erosion
+	if (this.IsErodible())
+	{
+		const hpFraction = this.GetHitpoints() / this.GetMaxHitpoints();
+		if (this.GetHitpoints() >= this.GetMaxHitpoints() - 2)
+			regen -= 0;
+		else if (hpFraction > 0.2)
+			regen -= this.GetErosionRate() * (1 - (hpFraction - 0.2) / 0.8);
+		else
+			regen -= this.GetErosionRate();
 	}
 
 	if (regen > 0)
@@ -151,9 +179,9 @@ Health.prototype.ExecuteRegeneration = function()
 Health.prototype.CheckRegenTimer = function()
 {
 	// check if we need a timer
-	if (this.GetRegenRate() == 0 && this.GetIdleRegenRate() == 0 ||
-	    !this.IsInjured() && this.GetRegenRate() >= 0 && this.GetIdleRegenRate() >= 0 ||
-	    this.hitpoints == 0)
+	if (!this.IsErodible() && this.GetRegenRate() == 0 && this.GetIdleRegenRate() == 0 ||
+		!this.IsErodible() && !this.IsInjured() && this.GetRegenRate() >= 0 && this.GetIdleRegenRate() >= 0 ||
+		this.hitpoints == 0)
 	{
 		// we don't need a timer, disable if one exists
 		if (this.regenTimer)

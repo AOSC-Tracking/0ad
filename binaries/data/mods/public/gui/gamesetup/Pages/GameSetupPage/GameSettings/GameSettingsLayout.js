@@ -33,6 +33,7 @@ var g_GameSettingsLayout = [
 			"PopulationCap",
 			"WorldPopulationCap",
 			"StartingResources",
+			"StructureErosionRate",
 			"Spies",
 			"Cheats"
 		]
