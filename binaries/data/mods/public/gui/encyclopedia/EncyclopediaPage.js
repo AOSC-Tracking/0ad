@@ -27,4 +27,4 @@ class EncyclopediaPage
 	}
 }
 
-EncyclopediaPage.prototype.pathToArticles = "gui/encyclopedia/articles/";
+EncyclopediaPage.prototype.pathToArticles = "encyclopedia/";

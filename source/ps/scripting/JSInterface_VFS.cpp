@@ -37,7 +37,7 @@ using namespace std::literals;
 // Only allow engine compartments to read files they may be concerned about.
 namespace PathRestriction
 {
-constexpr std::array<std::wstring_view, 8> GUI{L"gui/"sv, L"simulation/"sv, L"maps/"sv, L"campaigns/"sv,
+constexpr std::array<std::wstring_view, 9> GUI{L"gui/"sv, L"simulation/"sv, L"maps/"sv, L"campaigns/"sv, L"encyclopedia/"sv,
 	L"saves/campaigns/"sv, L"config/matchsettings.json"sv, L"config/matchsettings.mp.json"sv,
 	L"moddata"sv};
 

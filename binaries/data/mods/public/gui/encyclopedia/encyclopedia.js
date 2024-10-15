@@ -7,6 +7,6 @@ function init()
 		"activeCiv": null,
 		"activeSubcategory": null,
 		"activeArticle": null,
-		"targetPath": "gui/encyclopedia/articles/about/introduction.json"
+		"targetPath": "encyclopedia/about/introduction.json"
 	});
 }

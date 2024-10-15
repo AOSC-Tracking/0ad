@@ -32,7 +32,7 @@ function loadCivFiles(selectableOnly, includeHistory)
 
 		if (includeHistory)
 			// The history text is pulled from the encyclopedia
-			data.History = Engine.ReadJSONFile("gui/encyclopedia/articles/civilizations/" + data.Code + "/introduction.json").text;
+			data.History = Engine.ReadJSONFile("encyclopedia/civilizations/" + data.Code + "/introduction.json").text;
 
 		civData[data.Code] = data;
 	}
