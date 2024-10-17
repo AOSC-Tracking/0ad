@@ -78,6 +78,7 @@ General design and rules:
 #include <gloox/jinglesessionmanager.h>
 
 #include <cstring>
+#include <string>
 
 // Gloox leaves some #define up, we need to undefine them.
 #undef lookup
@@ -205,11 +206,6 @@ namespace glooxwrapper
 			return strcmp(m_Data, str.m_Data) < 0;
 		}
 	};
-
-	static inline std::ostream& operator<<(std::ostream& stream, const string& string)
-	{
-		return stream << string.c_str();
-	}
 
 	template<typename T>
 	class list
