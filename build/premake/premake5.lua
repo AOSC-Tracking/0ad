@@ -656,6 +656,7 @@ function setup_all_libs ()
 		"network",
 	}
 	extern_libs = {
+		"cpp_httplib",
 		"spidermonkey",
 		"enet",
 		"sdl",
@@ -674,6 +675,7 @@ function setup_all_libs ()
 		"boost", -- dragged in via simulation.h and scriptinterface.h
 		"fmt",
 		"spidermonkey",
+		"cpp_httplib",
 	}
 	setup_static_lib_project("rlinterface", source_dirs, extern_libs, { no_pch = 1 })
 
@@ -798,6 +800,7 @@ function setup_all_libs ()
 		"libsodium",
 		"fmt",
 		"freetype",
+		"cpp_httplib",
 	}
 
 	if not _OPTIONS["without-nvtt"] then
@@ -1024,6 +1027,7 @@ used_extern_libs = {
 	"libxml2",
 
 	"boost",
+	"cpp_httplib",
 	"cxxtest",
 	"comsuppw",
 	"enet",

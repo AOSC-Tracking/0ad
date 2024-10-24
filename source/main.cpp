@@ -502,7 +502,7 @@ static std::optional<RL::Interface> CreateRLInterface(const CmdLineArgs& args)
 		g_ConfigDB.Get("rlinterface.address", std::string{}) : args.Get("rl-interface")};
 
 	debug_printf("RL interface listening on %s\n", server_address.c_str());
-	return std::make_optional<RL::Interface>(server_address.c_str());
+	return std::make_optional<RL::Interface>(server_address);
 }
 
 // moved into a helper function to ensure args is destroyed before

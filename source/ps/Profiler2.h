@@ -86,6 +86,10 @@
 #include <thread>
 #include <vector>
 
+namespace httplib {
+	class Server;
+}
+
 namespace Renderer
 {
 namespace Backend
@@ -390,7 +394,8 @@ private:
 
 	int m_FrameNumber;
 
-	mg_context* m_MgContext;
+	std::unique_ptr<httplib::Server> m_HttpServer;
+	std::thread m_HttpServerThread;
 
 	CProfiler2GPU* m_GPU;
 
