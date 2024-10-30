@@ -5,6 +5,7 @@ GameSettings.prototype.Attributes.LockedTeams = class LockedTeams extends GameSe
 		this.enabled = false;
 		this.settings.map.watch(() => this.onMapChange(), ["map"]);
 		this.settings.rating.watch(() => this.onRatingChange(), ["enabled"]);
+		this.settings.population.watch(() => this.onPopCapTypeChange(), ["capType"]);
 		this.onRatingChange();
 	}
 
@@ -22,18 +23,24 @@ GameSettings.prototype.Attributes.LockedTeams = class LockedTeams extends GameSe
 	{
 		if (this.settings.map.type != "scenario")
 			return;
-		this.setEnabled(!!this.getMapSetting("LockTeams"));
+		this.setAvailable(!!this.getMapSetting("LockTeams"));
 	}
 
 	onRatingChange()
 	{
-		if (this.settings.rating.enabled)
-		{
-			this.available = false;
+		this.setAvailable(!this.settings.rating.enabled);
+	}
+
+	onPopCapTypeChange()
+	{
+		this.setAvailable(this.settings.population.capType != "team");
+	}
+
+	setAvailable(available)
+	{
+		this.available = available;
+		if (!this.available)
 			this.setEnabled(true);
-		}
-		else
-			this.available = true;
 	}
 
 	setEnabled(enabled)
