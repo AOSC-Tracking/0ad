@@ -466,7 +466,7 @@ function placePlayersNomad(playerClass, constraints)
 
 	for (let i = 0; i < numPlayers; ++i)
 	{
-		const objects = getStartingEntities(playerIDs[i]).filter(ents => ents.Template.startsWith("units/")).map(
+		const objects = getStartingEntities(playerIDs[i]).filter(ents => ents.Template.match("units/.*/support_female_citizen")).map(
 			ents => new SimpleObject(ents.Template, ents.Count || 1, ents.Count || 1, 1, 3));
 
 		// Add treasure if too few resources for a civic center
