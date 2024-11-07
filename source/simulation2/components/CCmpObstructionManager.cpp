@@ -840,7 +840,7 @@ bool CCmpObstructionManager::IsInTargetRange(entity_id_t ent, entity_id_t target
 bool CCmpObstructionManager::IsInTargetParabolicRange(entity_id_t ent, entity_id_t target, entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin, bool opposite) const
 {
 	CmpPtr<ICmpRangeManager> cmpRangeManager(GetSystemEntity());
-	return IsInTargetRange(ent, target, minRange, cmpRangeManager->GetEffectiveParabolicRange(ent, target, maxRange, yOrigin), opposite);
+	return IsInTargetRange(ent, target, cmpRangeManager->GetEffectiveParabolicRange(ent, target, minRange, yOrigin), cmpRangeManager->GetEffectiveParabolicRange(ent, target, maxRange, yOrigin), opposite);
 }
 
 bool CCmpObstructionManager::IsPointInPointRange(entity_pos_t x, entity_pos_t z, entity_pos_t px, entity_pos_t pz, entity_pos_t minRange, entity_pos_t maxRange) const

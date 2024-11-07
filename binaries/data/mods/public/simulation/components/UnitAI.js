@@ -3839,10 +3839,19 @@ UnitAI.prototype.SetupAttackRangeQuery = function(enable = true)
 
 	let range = this.GetQueryRange(IID_Attack);
 	// Do not compensate for entity sizes: LOS doesn't, and UnitAI relies on that.
-	this.losAttackRangeQuery = cmpRangeManager.CreateActiveQuery(this.entity,
-		range.min, range.max, players, IID_Resistance,
-		cmpRangeManager.GetEntityFlagMask("normal"), false);
 
+	if (range.min > 0)
+	{
+		var cmpAttack = Engine.QueryInterface(this.entity, IID_Attack);
+		let yOrigin = cmpAttack.GetAttackYOrigin("Ranged");
+		this.losAttackRangeQuery = cmpRangeManager.CreateActiveParabolicQuery(
+			this.entity, range.min, range.max, yOrigin,
+			players, IID_Resistance, cmpRangeManager.GetEntityFlagMask("normal"));
+	}
+	else
+		this.losAttackRangeQuery = cmpRangeManager.CreateActiveQuery(this.entity,
+			range.min, range.max, players, IID_Resistance,
+			cmpRangeManager.GetEntityFlagMask("normal"), false);
 	if (enable)
 		cmpRangeManager.EnableActiveQuery(this.losAttackRangeQuery);
 };
