@@ -31,11 +31,6 @@ pipeline {
 		}
 	}
 
-	parameters {
-		booleanParam(name: 'NEW_REPO', defaultValue: false, description: 'If a brand new nightly repo is being generated, do not attempt to identify unchanged translations.')
-		stashedFile(name: 'spirv_rules', description: 'rules.json file for generation of SPIR-V shaders. Needed for a new repo, else the existing rules files will be used. Uploading a new rules file will force-rebuild the shaders.')
-	}
-
 	stages {
 		stage("Generate build version") {
 			steps {
@@ -88,7 +83,6 @@ pipeline {
 			steps {
 				ws("workspace/nightly-svn") {
 					bat "svn co https://svn.wildfiregames.com/nightly-build/trunk ."
-					bat "svn revert -R ."
 					script { env.NIGHTLY_PATH = env.WORKSPACE }
 				}
 				bat """
@@ -117,19 +111,6 @@ pipeline {
 			}
 		}
 
-		stage("Check-in SPIR-V rules") {
-			when {
-				expression { env.spirv_rules_FILENAME }
-			}
-			steps {
-				ws("workspace/nightly-svn") {
-					unstash 'spirv_rules'
-					bat "move spirv_rules source\\tools\\spirv\\rules.json"
-				}
-				script { buildSPIRV = true }
-			}
-		}
-
 		stage("Recompile SPIR-V shaders") {
 			when {
 				expression { buildSPIRV }
@@ -153,9 +134,7 @@ pipeline {
 					}
 					bat "cd source\\tools\\i18n && python generate_debug_translation.py --long"
 					bat "cd source\\tools\\i18n && python clean_translation_files.py"
-					script { if (!params.NEW_REPO) {
-						bat "python source\\tools\\i18n\\check_diff.py --verbose"
-					}}
+					bat "cd source\\tools\\i18n && python check_diff.py --verbose"
 					bat "cd source\\tools\\i18n && python credit_translators.py"
 				}
 			}
@@ -180,6 +159,12 @@ pipeline {
 		always {
 			ws("workspace/nightly-svn") {
 				bat "svn cleanup"
+			}
+		}
+		failure {
+			ws("workspace/nightly-svn") {
+				bat "svn revert -R ."
+				bat "svn cleanup --remove-unversioned"
 			}
 		}
 	}
