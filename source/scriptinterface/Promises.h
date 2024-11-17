@@ -18,13 +18,7 @@
 #ifndef INCLUDED_SCRIPTINTERFACE_JOBQUEUE
 #define INCLUDED_SCRIPTINTERFACE_JOBQUEUE
 
-#if MSC_VERSION
-# pragma warning(push, 1)
-#endif
 #include "js/Promise.h"
-#if MSC_VERSION
-# pragma warning(pop)
-#endif
 
 #include <queue>
 

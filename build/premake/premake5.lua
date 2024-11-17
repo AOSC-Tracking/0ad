@@ -178,6 +178,8 @@ function project_set_build_flags()
 	if cc ~= "icc" and (os.istarget("windows") or not _OPTIONS["minimal-flags"]) then
 		-- adds the -Wall compiler flag
 		warnings "Extra" -- this causes far too many warnings/remarks on ICC
+		-- hide warnings caused by library includes
+		externalwarnings "Off"
 	end
 
 	-- disable Windows debug heap, since it makes malloc/free hugely slower when
