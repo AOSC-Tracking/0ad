@@ -290,6 +290,18 @@ var g_NotificationsTypes =
 		}
 
 		global.music.setLocked(notification.lock);
+	},
+	"hero-death": function(notification, player)
+	{
+		addChatMessage({
+			"type": "heroDeath",
+			"player": player,
+			"heroData": notification.heroData
+		});
+
+		Engine.GuiInterfaceCall("PlaySoundForPlayer", {
+			"name": "hero_fallen"
+		});
 	}
 };
 

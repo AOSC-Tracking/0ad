@@ -122,7 +122,8 @@ AddMock(100, IID_Player, {
 	"GetDisabledTemplates": function() { return {}; },
 	"GetDisabledTechnologies": function() { return {}; },
 	"CanBarter": function() { return false; },
-	"GetSpyCostMultiplier": function() { return 1; }
+	"GetSpyCostMultiplier": function() { return 1; },
+	"GetFallenHeroes": function() {	return new Set(); }
 });
 
 AddMock(100, IID_Diplomacy, {
@@ -219,6 +220,7 @@ AddMock(101, IID_Player, {
 	"GetDisabledTechnologies": function() { return {}; },
 	"CanBarter": function() { return false; },
 	"GetSpyCostMultiplier": function() { return 1; },
+	"GetFallenHeroes": function() {	return new Set(["heroTemplate1", "heroTemplate2"]); }
 });
 
 AddMock(101, IID_Diplomacy, {
@@ -338,6 +340,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetSimulationState(), {
 			"researchedTechs": new Set(),
 			"classCounts": {},
 			"typeCountsByClass": {},
+			"fallenHeroes": new Set(),
 			"canBarter": false,
 			"barterPrices": {
 				"buy": { "food": 150 },
@@ -389,6 +392,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetSimulationState(), {
 			"researchedTechs": new Set(),
 			"classCounts": {},
 			"typeCountsByClass": {},
+			"fallenHeroes": new Set(["heroTemplate1", "heroTemplate2"]),
 			"canBarter": false,
 			"barterPrices": {
 				"buy": { "food": 150 },
@@ -451,6 +455,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetExtendedSimulationState(), {
 			"researchedTechs": new Set(),
 			"classCounts": {},
 			"typeCountsByClass": {},
+			"fallenHeroes": new Set(),
 			"canBarter": false,
 			"barterPrices": {
 				"buy": { "food": 150 },
@@ -525,6 +530,7 @@ TS_ASSERT_UNEVAL_EQUALS(cmp.GetExtendedSimulationState(), {
 			"researchedTechs": new Set(),
 			"classCounts": {},
 			"typeCountsByClass": {},
+			"fallenHeroes": new Set(["heroTemplate1", "heroTemplate2"]),
 			"canBarter": false,
 			"barterPrices": {
 				"buy": { "food": 150 },

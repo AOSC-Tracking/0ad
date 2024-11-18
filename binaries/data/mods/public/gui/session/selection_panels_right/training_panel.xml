@@ -7,6 +7,7 @@
 			<object name="unitTrainingButton[n]" hidden="true" style="iconButton" type="button" size="0 0 38 38" tooltip_style="sessionToolTipBottom">
 				<object name="unitTrainingIcon[n]" type="image" ghost="true" size="3 3 35 35"/>
 				<object name="unitTrainingCount[n]" ghost="true" style="groupIconsText" type="text" z="20"/>
+				<object name="heroFallenIcon[n]" type="image" hidden="true" ghost="true" size="3 3 35 35" sprite="stretched:session/icons/hero_fallen.png"/>
 				<action on="MouseWheelUp">
 					OnTrainMouseWheel(1);
 				</action>

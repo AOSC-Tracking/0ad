@@ -77,6 +77,7 @@ Player.prototype.Init = function()
 		"buy": clone(this.template.BarterMultiplier.Buy),
 		"sell": clone(this.template.BarterMultiplier.Sell)
 	};
+	this.fallenHeroes = [];
 
 	// Initial resources.
 	const resCodes = Resources.GetCodes();
@@ -713,6 +714,26 @@ Player.prototype.TributeResource = function(player, amounts)
 		"from": this.playerID,
 		"amounts": amounts
 	});
+};
+
+Player.prototype.HandleHeroDeath = function(ent)
+{
+	const cmpIdentity = Engine.QueryInterface(ent, IID_Identity);
+	Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).PushNotification({
+		"type": "hero-death",
+		"players": [this.playerID],
+		"heroData": {
+			"name": cmpIdentity.GetGenericName(),
+			"phenotype": cmpIdentity.GetPhenotype()
+		}
+	});
+
+	this.fallenHeroes.push(Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager).GetCurrentTemplateName(ent));
+};
+
+Player.prototype.GetFallenHeroes = function()
+{
+	return this.fallenHeroes;
 };
 
 Player.prototype.AddDisabledTemplate = function(template)

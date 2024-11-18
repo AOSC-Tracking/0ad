@@ -281,6 +281,10 @@ Health.prototype.HandleDeath = function()
 	const cmpDeathDamage = Engine.QueryInterface(this.entity, IID_DeathDamage);
 	if (cmpDeathDamage)
 		cmpDeathDamage.CauseDeathDamage();
+
+	if (Engine.QueryInterface(this.entity, IID_Identity).GetClassesList().includes("Hero"))
+		QueryOwnerInterface(this.entity).HandleHeroDeath(this.entity);
+
 	PlaySound("death", this.entity);
 
 	if (this.template.SpawnEntityOnDeath)

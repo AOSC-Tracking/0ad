@@ -630,6 +630,17 @@
 			},
 			{
 				"type": "dropdown",
+				"label": "Chat notification hero death",
+				"tooltip": "Show a chat notification when your hero dies or any hero when you are observer.",
+				"config": "gui.session.notifications.herodeath",
+				"list": [
+					{ "value": "none", "label": "Disabled", "tooltip": "Disable the notifications entirely."},
+					{ "value": "basic", "label": "Basic", "tooltip": "Show a short, simple message only."},
+					{ "value": "expanded", "label": "Expanded", "tooltip": "Additionally include references to the civilization's mythology."}
+				]
+			},
+			{
+				"type": "dropdown",
 				"label": "Chat notification phase",
 				"tooltip": "Show a chat notification if you or an ally have started, aborted or completed a new phase, and phases of all players in observer mode.",
 				"config": "gui.session.notifications.phase",

@@ -82,6 +82,9 @@ function setupUnitPanel(guiName, unitEntStates, playerState)
 			"countDisplay": Engine.GetGUIObjectByName("unit" + guiName + "Count[" + i + "]")
 		};
 
+		if (guiName == "Training")
+			data.heroFallenIcon = Engine.GetGUIObjectByName("heroFallenIcon[" + i + "]");
+
 		if (data.button)
 		{
 			data.button.hidden = false;

@@ -4,6 +4,7 @@ Engine.LoadHelperScript("Player.js");
 Engine.LoadHelperScript("ValueModification.js");
 
 Engine.LoadHelperScript("Sound.js");
+Engine.LoadComponentScript("interfaces/Player.js");
 Engine.LoadComponentScript("interfaces/DeathDamage.js");
 
 Engine.LoadComponentScript("interfaces/Health.js");
@@ -30,6 +31,9 @@ function setEntityUp()
 
 	AddMock(entity_id, IID_DeathDamage, {
 		"CauseDeathDamage": () => {}
+	});
+	AddMock(entity_id, IID_Identity, {
+		"GetClassesList": () => []
 	});
 	AddMock(entity_id, IID_Position, {
 		"IsInWorld": () => true,

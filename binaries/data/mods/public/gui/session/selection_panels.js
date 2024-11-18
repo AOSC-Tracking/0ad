@@ -1095,6 +1095,9 @@ g_SelectionPanels.Training = {
 		if (template.icon)
 			data.icon.sprite = modifier + "stretched:session/portraits/" + template.icon;
 
+		if (data.heroFallenIcon)
+			data.heroFallenIcon.hidden = !data.playerState?.fallenHeroes.includes(data.item);
+
 		const index = data.i + getNumberOfRightPanelButtons();
 		setPanelObjectPosition(data.button, index, data.rowLength);
 

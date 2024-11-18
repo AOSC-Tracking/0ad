@@ -205,3 +205,158 @@ ChatMessageFormatSimulation.flare = class
 		};
 	}
 };
+
+ChatMessageFormatSimulation.heroDeath = class
+{
+	parse(msg)
+	{
+		const notificationType = Engine.ConfigDB_GetValue("user", "gui.session.notifications.herodeath");
+		if (notificationType == "none" || (!g_Players[msg.player].isMutualAlly[g_ViewedPlayer] && !g_IsObserver))
+			return "";
+
+		const isMale = msg.heroData.phenotype == "male";
+		const message = sprintf(
+			isMale ?
+				translate("%(player)s's hero %(heroName)s has fallen in battle.") :
+				translate("%(player)s's heroine %(heroName)s has fallen in battle."),
+			{
+				"player": colorizePlayernameByID(msg.player),
+				"heroName": msg.heroData.name
+			}
+		);
+		const appendageList = this.strings[g_Players[msg.player].civ] || this.strings[g_CivData[g_Players[msg.player].civ].Culture];
+		if (!appendageList || notificationType == "basic")
+			return { "text": message };
+
+		const messageAppendage = translate(
+			isMale ?
+				pickRandom(appendageList).masculine :
+				pickRandom(appendageList).feminine
+		);
+
+		return { "text": (message + " " + messageAppendage) };
+	}
+};
+
+ChatMessageFormatSimulation.heroDeath.prototype.strings = {
+	"hele": [
+		{
+			"masculine": markForTranslation("His shade will be ferried across the river Styx by Charon."),
+			"feminine": markForTranslation("Her shade will be ferried across the river Styx by Charon.")
+		},
+		{
+			"masculine": markForTranslation("His shade will be led to the Elysian Fields by Hermes for his merits."),
+			"feminine": markForTranslation("Her shade will be led to the Elysian Fields by Hermes for her merits.")
+		},
+		{
+			"masculine": markForTranslation("His shade will pass by Cerberus into the underworld, never to return."),
+			"feminine": markForTranslation("Her shade will pass by Cerberus into the underworld, never to return.")
+		},
+		{
+			"masculine": markForTranslation("His shade will enter the realm of Hades."),
+			"feminine": markForTranslation("Her shade will enter the realm of Hades.")
+		},
+		{
+			"masculine": markForTranslation("His deeds will be judged by Minos, Radamanthus, and Aecus."),
+			"feminine": markForTranslation("Her deeds will be judged by Minos, Radamanthus, and Aecus.")
+		}
+	],
+	"celt": [
+		{
+			"masculine": markForTranslation("His shade will journey to the Antumnos."),
+			"feminine": markForTranslation("Her shade will journey to the Antumnos.")
+		},
+		{
+			"masculine": markForTranslation("Her shade will persist under the aegis of Erecura."),
+			"feminine": markForTranslation("His shade will persist under the aegis of Erecura.")
+		}
+	],
+	"cart": [
+		{
+			"masculine": markForTranslation("His shade will be guided to the afterlife by Melqart."),
+			"feminine": markForTranslation("Her shade will be guided to the afterlife by Melqart.")
+		}
+	],
+	"han": [
+		{
+			"masculine": markForTranslation("His shade will descend to the Yellow Springs."),
+			"feminine": markForTranslation("Her shade will descend to the Yellow Springs.")
+		},
+		{
+			"masculine": markForTranslation("His shade will cross the Naihe Bridge of Oblivion and drink from Meng Po's soup."),
+			"feminine": markForTranslation("Her shade will cross the Naihe Bridge of Oblivion and drink from Meng Po's soup.")
+		},
+		{
+			"masculine": markForTranslation("His shade will be escorted to King Yama by Oxhead and Horseface."),
+			"feminine": markForTranslation("Her shade will be escorted to King Yama by Oxhead and Horseface.")
+		}
+	],
+	"iber": [
+		{
+			"masculine": markForTranslation("His shade will henceforth be commanded and protected by Ataecina."),
+			"feminine": markForTranslation("Her shade will henceforth be commanded and protected by Ataecina.")
+		}
+	],
+	"egyp": [
+		{
+			"masculine": markForTranslation("His heart will be weighed against the feather of Ma'at."),
+			"feminine": markForTranslation("Her heart will be weighed against the feather of Ma'at.")
+		},
+		{
+			"masculine": markForTranslation("His shade awaits the final judgement of Osiris."),
+			"feminine": markForTranslation("Her shade awaits the final judgement of Osiris.")
+		}
+	],
+	"maur": [
+		{
+			"masculine": markForTranslation("His shade will be reborn according to his Karma."),
+			"feminine": markForTranslation("Her shade will be reborn according to his Karma.")
+		}
+	],
+	"pers": [
+		{
+			"masculine": markForTranslation("His shade will be reunited with Ahura Mazda."),
+			"feminine": markForTranslation("Her shade will be reunited with Ahura Mazda.")
+		},
+		{
+			"masculine": markForTranslation("His shade will face final judgement in three days at the Chinvat bridge."),
+			"feminine": markForTranslation("Her shade will face final judgement in three days at the Chinvat bridge.")
+		},
+		{
+			"masculine": markForTranslation("His deeds will be weighed on Mithra's scale."),
+			"feminine": markForTranslation("Her deeds will be weighed on Mithra's scale.")
+		},
+		{
+			"masculine": markForTranslation("His deeds will be weighed on Mithra's scale."),
+			"feminine": markForTranslation("Her deeds will be weighed on Mithra's scale.")
+		}
+	],
+	"ptol": [
+		{
+			"masculine": markForTranslation("His shade will travel into the underworld ruled by Serapis."),
+			"feminine": markForTranslation("Her shade will travel into the underworld ruled by Serapis.")
+		}
+	],
+	"rome": [
+		{
+			"masculine": markForTranslation("His shade will be ferried across the river Styx by Charon."),
+			"feminine": markForTranslation("Her shade will be ferried across the river Styx by Charon.")
+		},
+		{
+			"masculine": markForTranslation("His shade will be led to the Elysian Fields by Mercury for his merits."),
+			"feminine": markForTranslation("Her shade will be led to the Elysian Fields by Mercury for her merits.")
+		},
+		{
+			"masculine": markForTranslation("His shade will pass by Cerberus into the underworld, never to return."),
+			"feminine": markForTranslation("Her shade will pass by Cerberus into the underworld, never to return.")
+		},
+		{
+			"masculine": markForTranslation("His shade will enter the realm of Pluto."),
+			"feminine": markForTranslation("Her shade will enter the realm of Pluto.")
+		},
+		{
+			"masculine": markForTranslation("His deeds will be judged by Minos, Radamanthus, and Aecus."),
+			"feminine": markForTranslation("Her deeds will be judged by Minos, Radamanthus, and Aecus.")
+		}
+	]
+};
