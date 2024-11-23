@@ -57,6 +57,14 @@ public:
 	JS::PersistentRootedValue msg;
 };
 
+template <>
+CComponentManager* ScriptInterface::ObjectFromCBData<CComponentManager>(const ScriptRequest& rq)
+{
+	CmptPrivate* pCmptPrivate = (CmptPrivate*)JS::GetRealmPrivate(JS::GetCurrentRealmOrNull(rq.cx));
+	// We can assume it's set
+	return static_cast<CComponentManager*>(pCmptPrivate->pCBData);
+}
+
 CComponentManager::CComponentManager(CSimContext& context, ScriptContext& cx, bool skipScriptFunctions) :
 	m_NextScriptComponentTypeId(CID__LastNative),
 	m_ScriptInterface("Engine", "Simulation", cx),
@@ -88,11 +96,11 @@ CComponentManager::CComponentManager(CSimContext& context, ScriptContext& cx, bo
 		ScriptFunction::Register<&CComponentManager::Script_BroadcastMessage, Getter>(rq, "BroadcastMessage");
 		ScriptFunction::Register<&CComponentManager::Script_AddEntity, Getter>(rq, "AddEntity");
 		ScriptFunction::Register<&CComponentManager::Script_AddLocalEntity, Getter>(rq, "AddLocalEntity");
-		ScriptFunction::Register<&CComponentManager::QueryInterface, Getter>(rq, "QueryInterface");
 		ScriptFunction::Register<&CComponentManager::DestroyComponentsSoon, Getter>(rq, "DestroyEntity");
 		ScriptFunction::Register<&CComponentManager::FlushDestroyedComponents, Getter>(rq, "FlushDestroyedEntities");
 		ScriptFunction::Register<&CComponentManager::Script_GetTemplate, Getter>(rq, "GetTemplate");
 
+		JS_DefineFunction(rq.cx, rq.GetNativeScope(), "QueryInterface", &CComponentManager::Script_QueryInterface, 2, JSPROP_ENUMERATE|JSPROP_READONLY|JSPROP_PERMANENT);
 	}
 
 	// Globalscripts may use VFS script functions
@@ -961,6 +969,33 @@ void CComponentManager::FlushDestroyedComponents()
 			}
 		}
 	}
+}
+
+bool CComponentManager::Script_QueryInterface(JSContext* cx, unsigned argc, JS::Value* vp)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+
+	CComponentManager& componentManager = *ScriptInterface::ObjectFromCBData<CComponentManager>(rq);
+
+	InterfaceId iid = args[1].toInt32();
+	if ((size_t)iid >= componentManager.m_ComponentsByInterface.size())
+	{
+		// Invalid iid
+		args.rval().setNull();
+		return true;
+	}
+
+	entity_id_t ent = args[0].toInt32();
+	std::unordered_map<entity_id_t, IComponent*>::const_iterator eit = componentManager.m_ComponentsByInterface[iid].find(ent);
+	if (eit == componentManager.m_ComponentsByInterface[iid].end())
+	{
+		// This entity doesn't implement this interface
+		args.rval().setNull();
+		return true;
+	}
+	Script::ToJSVal(rq, args.rval(), *eit->second);
+	return true;
 }
 
 IComponent* CComponentManager::QueryInterface(entity_id_t ent, InterfaceId iid) const

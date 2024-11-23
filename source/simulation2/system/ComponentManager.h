@@ -297,6 +297,7 @@ private:
 	int Script_AddEntity(const std::wstring& templateName);
 	int Script_AddLocalEntity(const std::wstring& templateName);
 	const CParamNode& Script_GetTemplate(const std::string& templateName);
+	static bool Script_QueryInterface(JSContext* cx, unsigned argc, JS::Value* vp);
 
 	CMessage* ConstructMessage(int mtid, JS::HandleValue data);
 	void SendGlobalMessage(entity_id_t ent, const CMessage& msg);

@@ -66,6 +66,32 @@ template<> void Script::ToJSVal<IComponent*>(const ScriptRequest& rq,  JS::Mutab
 	ret.setObject(*obj);
 }
 
+template<> void Script::ToJSVal<IComponent>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const IComponent& val)
+{
+	// If this is a scripted component, just return the JS object directly
+	JS::HandleValue instance(val.GetJSInstance());
+	if (!instance.isNull())
+	{
+		ret.set(instance);
+		return;
+	}
+
+	// Otherwise we need to construct a wrapper object
+	// (TODO: cache wrapper objects?)
+	JS::RootedObject obj(rq.cx);
+	if (!val.NewJSObject(rq.GetCurrentScriptInterface(), &obj))
+	{
+		// Report as an error, since scripts really shouldn't try to use unscriptable interfaces
+		LOGERROR("IComponent does not have a scriptable interface");
+		ret.setUndefined();
+		return;
+	}
+	JS::SetPrivate(obj, const_cast<IComponent*>(&val));
+	// TODO: update the above to the below after ESR115
+	//JS::SetReservedSlot(obj, 0, JS::PrivateValue(const_cast<IComponent*>(&val)));
+	ret.setObject(*obj);
+}
+
 template<> void Script::ToJSVal<CParamNode>(const ScriptRequest& rq,  JS::MutableHandleValue ret, CParamNode const& val)
 {
 	val.ToJSVal(rq, true, ret);
