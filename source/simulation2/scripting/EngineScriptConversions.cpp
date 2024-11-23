@@ -54,7 +54,7 @@ template<> void Script::ToJSVal<IComponent*>(const ScriptRequest& rq,  JS::Mutab
 	// Otherwise we need to construct a wrapper object
 	// (TODO: cache wrapper objects?)
 	JS::RootedObject obj(rq.cx);
-	if (!val->NewJSObject(rq.GetScriptInterface(), &obj))
+	if (!val->NewJSObject(rq.GetCurrentScriptInterface(), &obj))
 	{
 		// Report as an error, since scripts really shouldn't try to use unscriptable interfaces
 		LOGERROR("IComponent does not have a scriptable interface");
@@ -151,7 +151,7 @@ template<> bool Script::FromJSVal<CFixedVector3D>(const ScriptRequest& rq,  JS::
 
 template<> void Script::ToJSVal<CFixedVector3D>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const CFixedVector3D& val)
 {
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx, &rq.globalObject());
 	JS::RootedValue valueVector3D(rq.cx);
 	if (!ScriptInterface::GetGlobalProperty(rq, "Vector3D", &valueVector3D))
 		FAIL_VOID("Failed to get Vector3D constructor");
@@ -187,7 +187,7 @@ template<> bool Script::FromJSVal<CFixedVector2D>(const ScriptRequest& rq,  JS::
 
 template<> void Script::ToJSVal<CFixedVector2D>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const CFixedVector2D& val)
 {
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx, &rq.globalObject());
 	JS::RootedValue valueVector2D(rq.cx);
 	if (!ScriptInterface::GetGlobalProperty(rq, "Vector2D", &valueVector2D))
 		FAIL_VOID("Failed to get Vector2D constructor");

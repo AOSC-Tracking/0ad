@@ -142,10 +142,15 @@ public:
 	 * entering the ScriptInterface compartment. It should only be used in specific situations,
 	 * for instance when initializing a persistent rooted.
 	 * If you need the compartmented context of the ScriptInterface, you should create a
-	 * ScriptInterface::Request and use the context from that.
+	 * ScriptRequest and use the context from that.
 	 */
 	JSContext* GetGeneralJSContext() const;
 	ScriptContext& GetContext() const;
+
+	/**
+	 * Get the JS Object on which functions are placed into.
+	 */
+	JS::HandleObject GetNativeScope() const;
 
 	/**
 	 * Load global scripts that most script interfaces need,

@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2022 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -253,7 +253,7 @@ public:
 			// Register the sim globals for easy & explicit access. Mark it replaceable for hotloading.
 			JS::RootedValue global(rq.cx, simrq.globalValue());
 			m_ScriptInterface->SetGlobal("Sim", global, true);
-			JS::RootedValue scope(rq.cx, JS::ObjectValue(*simrq.nativeScope.get()));
+			JS::RootedValue scope(rq.cx, JS::ObjectValue(*simrq.GetNativeScope().get()));
 			m_ScriptInterface->SetGlobal("SimEngine", scope, true);
 		}
 
