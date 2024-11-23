@@ -266,7 +266,7 @@ void CGUIManager::SGUIPage::ResolvePromise(Script::StructuredClone args)
 	std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedObject globalObj(rq.cx, rq.glob);
+	JS::RootedObject globalObj(rq.cx, &rq.globalObject());
 
 	JS::RootedObject funcVal(rq.cx, *callbackFunction);
 
