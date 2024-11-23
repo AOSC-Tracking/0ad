@@ -41,6 +41,9 @@ AIInterface.prototype.Init = function()
 	// this is for auras and is EntityID->{StringForTheValue, ActualValue}
 	this.changedEntityTemplateInfo = {};
 	this.enabled = true;
+
+	// The AI interface receives a lot of template change on map setup, which slows it down a lot. Defer these.
+	this.duringPreinit = [];
 };
 
 AIInterface.prototype.Serialize = function()
@@ -214,6 +217,12 @@ AIInterface.prototype.OnCeasefireEnded = function(msg)
  */
 AIInterface.prototype.OnTemplateModification = function(msg)
 {
+	if (this.duringPreinit !== undefined)
+	{
+		this.duringPreinit.push(msg);
+		return;
+	}
+
 	let cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 	if (!this.templates)
 	{
@@ -318,5 +327,36 @@ AIInterface.prototype.OnGlobalValueModification = function(msg)
 		}
 	}
 };
+
+AIInterface.prototype.OnInitGame = function()
+{
+	const perPlayer = new Map();
+	for (const msg of this.duringPreinit)
+	{
+		let mpp = perPlayer.get(msg.player);
+		if (!mpp)
+		{
+			mpp = new Map();
+			perPlayer.set(msg.player, mpp);
+		}
+		let mpc = mpp.get(msg.component);
+		if (!mpc)
+		{
+			mpc = new Map();
+			mpp.set(msg.component, mpc);
+		}
+		msg.valueNames.forEach(value => mpc.set(value, true));
+	}
+	delete this.duringPreinit;
+	const msg = { player: 0, component: '', valueNames: [] };
+	perPlayer.forEach((perComp, player) => {
+		perComp.forEach((perValue, component) => {
+			msg.player = player;
+			msg.component = component;
+			msg.valueNames = Array.from(perValue.keys());
+			this.OnTemplateModification(msg);
+		});
+	})
+}
 
 Engine.RegisterSystemComponentType(IID_AIInterface, "AIInterface", AIInterface);
