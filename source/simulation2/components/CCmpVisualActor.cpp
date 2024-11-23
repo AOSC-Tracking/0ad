@@ -64,6 +64,7 @@ public:
 	}
 
 	DEFAULT_COMPONENT_ALLOCATOR(VisualActor)
+	CACHE_WRAPPED_SCRIPT_2(Visual, VisualActor);
 
 private:
 	std::wstring m_BaseActorName, m_ActorName;

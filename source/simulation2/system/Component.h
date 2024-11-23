@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2023 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -42,6 +42,33 @@
 	int GetComponentTypeId() const override \
 	{ \
 		return CID_##cname; \
+	}
+
+#define CACHE_WRAPPED_SCRIPT(iname) CACHE_WRAPPED_SCRIPT_2(iname, iname)
+
+#define CACHE_WRAPPED_SCRIPT_2(iname, cname) \
+	mutable JS::Heap<JS::Value> m_Instance; \
+	JS::HandleValue GetJSInstance() const override \
+	{ \
+		if (m_Instance) \
+			return JS::HandleValue::fromMarkedLocation(m_Instance.address()); \
+		const ScriptInterface& si = GetSimContext().GetScriptInterface(); \
+		ScriptRequest rq(si); \
+	\
+		JS::RootedObject obj(rq.cx); \
+		if (!NewJSObject(si, &obj)) \
+		{ \
+			/* Report as an error, since scripts really shouldn't try to use unscriptable interfaces*/ \
+			LOGERROR("CCmp##cname does not have a scriptable interface"); \
+			return JS::UndefinedHandleValue; \
+		} \
+	\
+		JS::SetPrivate(obj, static_cast<void*>(static_cast<ICmp##iname*>(const_cast<CCmp##cname*>(this)))); \
+		JS::RootedValue objVal(rq.cx); \
+		objVal.setObject(*obj); \
+		m_Instance.set(objVal); \
+		GetSimContext().GetComponentManager().RegisterTrace(GetEntityId(), m_Instance); \
+		return JS::HandleValue::fromMarkedLocation(m_Instance.address()); \
 	}
 
 #define DEFAULT_MOCK_COMPONENT() \

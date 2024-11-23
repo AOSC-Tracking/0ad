@@ -25,25 +25,26 @@
 #include "scriptinterface/Object.h"
 #include "simulation2/serialization/ISerializer.h"
 #include "simulation2/serialization/IDeserializer.h"
+#include "simulation2/system/ComponentManager.h"
 
 CComponentTypeScript::CComponentTypeScript(const ScriptInterface& scriptInterface, JS::HandleValue instance) :
-	m_ScriptInterface(scriptInterface)
+	m_ScriptInterface(scriptInterface), m_Instance(instance)
 {
-	m_Instance.init(ScriptRequest(m_ScriptInterface).cx, instance);
 }
 
-void CComponentTypeScript::Init(const CParamNode& paramNode, entity_id_t ent)
+void CComponentTypeScript::Init(CComponentManager& cmpMgr, const CParamNode& paramNode, entity_id_t ent)
 {
+	cmpMgr.RegisterTrace(ent, m_Instance);
 	ScriptRequest rq(m_ScriptInterface);
-	Script::SetProperty(rq, m_Instance, "entity", (int)ent, true, false);
-	Script::SetProperty(rq, m_Instance, "template", paramNode, true, false);
-	ScriptFunction::CallVoid(rq, m_Instance, "Init");
+	Script::SetProperty(rq, GetInstance(), "entity", (int)ent, true, false);
+	Script::SetProperty(rq, GetInstance(), "template", paramNode, true, false);
+	ScriptFunction::CallVoid(rq, GetInstance(), "Init");
 }
 
 void CComponentTypeScript::Deinit()
 {
 	ScriptRequest rq(m_ScriptInterface);
-	ScriptFunction::CallVoid(rq, m_Instance, "Deinit");
+	ScriptFunction::CallVoid(rq, GetInstance(), "Deinit");
 }
 
 void CComponentTypeScript::HandleMessage(const CMessage& msg, bool global)
@@ -54,7 +55,7 @@ void CComponentTypeScript::HandleMessage(const CMessage& msg, bool global)
 
 	JS::RootedValue msgVal(rq.cx, msg.ToJSValCached(rq));
 
-	if (!ScriptFunction::CallVoid(rq, m_Instance, name, msgVal))
+	if (!ScriptFunction::CallVoid(rq, GetInstance(), name, msgVal))
 		LOGERROR("Script message handler %s failed", name);
 }
 
@@ -64,26 +65,28 @@ void CComponentTypeScript::Serialize(ISerializer& serialize)
 
 	try
 	{
-		serialize.ScriptVal("comp", &m_Instance);
+		serialize.ScriptVal("comp", GetMutInstance());
 	}
 	catch(PSERROR_Serialize& err)
 	{
 		int ent = INVALID_ENTITY;
-		Script::GetProperty(rq, m_Instance, "entity", ent);
+		Script::GetProperty(rq, GetInstance(), "entity", ent);
 		std::string name = "(error)";
-		Script::GetObjectClassName(rq, m_Instance, name);
-		LOGERROR("Script component %s of entity %i failed to serialize: %s\nSerializing:\n%s", name, ent, err.what(), Script::ToString(rq, &m_Instance));
+		Script::GetObjectClassName(rq, GetInstance(), name);
+		LOGERROR("Script component %s of entity %i failed to serialize: %s\nSerializing:\n%s", name, ent, err.what(), Script::ToString(rq, GetMutInstance()));
 		// Rethrow now that we added more details
 		throw;
 	}
 }
 
-void CComponentTypeScript::Deserialize(const CParamNode& paramNode, IDeserializer& deserialize, entity_id_t ent)
+void CComponentTypeScript::Deserialize(CComponentManager& cmpMgr, const CParamNode& paramNode, IDeserializer& deserialize, entity_id_t ent)
 {
+	cmpMgr.RegisterTrace(ent, m_Instance);
+
 	ScriptRequest rq(m_ScriptInterface);
 
-	Script::SetProperty(rq, m_Instance, "entity", (int)ent, true, false);
-	Script::SetProperty(rq, m_Instance, "template", paramNode, true, false);
+	Script::SetProperty(rq, GetInstance(), "entity", (int)ent, true, false);
+	Script::SetProperty(rq, GetInstance(), "template", paramNode, true, false);
 
-	deserialize.ScriptObjectAssign("comp", m_Instance);
+	deserialize.ScriptObjectAssign("comp", GetInstance());
 }

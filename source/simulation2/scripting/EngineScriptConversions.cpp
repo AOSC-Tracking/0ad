@@ -44,7 +44,7 @@ template<> void Script::ToJSVal<IComponent*>(const ScriptRequest& rq,  JS::Mutab
 	}
 
 	// If this is a scripted component, just return the JS object directly
-	JS::RootedValue instance(rq.cx, val->GetJSInstance());
+	JS::HandleValue instance(val->GetJSInstance());
 	if (!instance.isNull())
 	{
 		ret.set(instance);

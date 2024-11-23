@@ -51,6 +51,7 @@ public:
 	}
 
 	DEFAULT_COMPONENT_ALLOCATOR(ProjectileManager)
+	CACHE_WRAPPED_SCRIPT(ProjectileManager);
 
 	static std::string GetSchema()
 	{

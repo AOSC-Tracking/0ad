@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2023 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -39,6 +39,7 @@ public:
 	}
 
 	DEFAULT_COMPONENT_ALLOCATOR(Footprint)
+	CACHE_WRAPPED_SCRIPT(Footprint);
 
 	EShape m_Shape;
 	entity_pos_t m_Size0; // width/radius

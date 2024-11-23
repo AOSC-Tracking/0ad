@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2023 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -37,21 +37,23 @@ class CComponentTypeScript
 public:
 	CComponentTypeScript(const ScriptInterface& scriptInterface, JS::HandleValue instance);
 
-	JS::Value GetInstance() const { return m_Instance.get(); }
+	JS::HandleValue GetInstance() const { return JS::HandleValue::fromMarkedLocation(m_Instance.address()); }
+	JS::MutableHandleValue GetMutInstance() { return JS::MutableHandleValue::fromMarkedLocation(const_cast<JS::Value*>(m_Instance.address())); }
+	static void Trace(JSTracer* trc, void* data);
 
-	void Init(const CParamNode& paramNode, entity_id_t ent);
+	void Init(CComponentManager& cmpMgr, const CParamNode& paramNode, entity_id_t ent);
 	void Deinit();
 	void HandleMessage(const CMessage& msg, bool global);
 
 	void Serialize(ISerializer& serialize);
-	void Deserialize(const CParamNode& paramNode, IDeserializer& deserialize, entity_id_t ent);
+	void Deserialize(CComponentManager& cmpMgr, const CParamNode& paramNode, IDeserializer& deserialize, entity_id_t ent);
 
 	template<typename R, typename... Ts>
 	R Call(const char* funcname, const Ts&... params) const
 	{
 		R ret;
 		ScriptRequest rq(m_ScriptInterface);
-		if (ScriptFunction::Call(rq, m_Instance, funcname, ret, params...))
+		if (ScriptFunction::Call(rq, GetInstance(), funcname, ret, params...))
 			return ret;
 		LOGERROR("Error calling component script function %s", funcname);
 		return R();
@@ -62,7 +64,7 @@ public:
 	void CallRef(const char* funcname, R ret, const Ts&... params) const
 	{
 		ScriptRequest rq(m_ScriptInterface);
-		if (!ScriptFunction::Call(rq, m_Instance, funcname, ret, params...))
+		if (!ScriptFunction::Call(rq, GetInstance(), funcname, ret, params...))
 			LOGERROR("Error calling component script function %s", funcname);
 	}
 
@@ -70,13 +72,13 @@ public:
 	void CallVoid(const char* funcname, const Ts&... params) const
 	{
 		ScriptRequest rq(m_ScriptInterface);
-		if (!ScriptFunction::CallVoid(rq, m_Instance, funcname, params...))
+		if (!ScriptFunction::CallVoid(rq, GetInstance(), funcname, params...))
 			LOGERROR("Error calling component script function %s", funcname);
 	}
 
 private:
 	const ScriptInterface& m_ScriptInterface;
-	JS::PersistentRootedValue m_Instance;
+	JS::Heap<JS::Value> m_Instance;
 };
 
 #define REGISTER_COMPONENT_SCRIPT_WRAPPER(cname) \
@@ -104,7 +106,7 @@ private:
 	} \
 	void Init(const CParamNode& paramNode) override \
 	{ \
-		m_Script.Init(paramNode, GetEntityId()); \
+		m_Script.Init(GetSimContext().GetComponentManager(), paramNode, GetEntityId()); \
 	} \
 	void Deinit() override \
 	{ \
@@ -120,9 +122,9 @@ private:
 	} \
 	void Deserialize(const CParamNode& paramNode, IDeserializer& deserialize) override \
 	{ \
-		m_Script.Deserialize(paramNode, deserialize, GetEntityId()); \
+		m_Script.Deserialize(GetSimContext().GetComponentManager(), paramNode, deserialize, GetEntityId()); \
 	} \
-	JS::Value GetJSInstance() const override \
+	JS::HandleValue GetJSInstance() const override \
 	{ \
 		return m_Script.GetInstance(); \
 	} \

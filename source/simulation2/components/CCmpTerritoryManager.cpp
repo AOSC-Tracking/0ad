@@ -73,6 +73,7 @@ public:
 	}
 
 	DEFAULT_COMPONENT_ALLOCATOR(TerritoryManager)
+	CACHE_WRAPPED_SCRIPT(TerritoryManager);
 
 	static std::string GetSchema()
 	{

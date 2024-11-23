@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2023 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -67,7 +67,7 @@ public:
 	 * Derrived classes should return true if they implement such a wrapper.
 	 */
 	virtual bool NewJSObject(const ScriptInterface& scriptInterface, JS::MutableHandleObject out) const;
-	virtual JS::Value GetJSInstance() const;
+	virtual JS::HandleValue GetJSInstance() const;
 	virtual int GetComponentTypeId() const = 0;
 
 private:
