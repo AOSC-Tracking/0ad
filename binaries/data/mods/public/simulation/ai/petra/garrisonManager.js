@@ -64,6 +64,8 @@ PETRA.GarrisonManager.prototype.update = function(gameState, events)
 		}
 	}
 
+	const enemyEnts = gameState.getEnemyEntities().values();
+
 	for (let [id, data] of this.holders.entries())
 	{
 		let list = data.list;
@@ -130,7 +132,7 @@ PETRA.GarrisonManager.prototype.update = function(gameState, events)
 		{
 			let range = holder.attackRange("Ranged") ? holder.attackRange("Ranged").max : 80;
 			let around = { "defenseStructure": false, "meleeSiege": false, "rangeSiege": false, "unit": false };
-			for (let ent of gameState.getEnemyEntities().values())
+			for (let ent of enemyEnts)
 			{
 				if (ent.hasClass("Structure"))
 				{

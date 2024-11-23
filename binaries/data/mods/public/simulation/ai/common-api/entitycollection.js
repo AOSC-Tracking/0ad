@@ -84,9 +84,10 @@ m.EntityCollection.prototype.filter = function(filter, thisp)
 		filter = { "func": filter, "dynamicProperties": [] };
 
 	let ret = new Map();
-	for (let [id, ent] of this._entities)
+	this._entities.forEach((ent, id) => {
 		if (filter.func.call(thisp, ent, id, this))
 			ret.set(id, ent);
+	});
 
 	return new m.EntityCollection(this._ai, ret, this._filters.concat([filter]));
 };
