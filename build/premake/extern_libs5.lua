@@ -257,7 +257,7 @@ extern_lib_defs = {
 			if os.istarget("windows") then
 				add_default_lib_paths("compressonator")
 				add_default_links({
-					win_names  = { "CMP_Framework_MD" },
+					win_names  = { "CMP_Framework_MD", "CMP_Core_MD" },
 					dbg_suffix = "",
 					no_delayload = 1,
 				})

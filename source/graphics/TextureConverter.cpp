@@ -174,12 +174,12 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 		srcMipSet.m_format == CMP_FORMAT_BC2 ||
 		srcMipSet.m_format == CMP_FORMAT_BC3)
 	{
-		// If we're using worse compression than defined in the texture.xml notify the user.
-		if (kernel_options.format < srcMipSet.m_format)
+		// If we're using a different compression than defined in the texture.xml notify the user.
+		if (kernel_options.format != srcMipSet.m_format)
 			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), srcMipSet.m_format, kernel_options.format);
 
 		// Touch so we can lookup!
-		std::shared_ptr<u8> nodata = std::make_unique<u8>(0);
+		std::shared_ptr<u8> nodata = std::make_shared<u8>(0);
 		m_VFS->CreateFile(request.dest, nodata, 0);
 		OsPath pszDestFile;
 		m_VFS->GetOriginalPath(request.dest, pszDestFile);
@@ -227,7 +227,7 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 		}
 
 		// Touch so we can lookup!
-		std::shared_ptr<u8> nodata = std::make_unique<u8>(0);
+		std::shared_ptr<u8> nodata = std::make_shared<u8>(0);
 		m_VFS->CreateFile(request.dest, nodata, 0);
 		OsPath pszDestFile;
 		m_VFS->GetOriginalPath(request.dest, pszDestFile);

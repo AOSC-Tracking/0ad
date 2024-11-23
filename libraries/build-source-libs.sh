@@ -86,7 +86,7 @@ if [ "$with_spirv_reflect" = "true" ]; then
 fi
 
 if [ "$without_compressonator" = "false" ]; then
-	./source/compressonator ./build.sh || die "Compressonator build failed"
+	./source/compressonator/build.sh || die "Compressonator build failed"
 	cp source/compressonator/bin/* ../binaries/system/
 fi
 

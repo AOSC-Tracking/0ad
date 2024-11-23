@@ -7,10 +7,6 @@ PV=4.5.52
 LIB_VERSION=${PV}
 JOBS=${JOBS:="-j2"}
 MAKE=${MAKE:="make"}
-LDFLAGS=${LDFLAGS:=""}
-CFLAGS=${CFLAGS:=""}
-CXXFLAGS=${CXXFLAGS:=""}
-CMAKE_FLAGS=${CMAKE_FLAGS:=""}
 
 if [ -e .already-built ] && [ "$(cat .already-built || true)" = "${LIB_VERSION}" ]; then
 	echo "compressonator is already up to date."
