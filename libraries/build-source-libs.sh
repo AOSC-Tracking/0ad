@@ -27,6 +27,7 @@ with_system_nvtt=false
 with_system_mozjs=false
 with_system_premake=false
 with_spirv_reflect=false
+without_compressonator=false
 
 JOBS=${JOBS:="-j2"}
 
@@ -35,6 +36,7 @@ for i in "$@"; do
 		--without-nvtt) without_nvtt=true ;;
 		--with-system-cxxtest) with_system_cxxtest=true ;;
 		--with-system-nvtt) with_system_nvtt=true ;;
+		--without-compressonator) without_compressonator=true ;;
 		--with-system-mozjs) with_system_mozjs=true ;;
 		--with-system-premake) with_system_mozjs=true ;;
 		--with-spirv-reflect) with_spirv_reflect=true ;;
@@ -81,6 +83,11 @@ fi
 echo
 if [ "$with_spirv_reflect" = "true" ]; then
 	./source/spirv-reflect/build.sh || die "spirv-reflect build failed"
+fi
+
+if [ "$without_compressonator" = "false" ]; then
+	./source/compressonator ./build.sh || die "Compressonator build failed"
+	cp source/compressonator/bin/* ../binaries/system/
 fi
 
 echo "Done."

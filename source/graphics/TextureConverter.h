@@ -23,11 +23,15 @@
 
 #include "TextureManager.h"
 
-#if CONFIG2_NVTT
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 #include "ps/Future.h"
 
 #include <memory>
 #include <queue>
+#endif
+
+#if CONFIG2_COMPRESSONATOR
+#include <compressonator.h>
 #endif
 
 class MD5;
@@ -207,10 +211,15 @@ private:
 	PIVFS m_VFS;
 	bool m_HighQuality;
 
-#if CONFIG2_NVTT
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 	struct ConversionResult;
-
+    struct ConversionRequest;
 	std::queue<Future<std::unique_ptr<ConversionResult>>> m_ResultQueue;
+#endif
+
+#if CONFIG2_COMPRESSONATOR
+	CMP_FORMAT getCMPFormat(CTextureConverter::Settings& settings);
+	CMP_ERROR process(CTextureConverter::ConversionRequest& request);
 #endif
 };
 

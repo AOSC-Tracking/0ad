@@ -76,6 +76,11 @@
 # define CONFIG2_NVTT 1
 #endif
 
+// allow use of Compressonator
+#ifndef CONFIG2_COMPRESSONATOR
+# define CONFIG2_COMPRESSONATOR 1
+#endif
+
 // allow use of lobby
 #ifndef CONFIG2_LOBBY
 # define CONFIG2_LOBBY 1

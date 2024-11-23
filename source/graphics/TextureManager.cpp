@@ -696,21 +696,28 @@ public:
 		{
 			CTexturePtr texture;
 			VfsPath dest;
-			bool ok;
+			bool ok = false;
 			if (m_TextureConverter.Poll(texture, dest, ok))
 			{
-				if (ok)
+				if (texture)
 				{
-					LoadTexture(texture, dest);
+					if (ok)
+					{
+						LoadTexture(texture, dest);
+					}
+					else
+					{
+						LOGERROR("Texture failed to convert: \"%s\"", texture->m_Properties.m_Path.string8());
+						texture->ResetBackendTexture(
+							nullptr, m_ErrorTexture.GetTexture()->GetBackendTexture());
+					}
+					texture->m_State = CTexture::LOADED;
+					return true;
 				}
 				else
 				{
 					LOGERROR("Texture failed to convert: \"%s\"", texture->m_Properties.m_Path.string8());
-					texture->ResetBackendTexture(
-						nullptr, m_ErrorTexture.GetTexture()->GetBackendTexture());
 				}
-				texture->m_State = CTexture::LOADED;
-				return true;
 			}
 		}
 

@@ -10,11 +10,13 @@ newoption { trigger = "with-system-cxxtest", description = "Search standard path
 newoption { trigger = "with-lto", description = "Enable Link Time Optimization (LTO)" }
 newoption { trigger = "with-system-mozjs", description = "Search standard paths for libmozjs91, instead of using bundled copy" }
 newoption { trigger = "with-system-nvtt", description = "Search standard paths for nvidia-texture-tools library, instead of using bundled copy" }
+newoption { trigger = "with-system-compressonator", description = "Search standard paths for amd compressonator library, instead of using bundled copy" }
 newoption { trigger = "with-valgrind", description = "Enable Valgrind support (non-Windows only)" }
 newoption { trigger = "without-audio", description = "Disable use of OpenAL/Ogg/Vorbis APIs" }
 newoption { trigger = "without-lobby", description = "Disable the use of gloox and the multiplayer lobby" }
 newoption { trigger = "without-miniupnpc", description = "Disable use of miniupnpc for port forwarding" }
 newoption { trigger = "without-nvtt", description = "Disable use of NVTT" }
+newoption { trigger = "with-compressonator", description = "Disable use of NVTT and use Compressonator instead" }
 newoption { trigger = "without-pch", description = "Disable generation and usage of precompiled headers" }
 newoption { trigger = "without-tests", description = "Disable generation of test projects" }
 
@@ -197,7 +199,13 @@ function project_set_build_flags()
 		defines { "CONFIG2_AUDIO=0" }
 	end
 
-	if _OPTIONS["without-nvtt"] then
+	if _OPTIONS["with-compressonator"] then
+		defines { "CONFIG2_COMPRESSONATOR=1" }
+	else
+		defines { "CONFIG2_COMPRESSONATOR=0" }
+	end
+
+	if _OPTIONS["with-compressonator"] or _OPTIONS["without-nvtt"] then
 		defines { "CONFIG2_NVTT=0" }
 	end
 
@@ -787,8 +795,12 @@ function setup_all_libs ()
 		"freetype",
 		"icu",
 	}
-	if not _OPTIONS["without-nvtt"] then
+	if _OPTIONS["with-compressonator"] or not _OPTIONS["without-nvtt"] then
 		table.insert(extern_libs, "nvtt")
+	end
+
+	if _OPTIONS["with-compressonator"] then
+		table.insert(extern_libs, "compressonator")
 	end
 	setup_static_lib_project("graphics", source_dirs, extern_libs, {})
 
@@ -1005,6 +1017,10 @@ end
 
 if not _OPTIONS["without-nvtt"] then
 	table.insert(used_extern_libs, "nvtt")
+end
+
+if _OPTIONS["with-compressonator"] then
+	table.insert(used_extern_libs, "compressonator")
 end
 
 if not _OPTIONS["without-lobby"] then

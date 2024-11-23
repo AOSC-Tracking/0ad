@@ -1151,3 +1151,9 @@ echo "Building Premake..."
 echo "Building Spidermonkey..."
 
 ./../source/spidermonkey/build.sh || die "SpiderMonkey build failed"
+
+# --------------------------------------------------------------
+# Compressonator - fetching handled by build script
+echo "Building Compressonator..."
+
+./../source/compressonator/build.sh || die "Error building Compressonator"

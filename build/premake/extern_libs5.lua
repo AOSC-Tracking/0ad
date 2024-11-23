@@ -243,6 +243,36 @@ extern_lib_defs = {
 			})
 		end,
 	},
+	compressonator = {
+		compile_settings = function()
+			if os.istarget("windows") then
+				add_default_include_paths("compressonator")
+			else
+				if not _OPTIONS["with-system-compressonator"] then
+					add_source_include_paths("compressonator")
+				end
+			end
+		end,
+		link_settings = function()
+			if os.istarget("windows") then
+				add_default_lib_paths("compressonator")
+				add_default_links({
+					win_names  = { "CMP_Framework_MD" },
+					dbg_suffix = "",
+					no_delayload = 1,
+				})
+			else
+				if not _OPTIONS["with-system-compressonator"] then
+					add_source_lib_paths("compressonator")
+				end
+			end
+
+			add_default_links({
+				unix_names = { "CMP_Framework", "CMP_Core" },
+				osx_names = { "CMP_Framework", "CMP_Core" },
+			})
+		end
+	},
 	comsuppw = {
 		link_settings = function()
 			add_default_links({

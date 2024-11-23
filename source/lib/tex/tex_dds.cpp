@@ -28,6 +28,7 @@
 
 #include "lib/byte_order.h"
 #include "lib/bits.h"
+#include "lib/config2.h"
 #include "lib/timer.h"
 #include "lib/allocators/shared_ptr.h"
 #include "tex_codec.h"
@@ -554,13 +555,20 @@ static Status decode_sd(const DDS_HEADER* sd, size_t& w, size_t& h, size_t& bpp,
 	if(sd_flags & DDSD_MIPMAPCOUNT)
 	{
 		const size_t mipmap_count = (size_t)read_le32(&sd->dwMipMapCount);
-		if(mipmap_count)
+		if (mipmap_count)
 		{
 			// mipmap chain is incomplete
 			// note: DDS includes the base level in its count, hence +1.
-			if(mipmap_count != ceil_log2(std::max(w,h))+1)
-				return ERR::TEX_FMT_INVALID;
-			flags |= TEX_MIPMAPS;
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
+#if CONFIG2_COMPRESSONATOR
+			if (mipmap_count != 1)
+#endif
+			{
+				if (mipmap_count != ceil_log2(std::min(w, h)) + 1)
+					return ERR::TEX_FMT_INVALID;
+				flags |= TEX_MIPMAPS;
+			}
+#endif
 		}
 	}
 
@@ -578,10 +586,12 @@ static Status decode_sd(const DDS_HEADER* sd, size_t& w, size_t& h, size_t& bpp,
 		return ERR::CORRUPTED;
 	// .. sanity check: warn if mipmap flag not set (don't bail if not
 	// because we've already made the decision).
+#if !CONFIG2_COMPRESSONATOR
 	const bool mipmap_cap = (sd->dwCaps & DDSCAPS_MIPMAP) != 0;
 	const bool mipmap_flag = (flags & TEX_MIPMAPS) != 0;
 	if (mipmap_cap != mipmap_flag)
 		return ERR::CORRUPTED;
+#endif
 	// note: we do not check for cubemaps and volume textures (not supported)
 	// because the file may still have useful data we can read.
 

@@ -32,6 +32,11 @@
 #include "ps/Util.h"
 #include "ps/XML/Xeromyces.h"
 
+#if CONFIG2_COMPRESSONATOR && (!defined(AMD_COMPRESS_VERSION_MAJOR) || AMD_COMPRESS_VERSION_MAJOR < 4)
+#error Please use Compressonator 4.0.0 or newer.
+If your system does not provide it, you should use the bundled version by NOT passing --with-system-compressonator to premake.
+#endif // CONFIG2_COMPRESSONATOR
+
 #if CONFIG2_NVTT
 
 #include "nvtt/nvtt.h"
@@ -47,7 +52,9 @@
 #error Please use NVTT 2.1.0 or newer. \
 If your system does not provide it, you should use the bundled version by NOT passing --with-system-nvtt to premake.
 #endif
+#endif
 
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 namespace
 {
 
@@ -55,11 +62,12 @@ namespace
 // use a lot of memory, so probably should not be too high.
 // Note that some results in the result queue may already be ready.
 constexpr size_t MAX_QUEUE_SIZE_FOR_OPTIMAL_UTILIZATION{12};
-
+#endif // CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
+#if CONFIG2_NVTT 
 /**
  * Output handler to collect NVTT's output into a simplistic buffer.
  */
-struct BufferOutputHandler : public nvtt::OutputHandler
+	struct BufferOutputHandler : public nvtt::OutputHandler
 {
 	std::vector<u8> buffer;
 
@@ -80,19 +88,26 @@ struct BufferOutputHandler : public nvtt::OutputHandler
 	}
 };
 
+#endif // CONFIG2_NVTT
+
+} // anonymous namespace
+
 /**
  * Arguments to the asynchronous task.
  */
-struct ConversionRequest
+struct CTextureConverter::ConversionRequest
 {
-	VfsPath dest;
-	CTexturePtr texture;
-	nvtt::InputOptions inputOptions;
-	nvtt::CompressionOptions compressionOptions;
-	nvtt::OutputOptions outputOptions;
+    VfsPath dest;
+    CTexturePtr texture;
+#if CONFIG2_NVTT
+    nvtt::InputOptions inputOptions;
+    nvtt::CompressionOptions compressionOptions;
+    nvtt::OutputOptions outputOptions;
+#elif CONFIG2_COMPRESSONATOR
+    VfsPath src;
+    CTextureConverter::Settings settings;
+#endif // CONFIG2_NVTT
 };
-
-} // anonymous namespace
 
 /**
  * Response from the asynchronous task.
@@ -101,11 +116,134 @@ struct CTextureConverter::ConversionResult
 {
 	VfsPath dest;
 	CTexturePtr texture;
+#if CONFIG2_NVTT
 	BufferOutputHandler output;
+#endif // CONFIG2_NVTT
 	bool ret; // true if the conversion succeeded
 };
 
-#endif // CONFIG2_NVTT
+#if CONFIG2_COMPRESSONATOR
+CMP_FORMAT CTextureConverter::getCMPFormat(CTextureConverter::Settings& settings)
+{
+	if (settings.normal == NORMAL_TRUE)
+		return CMP_FORMAT_BC3;
+
+	switch (settings.format)
+	{
+	case FMT_ALPHA: 
+		LOGERROR("FMT_ALPHA is deprecated and no longer works.", settings.format);
+	case FMT_DXT1:
+		return CMP_FORMAT_BC1;
+	case FMT_DXT3:
+		return CMP_FORMAT_BC2;
+	case FMT_RGBA: FALLTHROUGH;
+	case FMT_DXT5:
+		return CMP_FORMAT_BC3;
+	case FMT_UNSPECIFIED: FALLTHROUGH;
+	default:
+		LOGERROR("Unknown format \"%d\".", settings.format);
+		return CMP_FORMAT_Unknown;
+	}
+}
+
+CMP_ERROR CTextureConverter::process(ConversionRequest& request)
+{
+	CMP_MipSet srcMipSet;
+	memset(&srcMipSet, 0, sizeof(CMP_MipSet));
+
+	OsPath absolutePath;
+	m_VFS->GetOriginalPath(request.src, absolutePath);
+
+	CMP_ERROR cmpStatus = CMP_LoadTexture(absolutePath.string8().c_str(), &srcMipSet);
+	if (cmpStatus != CMP_OK)
+	{
+		if (cmpStatus == CMP_ERR_UNSUPPORTED_SOURCE_FORMAT)
+			LOGERROR("Loading source file \"%s\" failed because the format is not supported.", request.src.string8());
+		else
+			LOGERROR("Loading source file \"%s\" failed with error code \"%d\".", request.src.string8(), cmpStatus);
+
+		return cmpStatus;
+	}
+
+	KernelOptions kernel_options;
+	memset(&kernel_options, 0, sizeof(KernelOptions));
+
+	kernel_options.format = getCMPFormat(request.settings);
+
+	if (srcMipSet.m_format == CMP_FORMAT_BC1 ||
+		srcMipSet.m_format == CMP_FORMAT_BC2 ||
+		srcMipSet.m_format == CMP_FORMAT_BC3)
+	{
+		// If we're using worse compression than defined in the texture.xml notify the user.
+		if (kernel_options.format < srcMipSet.m_format)
+			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), srcMipSet.m_format, kernel_options.format);
+
+		// Touch so we can lookup!
+		std::shared_ptr<u8> nodata = std::make_unique<u8>(0);
+		m_VFS->CreateFile(request.dest, nodata, 0);
+		OsPath pszDestFile;
+		m_VFS->GetOriginalPath(request.dest, pszDestFile);
+
+		cmpStatus = CMP_SaveTexture(pszDestFile.string8().c_str(), &srcMipSet);
+		if (cmpStatus != CMP_OK)
+		{
+			LOGERROR("Failed to save texture \"%s\".", request.src.string8());
+			CMP_FreeMipSet(&srcMipSet);
+			return cmpStatus;
+		}
+	}
+	else
+	{
+		// Compressonator doesn't support generating mipmaps for textures of size 1.
+		if (srcMipSet.dwWidth > 1 && srcMipSet.dwHeight > 1 && request.settings.mipmap == MIP_TRUE)
+		{
+			CMP_INT nMinSize = CMP_CalcMinMipSize(srcMipSet.m_nHeight, srcMipSet.m_nWidth, 15);
+			CMP_CFilterParams params;
+			params.nMinSize = nMinSize;
+			CMP_GenerateMIPLevelsEx(&srcMipSet, &params);
+		}
+
+		kernel_options.fquality = m_HighQuality ? 1.0f : 0.5f; // 0.05..1
+		kernel_options.threads = 1; // 0 auto, max 128
+
+		if ((kernel_options.format == CMP_FORMAT_BC1 ||
+			kernel_options.format == CMP_FORMAT_BC2 ||
+			kernel_options.format == CMP_FORMAT_BC3) &&
+			m_HighQuality)
+			kernel_options.bc15.useRefinementSteps = true;
+
+		CMP_MipSet dstMipSet;
+		memset(&dstMipSet, 0, sizeof(CMP_MipSet));
+
+		cmpStatus = CMP_ProcessTexture(&srcMipSet, &dstMipSet, kernel_options, nullptr);
+		if (cmpStatus != CMP_OK)
+		{
+			CMP_FreeMipSet(&srcMipSet);
+			if (CMP_ERR_FAILED_HOST_SETUP == cmpStatus)
+				LOGERROR("Compressing source file \"%s\" failed because of the host setup.", request.src.string8().c_str());
+			else
+				LOGERROR("Compressing source file \"%s\" failed with error code \"%d\".", request.src.string8().c_str(), cmpStatus);
+			return cmpStatus;
+		}
+
+		// Touch so we can lookup!
+		std::shared_ptr<u8> nodata = std::make_unique<u8>(0);
+		m_VFS->CreateFile(request.dest, nodata, 0);
+		OsPath pszDestFile;
+		m_VFS->GetOriginalPath(request.dest, pszDestFile);
+		cmpStatus = CMP_SaveTexture(pszDestFile.string8().c_str(), &dstMipSet);
+		if (cmpStatus != CMP_OK)
+			LOGERROR("Failed to save texture \"%s\".", request.src.string8().c_str());
+
+		CMP_FreeMipSet(&dstMipSet);
+	}
+
+	CMP_FreeMipSet(&srcMipSet);
+	m_VFS->RepopulateDirectory(request.dest.Parent());
+
+	return cmpStatus;
+}
+#endif // CONFIG2_COMPRESSONATOR
 
 void CTextureConverter::Settings::Hash(MD5& hash)
 {
@@ -126,8 +264,8 @@ CTextureConverter::SettingsFile* CTextureConverter::LoadSettings(const VfsPath& 
 		return NULL;
 
 	// Define all the elements used in the XML file
-	#define EL(x) int el_##x = XeroFile.GetElementID(#x)
-	#define AT(x) int at_##x = XeroFile.GetAttributeID(#x)
+#define EL(x) int el_##x = XeroFile.GetElementID(#x)
+#define AT(x) int at_##x = XeroFile.GetAttributeID(#x)
 	EL(textures);
 	EL(file);
 	AT(pattern);
@@ -139,8 +277,8 @@ CTextureConverter::SettingsFile* CTextureConverter::LoadSettings(const VfsPath& 
 	AT(kaiserwidth);
 	AT(kaiseralpha);
 	AT(kaiserstretch);
-	#undef AT
-	#undef EL
+#undef AT
+#undef EL
 
 	XMBElement root = XeroFile.GetRoot();
 
@@ -308,6 +446,8 @@ CTextureConverter::CTextureConverter(PIVFS vfs, bool highQuality) :
 	// Verify that we are running with at least the version we were compiled with,
 	// to avoid bugs caused by ABI changes
 	ENSURE(nvtt::version() >= NVTT_VERSION);
+#elif CONFIG2_COMPRESSONATOR
+	CMP_InitFramework();
 #endif // CONFIG2_NVTT
 }
 
@@ -315,6 +455,7 @@ CTextureConverter::~CTextureConverter() = default;
 
 bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath& src, const VfsPath& dest, const Settings& settings)
 {
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 	std::shared_ptr<u8> file;
 	size_t fileSize;
 	if (m_VFS->LoadFile(src, file, fileSize) < 0)
@@ -375,13 +516,20 @@ bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath
 			}
 		}
 	}
+#endif
 
-#if CONFIG2_NVTT
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 
 	std::unique_ptr<ConversionRequest> request = std::make_unique<ConversionRequest>();
 	request->dest = dest;
 	request->texture = texture;
+#if CONFIG2_COMPRESSONATOR
 
+	request->src = src;
+	request->settings = settings;
+#endif
+
+#if CONFIG2_NVTT
 	// Apply the chosen settings:
 
 	request->inputOptions.setMipmapGeneration(settings.mipmap == MIP_TRUE);
@@ -458,8 +606,9 @@ bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath
 		request->inputOptions.setMipmapData(rgba, tex.m_Width, tex.m_Height);
 		delete[] rgba;
 	}
+#endif
 
-	m_ResultQueue.push(g_TaskManager.PushTask([request = std::move(request)]
+	m_ResultQueue.push(g_TaskManager.PushTask([this, request = std::move(request)]
 		{
 			PROFILE2("compress");
 			// Set up the result object
@@ -467,12 +616,16 @@ bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath
 			result->dest = request->dest;
 			result->texture = request->texture;
 
+#if CONFIG2_NVTT
 			request->outputOptions.setOutputHandler(&result->output);
 
 			// Perform the compression
 			nvtt::Compressor compressor;
 			result->ret = compressor.process(request->inputOptions, request->compressionOptions,
 				request->outputOptions);
+#elif CONFIG2_COMPRESSONATOR
+			result->ret = this->process(*request) == CMP_OK;
+#endif
 
 			return result;
 		}, Threading::TaskPriority::LOW));
@@ -480,14 +633,14 @@ bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath
 	return true;
 
 #else // CONFIG2_NVTT
-	LOGERROR("Failed to convert texture \"%s\" (NVTT not available)", src.string8());
+	LOGERROR("Failed to convert texture \"%s\" (NVTT or COMPRESSONATOR not available)", src.string8());
 	return false;
 #endif // !CONFIG2_NVTT
 }
 
 bool CTextureConverter::Poll(CTexturePtr& texture, VfsPath& dest, bool& ok)
 {
-#if CONFIG2_NVTT
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 	if (m_ResultQueue.empty() || !m_ResultQueue.front().IsDone())
 	{
 		// no work to do
@@ -504,6 +657,7 @@ bool CTextureConverter::Poll(CTexturePtr& texture, VfsPath& dest, bool& ok)
 		return true;
 	}
 
+#if !CONFIG2_COMPRESSONATOR
 	// Move output into a correctly-aligned buffer
 	size_t size = result->output.buffer.size();
 	std::shared_ptr<u8> file;
@@ -515,6 +669,7 @@ bool CTextureConverter::Poll(CTexturePtr& texture, VfsPath& dest, bool& ok)
 		ok = false;
 		return true;
 	}
+#endif
 
 	// Succeeded in converting texture
 	texture = result->texture;
@@ -529,7 +684,7 @@ bool CTextureConverter::Poll(CTexturePtr& texture, VfsPath& dest, bool& ok)
 
 bool CTextureConverter::IsBusy() const
 {
-#if CONFIG2_NVTT
+#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
 	return m_ResultQueue.size() >= MAX_QUEUE_SIZE_FOR_OPTIMAL_UTILIZATION;
 #else // CONFIG2_NVTT
 	return false;

@@ -189,7 +189,7 @@ def generate_font(outname, ttf_names, loadopts, size, renderstyle, dsizes):
     print("Failed to fit glyphs in texture")
 
 
-filled = {"fill": [(1, 1, 1, 1)]}
+filled = {"colour": True, "fill": [(1, 1, 1, 1)]}
 stroked1 = {
     "colour": True,
     "stroke": [((0, 0, 0, 1), 2.0), ((0, 0, 0, 1), 2.0)],
