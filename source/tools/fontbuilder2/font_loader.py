@@ -21,6 +21,9 @@ FT_LOAD_NO_AUTOHINT = 0x8000
 if sys.platform == "win32":
     ft_lib = "freetype6.dll"
     lc_lib = "libcairo-2.dll"
+elif sys.platform == "darwin":  # macOS
+    ft_lib = "libfreetype.6.dylib"
+    lc_lib = "libcairo.2.dylib"
 else:
     ft_lib = "libfreetype.so.6"
     lc_lib = "libcairo.so.2"
