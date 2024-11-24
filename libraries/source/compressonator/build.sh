@@ -29,9 +29,7 @@ rm -rf build
 
 # patch
 
-(
-	cd "src/compressonator-${PV}" && patch -p1 <../../patches/disable-sse.patch
-)
+patch -d "src/compressonator-${PV}" -p1 <patches/disable-sse.patch
 
 # shellcheck disable=SC2086
 cmake -S src/compressonator-${PV} -B build \
@@ -41,7 +39,7 @@ cmake -S src/compressonator-${PV} -B build \
 	-DOPTION_BUILD_INTERNAL_CMP_TEST=OFF \
 	-DCMAKE_C_FLAGS="$CFLAGS" \
 	-DCMAKE_CXX_FLAGS="$CXXFLAGS" \
-	-DCMAKE_INSTALL_PREFIX="$(realpath . || true)" \
+	-DCMAKE_INSTALL_PREFIX="$(pwd)" \
 	$CMAKE_FLAGS
 
 # build

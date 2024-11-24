@@ -1,16 +1,3 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a50e673d..dd08e3cc 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -49,7 +49,7 @@ if (CMP_HOST_WINDOWS)
-     add_compile_options(/W4 /wd4201)
- #    add_compile_options(/W4 /WX /wd4201)
- elseif(CMP_HOST_LINUX)
--    add_compile_options(-Wall)
-+#    add_compile_options(-Wall)
- #    add_compile_options(-Wall -Werror)
- endif()
- 
 diff --git a/cmp_core/CMakeLists.txt b/cmp_core/CMakeLists.txt
 index 47873770..41805e40 100644
 --- a/cmp_core/CMakeLists.txt

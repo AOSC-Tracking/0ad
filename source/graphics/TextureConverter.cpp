@@ -131,7 +131,7 @@ CMP_FORMAT CTextureConverter::getCMPFormat(CTextureConverter::Settings& settings
 	switch (settings.format)
 	{
 	case FMT_ALPHA: 
-		LOGERROR("FMT_ALPHA is deprecated and no longer works.", settings.format);
+		LOGERROR("FMT_ALPHA is deprecated and no longer works.");
 	case FMT_DXT1:
 		return CMP_FORMAT_BC1;
 	case FMT_DXT3:
@@ -160,7 +160,7 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 		if (cmpStatus == CMP_ERR_UNSUPPORTED_SOURCE_FORMAT)
 			LOGERROR("Loading source file \"%s\" failed because the format is not supported.", request.src.string8());
 		else
-			LOGERROR("Loading source file \"%s\" failed with error code \"%d\".", request.src.string8(), cmpStatus);
+			LOGERROR("Loading source file \"%s\" failed with error code \"%d\".", request.src.string8(), (int)cmpStatus);
 
 		return cmpStatus;
 	}
@@ -176,7 +176,7 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 	{
 		// If we're using a different compression than defined in the texture.xml notify the user.
 		if (kernel_options.format != srcMipSet.m_format)
-			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), srcMipSet.m_format, kernel_options.format);
+			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), static_cast<int>(srcMipSet.m_format), static_cast<int>(kernel_options.format));
 
 		// Touch so we can lookup!
 		std::shared_ptr<u8> nodata = std::make_shared<u8>(0);
@@ -222,7 +222,7 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 			if (CMP_ERR_FAILED_HOST_SETUP == cmpStatus)
 				LOGERROR("Compressing source file \"%s\" failed because of the host setup.", request.src.string8().c_str());
 			else
-				LOGERROR("Compressing source file \"%s\" failed with error code \"%d\".", request.src.string8().c_str(), cmpStatus);
+				LOGERROR("Compressing source file \"%s\" failed with error code \"%d\".", request.src.string8().c_str(), static_cast<int>(cmpStatus));
 			return cmpStatus;
 		}
 
@@ -608,7 +608,11 @@ bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath
 	}
 #endif
 
-	m_ResultQueue.push(g_TaskManager.PushTask([this, request = std::move(request)]
+#if CONFIG2_COMPRESSONATOR
+		m_ResultQueue.push(g_TaskManager.PushTask([this, request = std::move(request)]() mutable
+#else
+		m_ResultQueue.push(g_TaskManager.PushTask([request = std::move(request)]() mutable
+#endif
 		{
 			PROFILE2("compress");
 			// Set up the result object
