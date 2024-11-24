@@ -141,7 +141,7 @@ CMP_FORMAT CTextureConverter::getCMPFormat(CTextureConverter::Settings& settings
 		return CMP_FORMAT_BC3;
 	case FMT_UNSPECIFIED: FALLTHROUGH;
 	default:
-		LOGERROR("Unknown format \"%d\".", settings.format);
+		LOGERROR("Unknown format \"%d\".", static_cast<int>(settings.format));
 		return CMP_FORMAT_Unknown;
 	}
 }
