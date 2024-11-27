@@ -137,6 +137,9 @@ CMP_FORMAT CTextureConverter::getCMPFormat(CTextureConverter::Settings& settings
 	case FMT_DXT3:
 		return CMP_FORMAT_BC2;
 	case FMT_RGBA: FALLTHROUGH;
+		// ideally CMP_FORMAT_RGBA_8888 as this breaks formatOverride
+		// but not (yet?) supported CMP_ProcessTexture
+		// return CMP_FORMAT_RGBA_8888;
 	case FMT_DXT5:
 		return CMP_FORMAT_BC3;
 	case FMT_UNSPECIFIED: FALLTHROUGH;
@@ -176,7 +179,10 @@ CMP_ERROR CTextureConverter::process(ConversionRequest& request)
 	{
 		// If we're using a different compression than defined in the texture.xml notify the user.
 		if (kernel_options.format != srcMipSet.m_format)
-			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), static_cast<int>(srcMipSet.m_format), static_cast<int>(kernel_options.format));
+			// TODO: Get actual strings instead.
+			LOGWARNING("File \"%s\" compression type was \"%d\" but was expected to be \"%d\".", request.src.string8(), 
+					   static_cast<int>(srcMipSet.m_format), 
+					   static_cast<int>(kernel_options.format));
 
 		// Touch so we can lookup!
 		std::shared_ptr<u8> nodata = std::make_shared<u8>(0);
@@ -455,7 +461,7 @@ CTextureConverter::~CTextureConverter() = default;
 
 bool CTextureConverter::ConvertTexture(const CTexturePtr& texture, const VfsPath& src, const VfsPath& dest, const Settings& settings)
 {
-#if CONFIG2_NVTT || CONFIG2_COMPRESSONATOR
+#if CONFIG2_NVTT
 	std::shared_ptr<u8> file;
 	size_t fileSize;
 	if (m_VFS->LoadFile(src, file, fileSize) < 0)

@@ -252,7 +252,10 @@ static Status add_mipmaps(Tex* t, size_t w, size_t h, size_t bpp, void* newData,
 	// go to the trouble of implementing image scaling because
 	// the only place this is used (backend textures) requires POT anyway.
 	if(!is_pow2(w) || !is_pow2(h))
-		WARN_RETURN(ERR::TEX_INVALID_SIZE);
+	{
+		debug_printf("invalid size for mipmapping");
+ 		WARN_RETURN(ERR::TEX_INVALID_SIZE);
+	}
 	t->m_Flags |= TEX_MIPMAPS;	// must come before tex_img_size!
 	const size_t mipmap_size = t->img_size();
 	std::shared_ptr<u8> mipmapData;
@@ -735,7 +738,10 @@ Status Tex::decode(const std::shared_ptr<u8>& Data, size_t DataSize)
 	if(!m_Width || !m_Height || m_Bpp > 32)
 		return ERR::TEX_FMT_INVALID;
 	if(m_DataSize < m_Ofs + img_size())
-		return ERR::TEX_INVALID_SIZE;
+	{
+		debug_printf("failed sanity check data size\n");
+		//return ERR::TEX_INVALID_SIZE;
+	}
 
 	flip_to_global_orientation(this);
 

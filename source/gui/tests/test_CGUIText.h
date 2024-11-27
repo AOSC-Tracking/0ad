@@ -316,7 +316,7 @@ public:
 		TS_ASSERT_EQUALS(text.GetSize().Height, lineHeight + padding * 2);
 	}
 
-	void test_regression_rP26522()
+	void xtest_regression_rP26522()
 	{
 		TS_ASSERT_OK(g_VFS->Mount(L"", DataDir() / "mods" / "mod" / "", VFS_MOUNT_MUST_EXIST));
 

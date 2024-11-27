@@ -1,3 +1,81 @@
+commit 2d077024b4aef2c262b9e777135e3d816217234b
+Author: Ralph Sennhauser <ralph.sennhauser@gmail.com>
+Date:   Tue Nov 26 17:56:44 2024 +0100
+
+    Assorted fixes for cmp 4.5
+    
+    * drop smid as not available for all archs (arm for instrance)
+    * quick fix bsd
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a50e673d..a691090a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,6 +75,7 @@ set(PROJECT_FOLDER_APPS_PLUGIN_STATIC "${PROJECT_FOLDER_APPS}/Plugins/Static")
+ # For Apple (Mac) default to C++11
+ #---------------------------------------
+ if (CMP_HOST_LINUX OR CMP_HOST_WINDOWS)
++    if (NOT CMP_HOST_BSD)
+     if("cxx_std_11" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+         set(COMPILER_SUPPORTS_CXX11 ON)
+         message("Compiler Supports cxx_std_11")
+@@ -87,6 +88,7 @@ if (CMP_HOST_LINUX OR CMP_HOST_WINDOWS)
+         set(COMPILER_SUPPORTS_CXX17 ON)
+         message("Compiler Supports cxx_std_17")
+     endif()
++    endif()
+ else()
+     message("UNIX Build: CHECK_CXX_COMPILER_FLAG defaulted to -std=c++11")
+     set(COMPILER_SUPPORTS_CXX11 ON)
+@@ -597,4 +599,4 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "AMD")
+ set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://gpuopen.com/compressonator/")
+ set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+ 
+-include(CPack)
+\ No newline at end of file
++include(CPack)
+diff --git a/applications/_plugins/ccmp_encode/hpc/compute_cpu_hpc.cpp b/applications/_plugins/ccmp_encode/hpc/compute_cpu_hpc.cpp
+index 47637128..02f3c78d 100644
+--- a/applications/_plugins/ccmp_encode/hpc/compute_cpu_hpc.cpp
++++ b/applications/_plugins/ccmp_encode/hpc/compute_cpu_hpc.cpp
+@@ -488,7 +488,7 @@ CMP_ERROR CCPU_HPC::Compress(KernelOptions* Options, MipSet& SrcTexture, MipSet&
+                     if (progress_old != progress)
+                     {
+                         progress_old = progress;
+-                        if (pFeedback(progress * 100.0f, NULL, NULL))
++                        if (pFeedback(progress * 100.0f, 0, 0))
+                         {
+                             break;
+                         }
+diff --git a/cmake/helperfunctions.cmake b/cmake/helperfunctions.cmake
+index dfb46c52..05a755ca 100644
+--- a/cmake/helperfunctions.cmake
++++ b/cmake/helperfunctions.cmake
+@@ -3,6 +3,7 @@
+ set(CMP_HOST_APPLE OFF)
+ set(CMP_HOST_LINUX OFF)
+ set(CMP_HOST_WINDOWS OFF)
++set(CMP_HOST_BSD OFF)
+ 
+ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+     set(CMP_HOST_APPLE ON)
+@@ -10,6 +11,9 @@ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+     set(CMP_HOST_LINUX ON)
+ elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+     set(CMP_HOST_WINDOWS ON)
++elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "BSD")
++    set(CMP_HOST_LINUX ON)
++    set(CMP_HOST_BSD ON)
+ else()
+     message(FATAL_ERROR "Unknown platform")
+ endif()
+@@ -146,4 +150,4 @@ macro(cmp_execute_process COMMAND WORKING_DIR)
+         message(FATAL_ERROR "Process exited with non 0 exit code: ${_exit_code}\n${_stderr}")
+     endif()
+ 
+-endmacro()
+\ No newline at end of file
++endmacro()
 diff --git a/cmp_core/CMakeLists.txt b/cmp_core/CMakeLists.txt
 index 47873770..41805e40 100644
 --- a/cmp_core/CMakeLists.txt
@@ -78,3 +156,23 @@ index c97315dd..2b3dacd7 100644
  
      g_bc1FunctionPointersSet = true;
  
+diff --git a/cmp_framework/common/cmp_boxfilter.cpp b/cmp_framework/common/cmp_boxfilter.cpp
+index 8c7c4d01..53898082 100644
+--- a/cmp_framework/common/cmp_boxfilter.cpp
++++ b/cmp_framework/common/cmp_boxfilter.cpp
+@@ -387,13 +387,13 @@ CMP_INT CMP_API CMP_GenerateMIPLevelsEx(CMP_MipSet* pMipSet, CMP_CFilterParams*
+                 {
+                     // Wrong size - release & reallocate
+                     //CMips->FreeMipLevelData(pThisMipLevel);
+-                    if (CMips.AllocateMipLevelData(pThisMipLevel, nWidth, nHeight, pMipSet->m_ChannelFormat, pMipSet->m_TextureDataType) == NULL)
++                    if (CMips.AllocateMipLevelData(pThisMipLevel, nWidth, nHeight, pMipSet->m_ChannelFormat, pMipSet->m_TextureDataType) == 0)
+                     {
+                         return CMP_ERR_GENERIC;
+                     }
+                 }
+             }
+-            else if (CMips.AllocateMipLevelData(pThisMipLevel, nWidth, nHeight, pMipSet->m_ChannelFormat, pMipSet->m_TextureDataType) == NULL)
++            else if (CMips.AllocateMipLevelData(pThisMipLevel, nWidth, nHeight, pMipSet->m_ChannelFormat, pMipSet->m_TextureDataType) == 0)
+             {
+                 return CMP_ERR_GENERIC;
+             }

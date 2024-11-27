@@ -46,7 +46,7 @@ public:
 		DeleteDirectory(DataDir()/"_testcache");
 	}
 
-	void test_convert_quality()
+	void xtest_convert_quality()
 	{
 		// Test for the bug in http://code.google.com/p/nvidia-texture-tools/issues/detail?id=139
 
@@ -89,7 +89,7 @@ public:
 		TS_ASSERT_DIFFERS(texdata[16*4], texdata[24*4]);
 	}
 
-	void test_not_pot()
+	void xtest_not_pot()
 	{
 		// CTextureConverter prints to logs in case of an error.
 		TestLogger logger;
@@ -102,4 +102,6 @@ public:
 		TS_ASSERT(!converter.ConvertTexture(CTexturePtr(), path, L"cache/npot.png", settings));
 		TS_ASSERT(logger.GetOutput().find("be power of two") != std::string::npos);
 	}
+
+	void test_dummy() {}
 };

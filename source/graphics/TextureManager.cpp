@@ -495,6 +495,9 @@ public:
 		// Initialise base color from the texture
 		texture->m_BaseColor = textureData.get_average_color();
 
+		#if CONFIG2_COMPRESSONATOR
+		Renderer::Backend::Format format = ChooseFormatAndTransformTextureDataIfNeeded(m_Device, textureData, m_HasS3TC);
+		#elif CONFIG2_NVTT
 		Renderer::Backend::Format format = Renderer::Backend::Format::UNDEFINED;
 		if (texture->m_Properties.m_FormatOverride != Renderer::Backend::Format::UNDEFINED)
 		{
@@ -517,6 +520,7 @@ public:
 		{
 			format = ChooseFormatAndTransformTextureDataIfNeeded(m_Device, textureData, m_HasS3TC);
 		}
+		#endif // CONFIG2_NVTT
 
 		if (format == Renderer::Backend::Format::UNDEFINED)
 		{

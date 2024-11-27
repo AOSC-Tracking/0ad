@@ -398,7 +398,10 @@ static Status decode_pf(const DDS_PIXELFORMAT* pf, size_t& bpp, size_t& flags)
 
 	// check struct size
 	if(read_le32(&pf->dwSize) != sizeof(DDS_PIXELFORMAT))
+	{
+		debug_printf("pixel format size off");
 		return ERR::TEX_INVALID_SIZE;
+	}
 
 	// determine type
 	const size_t pf_flags = (size_t)read_le32(&pf->dwFlags);
@@ -419,7 +422,10 @@ static Status decode_pf(const DDS_PIXELFORMAT* pf, size_t& bpp, size_t& flags)
 		{
 			// something weird other than RGBA or BGRA
 			if(pf_a_mask != 0xFF000000)
+			{
+				debug_printf("dds rgba but not");
 				WARN_RETURN(ERR::TEX_FMT_INVALID);
+			}
 			flags |= TEX_ALPHA;
 		}
 
@@ -433,6 +439,7 @@ static Status decode_pf(const DDS_PIXELFORMAT* pf, size_t& bpp, size_t& flags)
 			// DDS is storing images in a format that requires no processing,
 			// we do not allow any weird orderings that require runtime work.
 			// instead, the artists must export with the correct settings.
+			debug_printf("dds rgba order invalid");
 			return ERR::TEX_FMT_INVALID;
 		}
 
@@ -447,10 +454,16 @@ static Status decode_pf(const DDS_PIXELFORMAT* pf, size_t& bpp, size_t& flags)
 		bpp = pf_bpp;
 
 		if(pf_bpp != 8)
+		{
+			debug_printf("dds uncompressed 8bpp greyscale invalid bpp");
 			return ERR::TEX_FMT_INVALID;
+		}
 
 		if(pf_a_mask != 0xFF)
+		{
+			debug_printf("dds uncompressed 8bpp greyscale invalid alpha mask");
 			return ERR::TEX_FMT_INVALID;
+		}
 		flags |= TEX_GREY;
 
 		RETURN_STATUS_IF_ERR(tex_validate_plain_format(bpp, (int)flags));
@@ -481,12 +494,16 @@ static Status decode_pf(const DDS_PIXELFORMAT* pf, size_t& bpp, size_t& flags)
 			break;
 
 		default:
+			debug_printf("invalid dds compression");
 			return ERR::TEX_FMT_INVALID;
 		}
 	}
 	// .. neither uncompressed nor compressed - invalid
 	else
+	{
+		debug_printf("dds neither compressed nor uncompressed");
 		return ERR::TEX_FMT_INVALID;
+	}
 
 	return INFO::OK;
 }
@@ -560,7 +577,10 @@ static Status decode_sd(const DDS_HEADER* sd, size_t& w, size_t& h, size_t& bpp,
 			// mipmap chain is incomplete
 			// note: DDS includes the base level in its count, hence +1.
 			if(mipmap_count != ceil_log2(std::max(w,h))+1)
+			{
+				debug_printf("mipmap count found %lu expected %lu\n", mipmap_count, ceil_log2(std::max(w,h))+1);
 				return ERR::TEX_FMT_INVALID;
+			}
 			flags |= TEX_MIPMAPS;
 		}
 	}
