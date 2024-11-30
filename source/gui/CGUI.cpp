@@ -52,6 +52,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
+
+extern float g_dpiMultiplier;
+
 const double SELECT_DBLCLICK_RATE = 0.5;
 const u32 MAX_OBJECT_DEPTH = 100; // Max number of nesting for GUI includes. Used to detect recursive inclusion
 
@@ -131,8 +134,7 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 		// Yes the mouse position is stored as float to avoid
 		//  constant conversions when operating in a
 		//  float-based environment.
-		m_MousePos = CVector2D((float)ev->ev.motion.x / g_VideoMode.GetScale(), (float)ev->ev.motion.y / g_VideoMode.GetScale());
-
+		m_MousePos = CVector2D((float)ev->ev.motion.x * g_dpiMultiplier / g_VideoMode.GetScale(), (float)ev->ev.motion.y * g_dpiMultiplier / g_VideoMode.GetScale());
 		SGUIMessage msg(GUIM_MOUSE_MOTION);
 		m_BaseObject->RecurseObject(&IGUIObject::IsHiddenOrGhostOrOutOfBoundaries, &IGUIObject::HandleMessage, msg);
 	}
@@ -156,7 +158,7 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 	CVector2D oldMousePos = m_MousePos;
 	if (ev->ev.type == SDL_MOUSEBUTTONDOWN || ev->ev.type == SDL_MOUSEBUTTONUP)
 	{
-		m_MousePos = CVector2D((float)ev->ev.button.x / g_VideoMode.GetScale(), (float)ev->ev.button.y / g_VideoMode.GetScale());
+		m_MousePos = CVector2D((float)ev->ev.button.x * g_dpiMultiplier / g_VideoMode.GetScale(), (float)ev->ev.button.y * g_dpiMultiplier / g_VideoMode.GetScale());
 	}
 
 	// Allow the focused object to pre-empt regular GUI events.

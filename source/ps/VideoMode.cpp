@@ -49,6 +49,9 @@
 #include <stdlib.h>
 #endif
 
+// Hack/workaround for SDL2 support: we need to know when we're in high DPI mode.
+float g_dpiMultiplier = 1.0f;
+
 namespace
 {
 
@@ -234,7 +237,7 @@ void CVideoMode::CCursor::SetCursor(const CStrW& name)
 		LOGERROR("Can't create surface for cursor: %s", SDL_GetError());
 		return;
 	}
-	const float scale = g_VideoMode.GetScale();
+	const float scale = g_VideoMode.GetScale() / g_dpiMultiplier;
 	if (scale != 1.0)
 	{
 		SDL_Surface* scaledSurface = SDL_CreateRGBSurface(0,
@@ -322,11 +325,11 @@ bool CVideoMode::SetVideoMode(int w, int h, int bpp, bool fullscreen)
 			flags |= SDL_WINDOW_BORDERLESS;
 	}
 
+	const bool isGLBackend =
+		m_Backend == Renderer::Backend::Backend::GL ||
+		m_Backend == Renderer::Backend::Backend::GL_ARB;
 	if (!m_Window)
 	{
-		const bool isGLBackend =
-			m_Backend == Renderer::Backend::Backend::GL ||
-			m_Backend == Renderer::Backend::Backend::GL_ARB;
 		if (isGLBackend)
 		{
 			SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -512,7 +515,14 @@ bool CVideoMode::SetVideoMode(int w, int h, int bpp, bool fullscreen)
 	}
 
 	// Grab the current video settings
-	SDL_GetWindowSize(m_Window, &m_CurrentW, &m_CurrentH);
+	if (isGLBackend)
+		SDL_GL_GetDrawableSize(m_Window, &m_CurrentW, &m_CurrentH);
+	else
+		SDL_Vulkan_GetDrawableSize(m_Window, &m_CurrentW, &m_CurrentH);
+	int wx, wy;
+	SDL_GetWindowSize(m_Window, &wx, &wy);
+	g_dpiMultiplier = static_cast<float>(m_CurrentW) / wx;
+
 	m_CurrentBPP = bpp;
 
 	// #545: we need to constrain the window in fullscreen mode to avoid mouse
