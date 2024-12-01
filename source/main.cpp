@@ -372,18 +372,15 @@ static void Frame(RL::Interface* rlInterface)
 	const double time = timer_Time();
 	g_frequencyFilter->Update(time);
 	// .. old method - "exact" but contains jumps
-#if 0
+#if 1
 	static double last_time;
-	const double time = timer_Time();
-	const float TimeSinceLastFrame = (float)(time-last_time);
+	const float realTimeSinceLastFrame = (float)(time-last_time);
 	last_time = time;
 	ONCE(return);	// first call: set last_time and return
-
-	// .. new method - filtered and more smooth, but errors may accumulate
 #else
 	const float realTimeSinceLastFrame = 1.0 / g_frequencyFilter->SmoothedFrequency();
 #endif
-	ENSURE(realTimeSinceLastFrame > 0.0f);
+	ONCE_NOT(ENSURE(realTimeSinceLastFrame > 0.0f)); // Skip this the first time as it could be 0
 
 	// Decide if update is necessary
 	const bool needUpdate{g_app_has_focus || g_NetClient || !g_PauseOnFocusLoss};

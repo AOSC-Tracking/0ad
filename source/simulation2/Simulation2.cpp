@@ -361,6 +361,9 @@ void CSimulation2Impl::Update(int turnLength, const std::vector<SimulationComman
 	PROFILE3("sim update");
 	PROFILE2_ATTR("turn %d", (int)m_TurnNumber);
 
+	// Sleep for half a second for debugging purposes
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
 	fixed turnLengthFixed = fixed::FromInt(turnLength) / 1000;
 
 	/*
