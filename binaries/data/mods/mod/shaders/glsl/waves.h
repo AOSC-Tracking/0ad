@@ -13,5 +13,5 @@ BEGIN_DRAW_UNIFORMS
 END_DRAW_UNIFORMS
 
 VERTEX_OUTPUT(0, float, ttime);
-VERTEX_OUTPUT(1, vec2, normal);
-VERTEX_OUTPUT(2, vec2, v_tex);
+VERTEX_OUTPUT(1, vec2, v_tex);
+VERTEX_OUTPUT(2, vec3, worldPos);

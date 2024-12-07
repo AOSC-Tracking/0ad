@@ -40,6 +40,10 @@
 #include "simulation2/components/ICmpRangeManager.h"
 
 #include <algorithm>
+#include <unordered_set>
+
+constexpr u16 MAX_WAVE_WIDTH = 7; // Maximal horizontal spread of waves
+constexpr u16 WAVE_DEPTH = 1; // Number of vertices depth-wise (for now we don't really need more than 1)
 
 struct CoastalPoint
 {
@@ -50,16 +54,10 @@ struct CoastalPoint
 
 struct SWavesVertex
 {
-	// vertex position
-	CVector3D m_BasePosition;
-	CVector3D m_ApexPosition;
-	CVector3D m_SplashPosition;
-	CVector3D m_RetreatPosition;
-
-	CVector2D m_PerpVect;
+	CVector3D m_Position;
 	float m_UV[2];
 };
-cassert(sizeof(SWavesVertex) == 64);
+cassert(sizeof(SWavesVertex) == 20);
 
 struct WaveObject
 {
@@ -131,32 +129,15 @@ void WaterManager::Initialize()
 {
 	const uint32_t stride = sizeof(SWavesVertex);
 
-	const std::array<Renderer::Backend::SVertexAttributeFormat, 6> attributes{{
+	const std::array<Renderer::Backend::SVertexAttributeFormat, 2> attributes{{
 		{Renderer::Backend::VertexAttributeStream::POSITION,
 			Renderer::Backend::Format::R32G32B32_SFLOAT,
-			offsetof(SWavesVertex, m_BasePosition), stride,
-			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
-		{Renderer::Backend::VertexAttributeStream::NORMAL,
-			Renderer::Backend::Format::R32G32_SFLOAT,
-			offsetof(SWavesVertex, m_PerpVect), stride,
+			offsetof(SWavesVertex, m_Position), stride,
 			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
 		{Renderer::Backend::VertexAttributeStream::UV0,
 			Renderer::Backend::Format::R32G32_SFLOAT,
 			offsetof(SWavesVertex, m_UV), stride,
 			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
-
-		{Renderer::Backend::VertexAttributeStream::UV1,
-			Renderer::Backend::Format::R32G32B32_SFLOAT,
-			offsetof(SWavesVertex, m_ApexPosition), stride,
-			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
-		{Renderer::Backend::VertexAttributeStream::UV2,
-			Renderer::Backend::Format::R32G32B32_SFLOAT,
-			offsetof(SWavesVertex, m_SplashPosition), stride,
-			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
-		{Renderer::Backend::VertexAttributeStream::UV3,
-			Renderer::Backend::Format::R32G32B32_SFLOAT,
-			offsetof(SWavesVertex, m_RetreatPosition), stride,
-			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0}
 	}};
 	m_ShoreVertexInputLayout = g_Renderer.GetVertexInputLayout(attributes);
 }
@@ -423,49 +404,118 @@ void WaterManager::UnloadWaterTextures()
 	m_RefractionTexture.reset();
 }
 
-template<bool Transpose>
-static inline void ComputeDirection(float* distanceMap, const u16* heightmap, float waterHeight, size_t SideSize, size_t maxLevel)
-{
-#define ABOVEWATER(x, z) (HEIGHT_SCALE * heightmap[z*SideSize + x] >= waterHeight)
-#define UPDATELOOKAHEAD \
-	for (; lookahead <= id2+maxLevel && lookahead < SideSize && \
-	       ((!Transpose && !ABOVEWATER(lookahead, id1)) || (Transpose && !ABOVEWATER(id1, lookahead))); ++lookahead)
-	// Algorithm:
-	// We want to know the distance to the closest shore point. Go through each line/column,
-	// keep track of when we encountered the last shore point and how far ahead the next one is.
-	for (size_t id1 = 0; id1 < SideSize; ++id1)
-	{
-		size_t id2 = 0;
-		const size_t& x = Transpose ? id1 : id2;
-		const size_t& z = Transpose ? id2 : id1;
+std::unique_ptr<float[]>
+ComputeDistances(const int SideSize, float waterHeight, const u16* heightmap, float maxDistance) {
+#define ABOVEWATER(x, z) (HEIGHT_SCALE * heightmap[z * SideSize + x] >= waterHeight)
 
-		size_t level = ABOVEWATER(x, z) ? 0 : maxLevel;
-		size_t lookahead = (size_t)(level > 0);
+    std::unique_ptr<float[]> distances = std::make_unique<float[]>(SideSize * SideSize);
+    std::fill(distances.get(), distances.get() + SideSize * SideSize, maxDistance + 10.0f);
 
-		UPDATELOOKAHEAD;
+    struct Cell {
+        int x, y;
+        float distance;
+        bool operator>(const Cell& other) const { return distance > other.distance; }
+    };
 
-		// start moving
-		for (; id2 < SideSize; ++id2)
-		{
-			// update current level
-			if (ABOVEWATER(x, z))
-				level = 0;
-			else
-				level = std::min(level+1, maxLevel);
+    std::priority_queue<Cell, std::vector<Cell>, std::greater<>> pq;
 
-			// move lookahead
-			if (lookahead == id2)
-				++lookahead;
-			UPDATELOOKAHEAD;
+    auto isShoreline = [&](int x, int y) {
+        if (!ABOVEWATER(x, y)) return 0; // Not ocean
+        for (int d = 0; d < 4; ++d) {
+            int nx = x + (d == 0) - (d == 1);
+            int ny = y + (d == 2) - (d == 3);
+            if (nx >= 0 && ny >= 0 && nx < SideSize && ny < SideSize && !ABOVEWATER(nx, ny))
+                return heightmap[ny * SideSize + nx] - heightmap[y * SideSize + x];
+        }
+        return 0;
+    };
 
-			// This is the important bit: set the distance to either:
-			// - the distance to the previous shore point (level)
-			// - the distance to the next shore point (lookahead-id2)
-			distanceMap[z*SideSize + x] = std::min(distanceMap[z*SideSize + x], (float)std::min(lookahead-id2, level));
+    for (int y = 0; y < SideSize; ++y) {
+        for (int x = 0; x < SideSize; ++x) {
+			u16 heightDelta = isShoreline(x, y);
+            if (heightDelta) {
+				// Interpolate our actual distance based on the height delta (gives slightly better results in general)
+				float dist = HEIGHT_SCALE * heightDelta;
+				if (dist > 1.0f) {
+					dist = 0.5f;
+				}
+                pq.push({x, y, dist/2.0f});
+                distances[y * SideSize + x] = dist/2.0f;
+            }
+        }
+    }
+
+    std::vector<int> dx = {-1, 1, 0, 0, -1, -1, 1, 1};
+    std::vector<int> dy = {0, 0, -1, 1, -1, 1, -1, 1};
+    std::vector<float> weights = {1.0f, 1.0f, 1.0f, 1.0f, std::sqrt(2.0f), std::sqrt(2.0f), std::sqrt(2.0f), std::sqrt(2.0f)};
+
+    while (!pq.empty()) {
+        auto [x, y, dist] = pq.top();
+        pq.pop();
+
+        if (dist > distances[y * SideSize + x]) continue;
+
+        for (int d = 0; d < 8; ++d) {
+            int nx = x + dx[d], ny = y + dy[d];
+            float newDist = dist + weights[d];
+
+            if (nx >= 0 && ny >= 0 && nx < SideSize && ny < SideSize && newDist < distances[ny * SideSize + nx] && newDist <= maxDistance) {
+                distances[ny * SideSize + nx] = newDist;
+                pq.push({nx, ny, newDist});
+            }
+        }
+    }
+
+	// Correct tiles onland to be negative
+	for (int y = 0; y < SideSize; ++y) {
+		for (int x = 0; x < SideSize; ++x) {
+			if (ABOVEWATER(x, y)) {
+				distances[y * SideSize + x] = -distances[y * SideSize + x];
+			}
 		}
 	}
+
+	// Blur the distance map a bit, which helps avoid any jaggedness
+	float blurRadius = 3.0;
+    float sigma = blurRadius / 2.0f;
+    int kernelSize = blurRadius * 2 + 1;
+
+	std::vector<float> kernel(kernelSize);
+
+    for (int i = -blurRadius; i <= blurRadius; ++i) {
+        kernel[i + blurRadius] = std::exp(-0.5f * (i * i) / (sigma * sigma));
+    }
+
+    float kernelSum = std::accumulate(kernel.begin(), kernel.end(), 0.0f);
+    for (auto& k : kernel) k /= kernelSum;
+
+	auto blurHeightmap = [&](auto& input, auto& output, bool horizontal) {
+        for (int y = 0; y < SideSize; ++y) {
+            for (int x = 0; x < SideSize; ++x) {
+                float sum = 0.0f;
+
+                for (int k = -blurRadius; k <= blurRadius; ++k) {
+                    int nx = horizontal ? x + k : x;
+                    int ny = horizontal ? y : y + k;
+
+                    if (nx >= 0 && ny >= 0 && nx < SideSize && ny < SideSize) {
+                        auto g = input[ny * SideSize + nx];
+                        float weight = kernel[k + blurRadius];
+                        sum += g * weight;
+                    }
+                }
+
+                output[y * SideSize + x] = sum;
+            }
+        }
+    };
+
+	std::unique_ptr<float[]> blurredDistances = std::make_unique<float[]>(SideSize * SideSize);
+	blurHeightmap(distances, blurredDistances, true);
+	blurHeightmap(blurredDistances, distances, false);
+
+	return distances;
 #undef ABOVEWATER
-#undef UPDATELOOKAHEAD
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -476,180 +526,195 @@ void WaterManager::RecomputeDistanceHeightmap()
 	if (!terrain.GetHeightMap())
 		return;
 
-	size_t SideSize = m_MapSize;
+	int SideSize = static_cast<int>(m_MapSize);
 
-	// we want to look ahead some distance, but not too much (less efficient and not interesting). This is our lookahead.
-	const size_t maxLevel = 5;
-
-	if (!m_DistanceHeightmap)
-	{
-		m_DistanceHeightmap = std::make_unique<float[]>(SideSize * SideSize);
-		std::fill(m_DistanceHeightmap.get(), m_DistanceHeightmap.get() + SideSize * SideSize, static_cast<float>(maxLevel));
-	}
-
-	// Create a manhattan-distance heightmap.
-	// This could be refined to only be done near the coast itself, but it's probably not necessary.
-
-	const u16* const heightmap = terrain.GetHeightMap();
-
-	ComputeDirection<false>(m_DistanceHeightmap.get(), heightmap, m_WaterHeight, SideSize, maxLevel);
-	ComputeDirection<true>(m_DistanceHeightmap.get(), heightmap, m_WaterHeight, SideSize, maxLevel);
+	// We don't really care about distance above this and it's better to stop for performance.
+	const size_t maxDistance = 10;
+	m_DistanceHeightmap = ComputeDistances(SideSize, m_WaterHeight, terrain.GetHeightMap(), maxDistance);
 }
 
-// This requires m_DistanceHeightmap to be defined properly.
 void WaterManager::CreateWaveMeshes()
 {
 	if (m_MapSize == 0)
 		return;
 
 	const CTerrain& terrain = g_Game->GetWorld()->GetTerrain();
-	if (!terrain.GetHeightMap())
+	const u16* heightmap = terrain.GetHeightMap();
+	if (!heightmap)
 		return;
 
 	m_ShoreWaves.clear();
 	m_ShoreWavesVBIndices.Reset();
 
-	if (m_Waviness < 5.0f && m_WaterType != L"ocean")
+	// Generate waves for ocean or for lakes with waviness > 4.0f
+	if (!(m_WaterType == L"ocean" || (m_WaterType == L"lake" && m_Waviness > 4.0f)))
 		return;
 
-	size_t SideSize = m_MapSize;
+	u16 SideSize = m_MapSize;
+
+	constexpr int aroundSq[4][2] = { { -1,0 }, { 0,1 }, { 1,0 }, { 0,-1 } };
+	constexpr int aroundDiag[4][2] = { { -1,-1 }, { -1,1 }, { 1,1 }, { 1,-1 } };
 
 	// First step: get the points near the coast.
-	std::set<int> CoastalPointsSet;
-	for (size_t z = 1; z < SideSize-1; ++z)
-		for (size_t x = 1; x < SideSize-1; ++x)
-			// get the points not on the shore but near it, ocean-side
-			if (m_DistanceHeightmap[z*m_MapSize + x] > 0.5f && m_DistanceHeightmap[z*m_MapSize + x] < 1.5f)
-				CoastalPointsSet.insert((z)*SideSize + x);
+	std::unordered_set<u32> CoastalPointsSet;
+	for (u16 z = 1; z < SideSize-1; ++z)
+		for (u16 x = 1; x < SideSize-1; ++x)
+		{
+			// It gives better results to use the heightmap over the distance map here.
+			if (heightmap[z*SideSize + x] * HEIGHT_SCALE > m_WaterHeight)
+				continue;
+			for (int i = 0; i < 4; ++i)
+				if (heightmap[(z + aroundSq[i][1])*SideSize + x + aroundSq[i][0]] * HEIGHT_SCALE > m_WaterHeight)
+				{
+					CoastalPointsSet.insert(x + z*SideSize);
+					break;
+				}
+		}
 
 	// Second step: create chains out of those coastal points.
-	static const int around[8][2] = { { -1,-1 }, { -1,0 }, { -1,1 }, { 0,1 }, { 1,1 }, { 1,0 }, { 1,-1 }, { 0,-1 } };
-
-	std::vector<std::deque<CoastalPoint> > CoastalPointsChains;
+	std::vector<std::deque<CoastalPoint>> CoastalPointsChains;
+	CoastalPointsChains.reserve(16);
+	// We'll reuse the same deque as a buffer.
+	std::deque<CoastalPoint> Chain;
 	while (!CoastalPointsSet.empty())
 	{
 		int index = *(CoastalPointsSet.begin());
 		int x = index % SideSize;
 		int y = (index - x ) / SideSize;
 
-		std::deque<CoastalPoint> Chain;
+		Chain.clear();
 
-		Chain.push_front(CoastalPoint(index,CVector2D(x*4,y*4)));
-
-		// Erase us.
+		Chain.push_front(CoastalPoint(index, CVector2D(x*4,y*4)));
 		CoastalPointsSet.erase(CoastalPointsSet.begin());
 
-		// We're our starter points. At most we can have 2 points close to us.
-		// We'll pick the first one and look for its neighbors (he can only have one new)
-		// Up until we either reach the end of the chain, or ourselves.
-		// Then go down the other direction if there is any.
+		// At the starting point, find our two neighbors (hopefully).
+		// We'll follow the path down both direction until we can no longer find neighbors.
+		// (Here we know we're not at a boundary so no need to check).
 		int neighbours[2] = { -1, -1 };
 		int nbNeighb = 0;
-		for (int i = 0; i < 8; ++i)
-		{
-			if (CoastalPointsSet.count(x + around[i][0] + (y + around[i][1])*SideSize))
+		for (int i = 0; i < 4; ++i)
+			if (CoastalPointsSet.count(x + aroundSq[i][0] + (y + aroundSq[i][1])*SideSize))
 			{
 				if (nbNeighb < 2)
-					neighbours[nbNeighb] = x + around[i][0] + (y + around[i][1])*SideSize;
-				++nbNeighb;
+					neighbours[nbNeighb++] = x + aroundSq[i][0] + (y + aroundSq[i][1])*SideSize;
+				else {
+					++nbNeighb;
+					break;
+				}
 			}
-		}
-		if (nbNeighb > 2)
-			continue;
+		// Try diagonally if we failed to find any otherwise.
+		if (nbNeighb == 0) {
+			nbNeighb = 0;
+			for (int i = 0; i < 4; ++i)
+				if (CoastalPointsSet.count(x + aroundDiag[i][0] + (y + aroundDiag[i][1])*SideSize))
+				{
+					if (nbNeighb < 2)
+						neighbours[nbNeighb++] = x + aroundDiag[i][0] + (y + aroundDiag[i][1])*SideSize;
+					else {
+						++nbNeighb;
+						break;
+					}
+				}
 
+		}
+		// In irregular cases, we can have more than two neighbors.
+		// We'll just assume those points aren't suitable for coastal waves.
+		if (nbNeighb == 0 || nbNeighb > 2) {
+			continue;
+		}
+
+		// Go down both ends, appending to our chain.
 		for (int i = 0; i < 2; ++i)
 		{
 			if (neighbours[i] == -1)
 				continue;
+
 			// Move to our neighboring point
 			int xx = neighbours[i] % SideSize;
 			int yy = (neighbours[i] - xx ) / SideSize;
 			int indexx = xx + yy*SideSize;
-			int endedChain = false;
+			CoastalPointsSet.erase(indexx);
 
 			if (i == 0)
 				Chain.push_back(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
 			else
 				Chain.push_front(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
 
-			// If there's a loop we'll be the "other" neighboring point already so check for that.
-			// We'll readd at the end/front the other one to have full squares.
-			if (CoastalPointsSet.count(indexx) == 0)
-				break;
-
-			CoastalPointsSet.erase(indexx);
-
-			// Start checking from there.
-			while(!endedChain)
+			while (true)
 			{
-				bool found = false;
+				// If we're at a boundary, we won't find more points
+				if (xx == 0 || xx == SideSize-1 || yy == 0 || yy == SideSize-1)
+					break;
+
 				nbNeighb = 0;
-				for (int p = 0; p < 8; ++p)
-				{
-					if (CoastalPointsSet.count(xx+around[p][0] + (yy + around[p][1])*SideSize))
+				// Remember the latest point we found.
+				int xxx = xx;
+				int yyy = yy;
+				// At this point we expect only one neighbor.
+				for (int p = 0; p < 4; ++p)
+					if (CoastalPointsSet.count(xx+aroundSq[p][0] + (yy + aroundSq[p][1])*SideSize))
 					{
-						if (nbNeighb >= 2)
-						{
-							CoastalPointsSet.erase(xx + yy*SideSize);
-							continue;
-						}
-						++nbNeighb;
-						// We've found a new point around us.
-						// Move there
-						xx = xx + around[p][0];
-						yy = yy + around[p][1];
-						indexx = xx + yy*SideSize;
-						if (i == 0)
-							Chain.push_back(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
-						else
-							Chain.push_front(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
-						CoastalPointsSet.erase(xx + yy*SideSize);
-						found = true;
-						break;
+						if (++nbNeighb > 1)
+							break;
+						xxx = xx + aroundSq[p][0];
+						yyy = yy + aroundSq[p][1];
 					}
-				}
-				if (!found)
-					endedChain = true;
+				if (nbNeighb == 0)
+					for (int p = 0; p < 4; ++p)
+						if (CoastalPointsSet.count(xx+aroundDiag[p][0] + (yy + aroundDiag[p][1])*SideSize))
+						{
+							if (++nbNeighb > 1)
+								break;
+							xxx = xx + aroundDiag[p][0];
+							yyy = yy + aroundDiag[p][1];
+						}
+				if (nbNeighb != 1)
+					break;
+				// We've found a valid point in the chain
+				// Move there
+				xx = xxx;
+				yy = yyy;
+				indexx = xx + yy*SideSize;
+				if (i == 0)
+					Chain.push_back(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
+				else
+					Chain.push_front(CoastalPoint(indexx,CVector2D(xx*4,yy*4)));
+				CoastalPointsSet.erase(xx + yy*SideSize);
 			}
 		}
-		if (Chain.size() > 10)
+		// Only keep chains that are large enough to be interesting.
+		if (Chain.size() > 4) {
 			CoastalPointsChains.push_back(Chain);
+		}
 	}
 
 	// (optional) third step: Smooth chains out.
-	// This is also really dumb.
+	constexpr int smoothness_level = 2;
 	for (size_t i = 0; i < CoastalPointsChains.size(); ++i)
-	{
-		// Bump 1 for smoother.
-		for (int p = 0; p < 3; ++p)
-		{
+		for (int p = 0; p < smoothness_level; ++p)
 			for (size_t j = 1; j < CoastalPointsChains[i].size()-1; ++j)
 			{
 				CVector2D realPos = CoastalPointsChains[i][j-1].position + CoastalPointsChains[i][j+1].position;
 
 				CoastalPointsChains[i][j].position = (CoastalPointsChains[i][j].position + realPos/2.0f)/2.0f;
 			}
-		}
-	}
 
-	// Fourth step: create waves themselves, using those chains. We basically create subchains.
-	u16 waveSizes = 14;	// maximal size in width.
+	// Fourth and final step: create waves themselves, creating subchains.
 
-	// Construct indices buffer (we can afford one for all of them)
+	// Construct indices buffer (we reuse the same for all waves)
 	std::vector<u16> water_indices;
-	for (u16 a = 0; a < waveSizes - 1; ++a)
-	{
-		for (u16 rect = 0; rect < 7; ++rect)
+	for (u16 a = 0; a < MAX_WAVE_WIDTH; ++a)
+		for (u16 depth = 0; depth < WAVE_DEPTH; ++depth)
 		{
-			water_indices.push_back(a * 9 + rect);
-			water_indices.push_back(a * 9 + 9 + rect);
-			water_indices.push_back(a * 9 + 1 + rect);
-			water_indices.push_back(a * 9 + 9 + rect);
-			water_indices.push_back(a * 9 + 10 + rect);
-			water_indices.push_back(a * 9 + 1 + rect);
+			water_indices.push_back(a * (WAVE_DEPTH+1) + depth);
+			water_indices.push_back((a+1) * (WAVE_DEPTH+1) + depth);
+			water_indices.push_back(a * (WAVE_DEPTH+1) + 1 + depth);
+
+			water_indices.push_back((a+1) * (WAVE_DEPTH+1) + depth);
+			water_indices.push_back((a+1) * (WAVE_DEPTH+1) + 1 + depth);
+			water_indices.push_back(a * (WAVE_DEPTH+1) + 1 + depth);
 		}
-	}
-	// Generic indexes, max-length
+
 	m_ShoreWavesVBIndices = g_Renderer.GetVertexBufferManager().AllocateChunk(
 		sizeof(u16), water_indices.size(),
 		Renderer::Backend::IBuffer::Type::INDEX,
@@ -657,234 +722,114 @@ void WaterManager::CreateWaveMeshes()
 		nullptr, CVertexBufferManager::Group::WATER);
 	m_ShoreWavesVBIndices->m_Owner->UpdateChunkVertices(m_ShoreWavesVBIndices.Get(), &water_indices[0]);
 
-	float diff = (rand() % 50) / 5.0f;
-
 	std::vector<SWavesVertex> vertices, reversed;
 	for (size_t i = 0; i < CoastalPointsChains.size(); ++i)
 	{
-		for (size_t j = 0; j < CoastalPointsChains[i].size()-waveSizes; ++j)
-		{
-			if (CoastalPointsChains[i].size()- 1 - j < waveSizes)
-				break;
+		float diff = (rand() % 50) / 5.0f;
+		bool sign = false;
+		for (size_t start = 0; start < CoastalPointsChains[i].size(); start += 5) {
+			u16 width = std::min(MAX_WAVE_WIDTH, static_cast<u16>(CoastalPointsChains[i].size() - start - 1));
 
-			u16 width = waveSizes;
-
-			// First pass to get some parameters out.
-			float outmost = 0.0f;	// how far to move on the shore.
-			float avgDepth = 0.0f;
-			int sign = 1;
-			CVector2D firstPerp(0,0), perp(0,0), lastPerp(0,0);
-			for (u16 a = 0; a < waveSizes;++a)
-			{
-				lastPerp = perp;
-				perp = CVector2D(0,0);
-				int nb = 0;
-				CVector2D pos = CoastalPointsChains[i][j+a].position;
-				CVector2D posPlus;
-				CVector2D posMinus;
-				if (a > 0)
-				{
-					++nb;
-					posMinus = CoastalPointsChains[i][j+a-1].position;
-					perp += pos-posMinus;
-				}
-				if (a < waveSizes-1)
-				{
-					++nb;
-					posPlus = CoastalPointsChains[i][j+a+1].position;
-					perp += posPlus-pos;
-				}
-				perp /= nb;
-				perp = CVector2D(-perp.Y,perp.X).Normalized();
-
-				if (a == 0)
-					firstPerp = perp;
-
-				if ( a > 1 && perp.Dot(lastPerp) < 0.90f && perp.Dot(firstPerp) < 0.70f)
-				{
-					width = a+1;
-					break;
-				}
-
-				if (terrain.GetExactGroundLevel(pos.X+perp.X*1.5f, pos.Y+perp.Y*1.5f)
-					> m_WaterHeight)
-					sign = -1;
-
-				avgDepth += terrain.GetExactGroundLevel(pos.X+sign*perp.X*20.0f,
-					pos.Y+sign*perp.Y*20.0f) - m_WaterHeight;
-
-				float localOutmost = -2.0f;
-				while (localOutmost < 0.0f)
-				{
-					const float depth = terrain.GetExactGroundLevel(
-						pos.X+sign*perp.X*localOutmost,
-						pos.Y+sign*perp.Y*localOutmost) - m_WaterHeight;
-					if (depth < 0.0f || depth > 0.6f)
-						localOutmost += 0.2f;
-					else
-						break;
-				}
-
-				outmost += localOutmost;
-			}
-			if (width < 5)
-			{
-				j += 6;
+			if (width < 3)
 				continue;
-			}
-
-			outmost /= width;
-
-			if (outmost > -0.5f)
-			{
-				j += 3;
-				continue;
-			}
-			outmost = -2.5f + outmost * m_Waviness/10.0f;
-
-			avgDepth /= width;
-
-			if (avgDepth > -1.3f)
-			{
-				j += 3;
-				continue;
-			}
-			// we passed the checks, we can create a wave of size "width".
-
+			
 			std::unique_ptr<WaveObject> shoreWave = std::make_unique<WaveObject>();
 			vertices.clear();
-			vertices.reserve(9 * width);
+			vertices.reserve(WAVE_DEPTH * width);
 
 			shoreWave->m_Width = width;
 			shoreWave->m_TimeDiff = diff;
-			diff += (rand() % 100) / 25.0f + 4.0f;
+			diff += rand() % 20 / 20.0f + 2.0;
 
-			for (u16 a = 0; a < width;++a)
+			CVector2D lastPerp, perp;
+			bool accept = true;
+
+			// First pass to determine if we're reverse order
+			// (this applies to the whole chain)
+			if (!sign)
+				for (size_t j = start; j <= start + width; ++j)
+				{
+					CVector2D pos = CoastalPointsChains[i][j].position;
+					
+					// Get the perpendicular vector
+					if (j == 0)
+						perp = CoastalPointsChains[i][j+1].position - pos;
+					else if (j == width)
+						perp = pos - CoastalPointsChains[i][j-1].position;
+					else {
+						perp = CoastalPointsChains[i][j+1].position - CoastalPointsChains[i][j].position;
+					}
+					// now rotate it 90 degrees
+					perp = CVector2D(-perp.Y, perp.X);
+					perp.Normalize();
+
+					if (!sign && terrain.GetExactGroundLevel(pos.X+perp.X*2.5f, pos.Y+perp.Y*2.5f)
+						> m_WaterHeight) {
+						sign = true;
+						break;
+					}
+				}
+
+			for (size_t j = start; j <= start + width; ++j)
 			{
-				perp = CVector2D(0,0);
-				int nb = 0;
-				CVector2D pos = CoastalPointsChains[i][j+a].position;
-				CVector2D posPlus;
-				CVector2D posMinus;
-				if (a > 0)
-				{
-					++nb;
-					posMinus = CoastalPointsChains[i][j+a-1].position;
-					perp += pos-posMinus;
-				}
-				if (a < waveSizes-1)
-				{
-					++nb;
-					posPlus = CoastalPointsChains[i][j+a+1].position;
-					perp += posPlus-pos;
-				}
-				perp /= nb;
-				perp = CVector2D(-perp.Y,perp.X).Normalized();
+				CVector2D pos = CoastalPointsChains[i][j].position;
 
-				SWavesVertex point[9];
-
-				float baseHeight = 0.04f;
-
-				float halfWidth = (width-1.0f)/2.0f;
-				float sideNess = sqrtf(Clamp( (halfWidth - fabsf(a - halfWidth)) / 3.0f, 0.0f, 1.0f));
-
-				point[0].m_UV[0] = a; point[0].m_UV[1] = 8;
-				point[1].m_UV[0] = a; point[1].m_UV[1] = 7;
-				point[2].m_UV[0] = a; point[2].m_UV[1] = 6;
-				point[3].m_UV[0] = a; point[3].m_UV[1] = 5;
-				point[4].m_UV[0] = a; point[4].m_UV[1] = 4;
-				point[5].m_UV[0] = a; point[5].m_UV[1] = 3;
-				point[6].m_UV[0] = a; point[6].m_UV[1] = 2;
-				point[7].m_UV[0] = a; point[7].m_UV[1] = 1;
-				point[8].m_UV[0] = a; point[8].m_UV[1] = 0;
-
-				point[0].m_PerpVect = perp;
-				point[1].m_PerpVect = perp;
-				point[2].m_PerpVect = perp;
-				point[3].m_PerpVect = perp;
-				point[4].m_PerpVect = perp;
-				point[5].m_PerpVect = perp;
-				point[6].m_PerpVect = perp;
-				point[7].m_PerpVect = perp;
-				point[8].m_PerpVect = perp;
-
-				static const float perpT1[9] = { 6.0f, 6.05f, 6.1f, 6.2f, 6.3f, 6.4f, 6.5f, 6.6f, 9.7f };
-				static const float perpT2[9] = { 2.0f, 2.1f,  2.2f, 2.3f, 2.4f, 3.0f, 3.3f, 3.6f, 9.5f };
-				static const float perpT3[9] = { 1.1f, 0.7f, -0.2f, 0.0f, 0.6f, 1.3f, 2.2f, 3.6f, 9.0f };
-				static const float perpT4[9] = { 2.0f, 2.1f,  1.2f, 1.5f, 1.7f, 1.9f, 2.7f, 3.8f, 9.0f };
-
-				static const float heightT1[9] = { 0.0f, 0.2f, 0.5f, 0.8f, 0.9f, 0.85f, 0.6f, 0.2f, 0.0 };
-				static const float heightT2[9] = { -0.8f, -0.4f, 0.0f, 0.1f, 0.1f, 0.03f, 0.0f, 0.0f, 0.0 };
-				static const float heightT3[9] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0 };
-
-				for (size_t t = 0; t < 9; ++t)
-				{
-					const float terrHeight = 0.05f + terrain.GetExactGroundLevel(
-						pos.X+sign*perp.X*(perpT1[t]+outmost),
-																			pos.Y+sign*perp.Y*(perpT1[t]+outmost));
-					point[t].m_BasePosition = CVector3D(pos.X+sign*perp.X*(perpT1[t]+outmost), baseHeight + heightT1[t]*sideNess + std::max(m_WaterHeight,terrHeight),
-														pos.Y+sign*perp.Y*(perpT1[t]+outmost));
-				}
-				for (size_t t = 0; t < 9; ++t)
-				{
-					const float terrHeight = 0.05f + terrain.GetExactGroundLevel(
-						pos.X+sign*perp.X*(perpT2[t]+outmost),
-																			pos.Y+sign*perp.Y*(perpT2[t]+outmost));
-					point[t].m_ApexPosition = CVector3D(pos.X+sign*perp.X*(perpT2[t]+outmost), baseHeight + heightT1[t]*sideNess + std::max(m_WaterHeight,terrHeight),
-														pos.Y+sign*perp.Y*(perpT2[t]+outmost));
-				}
-				for (size_t t = 0; t < 9; ++t)
-				{
-					const float terrHeight = 0.05f + terrain.GetExactGroundLevel(
-						pos.X+sign*perp.X*(perpT3[t]+outmost*sideNess),
-																			pos.Y+sign*perp.Y*(perpT3[t]+outmost*sideNess));
-					point[t].m_SplashPosition = CVector3D(pos.X+sign*perp.X*(perpT3[t]+outmost*sideNess), baseHeight + heightT2[t]*sideNess + std::max(m_WaterHeight,terrHeight), pos.Y+sign*perp.Y*(perpT3[t]+outmost*sideNess));
-				}
-				for (size_t t = 0; t < 9; ++t)
-				{
-					const float terrHeight = 0.05f + terrain.GetExactGroundLevel(
-						pos.X+sign*perp.X*(perpT4[t]+outmost),
-																			pos.Y+sign*perp.Y*(perpT4[t]+outmost));
-					point[t].m_RetreatPosition = CVector3D(pos.X+sign*perp.X*(perpT4[t]+outmost), baseHeight + heightT3[t]*sideNess + std::max(m_WaterHeight,terrHeight),
-														   pos.Y+sign*perp.Y*(perpT4[t]+outmost));
+				lastPerp = perp;
+				// Get the perpendicular vector
+				if (j == 0)
+					perp = CoastalPointsChains[i][j+1].position - pos;
+				else if (j == width)
+					perp = pos - CoastalPointsChains[i][j-1].position;
+				else {
+					perp = CoastalPointsChains[i][j+1].position - pos;
 				}
 
-				vertices.push_back(point[8]);
-				vertices.push_back(point[7]);
-				vertices.push_back(point[6]);
-				vertices.push_back(point[5]);
-				vertices.push_back(point[4]);
-				vertices.push_back(point[3]);
-				vertices.push_back(point[2]);
-				vertices.push_back(point[1]);
-				vertices.push_back(point[0]);
+				// now rotate it 90 degrees
+				perp = CVector2D(-perp.Y, perp.X);
+				perp.Normalize();
 
-				shoreWave->m_AABB += point[8].m_SplashPosition;
-				shoreWave->m_AABB += point[8].m_BasePosition;
-				shoreWave->m_AABB += point[0].m_SplashPosition;
-				shoreWave->m_AABB += point[0].m_BasePosition;
-				shoreWave->m_AABB += point[4].m_ApexPosition;
+				if (sign)
+					perp = -perp;
+
+				if (j > start+1 && lastPerp.Dot(perp) < 0.8f)
+				{
+					//LOGWARNING("Wave chain %d is too sharp at point %d - %f (%f, %f) (%f, %f)", i, j, lastPerp.Dot(perp), lastPerp.X, lastPerp.Y, perp.X, perp.Y);
+					accept = false;
+					start = j;
+					break;
+				}
+
+				SWavesVertex point[WAVE_DEPTH+1];
+				for (size_t depth = 0; depth <= WAVE_DEPTH; ++depth)
+				{
+					point[depth].m_UV[0] = (j-start) / static_cast<float>(width);
+					point[depth].m_UV[1] = depth / static_cast<float>(WAVE_DEPTH);
+					point[depth].m_Position = CVector3D(
+					    pos.X+perp.X * (depth * 30.0f - 2.0f),
+					    m_WaterHeight,
+					    pos.Y+perp.Y * (depth * 30.0f - 2.0f)
+					);
+
+					vertices.push_back(point[depth]);
+
+					shoreWave->m_AABB += point[depth].m_Position;
+				}
 			}
+			if (!accept)
+				continue;
 
-			if (sign == 1)
+			if (sign)
 			{
-				// Let's do some fancy reversing.
+				// Reverse the vertices to invert their index order
 				reversed.clear();
 				reversed.reserve(vertices.size());
-				for (int a = width - 1; a >= 0; --a)
-				{
-					for (size_t t = 0; t < 9; ++t)
-						reversed.push_back(vertices[a * 9 + t]);
-				}
+				for (size_t j = width; j != static_cast<size_t>(-1); --j)
+					for (size_t depth = 0; depth <= WAVE_DEPTH; ++depth)
+						reversed.push_back(vertices[j * (WAVE_DEPTH+1) + depth]);
 				std::swap(vertices, reversed);
 			}
-			j += width/2-1;
-
-			shoreWave->m_VBVertices = g_Renderer.GetVertexBufferManager().AllocateChunk(
-				sizeof(SWavesVertex), vertices.size(),
-				Renderer::Backend::IBuffer::Type::VERTEX,
-				Renderer::Backend::IBuffer::Usage::TRANSFER_DST,
-				nullptr, CVertexBufferManager::Group::WATER);
+			shoreWave->m_VBVertices = g_Renderer.GetVertexBufferManager().AllocateChunk(sizeof(SWavesVertex), vertices.size(),
+				Renderer::Backend::IBuffer::Type::VERTEX, Renderer::Backend::IBuffer::Usage::TRANSFER_DST, nullptr, CVertexBufferManager::Group::WATER);
 			shoreWave->m_VBVertices->m_Owner->UpdateChunkVertices(shoreWave->m_VBVertices.Get(), &vertices[0]);
 
 			m_ShoreWaves.emplace_back(std::move(shoreWave));
@@ -939,8 +884,8 @@ void WaterManager::RenderWaves(
 		ENSURE(!VBchunk->m_Owner->GetBuffer()->IsDynamic());
 		ENSURE(!m_ShoreWavesVBIndices->m_Owner->GetBuffer()->IsDynamic());
 
-		const uint32_t stride = sizeof(SWavesVertex);
-		const uint32_t firstVertexOffset = VBchunk->m_Index * stride;
+		const size_t stride = sizeof(SWavesVertex);
+		const uint32_t firstVertexOffset = static_cast<uint32_t>(VBchunk->m_Index * stride);
 
 		deviceCommandContext->SetVertexInputLayout(m_ShoreVertexInputLayout);
 
@@ -953,8 +898,8 @@ void WaterManager::RenderWaves(
 			0, VBchunk->m_Owner->GetBuffer(), firstVertexOffset);
 		deviceCommandContext->SetIndexBuffer(m_ShoreWavesVBIndices->m_Owner->GetBuffer());
 
-		const uint32_t indexCount = (m_ShoreWaves[a]->m_Width - 1) * (7 * 6);
-		deviceCommandContext->DrawIndexed(m_ShoreWavesVBIndices->m_Index, indexCount, 0);
+		const uint32_t indexCount = static_cast<uint32_t>(m_ShoreWaves[a]->m_Width * WAVE_DEPTH * 6);
+		deviceCommandContext->DrawIndexed(static_cast<uint32_t>(m_ShoreWavesVBIndices->m_Index), indexCount, 0);
 
 		g_Renderer.GetStats().m_DrawCalls++;
 		g_Renderer.GetStats().m_WaterTris += indexCount / 3;
@@ -987,6 +932,10 @@ void WaterManager::RecomputeWindStrength()
 	if (!terrain.GetHeightMap())
 		return;
 
+	// Use a subsampled map
+	u16 windSize = m_MapSize / 2;
+	auto windMap = std::make_unique<float[]>(windSize * windSize);
+
 	CVector2D windDir = CVector2D(cos(m_WindAngle), sin(m_WindAngle));
 
 	int stepSize = 10;
@@ -1007,33 +956,33 @@ void WaterManager::RecomputeWindStrength()
 	if (fabs(windDir.X) < 0.01f)
 	{
 		movement.emplace_back(0, windY > 0.f ? 1 : -1);
-		startingPoints.reserve(m_MapSize);
-		size_t start = windY > 0 ? 0 : m_MapSize - 1;
-		for (size_t x = 0; x < m_MapSize; ++x)
+		startingPoints.reserve(windSize);
+		size_t start = windY > 0 ? 0 : windSize - 1;
+		for (size_t x = 0; x < windSize; ++x)
 			startingPoints.emplace_back(x, start, 0.f);
 	}
 	else if (fabs(windDir.Y) < 0.01f)
 	{
 		movement.emplace_back(windX > 0.f ? 1 : - 1, 0);
-		startingPoints.reserve(m_MapSize);
-		size_t start = windX > 0 ? 0 : m_MapSize - 1;
-		for (size_t z = 0; z < m_MapSize; ++z)
+		startingPoints.reserve(windSize);
+		size_t start = windX > 0 ? 0 : windSize - 1;
+		for (size_t z = 0; z < windSize; ++z)
 			startingPoints.emplace_back(start, z, 0.f);
 	}
 	else
 	{
-		startingPoints.reserve(m_MapSize * 2);
+		startingPoints.reserve(windSize * 2);
 		// Points along X.
-		size_t start = windY > 0 ? 0 : m_MapSize - 1;
-		for (size_t x = 0; x < m_MapSize; ++x)
+		size_t start = windY > 0 ? 0 : windSize - 1;
+		for (size_t x = 0; x < windSize; ++x)
 			startingPoints.emplace_back(x, start, 0.f);
 		// Points along Z, avoid repeating the corner point.
-		start = windX > 0 ? 0 : m_MapSize - 1;
+		start = windX > 0 ? 0 : windSize - 1;
 		if (windY > 0)
-			for (size_t z = 1; z < m_MapSize; ++z)
+			for (size_t z = 1; z < windSize; ++z)
 				startingPoints.emplace_back(start, z, 0.f);
 		else
-			for (size_t z = 0; z < m_MapSize-1; ++z)
+			for (size_t z = 0; z < windSize-1; ++z)
 				startingPoints.emplace_back(start, z, 0.f);
 
 		// Compute movement array.
@@ -1054,24 +1003,24 @@ void WaterManager::RecomputeWindStrength()
 	for (SWindPoint& point : startingPoints)
 	{
 		// Starting velocity is 1.0 unless in shallow water.
-		m_WindStrength[point.Y * m_MapSize + point.X] = 1.f;
-		const float depth = m_WaterHeight - terrain.GetVertexGroundLevel(point.X, point.Y);
+		windMap[point.Y * windSize + point.X] = 1.f;
+		const float depth = m_WaterHeight - terrain.GetVertexGroundLevel(point.X*2, point.Y*2);
 		if (depth > 0.f && depth < 2.f)
-			m_WindStrength[point.Y * m_MapSize + point.X] = depth / 2.f;
-		point.windStrength = m_WindStrength[point.Y * m_MapSize + point.X];
+			windMap[point.Y * windSize + point.X] = depth / 2.f;
+		point.windStrength = windMap[point.Y * windSize + point.X];
 
 		bool onMap = true;
 		while (onMap)
 			for (size_t step = 0; step < movement.size(); ++step)
 			{
 				// Move wind speed towards the mean.
-				point.windStrength = 0.15f + point.windStrength * 0.85f;
+				point.windStrength = 0.3f + point.windStrength * 0.7f;
 
 				// Adjust speed based on height difference, a positive height difference slowly increases speed (simulate venturi effect)
 				// and a lower height reduces speed (wind protection from hills/...)
 				const float heightDiff = std::max(m_WaterHeight, terrain.GetVertexGroundLevel(
-					point.X + movement[step].first, point.Y + movement[step].second)) -
-					std::max(m_WaterHeight, terrain.GetVertexGroundLevel(point.X, point.Y));
+					(point.X + movement[step].first)*2, (point.Y + movement[step].second)*2)) -
+					std::max(m_WaterHeight, terrain.GetVertexGroundLevel(point.X*2, point.Y*2));
 				if (heightDiff > 0.f)
 					point.windStrength = std::min(2.f, point.windStrength + std::min(4.f, heightDiff) / 40.f);
 				else
@@ -1080,15 +1029,70 @@ void WaterManager::RecomputeWindStrength()
 				point.X += movement[step].first;
 				point.Y += movement[step].second;
 
-				if (point.X < 0 || point.X >= static_cast<ssize_t>(m_MapSize) || point.Y < 0 || point.Y >= static_cast<ssize_t>(m_MapSize))
+				if (point.X < 0 || point.X >= static_cast<ssize_t>(windSize) || point.Y < 0 || point.Y >= static_cast<ssize_t>(windSize))
 				{
 					onMap = false;
 					break;
 				}
-				m_WindStrength[point.Y * m_MapSize + point.X] = point.windStrength;
+				windMap[point.Y * windSize + point.X] = point.windStrength;
 			}
 	}
-	// TODO: should perhaps blur a little, or change the above code to incorporate neighboring tiles a bit.
+	
+	// Blur the downsampled windMap
+	auto blurDownsampled = [windSize](std::unique_ptr<float[]>& windMap) {
+		auto temp = std::make_unique<float[]>(windSize * windSize);
+		for (size_t y = 0; y < windSize; ++y) {
+			for (size_t x = 0; x < windSize; ++x) {
+				float sum = 0.f;
+				float weightSum = 0.f;
+
+				for (int ky = -1; ky <= 1; ++ky) {
+					for (int kx = -1; kx <= 1; ++kx) {
+						ssize_t nx = x + kx;
+						ssize_t ny = y + ky;
+						if (nx >= 0 && nx < static_cast<ssize_t>(windSize) && ny >= 0 && ny < static_cast<ssize_t>(windSize)) {
+							float weight = (kx == 0 && ky == 0) ? 4.f : 1.f; // Center weight higher
+							sum += windMap[ny * windSize + nx] * weight;
+							weightSum += weight;
+						}
+					}
+				}
+
+				temp[y * windSize + x] = sum / weightSum;
+			}
+		}
+
+		windMap.swap(temp); // Swap the pointers
+	};
+
+	blurDownsampled(windMap);
+
+	// Upsample with bilinear interpolation
+	auto upsampledBlur = [windSize, this](float* windMap) {
+		for (size_t y = 0; y < m_MapSize; ++y) {
+			for (size_t x = 0; x < m_MapSize; ++x) {
+				float fx = static_cast<float>(x) * (windSize - 1) / (m_MapSize - 1);
+				float fy = static_cast<float>(y) * (windSize - 1) / (m_MapSize - 1);
+
+				int x1 = static_cast<int>(fx);
+				int y1 = static_cast<int>(fy);
+				int x2 = std::min(x1 + 1, static_cast<int>(windSize - 1));
+				int y2 = std::min(y1 + 1, static_cast<int>(windSize - 1));
+
+				float tx = fx - x1;
+				float ty = fy - y1;
+
+				// Bilinear interpolation
+				float val = (1 - tx) * (1 - ty) * windMap[y1 * windSize + x1]
+						+ tx * (1 - ty) * windMap[y1 * windSize + x2]
+						+ (1 - tx) * ty * windMap[y2 * windSize + x1]
+						+ tx * ty * windMap[y2 * windSize + x2];
+
+				m_WindStrength[y * m_MapSize + x] = val;
+			}
+		}
+	};
+	upsampledBlur(windMap.get());
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1099,9 +1103,9 @@ void WaterManager::SetMapSize(size_t size)
 	m_MapSize = size;
 	m_NeedInfoUpdate = true;
 	m_updatei0 = 0;
-	m_updatei1 = size;
+	m_updatei1 = static_cast<u32>(size);
 	m_updatej0 = 0;
-	m_updatej1 = size;
+	m_updatej1 = static_cast<u32>(size);
 
 	m_DistanceHeightmap.reset();
 	m_WindStrength.reset();

@@ -168,7 +168,7 @@ Renderer::Backend::IVertexInputLayout* CPatchRData::GetWaterSurfaceVertexInputLa
 				Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
 			// UV1 will be used only in case of bindWaterData.
 			{Renderer::Backend::VertexAttributeStream::UV1,
-				Renderer::Backend::Format::R32G32_SFLOAT,
+				Renderer::Backend::Format::R32G32B32A32_SFLOAT,
 				offsetof(SWaterVertex, m_WaterData), stride,
 				Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0}
 		}};
@@ -196,7 +196,7 @@ Renderer::Backend::IVertexInputLayout* CPatchRData::GetWaterShoreVertexInputLayo
 			offsetof(SWaterVertex, m_Position), stride,
 			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0},
 		{Renderer::Backend::VertexAttributeStream::UV1,
-			Renderer::Backend::Format::R32G32_SFLOAT,
+			Renderer::Backend::Format::R32G32B32A32_SFLOAT,
 			offsetof(SWaterVertex, m_WaterData), stride,
 			Renderer::Backend::VertexAttributeRate::PER_VERTEX, 0}
 	}};
@@ -1456,13 +1456,6 @@ void CPatchRData::BuildWater()
 			if (!nearWater)
 				continue;
 
-			// This is actually lying and I should call CcmpTerrain
-			/*if (!terrain->IsOnMap(x+x1, z+z1)
-			 && !terrain->IsOnMap(x+x1, z+z1 + water_cell_size)
-			 && !terrain->IsOnMap(x+x1 + water_cell_size, z+z1)
-			 && !terrain->IsOnMap(x+x1 + water_cell_size, z+z1 + water_cell_size))
-			 continue;*/
-
 			for (int i = 0; i < 4; ++i)
 			{
 				if (water_index_map[z+moves[i][1]][x+moves[i][0]] != 0xFFFF)
@@ -1479,7 +1472,7 @@ void CPatchRData::BuildWater()
 
 				m_WaterBounds += vertex.m_Position;
 
-				vertex.m_WaterData = CVector2D(waterManager.m_WindStrength[xx + zz*mapSize], depth);
+				vertex.m_WaterData = CVector4D(waterManager.m_DistanceHeightmap[xx + zz*mapSize], depth, waterManager.m_WindStrength[xx + zz*mapSize], 0.0);
 
 				water_index_map[z+moves[i][1]][x+moves[i][0]] = static_cast<u16>(water_vertex_data.size());
 				water_vertex_data.push_back(vertex);
@@ -1490,51 +1483,6 @@ void CPatchRData::BuildWater()
 			water_indices.push_back(water_index_map[z + moves[1][1]][x + moves[1][0]]);
 			water_indices.push_back(water_index_map[z + moves[3][1]][x + moves[3][0]]);
 			water_indices.push_back(water_index_map[z + moves[2][1]][x + moves[2][0]]);
-
-			// Check id this tile is partly over land.
-			// If so add a square over the terrain. This is necessary to render waves that go on shore.
-			if (terrain->GetVertexGroundLevel(x+px, z+pz) < waterHeight &&
-				terrain->GetVertexGroundLevel(x+px + water_cell_size, z+pz) < waterHeight &&
-				terrain->GetVertexGroundLevel(x+px, z+pz+water_cell_size) < waterHeight &&
-				terrain->GetVertexGroundLevel(x+px + water_cell_size, z+pz+water_cell_size) < waterHeight)
-				continue;
-
-			for (int i = 0; i < 4; ++i)
-			{
-				if (water_shore_index_map[z+moves[i][1]][x+moves[i][0]] != 0xFFFF)
-					continue;
-				ssize_t xx = x + px + moves[i][0];
-				ssize_t zz = z + pz + moves[i][1];
-
-				SWaterVertex vertex;
-				terrain->CalcPosition(xx,zz, vertex.m_Position);
-
-				vertex.m_Position.Y += 0.02f;
-				m_WaterBounds += vertex.m_Position;
-
-				vertex.m_WaterData = CVector2D(0.0f, -5.0f);
-
-				water_shore_index_map[z+moves[i][1]][x+moves[i][0]] = static_cast<u16>(water_vertex_data_shore.size());
-				water_vertex_data_shore.push_back(vertex);
-			}
-			if (terrain->GetTriangulationDir(x + px, z + pz))
-			{
-				water_indices_shore.push_back(water_shore_index_map[z + moves[2][1]][x + moves[2][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[0][1]][x + moves[0][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[1][1]][x + moves[1][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[1][1]][x + moves[1][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[3][1]][x + moves[3][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[2][1]][x + moves[2][0]]);
-			}
-			else
-			{
-				water_indices_shore.push_back(water_shore_index_map[z + moves[3][1]][x + moves[3][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[2][1]][x + moves[2][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[0][1]][x + moves[0][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[3][1]][x + moves[3][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[0][1]][x + moves[0][0]]);
-				water_indices_shore.push_back(water_shore_index_map[z + moves[1][1]][x + moves[1][0]]);
-			}
 		}
 	}
 

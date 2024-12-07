@@ -137,9 +137,9 @@ private:
 	{
 		// vertex position
 		CVector3D m_Position;
-		CVector2D m_WaterData;
+		CVector4D m_WaterData;
 		// pad to a power of two
-		u8 m_Padding[12];
+		u8 m_Padding[4];
 	};
 	cassert(sizeof(SWaterVertex) == 32);
 

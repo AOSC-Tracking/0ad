@@ -4,7 +4,7 @@
 		<require shaders="glsl"/>
 		<pass shader="glsl/waves">
 			<depth test="TRUE" func="always"/>
-			<blend src="src_alpha" dst="one_minus_src_alpha"/>
+			<blend src="src_alpha" dst="one"/>
 		</pass>
 	</technique>
 
@@ -12,7 +12,7 @@
 		<require shaders="spirv"/>
 		<pass shader="spirv/waves">
 			<depth test="TRUE" func="always"/>
-			<blend src="src_alpha" dst="one_minus_src_alpha"/>
+			<blend src="src_alpha" dst="one"/>
 		</pass>
 	</technique>
 </effect>

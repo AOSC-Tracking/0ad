@@ -508,6 +508,16 @@ bool TerrainRenderer::RenderFancyWater(
 		fancyWaterShader->GetBindingSlot(str_normalMap2),
 		nextNormalTexture->GetBackendTexture());
 
+	waterManager.m_FoamTex->UploadBackendTextureIfNeeded(deviceCommandContext);
+	deviceCommandContext->SetTexture(
+		fancyWaterShader->GetBindingSlot(str_foamTex),
+		waterManager.m_FoamTex->GetBackendTexture());
+
+	waterManager.m_WaveTex->UploadBackendTextureIfNeeded(deviceCommandContext);
+	deviceCommandContext->SetTexture(
+		fancyWaterShader->GetBindingSlot(str_waveTex),
+		waterManager.m_WaveTex->GetBackendTexture());
+
 	if (waterManager.m_WaterFancyEffects)
 	{
 		deviceCommandContext->SetTexture(
@@ -617,28 +627,28 @@ bool TerrainRenderer::RenderFancyWater(
 	{
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams1),
-			30.0f, 1.5f, 20.0f, 0.03f);
+			1.0f, 4.0f, 0.01f, 0.1f);
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams2),
-			0.5f, 0.0f, 0.0f, 0.0f);
+			6.0f, 0.02f, 0.0f, 0.0f);
 	}
 	else if (waterManager.m_WaterType == L"lake")
 	{
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams1),
-			8.5f, 1.5f, 15.0f, 0.03f);
+			0.3f, 1.0f, 0.05f, 0.2f);
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams2),
-			0.2f, 0.0f, 0.0f, 0.07f);
+			4.0f, 0.05f, 0.7f, 0.0f);
 	}
 	else
 	{
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams1),
-			15.0f, 0.8f, 10.0f, 0.1f);
+			0.08f, 0.7f, 0.05f, 0.2f);
 		deviceCommandContext->SetUniform(
 			fancyWaterShader->GetBindingSlot(str_waveParams2),
-			0.3f, 0.0f, 0.1f, 0.3f);
+			4.0f, 0.06f, 1.3f, 0.0f);
 	}
 
 	if (shadow)

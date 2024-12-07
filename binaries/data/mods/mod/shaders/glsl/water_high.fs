@@ -8,35 +8,105 @@
 #include "common/los_fragment.h"
 #include "common/shadows_fragment.h"
 
-vec3 getNormal(vec4 fancyeffects)
+// These control the scaling of the water normal map at high and low waviness.
+float bigScale = waveParams1.r;
+float smallScale = waveParams1.g;
+// This controls how much the normal map moves over time.
+float speedMultiplier = waveParams1.b;
+// This is the minimal amount of waviness that is applied to the water.
+float baseNormalMix = waveParams1.a;
+// This is added to the waviness factor, up until normals are fully in effect.
+float maxNormalMixAt = waveParams2.r;
+// This is used for the parallax mapping.
+float parallaxHeightScale = waveParams2.g;
+// How much base foam along the shore
+float shoreFoam = waveParams2.b;
+
+float getHeightAt(vec2 texCoords) {
+	float ww1 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap), texCoords).a;
+	float ww2 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap2), texCoords).a;
+	float wwInterp = mix(ww1, ww2, moddedTime);
+
+	// This isn't correct because we're sampling the unmodified point,
+	// but it still helps selling the effect.
+	wwInterp += SAMPLE_2D(GET_DRAW_TEXTURE_2D(waterEffectsTex), gl_FragCoord.xy / screenSize).g;
+
+	return wwInterp;
+}
+
+const float minSteps = 4.0;
+const float maxSteps = 40.0;
+
+vec2 parallaxMapping(float heightScale, vec2 texCoords, vec3 viewDir) {
+	// Transpose into left-hand tangent space
+	vec3 rayDir = vec3(
+		viewDir.x * windCosSin.x + viewDir.z * -windCosSin.y,
+		viewDir.x * windCosSin.y + viewDir.z * windCosSin.x,
+		viewDir.y
+	);
+	
+	vec2 currentTexCoords = texCoords + rayDir.xy * 0.5 * heightScale / rayDir.z;
+
+	// This requires quite a few steps to look good as the heightscale is large.
+	float numSteps = mix(maxSteps, minSteps, abs(dot(vec3(0.0, 0.0, 1.0), rayDir)));
+	numSteps /= v_eyeDistance / 100.0;
+	numSteps = clamp(numSteps, minSteps, maxSteps);
+	float stepSize = 1.0 / numSteps;
+
+	float currentDepth = 0.0;
+	float heightFromMap = getHeightAt(currentTexCoords);
+
+	vec2 deltaTexCoords = rayDir.xy * heightScale * stepSize / rayDir.z;
+
+	// Step through the heightmap
+	while (currentDepth < 1.0 - heightFromMap) {
+		currentTexCoords -= deltaTexCoords;
+		currentDepth += stepSize;
+		heightFromMap = getHeightAt(currentTexCoords);
+	}
+
+	// get texture coordinates before collision (reverse operations)
+	vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+
+	// get depth after and before collision for linear interpolation
+	float afterDepth = (1.0 - heightFromMap) - currentDepth;
+	float beforeDepth = (1.0 - getHeightAt(prevTexCoords)) - (currentDepth - stepSize);
+
+	// interpolation of texture coordinates
+	float weight = afterDepth / (afterDepth - beforeDepth);
+	vec2 finalTexCoords = prevTexCoords * weight + currentTexCoords * (1.0 - weight);
+
+	return finalTexCoords;
+}
+
+vec4 getNormal(vec3 eyeVec)
 {
-	float wavyEffect = waveParams1.r;
-	float baseScale = waveParams1.g;
-	float flattenism = waveParams1.b;
-	float baseBump = waveParams1.a;
-	float BigMovement = waveParams2.b;
-
-	// This method uses 60 animated water frames. We're blending between each two frames
 	// Scale the normal textures by waviness so that big waviness means bigger waves.
-	vec3 ww1 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap), (normalCoords.st + normalCoords.zw * BigMovement * waviness / 10.0) * (baseScale - waviness / wavyEffect)).xzy;
-	vec3 ww2 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap2), (normalCoords.st + normalCoords.zw * BigMovement * waviness / 10.0) * (baseScale - waviness / wavyEffect)).xzy;
-	vec3 wwInterp = mix(ww1, ww2, moddedTime) - vec3(0.5, 0.0, 0.5);
+	vec2 scaledNormalCoords = (normalCoords.st + normalCoords.zw * speedMultiplier * waviness / 10.0) * mix(smallScale, bigScale, waviness / 10.0);
 
-	ww1.x = wwInterp.x * windCosSin.x - wwInterp.z * windCosSin.y;
-	ww1.z = wwInterp.x * windCosSin.y + wwInterp.z * windCosSin.x;
-	ww1.y = wwInterp.y;
-
-	// Flatten them based on waviness.
-	vec3 normal = normalize(mix(vec3(0.0, 1.0, 0.0), ww1, clamp(baseBump + fwaviness / flattenism, 0.0, 1.0)));
-
+	float normalMix = clamp(baseNormalMix + fwaviness / maxNormalMixAt, 0.0, 1.0);
+	
 #if USE_FANCY_EFFECTS
-	normal = mix(vec3(0.0, 1.0, 0.0), normal, 0.5 + waterInfo.r / 2.0);
-	normal.xz = mix(normal.xz, fancyeffects.rb, fancyeffects.a / 2.0);
-#else
-	normal = mix(vec3(0.0, 1.0, 0.0), normal, 0.5 + waterInfo.r / 2.0);
+	// Use parallax mapping, improving the look at somewhat oblique angles.
+	scaledNormalCoords = parallaxMapping(mix(0.0, parallaxHeightScale, normalMix), scaledNormalCoords, -eyeVec);
 #endif
 
-	return vec3(-normal.x, normal.y, -normal.z);
+	// This method uses 60 animated water frames. We're blending between each two frames
+	vec3 ww1 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap), scaledNormalCoords).xyz * 2.0 - 1.0;
+	vec3 ww2 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap2), scaledNormalCoords).xyz * 2.0 - 1.0;
+	vec3 wwInterp = mix(ww1, ww2, moddedTime);
+
+	// Normals are now in tangent space, transform into world space
+	wwInterp = vec3(
+		wwInterp.x * windCosSin.x + wwInterp.y * -windCosSin.y,
+		wwInterp.z,
+		wwInterp.x * windCosSin.y + wwInterp.y * windCosSin.x
+	);
+
+	// Flatten them based on waviness (includes wind effect)
+	vec3 normal = normalize(mix(vec3(0.0, 1.0, 0.0), wwInterp, normalMix));
+
+	return vec4(normal.x, normal.y, normal.z, getHeightAt(scaledNormalCoords));
 }
 
 vec3 getSpecular(vec3 normal, vec3 eyeVec)
@@ -58,15 +128,17 @@ vec4 getReflection(vec3 normal, vec3 eyeVec)
 	// -If a player has refraction OR reflection, we return a reflection of the actual skybox used.
 	// -If a player has reflection enabled, we also return a reflection of actual entities where applicable.
 
-	// reflMod reduces the intensity of reflections somewhat since they kind of wash refractions out otherwise.
-	float reflMod = 0.75;
 	vec3 eye = reflect(eyeVec, normal);
-
+	
 #if USE_REFLECTION
 	float refVY = clamp(eyeVec.y * 2.0, 0.05, 1.0);
 
 	// Distort the reflection coords based on waves.
-	vec2 reflCoords = (0.5 * reflectionCoords.xy - 15.0 * normal.zx / refVY) / reflectionCoords.z + 0.5;
+	// Compute how much the normals should divert the ray, plus fudge.
+	float fac = 0.2 + dot(normal.xz, eyeVec.xz);
+	vec2 normalDistort = fac * 30.0 * normal.xz / refVY;
+
+	vec2 reflCoords = (0.5 * reflectionCoords.xy - normalDistort) / reflectionCoords.z + 0.5;
 	vec4 refTex = SAMPLE_2D(GET_DRAW_TEXTURE_2D(reflectionMap), reflCoords);
 
 	vec3 reflColor = refTex.rgb;
@@ -76,10 +148,12 @@ vec4 getReflection(vec3 normal, vec3 eyeVec)
 	if (refTex.a < 0.4)
 		reflColor = mix(SAMPLE_CUBE(GET_DRAW_TEXTURE_CUBE(skyCube), (vec4(eye, 0.0) * skyBoxRot).xyz).rgb, refTex.rgb, refTex.a);
 
-	// Let actual objects be reflected fully.
-	reflMod = max(refTex.a, 0.75);
+	// Let actual objects be reflected fully, otherwise dim them slightly
+	// to let refractions shine through.
+	float reflMod = max(refTex.a, 0.9);
 #else
 	vec3 reflColor = SAMPLE_CUBE(GET_DRAW_TEXTURE_CUBE(skyCube), (vec4(eye, 0.0) * skyBoxRot).xyz).rgb;
+	float reflMod = 0.9;
 #endif
 
 	return vec4(reflColor, reflMod);
@@ -135,7 +209,7 @@ vec4 getRefraction(vec3 normal, vec3 eyeVec, float depthLimit)
 #endif
 
 #if USE_FANCY_EFFECTS
-	depth = max(depth, depthLimit);
+	depth = depth + (depthLimit - 0.5) * 1.0;
 	if (waterDepth < 0.0)
 		depth = 0.0;
 #endif
@@ -169,6 +243,7 @@ vec4 getRefraction(vec3 normal, vec3 eyeVec, float depthLimit)
 #if USE_FANCY_EFFECTS
 	depth = max(depth, depthLimit);
 #endif
+
 	vec3 refColor = color;
 #endif
 
@@ -192,26 +267,28 @@ vec4 getRefraction(vec3 normal, vec3 eyeVec, float depthLimit)
 	return vec4(refrColor, alpha);
 }
 
-vec4 getFoam(vec4 fancyeffects, float shadow)
-{
-#if USE_FANCY_EFFECTS
-	float wavyEffect = waveParams1.r;
-	float baseScale = waveParams1.g;
-	float BigMovement = waveParams2.b;
-	vec3 foam1 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap), (normalCoords.st + normalCoords.zw * BigMovement * waviness / 10.0) * (baseScale - waviness / wavyEffect)).aaa;
-	vec3 foam2 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap2), (normalCoords.st + normalCoords.zw * BigMovement * waviness / 10.0) * (baseScale - waviness / wavyEffect)).aaa;
-	vec3 foam3 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap), normalCoords.st / 6.0 - normalCoords.zw * 0.02).aaa;
-	vec3 foam4 = SAMPLE_2D(GET_DRAW_TEXTURE_2D(normalMap2), normalCoords.st / 6.0 - normalCoords.zw * 0.02).aaa;
-	vec3 foaminterp = mix(foam1, foam2, moddedTime);
-	foaminterp *= mix(foam3, foam4, moddedTime);
+float getShoreFoam(vec3 normal) {
+	if (waterInfo.r > 10.0)
+		return 0.0;
 
-	foam1.x = abs(foaminterp.x * windCosSin.x) + abs(foaminterp.z * windCosSin.y);
+	// Shift the coordinates a little differently for the two samples.
+	vec2 shiftA = worldPos.xz / 6.0 + vec2(0.1, -0.2) * vec2(cos(time), sin(time)) * 0.3;
+	vec2 shiftB = worldPos.zx * 0.1 + vec2(0.4, 0.8) * time * 0.05;
 
-	float alpha = (fancyeffects.g + pow(foam1.x * (3.0 + waviness), 2.6 - waviness / 5.5)) * 2.0;
-	return vec4(sunColor * shadow + ambient, clamp(alpha, 0.0, 1.0));
-#else
-	return vec4(0.0);
-#endif
+	// Modulate the first layer over time for more randomness
+	float modulateA = (0.9 + 0.2 * cos(time + worldPos.x / 20.0 + worldPos.z / 20.0));
+
+	float ftx = SAMPLE_2D(GET_DRAW_TEXTURE_2D(foamTex), waviness/20.0 * normal.xz + shiftA).r * modulateA;
+	ftx *= 1.0 - SAMPLE_2D(GET_DRAW_TEXTURE_2D(foamTex), waviness/20.0 * normal.zx + shiftB).r;
+	ftx = clamp(ftx * 2.0, 0.0, 1.0);
+
+	float shoreDistFactor = mix(
+		(shoreFoam - waterInfo.r),
+		(shoreFoam - waterInfo.r * 0.38),
+		waterInfo.b *  waviness / 8.0 // Allow it to a little beyond that at really high settings
+	);
+	ftx = ftx * clamp(shoreDistFactor, 0.0, 1.0);
+	return clamp((ftx - 0.3) * 1.0, 0.0, 1.0) + ftx * 0.5;
 }
 
 void main()
@@ -224,23 +301,26 @@ void main()
 		return;
 	}
 
+	vec3 eyeVec = v_eyeVec / v_eyeDistance;
+	vec4 normal_height = getNormal(eyeVec);
+	vec3 normal = normal_height.xyz;
+
 #if USE_FANCY_EFFECTS
-	vec4 fancyeffects = SAMPLE_2D(GET_DRAW_TEXTURE_2D(waterEffectsTex), gl_FragCoord.xy / screenSize);
+	float foamFactor = SAMPLE_2D(GET_DRAW_TEXTURE_2D(waterEffectsTex), gl_FragCoord.xy / screenSize + normal.xz * 0.01).r;
+	foamFactor = mix((foamFactor - 0.3) * 2.0, (foamFactor - 0.1) * 2.0, fwaviness / 10.0);
+	foamFactor = max(foamFactor, getShoreFoam(normal));
 #else
-	vec4 fancyeffects = vec4(0.0);
+	foamFactor = getShoreFoam(normal);
 #endif
 
-	vec3 eyeVec = normalize(v_eyeVec);
-	vec3 normal = getNormal(fancyeffects);
-
-	vec4 refrColor = getRefraction(normal, eyeVec, fancyeffects.a);
+	vec4 refrColor = getRefraction(normal, eyeVec, normal_height.a);
 	vec4 reflColor = getReflection(normal, eyeVec);
 
 	// How perpendicular to the normal our view is. Used for fresnel.
 	float ndotv = clamp(dot(normal, eyeVec), 0.0, 1.0);
 
 	// Fresnel for "how much reflection vs how much refraction".
-	float fresnel = clamp(((pow(1.1 - ndotv, 2.0)) * 1.5), 0.1, 0.75); // Approximation. I'm using 1.1 and not 1.0 because it causes artifacts, see #1714
+	float fresnel = clamp(((pow(1.1 - ndotv, 2.0)) * 1.5), 0.1, 0.9); // Approximation. I'm using 1.1 and not 1.0 because it causes artifacts, see #1714
 
 	vec3 specular = getSpecular(normal, eyeVec);
 
@@ -254,9 +334,7 @@ void main()
 	vec3 color = mix(refrColor.rgb, reflColor.rgb, fresnel * reflColor.a);
 	color += shadow * specular;
 
-	vec4 foam = getFoam(fancyeffects, shadow);
-	color = clamp(mix(color, foam.rgb, foam.a), 0.0, 1.0);
-
+	color = clamp(mix(color, vec3(1.0), clamp(foamFactor, 0.0, 1.0)), 0.0, 1.0);
 	color = applyFog(color, fogColor, fogParams);
 
 	OUTPUT_FRAGMENT_SINGLE_COLOR(vec4(applyDebugColor(color * los, 1.0, refrColor.a, 0.0), refrColor.a));

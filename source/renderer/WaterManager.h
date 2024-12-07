@@ -52,7 +52,7 @@ public:
 
 	// How strong the waves are at point X. % of waviness.
 	std::unique_ptr<float[]> m_WindStrength;
-	// How far from the shore a point is. Manhattan.
+	// How far from the shore a point is.
 	std::unique_ptr<float[]> m_DistanceHeightmap;
 
 	// Waves vertex buffers
@@ -106,7 +106,7 @@ public:
 	// Reflection and refraction textures for fancy water
 	std::unique_ptr<Renderer::Backend::ITexture> m_ReflectionTexture;
 	std::unique_ptr<Renderer::Backend::ITexture> m_RefractionTexture;
-	size_t m_RefTextureSize;
+	u16 m_RefTextureSize;
 
 	// framebuffer objects
 	std::unique_ptr<Renderer::Backend::IFramebuffer> m_RefractionFramebuffer;

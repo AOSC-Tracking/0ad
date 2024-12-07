@@ -6,9 +6,7 @@ BEGIN_DRAW_TEXTURES
 	TEXTURE_2D(1, normalMap)
 	TEXTURE_2D(2, normalMap2)
 	TEXTURE_2D(3, losTex)
-#if USE_FANCY_EFFECTS
 	TEXTURE_2D(4, waterEffectsTex)
-#endif
 #if USE_REFLECTION
 	TEXTURE_2D(5, reflectionMap)
 #endif
@@ -21,6 +19,8 @@ BEGIN_DRAW_TEXTURES
 #if USE_SHADOW
 	SHADOWS_TEXTURES(8)
 #endif
+	TEXTURE_2D(9, foamTex)
+	TEXTURE_2D(10, waveTex)
 END_DRAW_TEXTURES
 
 BEGIN_DRAW_UNIFORMS
@@ -39,14 +39,14 @@ BEGIN_MATERIAL_UNIFORMS
 	UNIFORM(vec2, screenSize)
 	UNIFORM(vec3, cameraPos)
 
-	UNIFORM(float, waviness)			// "Wildness" of the reflections and refractions; choose based on texture
-	UNIFORM(vec3, color)				// color of the water
-	UNIFORM(vec3, tint)				// Tint for refraction (used to simulate particles in water)
-	UNIFORM(float, murkiness)		// Amount of tint to blend in with the refracted color
+	UNIFORM(float, waviness)  // "Wildness" of the reflections and refractions; choose based on texture
+	UNIFORM(vec3, color)      // color of the water
+	UNIFORM(vec3, tint)       // Tint for refraction (used to simulate particles in water)
+	UNIFORM(float, murkiness) // Amount of tint to blend in with the refracted color
 	UNIFORM(float, windAngle)
 
-	UNIFORM(vec4, waveParams1) // wavyEffect, BaseScale, Flattenism, Basebump
-	UNIFORM(vec4, waveParams2) // Smallintensity, Smallbase, Bigmovement, Smallmovement
+	UNIFORM(vec4, waveParams1) // See water_high.fs
+	UNIFORM(vec4, waveParams2)
 
 	// Environment settings
 	UNIFORM(vec3, ambient)
@@ -64,19 +64,20 @@ END_MATERIAL_UNIFORMS
 
 VERTEX_OUTPUT(0, vec3, worldPos);
 VERTEX_OUTPUT(1, float, waterDepth);
-VERTEX_OUTPUT(2, vec2, waterInfo);
+VERTEX_OUTPUT(2, vec4, waterInfo);
 VERTEX_OUTPUT(3, float, fwaviness);
 VERTEX_OUTPUT(4, float, moddedTime);
 VERTEX_OUTPUT(5, vec2, windCosSin);
 VERTEX_OUTPUT(6, vec3, v_eyeVec);
-VERTEX_OUTPUT(7, vec4, normalCoords);
-VERTEX_OUTPUT(8, vec2, v_los);
+VERTEX_OUTPUT(7, float, v_eyeDistance);
+VERTEX_OUTPUT(8, vec4, normalCoords);
+VERTEX_OUTPUT(9, vec2, v_los);
 #if USE_REFLECTION
-VERTEX_OUTPUT(9, vec3, reflectionCoords);
+	VERTEX_OUTPUT(10, vec3, reflectionCoords);
 #endif
 #if USE_REFRACTION
-VERTEX_OUTPUT(10, vec3, refractionCoords);
+	VERTEX_OUTPUT(11, vec3, refractionCoords);
 #endif
 #if USE_SHADOW
-SHADOWS_VERTEX_OUTPUTS(11)
+	SHADOWS_VERTEX_OUTPUTS(12)
 #endif

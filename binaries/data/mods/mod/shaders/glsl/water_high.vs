@@ -7,7 +7,7 @@
 #include "common/vertex.h"
 
 VERTEX_INPUT_ATTRIBUTE(0, vec3, a_vertex);
-VERTEX_INPUT_ATTRIBUTE(1, vec2, a_waterInfo);
+VERTEX_INPUT_ATTRIBUTE(1, vec4, a_waterInfo);
 
 void main()
 {
@@ -34,12 +34,13 @@ void main()
 
 	calculatePositionInShadowSpace(vec4(a_vertex, 1.0));
 
-	v_eyeVec = normalize(cameraPos - worldPos);
+	v_eyeVec = cameraPos - worldPos;
+	v_eyeDistance = length(v_eyeVec);
 
 	moddedTime = mod(time * 60.0, 8.0) / 8.0;
 
 	// Fix the waviness for local wind strength
-	fwaviness = waviness * (0.15 + a_waterInfo.r / 1.15);
+	fwaviness = waviness * (0.15 + a_waterInfo.b * 0.85);
 
 	OUTPUT_VERTEX_POSITION(transform * vec4(a_vertex, 1.0));
 }
