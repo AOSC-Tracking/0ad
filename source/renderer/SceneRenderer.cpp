@@ -514,16 +514,67 @@ void CSceneRenderer::ComputeRefractionCamera(CCamera& camera, const CBoundingBox
 	CMatrix3D projection;
 	if (m_ViewCamera.GetProjectionType() == CCamera::ProjectionType::PERSPECTIVE)
 	{
-		const float aspectRatio = 1.0f;
-		// Expand fov slightly since ripples can reflect parts of the scene that
-		// are slightly outside the normal camera view, and we want to avoid any
-		// noticeable edge-filtering artifacts
-		projection.SetPerspective(m_ViewCamera.GetFOV() * 1.05f, aspectRatio, m_ViewCamera.GetNearPlane(), m_ViewCamera.GetFarPlane());
-	}
-	else
-		projection = m_ViewCamera.GetProjection();
+		// Compute the world position of the 4 corners.
+		CVector3D corners[4] = {
+			m_ViewCamera.GetWorldCoordinates(0, 0, wm.m_WaterHeight),                            // Top-left
+			m_ViewCamera.GetWorldCoordinates(g_Renderer.GetWidth(), 0, wm.m_WaterHeight),        // Top-right
+			m_ViewCamera.GetWorldCoordinates(0, g_Renderer.GetHeight(), wm.m_WaterHeight),       // Bottom-left
+			m_ViewCamera.GetWorldCoordinates(g_Renderer.GetWidth(), g_Renderer.GetHeight(), wm.m_WaterHeight) // Bottom-right
+		};
 
-	camera = m_ViewCamera;
+		camera = m_ViewCamera;
+
+		// Compute a vector looking slightly more down, to fake IOR.
+		// Fake refraction by shifting it up
+		float fakeIOR = 0.7;
+
+		CVector3D currentViewDir = camera.GetOrientation().GetIn();
+		CVector3D refractedViewDir = currentViewDir * fakeIOR + CVector3D(0.0, -1.0, 0.0) * (1.f - fakeIOR);
+		refractedViewDir.Normalize();
+
+		CVector3D centerPos = camera.GetWorldCoordinates(g_Renderer.GetWidth()/2.f, g_Renderer.GetHeight()/2.f, wm.m_WaterHeight);
+
+		// Compute the rotation required to align the current view direction with the refracted view direction
+		CVector3D rotationAxis = currentViewDir.Cross(refractedViewDir);
+		float rotationAngle = acos(currentViewDir.Dot(refractedViewDir));
+
+		CQuaternion rotationMatrix;
+		rotationMatrix.FromAxisAngle(rotationAxis, rotationAngle);
+
+		// Apply the rotation about centerPos
+		camera.m_Orientation.Translate(-centerPos);
+		camera.m_Orientation.Rotate(rotationMatrix);
+		camera.m_Orientation.Translate(centerPos);
+
+		// Compute the bounding box of these points in the refraction camera's view space
+		CMatrix3D refractionViewMatrix = camera.m_Orientation.GetInverse();
+		float maxTangentX = 0.0f, maxTangentY = 0.0f;
+		for (int i = 0; i < 4; ++i)
+		{
+			CVector3D cornerInViewSpace = refractionViewMatrix.Transform(corners[i]);
+			float tangentX = fabs(cornerInViewSpace.X / cornerInViewSpace.Z);
+			float tangentY = fabs(cornerInViewSpace.Y / cornerInViewSpace.Z);
+			maxTangentX = std::max(maxTangentX, tangentX);
+			maxTangentY = std::max(maxTangentY, tangentY);
+		}
+
+		if (maxTangentY <= 0.0001f)
+			maxTangentY = 0.0001f;
+
+		// Compute new FOV and aspect ratio
+		float expandedFOV = 2.0f * atan(maxTangentY);
+		float aspectRatio = maxTangentX / maxTangentY;
+
+		projection.SetPerspective(expandedFOV, aspectRatio, m_ViewCamera.GetNearPlane(), m_ViewCamera.GetFarPlane());
+		camera.SetProjection(projection);
+	}
+	else {
+		projection = m_ViewCamera.GetProjection();
+		camera.SetProjection(projection);
+		CMatrix3D scaleMat;
+		scaleMat.SetScaling(g_Renderer.GetHeight() / static_cast<float>(std::max(1, g_Renderer.GetWidth())), 1.0f, 1.0f);
+		camera.SetProjection(scaleMat * camera.GetProjection());
+	}
 
 	// Temporarily change the camera to make it render to a view port the size of the
 	// water texture, stretch the image according to our aspect ratio so it covers
@@ -538,10 +589,6 @@ void CSceneRenderer::ComputeRefractionCamera(CCamera& camera, const CBoundingBox
 	vp.m_X = 0;
 	vp.m_Y = 0;
 	camera.SetViewPort(vp);
-	camera.SetProjection(projection);
-	CMatrix3D scaleMat;
-	scaleMat.SetScaling(g_Renderer.GetHeight() / static_cast<float>(std::max(1, g_Renderer.GetWidth())), 1.0f, 1.0f);
-	camera.SetProjection(scaleMat * camera.GetProjection());
 }
 
 // RenderReflections: render the water reflections to the reflection texture
