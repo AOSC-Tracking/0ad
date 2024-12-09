@@ -16,7 +16,8 @@ body:
     attributes:
       label: Reporting Errors
       description: >
-        For crashes and errors, you must read the [ReportingErrors](wiki/ReportingErrors) page. In
+        For crashes and errors, you must read the
+        [ReportingErrors](https://gitea.wildfiregames.com/0ad/0ad/wiki/ReportingErrors) page. In
         particular, if you are reporting a crash, you must upload crashlog files in the Description
         field below.
       options:
