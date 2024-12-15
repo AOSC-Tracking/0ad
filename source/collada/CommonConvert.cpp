@@ -59,18 +59,24 @@ FColladaErrorHandler::FColladaErrorHandler(std::string& xmlErrors_)
 	// Grab all the error output from libxml2, for useful error reporting
 	xmlSetGenericErrorFunc(&xmlErrors, &errorHandler);
 
-	FUError::AddErrorCallback(FUError::DEBUG_LEVEL, this, &FColladaErrorHandler::OnError);
-	FUError::AddErrorCallback(FUError::WARNING_LEVEL, this, &FColladaErrorHandler::OnError);
-	FUError::AddErrorCallback(FUError::ERROR_LEVEL, this, &FColladaErrorHandler::OnError);
+	FUError::AddErrorCallback(FUError::DEBUG_LEVEL, this,
+				std::bind(&FColladaErrorHandler::OnError, this,
+					std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	FUError::AddErrorCallback(FUError::WARNING_LEVEL, this,
+				std::bind(&FColladaErrorHandler::OnError, this,
+					std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	FUError::AddErrorCallback(FUError::ERROR_LEVEL, this,
+				std::bind(&FColladaErrorHandler::OnError, this,
+					std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
 FColladaErrorHandler::~FColladaErrorHandler()
 {
 	xmlSetGenericErrorFunc(NULL, NULL);
 
-	FUError::RemoveErrorCallback(FUError::DEBUG_LEVEL, this, &FColladaErrorHandler::OnError);
-	FUError::RemoveErrorCallback(FUError::WARNING_LEVEL, this, &FColladaErrorHandler::OnError);
-	FUError::RemoveErrorCallback(FUError::ERROR_LEVEL, this, &FColladaErrorHandler::OnError);
+	FUError::RemoveErrorCallback(FUError::DEBUG_LEVEL, this);
+	FUError::RemoveErrorCallback(FUError::WARNING_LEVEL, this);
+	FUError::RemoveErrorCallback(FUError::ERROR_LEVEL, this);
 }
 
 void FColladaErrorHandler::OnError(FUError::Level errorLevel, uint32 errorCode, uint32 UNUSED(lineNumber))

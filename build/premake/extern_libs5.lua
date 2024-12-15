@@ -304,17 +304,9 @@ extern_lib_defs = {
 		link_settings = function()
 			add_source_lib_paths("fcollada")
 			if os.istarget("windows") then
-				filter "Debug"
-					links { "FColladaD" }
-				filter "Release"
-					links { "FCollada" }
-				filter { }
+				links { "FCollada" }
 			else
-				filter "Debug"
-					links { "FColladaSD" }
-				filter "Release"
-					links { "FColladaSR" }
-				filter { }
+				links { "FColladaS" }
 			end
 		end,
 	},

@@ -331,7 +331,7 @@ ICONV_DIR="$(pwd)/iconv"
 
 # --------------------------------------------------------------
 echo "Building libxml2..."
-
+LIBXML2_DIR="$(pwd)/libxml2"
 (
 	LIB_VERSION="${XML2_VERSION}"
 	LIB_ARCHIVE="$LIB_VERSION.tar.xz"
@@ -341,30 +341,34 @@ echo "Building libxml2..."
 	mkdir -p libxml2
 	cd libxml2
 
-	if [ $force_rebuild = "true" ] || [ ! -e .already-built ] || [ "$(cat .already-built)" != "$LIB_VERSION" ]; then
+	if [ $force_rebuild = "true" ] || [ ! -e .already-built ] || [ "$(cat .already-built)" != "$LIB_VERSION+1" ]; then
 		INSTALL_DIR="$(pwd)"
 
 		rm -f .already-built
 		download_lib $LIB_URL $LIB_ARCHIVE || die
 
-		rm -rf $LIB_DIRECTORY bin include lib share
+		rm -rf $LIB_DIRECTORY include lib share
 		tar -xf $LIB_ARCHIVE || die
 
-		(
-			cd $LIB_DIRECTORY || die
-			./configure \
-				CFLAGS="$CFLAGS" \
-				LDFLAGS="$LDFLAGS" \
-				"$HOST_PLATFORM" \
-				--prefix="$INSTALL_DIR" \
-				--without-lzma \
-				--without-python \
-				--with-iconv="${ICONV_DIR}" \
-				--with-zlib="${ZLIB_DIR}" \
-				--enable-shared=no || die
-			make "${JOBS}" || die
-			make install || die
-		) || die "libxml2 build failed"
+		# shellcheck disable=SC2086
+		cmake -B libxml2 \
+			-S $LIB_DIRECTORY \
+			-G "Unix Makefiles" \
+			-DLIBXML2_WITH_ZLIB=ON \
+			-DLIBXML2_WITH_ICONV=ON \
+			-DLIBXML2_WITH_ISO8859X=OFF \
+			-DLIBXML2_WITH_PROGRAMS=OFF \
+			-DLIBXML2_WITH_TESTS=OFF \
+			-DLIBXML2_WITH_PYTHON=OFF \
+			-DLIBXML2_WITH_THREADS=ON \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DCMAKE_BUILD_TYPE=Release \
+			-DINSTALL_DOCS=OFF \
+			-DCMAKE_PREFIX_PATH="$ZLIB_DIR;$ICONV_DIR" \
+			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_C_FLAGS="$CFLAGS" \
+			$CMAKE_FLAGS || die "libxml2 build failed"
+		cmake --build libxml2 "${JOBS}" --target install || die "libxml2 build failed"
 
 		cp -f lib/pkgconfig/* "$PC_PATH"
 		echo "$LIB_VERSION" >.already-built
@@ -1104,14 +1108,14 @@ echo "Building libsodium..."
 
 # --------------------------------------------------------------
 echo "Building fmt..."
-
+FMT_DIR="$(pwd)/libfmt"
 (
 	LIB_DIRECTORY="fmt-$FMT_VERSION"
 	LIB_ARCHIVE="$FMT_VERSION.tar.gz"
 	LIB_URL="https://github.com/fmtlib/fmt/archive/"
 
-	mkdir -p fmt
-	cd fmt
+	mkdir -p libfmt
+	cd libfmt
 
 	if [ $force_rebuild = "true" ] || [ ! -e .already-built ] || [ "$(cat .already-built)" != "$FMT_VERSION" ]; then
 		INSTALL_DIR="$(pwd)"
@@ -1130,7 +1134,7 @@ echo "Building fmt..."
 			-DFMT_TEST=False \
 			-DFMT_DOC=False \
 			-DCMAKE_C_FLAGS="$CFLAGS" \
-			-DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+			-DCMAKE_INSTALL_PREFIX="$FMT_DIR" \
 			$CMAKE_FLAGS || die
 		cmake --build libfmt "${JOBS}" --target install || die
 
@@ -1186,7 +1190,7 @@ export ARCH CXXFLAGS CFLAGS LDFLAGS CMAKE_FLAGS JOBS
 
 # --------------------------------------------------------------
 # shellcheck disable=SC2086
-./../source/fcollada/build.sh $build_sh_options || die "FCollada build failed"
+ICONV_DIR=$ICONV_DIR ZLIB_DIR=$ZLIB_DIR FMT_DIR=$FMT_DIR LIBXML2_DIR=$LIBXML2_DIR PKG_CONFIG_PATH=$PC_PATH ./../source/fcollada/build.sh $build_sh_options || die "FCollada build failed"
 
 # --------------------------------------------------------------
 # shellcheck disable=SC2086

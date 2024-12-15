@@ -1,0 +1,124 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d6fdec4..e95f065 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,7 +18,6 @@ if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-
+ option(BUILD_SHARED_LIBS "Build FCollada as a shared library." OFF)
+ option(BUILD_UNICODE "Build FCollada in wide-character mode." OFF)
+ option(BUILD_TESTING "Build the test suite." OFF)
+@@ -30,7 +29,9 @@ mark_as_advanced(FCOLLADA_ENABLE_COVERAGE)
+ 
+ find_package(LibXml2 REQUIRED)
+ find_package(fmt REQUIRED)
+-
++find_package(Iconv REQUIRED)
++find_package(ZLIB REQUIRED)
++find_library(ICONV_LIBRARY NAMES iconv)
+ 
+ if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+     add_definitions(-D_DEBUG)
+@@ -44,14 +45,12 @@ if(USE_FMT_HEADER_ONLY)
+     add_definitions(-DFMT_HEADER_ONLY)
+ endif()
+ 
+-
+ if(NOT MSVC)
+     # clang-14 enabled it by default and on aarch64 this results
+     # in a loss of precision enough to fail the tests.
+     add_compile_options(-ffp-contract=off)
+ endif()
+ 
+-
+ set(LIBRARY_NAME FCollada)
+ if(NOT BUILD_SHARED_LIBS AND NOT MSVC)
+     set(LIBRARY_NAME "${LIBRARY_NAME}S")
+@@ -68,7 +67,10 @@ target_compile_features(FCollada PUBLIC cxx_std_17)
+ target_link_libraries(FCollada
+     LibXml2::LibXml2
+     fmt::fmt
+-    ${CMAKE_DL_LIBS})
++    ${CMAKE_DL_LIBS}
++    ${ICONV_LIBRARY}
++    ${ZLIB_LIBRARIES}
++)
+ set_target_properties(FCollada
+     PROPERTIES
+         OUTPUT_NAME "${LIBRARY_NAME}"
+@@ -76,6 +78,12 @@ set_target_properties(FCollada
+ include(GenerateExportHeader)
+ generate_export_header(FCollada)
+ 
++target_include_directories(FCollada
++    PUBLIC
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
++        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/FCollada>
++)
++
+ target_sources(FCollada
+     PUBLIC
+         FILE_SET HEADERS
+@@ -86,13 +94,21 @@ target_sources(FCollada
+             ${CMAKE_CURRENT_BINARY_DIR}/fcollada_export.h
+ )
+ 
+-
+ add_executable(FColladaTest)
+ set_target_properties(FColladaTest
+     PROPERTIES
+         EXCLUDE_FROM_ALL "$<NOT:$<BOOL:${BUILD_TESTING}>>"
+ )
+-target_link_libraries(FColladaTest FCollada)
++
++target_link_libraries(FColladaTest
++    FCollada           # Link FCollada (which already links LibXml2, fmt, etc.)
++    LibXml2::LibXml2
++    fmt::fmt
++    ${ZLIB_LIBRARIES}
++    ${ICONV_LIBRARY}   # Ensure libiconv is linked to the test
++    ${CMAKE_DL_LIBS}   # Ensure dynamic libraries are linked
++)
++
+ target_include_directories(FColladaTest PRIVATE FCollada/FColladaTest)
+ 
+ add_custom_command(
+@@ -110,7 +126,7 @@ add_test(NAME runTests
+     WORKING_DIRECTORY "$<TARGET_FILE_DIR:FColladaTest>"
+ )
+ 
+-# TODO: clumsy approch without changing the test runner
++# TODO: clumsy approach without changing the test runner
+ set(TEST_LOG "$<SHELL_PATH:$<TARGET_FILE_DIR:FColladaTest>/FColladaTestLog.txt>")
+ if(WIN32 AND NOT MINGW)
+     add_test(NAME checkTestLog
+@@ -125,12 +141,10 @@ set_tests_properties(checkTestLog PROPERTIES
+   FAIL_REGULAR_EXPRESSION "failed"
+ )
+ 
+-
+ if(FCOLLADA_ENABLE_COVERAGE)
+     include(cmake/coverage.cmake)
+ endif()
+ 
+-
+ if(BUILD_DOCS)
+     find_package(Doxygen REQUIRED)
+     doxygen_add_docs(doxygen
+@@ -141,7 +155,6 @@ if(BUILD_DOCS)
+         COMMENT "Generate html pages")
+ endif()
+ 
+-
+ install(TARGETS FCollada
+     FILE_SET HEADERS
+ )
+@@ -150,6 +163,5 @@ configure_file("fcollada.pc.in" "fcollada.pc" @ONLY)
+ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/fcollada.pc"
+     DESTINATION "lib/pkgconfig")
+ 
+-
+ add_subdirectory(FCollada)
+ add_subdirectory(FColladaPlugins)

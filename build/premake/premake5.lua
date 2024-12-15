@@ -1388,6 +1388,7 @@ function setup_collada_projects()
 	},{	-- include
 	},{	-- extern_libs
 		"fcollada",
+		"fmt",
 		"iconv",
 		"libxml2"
 	},{	-- extra_params
