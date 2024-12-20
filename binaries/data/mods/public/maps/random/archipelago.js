@@ -76,7 +76,7 @@ function* GenerateMap(mapSettings)
 
 	const islandRadius = scaleByMapSize(22, 31);
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			mapSettings.PlayerPlacement,
 			fractionToTiles(0.35),
@@ -124,7 +124,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		// PlayerTileClass marked below
 		"BaseResourceClass": clBaseResource,
-		"Walls": "towers",
+		"Walls": wallsAllowed,
 		"CityPatch": {
 			"outerTerrain": tRoadWild,
 			"innerTerrain": tRoad,

@@ -72,7 +72,7 @@ function* GenerateMap(mapSettings)
 		"stronghold": 0.33
 	}[pattern];
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			pattern,
 			fractionToTiles(teamDist),
@@ -84,6 +84,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"PlayerTileClass": clPlayer,
 		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
 		"CityPatch": {
 			"outerTerrain": tRoadWild,
 			"innerTerrain": tRoad

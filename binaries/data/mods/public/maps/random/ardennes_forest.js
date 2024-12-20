@@ -104,7 +104,7 @@ function* GenerateMap(mapSettings)
 			}
 		}
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			mapSettings.PlayerPlacement,
 			fractionToTiles(0.35),
@@ -142,6 +142,7 @@ function* GenerateMap(mapSettings)
 	placePlayerBases({
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
 		// Playerclass marked below
 		"CityPatch": {
 			"outerTerrain": tCity,

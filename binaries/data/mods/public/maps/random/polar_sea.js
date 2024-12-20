@@ -66,7 +66,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"PlayerTileClass": clPlayer,
 		"BaseResourceClass": clBaseResource,
-		"Walls": "towers",
+		"Walls": "false",
 		"CityPatch": {
 			"outerTerrain": tSecondary,
 			"innerTerrain": tSecondary

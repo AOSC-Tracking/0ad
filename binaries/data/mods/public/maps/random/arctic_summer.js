@@ -63,7 +63,7 @@ function* GenerateMap(mapSettings)
 	const clFood = g_Map.createTileClass();
 	const clBaseResource = g_Map.createTileClass();
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			mapSettings.PlayerPlacement,
 			fractionToTiles(0.35),
@@ -75,6 +75,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"PlayerTileClass": clPlayer,
 		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
 		"CityPatch": {
 			"outerTerrain": tPrimary,
 			"innerTerrain": tSecondary

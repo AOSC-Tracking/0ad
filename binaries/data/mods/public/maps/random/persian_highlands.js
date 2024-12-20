@@ -61,7 +61,7 @@ function* GenerateMap(mapSettings)
 
 	const pattern = mapSettings.PlayerPlacement;
 	const teamDist = (pattern == "river") ? .50 : .35;
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			pattern,
 			fractionToTiles(teamDist),
@@ -72,6 +72,7 @@ function* GenerateMap(mapSettings)
 	placePlayerBases({
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
 		"CityPatch": {
 			"outerTerrain": tCity,
 			"innerTerrain": tCity,

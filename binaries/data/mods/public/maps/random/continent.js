@@ -86,7 +86,7 @@ function* GenerateMap(mapSettings)
 			new TileClassPainter(clLand)
 		]);
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			mapSettings.PlayerPlacement,
 			fractionToTiles(0.25),
@@ -120,6 +120,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"PlayerTileClass": clPlayer,
 		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
 		"CityPatch": {
 			"outerTerrain": tRoadWild,
 			"innerTerrain": tRoad

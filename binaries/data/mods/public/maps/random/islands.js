@@ -138,7 +138,7 @@ function* GenerateMap(mapSettings)
 		"PlayerPlacement": [playerIDs, playerPosition],
 		// PlayerTileClass marked above
 		"BaseResourceClass": clBaseResource,
-		"Walls": "towers",
+		"Walls": "false",
 		"CityPatch": {
 			"radius": playerIslandRadius / 3,
 			"outerTerrain": tRoadWild,

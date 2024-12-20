@@ -65,7 +65,7 @@ function* GenerateMap()
 	const clBaseResource = g_Map.createTileClass();
 	const clShallows = g_Map.createTileClass();
 
-	const [playerIDs, playerPosition, playerAngle, startAngle] =
+	const [playerIDs, playerPosition, wallsAllowed, playerAngle, startAngle] =
 		playerPlacementCircle(fractionToTiles(0.35));
 
 	placePlayerBases({

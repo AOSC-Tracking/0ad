@@ -143,7 +143,7 @@ function* GenerateMap()
 		"PlayerPlacement": [sortAllPlayers(), playerPosition],
 		// PlayerTileClass is clCity here and painted below
 		"BaseResourceClass": clBaseResource,
-		"Walls": "towers",
+		"Walls": false,
 		"CityPatch": {
 			"radius": 6,
 			"outerTerrain": tGrass,

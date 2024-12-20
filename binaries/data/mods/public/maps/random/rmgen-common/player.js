@@ -641,7 +641,8 @@ function playerPlacementCircle(radius, startingAngle = undefined, center = undef
 {
 	const startAngle = startingAngle !== undefined ? startingAngle : randomAngle();
 	const [playerPosition, playerAngle] = distributePointsOnCircle(getNumPlayers(), startAngle, radius, center || g_Map.getCenter());
-	return [getPlayerIDs(), playerPosition.map(p => p.round()), playerAngle, startAngle];
+	const wallsAllowed = true;
+	return [getPlayerIDs(), playerPosition.map(p => p.round()), wallsAllowed, playerAngle, startAngle];
 }
 
 /**
@@ -703,6 +704,7 @@ function playerPlacementRiver(angle, width, center = undefined)
 	const mapSize = g_Map.getSize();
 	const centerPosition = center || g_Map.getCenter();
 	const playerPosition = [];
+	const wallsAllowed = true;
 
 	for (let i = 0; i < numPlayers; ++i)
 	{
@@ -717,7 +719,7 @@ function playerPlacementRiver(angle, width, center = undefined)
 		).rotateAround(angle, centerPosition).round();
 	}
 
-	return groupPlayersByArea(new Array(numPlayers).fill(0).map((_p, i) => i + 1), playerPosition);
+	return groupPlayersByArea(new Array(numPlayers).fill(0).map((_p, i) => i + 1), playerPosition, wallsAllowed);
 }
 
 /**
@@ -760,6 +762,7 @@ function placeLine(teamsArray, distance, groupedDistance, startAngle)
 	const numAcross = 2 * getNumPlayers() / teamsArray.length; // if its two teams, numAcross is the same as numPlayers.
 	const dist = fractionToTiles(numAcross == 2 ? 0.45 : 0.66 + (-0.01 * numAcross));
 	groupedDistance = groupedDistance * (3.00 + (-0.225 * numAcross));
+	const wallsAllowed = false;
 	for (let i = 0; i < teamsArray.length; ++i)
 	{
 		let safeDist = distance;
@@ -775,7 +778,7 @@ function placeLine(teamsArray, distance, groupedDistance, startAngle)
 		}
 	}
 
-	return [playerIDs, playerPosition];
+	return [playerIDs, playerPosition, wallsAllowed];
 }
 
 /**
@@ -792,6 +795,7 @@ function placeStronghold(teamsArray, distance, groupedDistance, startAngle)
 
 	const playerIDs = [];
 	const playerPosition = [];
+	const wallsAllowed = false;
 
 	for (let i = 0; i < teamsArray.length; ++i)
 	{
@@ -818,7 +822,7 @@ function placeStronghold(teamsArray, distance, groupedDistance, startAngle)
 		}
 	}
 
-	return [playerIDs, playerPosition];
+	return [playerIDs, playerPosition, wallsAllowed];
 }
 
 /**
@@ -836,6 +840,7 @@ function playerPlacementRandom(playerIDs, constraints = undefined)
 	const borderDistance = fractionToTiles(0.08);
 
 	const area = createArea(new MapBoundsPlacer(), undefined, new AndConstraint(constraints));
+	const wallsAllowed = true;
 
 	for (let i = 0; i < getNumPlayers(); ++i)
 	{
@@ -871,13 +876,13 @@ function playerPlacementRandom(playerIDs, constraints = undefined)
 
 		locations[i] = position;
 	}
-	return groupPlayersByArea(playerIDs, locations);
+	return groupPlayersByArea(playerIDs, locations, wallsAllowed);
 }
 
 /**
  *  Pick locations from the given set so that teams end up grouped.
  */
-function groupPlayersByArea(playerIDs, locations)
+function groupPlayersByArea(playerIDs, locations, wallsAllowed = true)
 {
 	playerIDs = sortPlayers(playerIDs);
 
@@ -916,7 +921,7 @@ function groupPlayersByArea(playerIDs, locations)
 		}
 	});
 
-	return [playerIDs, minLocations];
+	return [playerIDs, minLocations, wallsAllowed];
 }
 
 /**

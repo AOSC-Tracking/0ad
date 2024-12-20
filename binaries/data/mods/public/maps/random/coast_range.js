@@ -110,7 +110,7 @@ function* GenerateMap(mapSettings) {
 		"stronghold": 0.11
 	}[pattern];
 
-	const [playerIDs, playerPosition] =
+	const [playerIDs, playerPosition, wallsAllowed] =
 		playerPlacementByPattern(
 			pattern,
 			fractionToTiles(teamDist),
@@ -119,53 +119,54 @@ function* GenerateMap(mapSettings) {
 			undefined);
 
 	placePlayerBases({
-			"PlayerPlacement": [playerIDs, playerPosition],
-			"PlayerTileClass": clPlayer,
-			"BaseResourceClass": clBaseResource,
-			"CityPatch": {
-					"outerTerrain": tRoadWild,
-					"innerTerrain": tRoad
-			},
-			"StartingAnimal": {
-			},
-			"Berries": {
-					"template": oFruitBush
-			},
-			"Mines": {
-					"types": [
-							{ "template": oMetalLarge },
-							{ "template": oStoneLarge }
-					]
-			}, 
-			"Trees": {
-					"template": oTree1,
-					"count": 2
-			},
-			"Decoratives": {
-					"template": aGrassShort
-			}
+		"PlayerPlacement": [playerIDs, playerPosition],
+		"PlayerTileClass": clPlayer,
+		"BaseResourceClass": clBaseResource,
+		"Walls": wallsAllowed,
+		"CityPatch": {
+			"outerTerrain": tRoadWild,
+			"innerTerrain": tRoad
+		},
+		"StartingAnimal": {
+		},
+		"Berries": {
+			"template": oFruitBush
+		},
+		"Mines": {
+			"types": [
+				{ "template": oMetalLarge },
+				{ "template": oStoneLarge }
+			]
+		}, 
+		"Trees": {
+			"template": oTree1,
+			"count": 2
+		},
+		"Decoratives": {
+			"template": aGrassShort
+		}
 	});
 
 	yield 30;
 
 	for (let m = 0; m < randIntInclusive(20, 34); ++m)
 	{
-			let elevRand = randIntInclusive(4, 12);
-			createArea(
-					new ChainPlacer(
-							7, 
-							15,
-							Math.floor(scaleByMapSize(15, 20)),
-							Infinity,
-							new Vector2D(fractionToTiles(randFloat(0, 1)), fractionToTiles(randFloat(0, 1))),
-							0,
-							[Math.floor(fractionToTiles(0.01))]),
-					[
-							new LayeredPainter([tHill,tMainTerrain], [Math.floor(elevRand / 3), 40]),
-							new SmoothElevationPainter(ELEVATION_SET, elevRand, Math.floor(elevRand / 3)),
-							new TileClassPainter(clHill)
-					],
-					[avoidClasses(clPlayer, 16),stayClasses(clLand, 28)]);
+		let elevRand = randIntInclusive(4, 12);
+		createArea(
+			new ChainPlacer(
+				7, 
+				15,
+				Math.floor(scaleByMapSize(15, 20)),
+				Infinity,
+				new Vector2D(fractionToTiles(randFloat(0, 1)), fractionToTiles(randFloat(0, 1))),
+				0,
+				[Math.floor(fractionToTiles(0.01))]),
+			[
+				new LayeredPainter([tHill,tMainTerrain], [Math.floor(elevRand / 3), 40]),
+				new SmoothElevationPainter(ELEVATION_SET, elevRand, Math.floor(elevRand / 3)),
+				new TileClassPainter(clHill)
+			],
+				[avoidClasses(clPlayer, 16),stayClasses(clLand, 28)]);
 	}
 
 	const nonMountainPosition = Vector2D.add(mapCenter, new Vector2D(0, fractionToTiles(0.10)).rotate(startAngle).rotate(Math.PI)).round();

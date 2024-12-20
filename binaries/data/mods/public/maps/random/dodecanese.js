@@ -229,7 +229,7 @@ function* GenerateMap()
 		"PlayerPlacement": [playerIDs, playerPosition],
 		"BaseResourceClass": clBaseResource,
 		"PlayerTileClass": clPlayer,
-		"Walls": "towers",
+		"Walls": false,
 		"CityPatch": {
 			"radius": playerIslandRadius / 4,
 			"outerTerrain": tCityPlaza,
