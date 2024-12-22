@@ -66,30 +66,7 @@ DelayedDamage.prototype.Hit = function(data, lateness)
 		return;
 	}
 
-	let cmpProjectileManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ProjectileManager);
-
-	// Deal direct damage if we hit the main target
-	// and we could handle the attack.
-	if (PositionHelper.TestCollision(target, data.position, lateness) &&
-		AttackHelper.HandleAttackEffects(target, data))
-	{
-		cmpProjectileManager.RemoveProjectile(data.projectileId);
-		return;
-	}
-
-	// If we didn't hit the main target look for nearby units.
-	let ents = PositionHelper.EntitiesNearPoint(Vector2D.from3D(data.position), this.MISSILE_HIT_RADIUS,
-		AttackHelper.GetPlayersToDamage(data.attackerOwner, data.friendlyFire));
-
-	for (let ent of ents)
-	{
-		if (!PositionHelper.TestCollision(ent, data.position, lateness) ||
-			!AttackHelper.HandleAttackEffects(ent, data))
-			continue;
-
-		cmpProjectileManager.RemoveProjectile(data.projectileId);
-		break;
-	}
+	AttackHelper.HandleAttackEffects(target, data);
 };
 
 Engine.RegisterSystemComponentType(IID_DelayedDamage, "DelayedDamage", DelayedDamage);

@@ -40,6 +40,12 @@ public:
 	{
 		return m_Script.Call<std::vector<CStr>>("GetAttackTypes");
 	}
+
+	void ProjectileHit(JS::HandleValue value, fixed delay) const override
+	{
+		m_Script.CallVoid("ProjectileHit", value, delay);
+	}
+
 };
 
 REGISTER_COMPONENT_SCRIPT_WRAPPER(AttackScripted)

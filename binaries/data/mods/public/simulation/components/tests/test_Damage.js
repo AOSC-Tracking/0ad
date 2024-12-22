@@ -88,7 +88,6 @@ function Test_Generic()
 	});
 
 	AddMock(SYSTEM_ENTITY, IID_ProjectileManager, {
-		"RemoveProjectile": () => {},
 		"LaunchProjectileAtPoint": (ent, pos, speed, gravity) => {},
 	});
 
@@ -157,7 +156,7 @@ function Test_Generic()
 	TestDamage();
 
 	// Check for damage still being dealt if the attacker dies
-	cmpAttack.PerformAttack("Ranged", target);
+	cmpAttack.PerformAttack("Ranged", target, 0);
 	Engine.DestroyEntity(attacker);
 	TestDamage();
 
@@ -442,7 +441,6 @@ function Test_MissileHit()
 	});
 
 	AddMock(SYSTEM_ENTITY, IID_ProjectileManager, {
-		"RemoveProjectile": () => {},
 		"LaunchProjectileAtPoint": (ent, pos, speed, gravity) => {},
 	});
 

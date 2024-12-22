@@ -122,7 +122,6 @@ void CCmpUnitMotionManager::ClassInit(CComponentManager& componentManager)
 	componentManager.SubscribeToMessageType(MT_Deserialized);
 	componentManager.SubscribeToMessageType(MT_TerrainChanged);
 	componentManager.SubscribeToMessageType(MT_TurnStart);
-	componentManager.SubscribeToMessageType(MT_Update_Final);
 	componentManager.SubscribeToMessageType(MT_Update_MotionUnit);
 	componentManager.SubscribeToMessageType(MT_Update_MotionFormation);
 #if DEBUG_RENDER

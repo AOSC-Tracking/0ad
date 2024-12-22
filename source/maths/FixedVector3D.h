@@ -74,6 +74,23 @@ public:
 		return *this;
 	}
 
+	/**
+	 * Multiply by a CFixed. Likely to overflow if both numbers are large,
+	 * so we use an ugly name instead of operator* to make it obvious.
+	 */
+	CFixedVector3D Multiply(fixed n) const
+	{
+		return CFixedVector3D(X.Multiply(n), Y.Multiply(n), Z.Multiply(n));
+	}
+
+	/**
+	 * Multiply by m and divide by d. Must not have d == 0. Won't overflow if the result can be represented as a CFixed.
+	 * @see CFixed::MulDiv.
+	 */
+	CFixedVector3D MulDiv(fixed m, fixed d) const
+	{
+		return CFixedVector3D(X.MulDiv(m, d), Y.MulDiv(m, d), Z.MulDiv(m, d));
+	}
 
 	/**
 	 * Returns the length of the vector.

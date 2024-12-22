@@ -585,10 +585,9 @@ Attack.prototype.Attack = function(type, lateness)
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
 	this.lastAttacked = cmpTimer.GetTime() - lateness;
-
 	// BuildingAI has its own attack routine.
 	if (!Engine.QueryInterface(this.entity, IID_BuildingAI))
-		this.PerformAttack(type, this.target);
+		this.PerformAttack(type, this.target, lateness);
 
 	if (!this.target)
 		return;
@@ -618,7 +617,7 @@ Attack.prototype.Attack = function(type, lateness)
  * and should only be called after GetTimers().repeat msec has passed since the last
  * call to PerformAttack.
  */
-Attack.prototype.PerformAttack = function(type, target)
+Attack.prototype.PerformAttack = function(type, target, lateness)
 {
 	let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
 	if (!cmpPosition || !cmpPosition.IsInWorld())
@@ -692,7 +691,7 @@ Attack.prototype.PerformAttack = function(type, target)
 				predictedPosition = Vector3D.mult(targetVelocity, timeToTarget).add(targetPosition);
 		}
 
-		let predictedHeight = cmpTargetPosition.GetHeightAt(predictedPosition.x, predictedPosition.z);
+		let predictedHeight = cmpTargetPosition.GetHeightAt(predictedPosition.x, predictedPosition.z) + 4.0;
 
 		// Add inaccuracy based on spread.
 		let distanceModifiedSpread = ApplyValueModificationsToEntity("Attack/" + type + "/Spread", +this.template[type].Projectile.Spread, this.entity) *
@@ -732,7 +731,7 @@ Attack.prototype.PerformAttack = function(type, target)
 		}
 
 		let cmpProjectileManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ProjectileManager);
-		data.projectileId = cmpProjectileManager.LaunchProjectileAtPoint(launchPoint, data.position, horizSpeed, gravity, actorName, impactActorName, impactAnimationLifetime);
+		data.projectileId = cmpProjectileManager.LaunchProjectileAtPoint(data, launchPoint, data.position, target, lateness, horizSpeed, gravity, actorName, impactActorName, impactAnimationLifetime);
 
 		let cmpSound = Engine.QueryInterface(this.entity, IID_Sound);
 		data.attackImpactSound = cmpSound ? cmpSound.GetSoundGroup("attack_impact_" + type.toLowerCase()) : "";
@@ -746,12 +745,17 @@ Attack.prototype.PerformAttack = function(type, target)
 	}
 	if (delay)
 	{
-		let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-		cmpTimer.SetTimeout(SYSTEM_ENTITY, IID_DelayedDamage, "Hit", delay, data);
+		//let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
+		//cmpTimer.SetTimeout(SYSTEM_ENTITY, IID_DelayedDamage, "Hit", delay, data);
 	}
 	else
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_DelayedDamage).Hit(data, 0);
 };
+
+Attack.prototype.ProjectileHit = function(data, delay)
+{
+	Engine.QueryInterface(SYSTEM_ENTITY, IID_DelayedDamage).Hit(data, delay);
+}
 
 /**
  * @param {number} - The entity ID of the target to check.

@@ -492,6 +492,8 @@ public:
 	void GetUnitsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const override;
 	void GetStaticObstructionsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const override;
 
+	void HandleCollisionWith(const ObstructionSquare& square, const IObstructionTestFilter& filter, std::function<bool(entity_id_t)> handler) const override;
+
 	void SetPassabilityCircular(bool enabled) override
 	{
 		m_PassabilityCircular = enabled;
@@ -1305,6 +1307,62 @@ void CCmpObstructionManager::GetUnitsOnObstruction(const ObstructionSquare& squa
 		}
 	}
 }
+
+void CCmpObstructionManager::HandleCollisionWith(const ObstructionSquare& square, const IObstructionTestFilter& filter, std::function<bool(entity_id_t)> handler) const 
+{
+	std::vector<entity_id_t> unitShapes;
+	CFixedVector2D center(square.x, square.z);
+	CFixedVector2D expandedBox =
+	Geometry::GetHalfBoundingBox(square.u, square.v, CFixedVector2D(square.hw, square.hh)) +
+	CFixedVector2D(m_MaxClearance, m_MaxClearance);
+	m_UnitSubdivision.GetInRange(unitShapes, center - expandedBox, center + expandedBox);
+
+	for (const u32& unitShape : unitShapes)
+	{
+		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(unitShape);
+		ENSURE(it != m_UnitShapes.end());
+
+		const UnitShape& shape = it->second;
+
+		if (!filter.TestShape(UNIT_INDEX_TO_TAG(unitShape), shape.flags, shape.group, INVALID_ENTITY))
+			continue;
+
+		// Skip this object if its overestimated bounding box is completely outside the requested range
+		if (it->second.x < square.x - expandedBox.X ||
+			it->second.x > square.x + expandedBox.X ||
+			it->second.z < square.z - expandedBox.Y ||
+			it->second.z > square.z + expandedBox.Y)
+			continue;
+
+		if (handler(shape.entity))
+			return;
+	}
+
+	std::vector<entity_id_t> staticShapes;
+	m_StaticSubdivision.GetInRange(staticShapes, center - expandedBox, center + expandedBox);
+
+	for (const u32& staticShape : staticShapes)
+	{
+		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(staticShape);
+		ENSURE(it != m_StaticShapes.end());
+
+		const StaticShape& shape = it->second;
+
+		if (!filter.TestShape(STATIC_INDEX_TO_TAG(staticShape), shape.flags, shape.group, shape.group2))
+			continue;
+
+		// Skip this object if its overestimated bounding box is completely outside the requested range
+		if (shape.x < square.x - expandedBox.X ||
+			shape.x > square.x + expandedBox.X ||
+			shape.z < square.z - expandedBox.Y ||
+			shape.z > square.z + expandedBox.Y)
+			continue;
+
+		if (handler(shape.entity))
+			return;
+	}
+}
+
 
 void CCmpObstructionManager::GetStaticObstructionsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const
 {

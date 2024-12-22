@@ -28,6 +28,7 @@ class ICmpAttack : public IComponent
 public:
     virtual float GetRepeatTime(const std::string& type) const = 0;
     virtual std::vector<CStr> GetAttackTypes() const = 0;
+	virtual void ProjectileHit(JS::HandleValue value, fixed delay) const = 0;
     DECLARE_INTERFACE_TYPE(Attack)
 };
 

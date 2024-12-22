@@ -322,6 +322,8 @@ public:
 	 */
 	virtual void GetUnitsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const = 0;
 
+	virtual void HandleCollisionWith(const ObstructionSquare& square, const IObstructionTestFilter& filter, std::function<bool(entity_id_t)> handler) const = 0;
+
 	/**
 	 * Get the obstruction square representing the given shape.
 	 * @param tag tag of shape (must be valid)

@@ -381,7 +381,7 @@ BuildingAI.prototype.FireArrows = function()
 			yOrigin,
 			false))
 		{
-			cmpAttack.PerformAttack(attackType, selectedTarget);
+			cmpAttack.PerformAttack(attackType, selectedTarget, 0);
 			PlaySound("attack_" + attackType.toLowerCase(), this.entity);
 			++firedArrows;
 		}

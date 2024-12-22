@@ -43,7 +43,7 @@ public:
 	 * @param impactAnimationLifetime animation lenth
 	 * @return id of the created projectile
 	 */
-	virtual uint32_t LaunchProjectileAtPoint(const CFixedVector3D& launchPoint, const CFixedVector3D& target, fixed speed, fixed gravity, const std::wstring& actorName, const std::wstring& impactActorName, fixed impactAnimationLifetime) = 0;
+	virtual uint32_t LaunchProjectileAtPoint(JS::HandleValue data, const CFixedVector3D& launchPoint, const CFixedVector3D& target, entity_id_t targetEnt, fixed lateness, fixed speed, fixed gravity, const std::wstring& actorName, const std::wstring& impactActorName, fixed impactAnimationLifetime) = 0;
 
 	/**
      * Removes a projectile, used when the projectile has hit a target
