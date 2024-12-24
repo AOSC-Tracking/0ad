@@ -26,13 +26,16 @@ There are several ways to contact us and find more information:
 ## Running precompiled binaries on Windows
 
 A precompiled, ready-to-play development version of the game is available from
-a checkout of the `nightly-build` SVN repository. If you are using the git
-repository, you have to follow [the steps below](#compiling-the-game-from-source-code).
+a checkout of the `nightly-build` SVN repository. It is generated every night
+at 1 AM UTC. If you are using the git repository, you have to follow
+[the steps below](#compiling-the-game-from-source-code).
 
 In a checkout of the `nightly-build` SVN repository, open the "binaries\system" folder.
 
 - To launch the game: Run pyrogenesis.exe
 - To launch the map editor: Run Atlas.bat or "pyrogenesis.exe -editor"
+
+for more information, see [NightlyBuild](https://gitea.wildfiregames.com/0ad/0ad/wiki/NightlyBuild)
 
 ## Compiling the game from source code
 
