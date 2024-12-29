@@ -44,7 +44,6 @@ class CCmpPosition final : public ICmpPosition
 public:
 	static void ClassInit(CComponentManager& componentManager)
 	{
-		componentManager.SubscribeToMessageType(MT_TurnStart);
 		componentManager.SubscribeToMessageType(MT_TerrainChanged);
 		componentManager.SubscribeToMessageType(MT_WaterChanged);
 		componentManager.SubscribeToMessageType(MT_Deserialized);
@@ -55,7 +54,12 @@ public:
 		// entities that don't move
 	}
 
-	DEFAULT_COMPONENT_ALLOCATOR(Position)
+	static IComponent* Allocate(CComponentManager& mgr, const ScriptInterface&, JS::HandleValue);
+	static void Deallocate(CComponentManager& mgr, IComponent* cmp);
+	int GetComponentTypeId() const override
+	{
+		return CID_Position;
+	}
 
 	// Template state:
 
@@ -819,25 +823,6 @@ public:
 
 			break;
 		}
-		case MT_TurnStart:
-		{
-
-			m_LastInterpolatedRotX = m_InterpolatedRotX;
-			m_LastInterpolatedRotZ = m_InterpolatedRotZ;
-
-			if (m_InWorld && (m_LastX != m_X || m_LastZ != m_Z))
-				UpdateXZRotation();
-
-			// Store the positions from the turn before
-			m_PrevX = m_LastX;
-			m_PrevZ = m_LastZ;
-
-			m_LastX = m_X;
-			m_LastZ = m_Z;
-			m_LastYDifference = entity_pos_t::Zero();
-
-			break;
-		}
 		case MT_TerrainChanged:
 		case MT_WaterChanged:
 		{
@@ -850,6 +835,22 @@ public:
 			break;
 		}
 		}
+	}
+
+	void OnTurnStart() {
+		m_LastInterpolatedRotX = m_InterpolatedRotX;
+		m_LastInterpolatedRotZ = m_InterpolatedRotZ;
+
+		if (m_InWorld && (m_LastX != m_X || m_LastZ != m_Z))
+			UpdateXZRotation();
+
+		// Store the positions from the turn before
+		m_PrevX = m_LastX;
+		m_PrevZ = m_LastZ;
+
+		m_LastX = m_X;
+		m_LastZ = m_Z;
+		m_LastYDifference = entity_pos_t::Zero();
 	}
 
 private:
@@ -970,3 +971,75 @@ private:
 };
 
 REGISTER_COMPONENT_TYPE(Position)
+
+
+
+class CCmpPositionManager final : public ICmpPositionManager
+{
+private:
+	std::deque<std::optional<CCmpPosition>> m_Components;
+public:
+	static void ClassInit(CComponentManager& componentManager)
+	{
+		componentManager.SubscribeToMessageType(MT_TurnStart);
+	}
+
+	DEFAULT_COMPONENT_ALLOCATOR(PositionManager)
+
+	static std::string GetSchema()
+	{
+		return "<a:component type='system'/><empty/>";
+	}
+
+	void Init(const CParamNode& UNUSED(paramNode)) override {}
+	void Deinit() override {}
+	void Serialize(ISerializer& UNUSED(serialize)) override {}
+	void Deserialize(const CParamNode& UNUSED(paramNode), IDeserializer& UNUSED(deserialize)) override {}
+
+	IComponent* NewComponent() {
+		m_Components.emplace_back();
+		m_Components.back().emplace();
+		return &m_Components.back().value();
+	}
+
+	void DeleteComponent(IComponent* cmp) {
+		auto it = std::find_if(m_Components.begin(), m_Components.end(), [cmp](const std::optional<CCmpPosition>& cmpOpt) {
+			return cmpOpt.has_value() && cmp == &cmpOpt.value();
+		});
+		if (it != m_Components.end())
+			it->reset();
+	}
+
+	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	{
+		switch (msg.GetType())
+		{
+		case MT_TurnStart:
+		{
+			PROFILE("PositionManager::TurnStart");
+
+			for (std::optional<CCmpPosition>& cmp : m_Components)
+				if (cmp.has_value())
+					cmp->OnTurnStart();
+
+			break;
+		}
+		}
+	}
+};
+
+REGISTER_COMPONENT_TYPE(PositionManager)
+
+
+IComponent* CCmpPosition::Allocate(CComponentManager& mgr, const ScriptInterface&, JS::HandleValue)
+{
+	CmpPtr<ICmpPositionManager> cmpPosMgr(mgr.GetSystemEntity());
+	return static_cast<CCmpPositionManager*>(cmpPosMgr.operator->())->NewComponent();
+}
+
+void CCmpPosition::Deallocate(CComponentManager& mgr, IComponent* cmp)
+{
+	CmpPtr<ICmpPositionManager> cmpPosMgr(mgr.GetSystemEntity());
+	static_cast<CCmpPositionManager*>(cmpPosMgr.operator->())->DeleteComponent(cmp);
+}
+

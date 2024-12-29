@@ -28,13 +28,14 @@ class CParamNode;
 class CMessage;
 class ISerializer;
 class IDeserializer;
+class CComponentManager;
 
 class IComponent
 {
 public:
 	// Component allocation types
-	using AllocFunc = IComponent* (*)(const ScriptInterface& scriptInterface, JS::HandleValue ctor);
-	using DeallocFunc = void (*)(IComponent*);
+	using AllocFunc = IComponent* (*)(CComponentManager& mgr, const ScriptInterface& scriptInterface, JS::HandleValue ctor);
+	using DeallocFunc = void (*)(CComponentManager& mgr, IComponent*);
 
 	virtual ~IComponent();
 

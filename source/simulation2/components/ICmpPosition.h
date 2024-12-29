@@ -246,4 +246,10 @@ public:
 	DECLARE_INTERFACE_TYPE(Position)
 };
 
+class ICmpPositionManager : public IComponent
+{
+public:
+	DECLARE_INTERFACE_TYPE(PositionManager)
+};
+
 #endif // INCLUDED_ICMPPOSITION

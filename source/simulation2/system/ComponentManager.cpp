@@ -491,7 +491,7 @@ void CComponentManager::ResetState()
 		for (; eit != iit->second.end(); ++eit)
 		{
 			eit->second->Deinit();
-			m_ComponentTypesById[iit->first].dealloc(eit->second);
+			m_ComponentTypesById[iit->first].dealloc(*this, eit->second);
 		}
 	}
 
@@ -696,6 +696,7 @@ void CComponentManager::AddSystemComponents(bool skipScriptedComponents, bool sk
 	AddComponent(m_SystemEntity, CID_ObstructionManager, noParam);
 	AddComponent(m_SystemEntity, CID_ParticleManager, noParam);
 	AddComponent(m_SystemEntity, CID_Pathfinder, noParam);
+	AddComponent(m_SystemEntity, CID_PositionManager, noParam);
 	AddComponent(m_SystemEntity, CID_ProjectileManager, noParam);
 	AddComponent(m_SystemEntity, CID_RangeManager, noParam);
 	AddComponent(m_SystemEntity, CID_SoundManager, noParam);
@@ -753,7 +754,7 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 
 	// Construct the new component
 	// NB: The unit motion manager relies on components not moving in memory once constructed.
-	IComponent* component = ct.alloc(m_ScriptInterface, obj);
+	IComponent* component = ct.alloc(*this, m_ScriptInterface, obj);
 	ENSURE(component);
 
 	component->SetEntityHandle(ent);
@@ -921,7 +922,7 @@ void CComponentManager::FlushDestroyedComponents()
 				{
 					eit->second->Deinit();
 					RemoveComponentDynamicSubscriptions(eit->second);
-					m_ComponentTypesById[iit->first].dealloc(eit->second);
+					m_ComponentTypesById[iit->first].dealloc(*this, eit->second);
 					iit->second.erase(ent);
 					handle.GetComponentCache()->interfaces[m_ComponentTypesById[iit->first].iid] = NULL;
 				}

@@ -144,6 +144,9 @@ COMPONENT(PlayerScripted)
 INTERFACE(PlayerManager)
 COMPONENT(PlayerManagerScripted)
 
+INTERFACE(PositionManager)
+COMPONENT(PositionManager) // must be before Position?
+
 INTERFACE(Position)
 COMPONENT(Position) // must be before VisualActor
 

@@ -89,11 +89,11 @@ private:
 
 #define DEFAULT_SCRIPT_WRAPPER(cname) \
 	static void ClassInit(CComponentManager& UNUSED(componentManager)) { } \
-	static IComponent* Allocate(const ScriptInterface& scriptInterface, JS::HandleValue instance) \
+	static IComponent* Allocate(CComponentManager&, const ScriptInterface& scriptInterface, JS::HandleValue instance) \
 	{ \
 		return new CCmp##cname(scriptInterface, instance); \
 	} \
-	static void Deallocate(IComponent* cmp) \
+	static void Deallocate(CComponentManager&, IComponent* cmp) \
 	{ \
 		delete static_cast<CCmp##cname*> (cmp); \
 	} \

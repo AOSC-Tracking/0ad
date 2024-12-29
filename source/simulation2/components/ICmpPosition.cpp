@@ -21,6 +21,9 @@
 
 #include "simulation2/system/InterfaceScripted.h"
 
+BEGIN_INTERFACE_WRAPPER(PositionManager)
+END_INTERFACE_WRAPPER(PositionManager)
+
 BEGIN_INTERFACE_WRAPPER(Position)
 DEFINE_INTERFACE_METHOD("SetTurretParent", ICmpPosition, SetTurretParent)
 DEFINE_INTERFACE_METHOD("GetTurretParent", ICmpPosition, GetTurretParent)
