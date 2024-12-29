@@ -229,7 +229,7 @@ public:
 		Init(paramNode);
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override;
+	void HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global)) override;
 
 	void SetSelectionHighlight(const CColor& color, bool selected) override
 	{
@@ -354,9 +354,9 @@ private:
 const float CCmpSelectable::FADE_DURATION = 0.3f;
 const char* CCmpSelectable::TEXTUREBASEPATH = "art/textures/selection/";
 
-void CCmpSelectable::HandleMessage(const CMessage& msg, bool UNUSED(global))
+void CCmpSelectable::HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global))
 {
-	switch (msg.GetType())
+	switch (msgType)
 	{
 	case MT_Interpolate:
 	{

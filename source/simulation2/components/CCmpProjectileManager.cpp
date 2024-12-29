@@ -88,9 +88,9 @@ public:
 		deserialize.NumberU32_Unbounded("next id", m_NextId);
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_Interpolate:
 		{

@@ -288,9 +288,9 @@ public:
 		}
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_OwnershipChanged:
 		{

@@ -46,7 +46,7 @@ public:
 	virtual void Init(const CParamNode& paramNode) = 0;
 	virtual void Deinit() = 0;
 
-	virtual void HandleMessage(const CMessage& msg, bool global);
+	virtual void HandleMessage(const int msgType, const CMessage& msg, bool global);
 
 	CEntityHandle GetEntityHandle() const { return m_EntityHandle; }
 	void SetEntityHandle(CEntityHandle ent) { m_EntityHandle = ent; }

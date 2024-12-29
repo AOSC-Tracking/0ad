@@ -134,7 +134,7 @@ public:
 	void Serialize(ISerializer& serialize) override;
 	void Deserialize(const CParamNode& paramNode, IDeserializer& deserialize) override;
 
-	void HandleMessage(const CMessage& msg, bool global) override;
+	void HandleMessage(const int msgType, const CMessage& msg, bool global) override;
 
 	void Register(CCmpUnitMotion* component, entity_id_t ent, bool formationController) override;
 	void Unregister(entity_id_t ent) override;

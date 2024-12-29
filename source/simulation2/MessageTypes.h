@@ -32,10 +32,10 @@
 #include "ps/CStr.h"
 
 #define DEFAULT_MESSAGE_IMPL(name) \
-	virtual int GetType() const { return MT_##name; } \
-	virtual const char* GetScriptHandlerName() const { return "On" #name; } \
-	virtual const char* GetScriptGlobalHandlerName() const { return "OnGlobal" #name; } \
-	virtual JS::Value ToJSVal(const ScriptRequest& rq) const; \
+	virtual int GetType() const final { return MT_##name; } \
+	virtual const char* GetScriptHandlerName() const final { return "On" #name; } \
+	virtual const char* GetScriptGlobalHandlerName() const final { return "OnGlobal" #name; } \
+	virtual JS::Value ToJSVal(const ScriptRequest& rq) const final; \
 	static CMessage* FromJSVal(const ScriptRequest&, JS::HandleValue val);
 
 class SceneCollector;

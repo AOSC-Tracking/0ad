@@ -110,7 +110,7 @@ private:
 	{ \
 		m_Script.Deinit(); \
 	} \
-	void HandleMessage(const CMessage& msg, bool global) override \
+	void HandleMessage(const int UNUSED(msgType), const CMessage& msg, bool global) override \
 	{ \
 		m_Script.HandleMessage(msg, global); \
 	} \

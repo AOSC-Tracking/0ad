@@ -43,7 +43,7 @@ void IComponent::RegisterComponentTypeScriptWrapper(CComponentManager& mgr, EInt
 	mgr.RegisterComponentTypeScriptWrapper(iid, cid, alloc, dealloc, name, schema);
 }
 
-void IComponent::HandleMessage(const CMessage& UNUSED(msg), bool UNUSED(global))
+void IComponent::HandleMessage(const int UNUSED(msgType), const CMessage& UNUSED(msg), bool UNUSED(global))
 {
 }
 

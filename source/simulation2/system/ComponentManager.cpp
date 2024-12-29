@@ -995,6 +995,9 @@ void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 {
 	PROFILE2_IFSPIKE("Post Message", 0.0005);
 	PROFILE2_ATTR("%s", msg.GetScriptHandlerName());
+
+	const int msgType = msg.GetType();
+
 	// Send the message to components of ent, that subscribed locally to this message
 	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
 	it = m_LocalMessageSubscriptions.find(msg.GetType());
@@ -1011,7 +1014,7 @@ void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 			// Send the message to all of them
 			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.find(ent);
 			if (eit != emap->second.end())
-				eit->second->HandleMessage(msg, false);
+				eit->second->HandleMessage(msgType, msg, false);
 		}
 	}
 
@@ -1020,6 +1023,8 @@ void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 
 void CComponentManager::BroadcastMessage(const CMessage& msg)
 {
+	const int msgType = msg.GetType();
+
 	// Send the message to components of all entities that subscribed locally to this message
 	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
 	it = m_LocalMessageSubscriptions.find(msg.GetType());
@@ -1036,7 +1041,7 @@ void CComponentManager::BroadcastMessage(const CMessage& msg)
 			// Send the message to all of them
 			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
-				eit->second->HandleMessage(msg, false);
+				eit->second->HandleMessage(msgType, msg, false);
 		}
 	}
 
@@ -1048,6 +1053,8 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 	PROFILE2_IFSPIKE("SendGlobalMessage", 0.001);
 	PROFILE2_ATTR("%s", msg.GetScriptHandlerName());
 	// (Common functionality for PostMessage and BroadcastMessage)
+
+	const int msgType = msg.GetType();
 
 	// Send the message to components of all entities that subscribed globally to this message
 	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
@@ -1075,7 +1082,7 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 			// Send the message to all of them
 			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
-				eit->second->HandleMessage(msg, true);
+				eit->second->HandleMessage(msgType, msg, true);
 		}
 	}
 
@@ -1086,7 +1093,7 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 		dit->second.Flatten();
 		const std::vector<IComponent*>& dynamic = dit->second.GetComponents();
 		for (size_t i = 0; i < dynamic.size(); i++)
-			dynamic[i]->HandleMessage(msg, false);
+			dynamic[i]->HandleMessage(msgType, msg, false);
 	}
 }
 

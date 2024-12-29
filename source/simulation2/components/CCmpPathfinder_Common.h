@@ -160,7 +160,7 @@ public:
 
 	void Deserialize(const CParamNode& paramNode, IDeserializer& deserialize) override;
 
-	void HandleMessage(const CMessage& msg, bool global) override;
+	void HandleMessage(const int msgType, const CMessage& msg, bool global) override;
 
 	pass_class_t GetPassabilityClass(const std::string& name) const override;
 

@@ -69,9 +69,9 @@ public:
 		return m_x;
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& UNUSED(msg), bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_Destroy:
 			GetSimContext().GetComponentManager().DynamicSubscriptionNonsync(MT_RenderSubmit, this, false);
@@ -133,9 +133,9 @@ public:
 		return m_x;
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& UNUSED(msg), bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_Update:
 			m_x += 10;
@@ -194,9 +194,9 @@ public:
 		return m_x;
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_TurnStart:
 			m_x += 50;

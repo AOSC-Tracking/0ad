@@ -130,9 +130,9 @@ void CCmpUnitMotionManager::ClassInit(CComponentManager& componentManager)
 #endif
 }
 
-void CCmpUnitMotionManager::HandleMessage(const CMessage& msg, bool UNUSED(global))
+void CCmpUnitMotionManager::HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global))
 {
-	switch (msg.GetType())
+	switch (msgType)
 	{
 		case MT_TerrainChanged:
 		{

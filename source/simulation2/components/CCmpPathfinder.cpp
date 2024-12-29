@@ -168,9 +168,9 @@ void CCmpPathfinder::Deserialize(const CParamNode& paramNode, IDeserializer& des
 	SerializeCommon(deserialize);
 }
 
-void CCmpPathfinder::HandleMessage(const CMessage& msg, bool UNUSED(global))
+void CCmpPathfinder::HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global))
 {
-	switch (msg.GetType())
+	switch (msgType)
 	{
 	case MT_RenderSubmit:
 	{

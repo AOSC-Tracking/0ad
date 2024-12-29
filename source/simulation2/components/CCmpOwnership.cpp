@@ -64,9 +64,9 @@ public:
 		deserialize.NumberI32_Unbounded("owner", m_Owner);
 	}
 
-	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override
+	void HandleMessage(const int msgType, const CMessage& UNUSED(msg), bool UNUSED(global)) override
 	{
-		switch (msg.GetType())
+		switch (msgType)
 		{
 		case MT_Destroy:
 		{

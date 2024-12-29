@@ -151,9 +151,9 @@ void CCmpRallyPointRenderer::Deserialize(const CParamNode& paramNode, IDeseriali
 	// The dependent components have not been deserialized, so the color is loaded on first SetDisplayed
 }
 
-void CCmpRallyPointRenderer::HandleMessage(const CMessage& msg, bool UNUSED(global))
+void CCmpRallyPointRenderer::HandleMessage(const int msgType, const CMessage& msg, bool UNUSED(global))
 {
-	switch (msg.GetType())
+	switch (msgType)
 	{
 	case MT_PlayerColorChanged:
 	{
