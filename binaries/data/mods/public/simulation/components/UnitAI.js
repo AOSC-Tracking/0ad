@@ -187,6 +187,8 @@ UnitAI.prototype.notifyToCheerInRange = 30;
 
 UnitAI.prototype.DEFAULT_CAPTURE = false;
 
+UnitAI.prototoype.DELETED_SOON_STATE = "";
+
 // To reject an order, use 'return this.FinishOrder();'
 const ACCEPT_ORDER = true;
 
@@ -3683,7 +3685,7 @@ UnitAI.prototype.OnOwnershipChanged = function(msg)
 		{
 			const state = this.GetCurrentState();
 			// Special "will be destroyed soon" mode - do nothing.
-			if (state === "")
+			if (state === this.DELETED_SOON_STATE)
 				return;
 			const index = state.indexOf(".");
 			if (index != -1)
@@ -3705,15 +3707,21 @@ UnitAI.prototype.OnOwnershipChanged = function(msg)
 UnitAI.prototype.OnDestroy = function()
 {
 	// Switch to an empty state to let states execute their leave handlers.
-	this.UnitFsm.SwitchToNextState(this, "");
+	this.UnitFsm.SwitchToNextState(this, DELETED_SOON_STATE);
 
 	let cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
-	if (this.losRangeQuery)
+	if (this.losRangeQuery) {
 		cmpRangeManager.DestroyActiveQuery(this.losRangeQuery);
-	if (this.losHealRangeQuery)
+		this.losRangeQuery = undefined;
+	}
+	if (this.losHealRangeQuery) {
 		cmpRangeManager.DestroyActiveQuery(this.losHealRangeQuery);
-	if (this.losAttackRangeQuery)
+		this.losHealRangeQuery = undefined;
+	}
+	if (this.losAttackRangeQuery) {
 		cmpRangeManager.DestroyActiveQuery(this.losAttackRangeQuery);
+		this.losAttackRangeQuery = undefined;
+	}
 };
 
 UnitAI.prototype.OnVisionRangeChanged = function(msg)

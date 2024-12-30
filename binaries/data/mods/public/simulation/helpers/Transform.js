@@ -142,7 +142,8 @@ function ChangeEntityTemplate(oldEnt, newTemplate)
 	// UnitAI generally needs other components to be properly initialised.
 	let cmpUnitAI = Engine.QueryInterface(oldEnt, IID_UnitAI);
 	let cmpNewUnitAI = Engine.QueryInterface(newEnt, IID_UnitAI);
-	if (cmpUnitAI && cmpNewUnitAI)
+	// Ignore units that are about to be deleted
+	if (cmpUnitAI && cmpNewUnitAI && cmpUnitAI.GetCurrentState() !== cmpUnitAI.DELETED_SOON_STATE)
 	{
 		let pos = cmpUnitAI.GetHeldPosition();
 		if (pos)

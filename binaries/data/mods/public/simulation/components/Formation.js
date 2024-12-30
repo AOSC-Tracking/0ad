@@ -1006,10 +1006,23 @@ Formation.prototype.OnGlobalEntityRenamed = function(msg)
 	let temp = this.rearrange;
 	this.rearrange = false;
 
+	const cmpUnitAI = Engine.QueryInterface(msg.entity, IID_UnitAI);
+	const state = cmpUnitAI?.GetCurrentState();
+	const orders = cmpUnitAI?.GetOrders();
+
 	// First remove the old member to be able to reuse its position.
 	this.RemoveMembers([msg.entity], true);
 	this.AddMembers([msg.newentity]);
 	this.memberPositions[msg.newentity] = this.memberPositions[msg.entity];
+
+	// Then explicitly mark the old unitAI as destroyed soon (hack-ish).
+	Engine.QueryInterface(msg.entity, IID_UnitAI)?.OnDestroy();
+
+	const cmpNewUnitAI = Engine.QueryInterface(msg.newentity, IID_UnitAI);
+	if (state && orders && cmpNewUnitAI && state !== "FORMATIONMEMBER.IDLE") {
+		cmpNewUnitAI.SetNextState(state);
+		cmpNewUnitAI.AddOrders(orders);
+	}
 
 	this.rearrange = temp;
 };
