@@ -10,7 +10,7 @@ Loot.prototype.Schema =
 
 Loot.prototype.Serialize = null; // we have no dynamic state to save
 
-Loot.prototype.GetXp = function()
+Loot.prototype.GetXp = function(this: { template: any; entity: number }): number
 {
 	return Math.floor(ApplyValueModificationsToEntity("Loot/xp", +(this.template.xp || 0), this.entity));
 };

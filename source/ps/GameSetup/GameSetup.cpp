@@ -807,7 +807,7 @@ bool Autostart(const CmdLineArgs& args)
 	JSI_Game::RegisterScriptFunctions(rq);
 	JSI_Main::RegisterScriptFunctions(rq);
 	JSI_Simulation::RegisterScriptFunctions(rq);
-	JSI_VFS::RegisterScriptFunctions_ReadWriteAnywhere(rq);
+	JSI_VFS::RegisterScriptFunctions_ReadWriteGUI(rq);
 	JSI_Network::RegisterScriptFunctions(rq);
 
 	JS::RootedValue cmdLineArgs(rq.cx);

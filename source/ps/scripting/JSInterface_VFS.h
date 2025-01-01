@@ -24,7 +24,9 @@ class ScriptRequest;
 
 namespace JSI_VFS
 {
-	void RegisterScriptFunctions_ReadWriteAnywhere(const ScriptRequest& rq,
+void RegisterScriptFunctions_ReadWriteAnywhere(const ScriptRequest& rq,
+		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT);
+	void RegisterScriptFunctions_ReadWriteGUI(const ScriptRequest& rq,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT);
 	void RegisterScriptFunctions_ReadOnlySimulation(const ScriptRequest& rq,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT);

@@ -142,15 +142,38 @@ void CComponentManager::LoadComponentTypes()
 #undef COMPONENT
 }
 
+#include "ps/scripting/JSInterface_VFS.h"
+
+CStr8 Transpile(const std::string& filename) {
+	ScriptInterface script("Engine", "Test", g_ScriptContext);
+	ScriptRequest rq(script);
+	JSI_VFS::RegisterScriptFunctions_ReadWriteAnywhere(rq);
+
+	script.LoadGlobalScriptFile(L"node_modules/typescript/lib/typescript.js");
+	script.LoadGlobalScriptFile(L"transpile.js");
+
+	CStr8 output;
+	JS::RootedValue global(rq.cx, rq.globalValue());
+	ScriptFunction::Call(rq, global, "transpile", output, filename);
+	return output;
+}
 
 bool CComponentManager::LoadScript(const VfsPath& filename, bool hotload)
 {
 	m_CurrentlyHotloading = hotload;
-	CVFSFile file;
-	PSRETURN loadOk = file.Load(g_VFS, filename);
-	if (loadOk != PSRETURN_OK) // VFS will log the failed file and the reason
-		return false;
-	std::string content = file.DecodeUTF8(); // assume it's UTF-8
+	std::string content;
+	if (filename.Extension() == L".ts")
+	{
+		content = Transpile(filename.string8());
+	}
+	else
+	{
+		CVFSFile file;
+		PSRETURN loadOk = file.Load(g_VFS, filename);
+		if (loadOk != PSRETURN_OK) // VFS will log the failed file and the reason
+			return false;
+		content = file.DecodeUTF8(); // assume it's UTF-8
+	}
 	bool ok = m_ScriptInterface.LoadScript(filename, content);
 
 	m_CurrentlyHotloading = false;

@@ -71,6 +71,6 @@ void GuiScriptingInit(ScriptInterface& scriptInterface)
 	JSI_Simulation::RegisterScriptFunctions(rq);
 	JSI_Sound::RegisterScriptFunctions(rq);
 	JSI_UserReport::RegisterScriptFunctions(rq);
-	JSI_VFS::RegisterScriptFunctions_ReadWriteAnywhere(rq);
+	JSI_VFS::RegisterScriptFunctions_ReadWriteGUI(rq);
 	JSI_VisualReplay::RegisterScriptFunctions(rq);
 }

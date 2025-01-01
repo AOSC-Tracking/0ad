@@ -194,12 +194,14 @@ bool CSimulation2Impl::LoadScripts(CComponentManager& componentManager, std::set
 	if (vfs::GetPathnames(g_VFS, path, L"*.js", pathnames) < 0)
 		return false;
 
+	if (vfs::GetPathnames(g_VFS, path, L"*.ts", pathnames) < 0)
+		return false;
+
 	bool ok = true;
 	for (const VfsPath& scriptPath : pathnames)
 	{
 		if (loadedScripts)
 			loadedScripts->insert(scriptPath);
-		LOGMESSAGE("Loading simulation script '%s'", scriptPath.string8());
 		if (!componentManager.LoadScript(scriptPath))
 			ok = false;
 	}

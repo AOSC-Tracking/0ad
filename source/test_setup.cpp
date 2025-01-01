@@ -75,7 +75,7 @@ class MiscSetup : public CxxTest::GlobalFixture
 
 		g_Profiler2.Initialise();
 		m_ScriptEngine = new ScriptEngine;
-		g_ScriptContext = ScriptContext::CreateContext();
+		g_ScriptContext = ScriptContext::CreateContext(64 * 1024 * 1024);
 
 		taskManager.emplace();
 

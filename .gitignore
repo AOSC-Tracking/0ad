@@ -80,6 +80,14 @@ binaries/data/mods/public/gui/credits/texts/translators.json
 binaries/data/mods/**/*.bmp
 binaries/data/mods/**/*.jpg
 
+binaries/data/mods/typescript/node_modules/*
+!binaries/data/mods/typescript/node_modules/typescript/
+binaries/data/mods/typescript/node_modules/typescript/*
+!binaries/data/mods/typescript/node_modules/typescript/lib/
+binaries/data/mods/typescript/node_modules/typescript/lib/*
+!binaries/data/mods/typescript/node_modules/typescript/lib/**.d.ts
+!binaries/data/mods/typescript/node_modules/typescript/lib/typescript.js
+
 # Vulkan SPIR-V shaders
 binaries/data/mods/*/shaders/spirv
 

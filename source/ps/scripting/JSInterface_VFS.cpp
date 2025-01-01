@@ -37,6 +37,8 @@ using namespace std::literals;
 // Only allow engine compartments to read files they may be concerned about.
 namespace PathRestriction
 {
+constexpr std::array<std::wstring_view, 1> ANY{L""sv};
+
 constexpr std::array<std::wstring_view, 8> GUI{L"gui/"sv, L"simulation/"sv, L"maps/"sv, L"campaigns/"sv,
 	L"saves/campaigns/"sv, L"config/matchsettings.json"sv, L"config/matchsettings.mp.json"sv,
 	L"moddata"sv};
@@ -269,6 +271,19 @@ bool DeleteCampaignSave(const CStrW& filePath)
 }
 
 void RegisterScriptFunctions_ReadWriteAnywhere(const ScriptRequest& rq,
+	const u16 flags /*= JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT */)
+{
+	ScriptFunction::Register<&BuildDirEntList<PathRestriction::ANY>>(rq, "ListDirectoryFiles", flags);
+	ScriptFunction::Register<&FileExists<PathRestriction::ANY>>(rq, "FileExists", flags);
+	ScriptFunction::Register<&GetFileSize>(rq, "GetFileSize", flags);
+	ScriptFunction::Register<&ReadFile<PathRestriction::ANY>>(rq, "ReadFile", flags);
+	ScriptFunction::Register<&ReadFileLines<PathRestriction::ANY>>(rq, "ReadFileLines", flags);
+	ScriptFunction::Register<&ReadJSONFile<PathRestriction::ANY>>(rq, "ReadJSONFile", flags);
+	ScriptFunction::Register<&WriteJSONFile<PathRestriction::ANY>>(rq, "WriteJSONFile", flags);
+}
+
+
+void RegisterScriptFunctions_ReadWriteGUI(const ScriptRequest& rq,
 	const u16 flags /*= JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT */)
 {
 	ScriptFunction::Register<&BuildDirEntList<PathRestriction::GUI>>(rq, "ListDirectoryFiles", flags);

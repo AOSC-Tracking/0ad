@@ -1,14 +1,19 @@
 class AutoBuildable
 {
+	entity!: number;
+	template!: { Rate: string; };
+	rate!: number;
+	timer?: number;
+
 	Init()
 	{
 		this.UpdateRate();
 	}
 
 	/**
-	 * @return {number} - The rate with technologies and aura modification applied.
+	 * @return The rate with technologies and aura modification applied.
 	 */
-	GetRate()
+	GetRate(): number
 	{
 		return this.rate;
 	}
@@ -65,7 +70,7 @@ class AutoBuildable
 		cmpFoundation.Build(this.entity, this.rate);
 	}
 
-	OnValueModification(msg)
+	OnValueModification(msg: { component: string; })
 	{
 		if (msg.component != "AutoBuildable")
 			return;
@@ -73,7 +78,7 @@ class AutoBuildable
 		this.UpdateRate();
 	}
 
-	OnOwnershipChanged(msg)
+	OnOwnershipChanged(msg: { from: number, to: number })
 	{
 		if (msg.to == INVALID_PLAYER)
 			return;
