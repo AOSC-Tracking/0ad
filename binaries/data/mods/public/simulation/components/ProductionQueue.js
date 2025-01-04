@@ -1,4 +1,12 @@
-function ProductionQueue() {}
+function ProductionQueue() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {number} */
+	this.nextID;
+	/** @type {ProductionQueueItem[]} */
+	this.queue;
+}
 
 ProductionQueue.prototype.Schema =
 	"<a:help>Helps the building to train new units and research technologies.</a:help>" +
@@ -9,27 +17,34 @@ ProductionQueue.prototype.MaxQueueSize = 16;
 
 /**
  * This object represents an item in the queue.
- *
+ * @class
  * @param {number} producer - The entity ID of our producer.
  * @param {string} metadata - Optionally any metadata attached to us.
  */
-ProductionQueue.prototype.Item = function(producer, metadata)
+function ProductionQueueItem(producer, metadata)
 {
 	this.producer = producer;
 	this.metadata = metadata;
+
+	/** @type {number} */
+	this.id;
+	/** @type {EntityId | -1 | undefined} */
+	this.entity;
+	/** @type {number | -1 | undefined} */
+	this.technology;
 };
 
 /**
  * @param {string} type - The type of queue to use.
  * @param {string} templateName - The template to queue.
- * @param {number} count - The amount of template to queue. Only applicable for type == "unit".
+ * @param {number | undefined} count - The amount of template to queue. Only applicable for type == "unit".
  *
  * @return {boolean} - Whether the item could be queued.
  */
-ProductionQueue.prototype.Item.prototype.Queue = function(type, templateName, count)
+ProductionQueueItem.prototype.Queue = function(type, templateName, count)
 {
 	if (type == "unit")
-		return this.QueueEntity(templateName, count);
+		return this.QueueEntity(templateName, /** @type {number} */(count));
 
 	if (type == "technology")
 		return this.QueueTechnology(templateName);
@@ -43,7 +58,7 @@ ProductionQueue.prototype.Item.prototype.Queue = function(type, templateName, co
  * @param {number} count - The number of entities that should be produced.
  * @return {boolean} - Whether the batch was successfully created.
  */
-ProductionQueue.prototype.Item.prototype.QueueEntity = function(templateName, count)
+ProductionQueueItem.prototype.QueueEntity = function(templateName, count)
 {
 	const cmpTrainer = Engine.QueryInterface(this.producer, IID_Trainer);
 	if (!cmpTrainer)
@@ -64,7 +79,7 @@ ProductionQueue.prototype.Item.prototype.QueueEntity = function(templateName, co
  * @param {string} templateName - The name of the technology to queue.
  * @return {boolean} - Whether the technology was successfully queued.
  */
-ProductionQueue.prototype.Item.prototype.QueueTechnology = function(templateName)
+ProductionQueueItem.prototype.QueueTechnology = function(templateName)
 {
 	const cmpResearcher = Engine.QueryInterface(this.producer, IID_Researcher);
 	if (!cmpResearcher)
@@ -76,24 +91,24 @@ ProductionQueue.prototype.Item.prototype.QueueTechnology = function(templateName
 /**
  * @param {number} id - The id this item needs to get.
  */
-ProductionQueue.prototype.Item.prototype.SetID = function(id)
+ProductionQueueItem.prototype.SetID = function(id)
 {
 	this.id = id;
 };
 
-ProductionQueue.prototype.Item.prototype.Stop = function()
+ProductionQueueItem.prototype.Stop = function()
 {
-	if (this.entity > 0)
+	if (this.entity !== undefined && this.entity > 0)
 		Engine.QueryInterface(this.producer, IID_Trainer)?.StopBatch(this.entity);
 
-	if (this.technology > 0)
+	if (this.technology !== undefined && this.technology > 0)
 		Engine.QueryInterface(this.producer, IID_Researcher)?.StopResearching(this.technology);
 };
 
 /**
  * Called when the first work is performed.
  */
-ProductionQueue.prototype.Item.prototype.Start = function()
+ProductionQueueItem.prototype.Start = function()
 {
 	this.started = true;
 };
@@ -101,7 +116,7 @@ ProductionQueue.prototype.Item.prototype.Start = function()
 /**
  * @return {boolean} - Whether there is work done on the item.
  */
-ProductionQueue.prototype.Item.prototype.IsStarted = function()
+ProductionQueueItem.prototype.IsStarted = function()
 {
 	return !!this.started;
 };
@@ -109,7 +124,7 @@ ProductionQueue.prototype.Item.prototype.IsStarted = function()
 /**
  * @return {boolean} - Whether this item is finished.
  */
-ProductionQueue.prototype.Item.prototype.IsFinished = function()
+ProductionQueueItem.prototype.IsFinished = function()
 {
 	return !!this.finished;
 };
@@ -118,20 +133,20 @@ ProductionQueue.prototype.Item.prototype.IsFinished = function()
  * @param {number} allocatedTime - The time allocated to this item.
  * @return {number} - The time used for this item.
  */
-ProductionQueue.prototype.Item.prototype.Progress = function(allocatedTime)
+ProductionQueueItem.prototype.Progress = function(allocatedTime)
 {
 	if (this.paused)
 		this.Unpause();
 	if (this.entity)
 	{
-		const cmpTrainer = Engine.QueryInterface(this.producer, IID_Trainer);
+		const cmpTrainer = /** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer));
 		allocatedTime -= cmpTrainer.Progress(this.entity, allocatedTime);
 		if (!cmpTrainer.HasBatch(this.entity))
 			delete this.entity;
 	}
 	if (this.technology)
 	{
-		const cmpResearcher = Engine.QueryInterface(this.producer, IID_Researcher);
+		const cmpResearcher = /** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher));
 		allocatedTime -= cmpResearcher.Progress(this.technology, allocatedTime);
 		if (!cmpResearcher.HasItem(this.technology))
 			delete this.technology;
@@ -142,16 +157,16 @@ ProductionQueue.prototype.Item.prototype.Progress = function(allocatedTime)
 	return allocatedTime;
 };
 
-ProductionQueue.prototype.Item.prototype.Pause = function()
+ProductionQueueItem.prototype.Pause = function()
 {
 	this.paused = true;
 	if (this.entity)
-		Engine.QueryInterface(this.producer, IID_Trainer).PauseBatch(this.entity);
+		/** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer)).PauseBatch(this.entity);
 	if (this.technology)
-		Engine.QueryInterface(this.producer, IID_Researcher).PauseTechnology(this.technology);
+		/** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher)).PauseTechnology(this.technology);
 };
 
-ProductionQueue.prototype.Item.prototype.Unpause = function()
+ProductionQueueItem.prototype.Unpause = function()
 {
 	delete this.paused;
 };
@@ -159,35 +174,36 @@ ProductionQueue.prototype.Item.prototype.Unpause = function()
 /**
  * @return {boolean} - Whether the item is currently paused.
  */
-ProductionQueue.prototype.Item.prototype.IsPaused = function()
+ProductionQueueItem.prototype.IsPaused = function()
 {
 	return !!this.paused;
 };
 
 /**
- * @return {Object} - Some basic information of this item.
+ * @return {(ReturnType<Trainer["GetBatch"]>|ReturnType<Researcher["GetResearchingTechnology"]>) & {id: number, paused: boolean}} - Some basic information of this item.
  */
-ProductionQueue.prototype.Item.prototype.GetBasicInfo = function()
+ProductionQueueItem.prototype.GetBasicInfo = function()
 {
+	/** @type {any} */
 	let result;
 	if (this.technology)
-		result = Engine.QueryInterface(this.producer, IID_Researcher).GetResearchingTechnology(this.technology);
+		result = /** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher)).GetResearchingTechnology(this.technology);
 	else if (this.entity)
-		result = Engine.QueryInterface(this.producer, IID_Trainer).GetBatch(this.entity);
+		result = /** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer)).GetBatch(this.entity);
 	result.id = this.id;
 	result.paused = this.paused;
 	return result;
 };
 
 /**
- * @return {Object} - The originally queued item.
+ * @return - The originally queued item.
  */
-ProductionQueue.prototype.Item.prototype.OriginalItem = function()
+ProductionQueueItem.prototype.OriginalItem = function()
 {
 	return this.originalItem;
 };
 
-ProductionQueue.prototype.Item.prototype.SerializableAttributes = [
+ProductionQueueItem.prototype.SerializableAttributes = [
 	"entity",
 	"id",
 	"metadata",
@@ -198,19 +214,23 @@ ProductionQueue.prototype.Item.prototype.SerializableAttributes = [
 	"technology"
 ];
 
-ProductionQueue.prototype.Item.prototype.Serialize = function()
+ProductionQueueItem.prototype.Serialize = function()
 {
+	/** @type {any} */
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-expect-error
 			result[att] = this[att];
 	return result;
 };
 
-ProductionQueue.prototype.Item.prototype.Deserialize = function(data)
+/** @param {any} data */
+ProductionQueueItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-expect-error
 			this[att] = data[att];
 };
 
@@ -229,6 +249,7 @@ ProductionQueue.prototype.SerializableAttributes = [
 
 ProductionQueue.prototype.Serialize = function()
 {
+	/** @type {any} */
 	const result = {
 		"queue": []
 	};
@@ -237,22 +258,26 @@ ProductionQueue.prototype.Serialize = function()
 
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-expect-error
 			result[att] = this[att];
 
 	return result;
 };
 
+/** @param {any} data */
 ProductionQueue.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-expect-error
 			this[att] = data[att];
 
 	this.queue = [];
 
 	for (const item of data.queue)
 	{
-		const newItem = new this.Item();
+		// @ts-expect-error
+		const newItem = new ProductionQueueItem();
 		newItem.Deserialize(item);
 		this.queue.push(newItem);
 	}
@@ -282,12 +307,12 @@ ProductionQueue.prototype.DisableAutoQueue = function()
 	delete this.autoqueuing;
 };
 
-/*
+/**
  * Adds a new batch of identical units to train or a technology to research to the production queue.
  * @param {string} templateName - The template to start production on.
  * @param {string} type - The type of production (i.e. "unit" or "technology").
- * @param {number} count - The amount of units to be produced. Ignored for a tech.
- * @param {any} metadata - Optionally any metadata to be attached to the item.
+ * @param {number | undefined} count - The amount of units to be produced. Ignored for a tech.
+ * @param {any} metadata - Optionaly any metadata to be attached to the item.
  * @param {boolean} pushFront - Whether to push the item to the front of the queue and pause any item(s) currently in progress.
  *
  * @return {boolean} - Whether the addition of the item has succeeded.
@@ -299,7 +324,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 
 	if (!this.queue.length)
 	{
-		const cmpPlayer = QueryOwnerInterface(this.entity);
+		const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
 			return false;
 		const player = cmpPlayer.GetPlayerID();
@@ -317,7 +342,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	}
 	else if (this.queue.length >= this.MaxQueueSize)
 	{
-		const cmpPlayer = QueryOwnerInterface(this.entity);
+		const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
 			return false;
 		const player = cmpPlayer.GetPlayerID();
@@ -330,7 +355,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 		return false;
 	}
 
-	const item = new this.Item(this.entity, metadata);
+	const item = new ProductionQueueItem(this.entity, metadata);
 	if (!item.Queue(type, templateName, count))
 		return false;
 
@@ -343,15 +368,15 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	else
 		this.queue.push(item);
 
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+	Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 	if (!this.timer)
 		this.StartTimer();
 	return true;
 };
 
-/*
- * @param {number} - The ID of the item to remove from the queue.
+/**
+ * @param {number} id - The ID of the item to remove from the queue.
  */
 ProductionQueue.prototype.RemoveItem = function(id)
 {
@@ -361,12 +386,13 @@ ProductionQueue.prototype.RemoveItem = function(id)
 
 	this.queue.splice(itemIndex, 1)[0].Stop();
 
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+	Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 	if (!this.queue.length)
 		this.StopTimer();
 };
 
+/** @param {string} name */
 ProductionQueue.prototype.SetAnimation = function(name)
 {
 	let cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -393,9 +419,9 @@ ProductionQueue.prototype.ResetQueue = function()
 	this.DisableAutoQueue();
 };
 
-/*
+/**
  * Increments progress on the first item in the production queue.
- * @param {Object} data - Unused in this case.
+ * @param {unknown} data - Unused in this case.
  * @param {number} lateness - The time passed since the expected time to fire the function.
  */
 ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
@@ -423,12 +449,12 @@ ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
 		time -= item.Progress(time);
 		if (!item.IsFinished())
 		{
-			Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+			Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 			return;
 		}
 
 		this.queue.shift();
-		Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+		Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 		// If autoqueuing, push a new unit on the queue immediately,
 		// but don't start right away. This 'wastes' some time, making
@@ -446,7 +472,7 @@ ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
 				this.DisableAutoQueue();
 				const cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 				cmpGUIInterface.PushNotification({
-					"players": [QueryOwnerInterface(this.entity).GetPlayerID()],
+					"players": [/** @type {Player} */(QueryOwnerInterface(this.entity, IID_Player)).GetPlayerID()],
 					"message": markForTranslation("Could not auto-queue unit, de-activating."),
 					"translateMessage": true
 				});
@@ -505,6 +531,7 @@ ProductionQueue.prototype.HasQueuedProduction = function()
 	return this.queue.length > 0;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 ProductionQueue.prototype.OnOwnershipChanged = function(msg)
 {
 	// Reset the production queue whenever the owner changes.
@@ -515,6 +542,7 @@ ProductionQueue.prototype.OnOwnershipChanged = function(msg)
 	this.ResetQueue();
 };
 
+/** @param {MessageGarrisonedStateChanged} msg */
 ProductionQueue.prototype.OnGarrisonedStateChanged = function(msg)
 {
 	if (msg.holderID != INVALID_ENTITY)

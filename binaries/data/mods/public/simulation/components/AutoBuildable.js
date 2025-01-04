@@ -1,5 +1,17 @@
 class AutoBuildable
 {
+	/** @ts-expect-error; @type {EntityId} */
+	entity;
+
+	/** @ts-expect-error; @type {{ Rate: string }} */
+	template;
+
+	/** @ts-expect-error; @type {number} */
+	rate;
+
+	/** @type {number | undefined} */
+	timer;
+
 	Init()
 	{
 		this.UpdateRate();
@@ -65,6 +77,7 @@ class AutoBuildable
 		cmpFoundation.Build(this.entity, this.rate);
 	}
 
+	/** @param {MessageValueModification} msg */
 	OnValueModification(msg)
 	{
 		if (msg.component != "AutoBuildable")
@@ -73,6 +86,7 @@ class AutoBuildable
 		this.UpdateRate();
 	}
 
+	/** @param {MessageOwnershipChanged} msg */
 	OnOwnershipChanged(msg)
 	{
 		if (msg.to == INVALID_PLAYER)

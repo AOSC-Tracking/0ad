@@ -1,4 +1,14 @@
-function TriggerPoint() {}
+function TriggerPoint() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{Reference?: string}} */
+	this.template;
+
+	/** @type {Record<string, EntityId[]>} */
+	this.currentCollections;
+	/** @type {Record<number, string>} */
+	this.triggers;
+}
 
 TriggerPoint.prototype.Schema =
 	"<optional>" +
@@ -20,7 +30,7 @@ TriggerPoint.prototype.Init = function()
 
 TriggerPoint.prototype.OnDestroy = function()
 {
-	if (this.template && this.template.EntityReference)
+	if (this.template && this.template.Reference)
 	{
 		var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 		cmpTrigger.RemoveRegisteredTriggerPoint(this.template.Reference, this.entity);
@@ -28,8 +38,8 @@ TriggerPoint.prototype.OnDestroy = function()
 };
 
 /**
- * @param name Name of the trigger.
- * @param data The data is an object containing information for the range query
+ * @param {string} name Name of the trigger.
+ * @param {TriggerData} data The data is an object containing information for the range query
  * Some of the data has sendible defaults (mentionned next to the object)
  * data.players = [1,2,3,...]  * list of player ids
  * data.minRange = 0           * Minimum range for the query
@@ -42,6 +52,7 @@ TriggerPoint.prototype.RegisterRangeTrigger = function(name, data)
 	var players = data.players || Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetAllPlayers();
 	var minRange = data.minRange || 0;
 	var maxRange = data.maxRange || -1;
+	/** @type {IID | 0} */
 	var cid = data.requiredComponent || 0;
 
 	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
@@ -52,6 +63,7 @@ TriggerPoint.prototype.RegisterRangeTrigger = function(name, data)
 	return tag;
 };
 
+/** @param {MessageRangeUpdate} msg */
 TriggerPoint.prototype.OnRangeUpdate = function(msg)
 {
 	var collection = this.currentCollections[msg.tag];
@@ -68,9 +80,11 @@ TriggerPoint.prototype.OnRangeUpdate = function(msg)
 	for (var entity of msg.added)
 		collection.push(entity);
 
-	var r = { "currentCollection": collection.slice() };
-	r.added = msg.added;
-	r.removed = msg.removed;
+	var r = {
+		currentCollection: collection.slice(),
+		added: msg.added,
+		removed: msg.removed
+	};
 	var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 	cmpTrigger.CallTrigger("OnRange", this.triggers[msg.tag], r);
 };

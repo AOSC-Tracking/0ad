@@ -6,6 +6,7 @@ Wonder.prototype.Init = function()
 {
 };
 
+// @ts-ignore
 Wonder.prototype.Serialize = null;
 
 Engine.RegisterComponentType(IID_Wonder, "Wonder", Wonder);

@@ -2,6 +2,7 @@
 /**
  * Used to initialize non-player settings relevant to the map, like
  * default stance and victory conditions. DO NOT load players here
+ * @param {Record<string, any>} settings
  */
 function LoadMapSettings(settings)
 {
@@ -11,7 +12,7 @@ function LoadMapSettings(settings)
 	if (settings.DefaultStance)
 		for (const ent of Engine.GetEntitiesWithInterface(IID_UnitAI))
 		{
-			const cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
+			const cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(ent, IID_UnitAI));
 			cmpUnitAI.SwitchToStance(settings.DefaultStance);
 		}
 
@@ -38,16 +39,21 @@ function LoadMapSettings(settings)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(settings.TriggerDifficulty);
 	else if (settings.SupportedTriggerDifficulties)	// used by Atlas and autostart games
 	{
+		/** @ts-expect-error; @type {Record<string, any>[]} */
 		let difficulties = Engine.ReadJSONFile("simulation/data/settings/trigger_difficulties.json").Data;
 		let defaultDiff;
 		if (settings.SupportedTriggerDifficulties.Default)
-			defaultDiff = difficulties.find(d => d.Name == settings.SupportedTriggerDifficulties.Default).Difficulty;
+			defaultDiff = difficulties.find(d => d.Name == settings.SupportedTriggerDifficulties.Default)?.Difficulty;
 		else
-			defaultDiff = difficulties.find(d => d.Default).Difficulty;
-		Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(defaultDiff);
+			defaultDiff = difficulties.find(d => d.Default)?.Difficulty;
+		if (defaultDiff === undefined)
+			warn("No default trigger difficulty found!");
+		else
+			Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(defaultDiff);
 	}
 
 	const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
+	/** @type {VictorySettings} */
 	const gameSettings = { "victoryConditions": clone(settings.VictoryConditions) };
 	if (gameSettings.victoryConditions.indexOf("capture_the_relic") != -1)
 	{

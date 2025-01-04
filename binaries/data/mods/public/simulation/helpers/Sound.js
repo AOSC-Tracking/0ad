@@ -1,7 +1,8 @@
 /**
  * Simple wrapper function for playing sounds that are associated with entities
- * @param name Typically one of 'walk', 'run', 'attack', 'death', 'build',
+ * @param {string} name Typically one of 'walk', 'run', 'attack', 'death', 'build',
  *     'gather_fruit', 'gather_grain', 'gather_wood', 'gather_stone', 'gather_metal'
+ * @param {EntityId} ent
  */
 function PlaySound(name, ent)
 {

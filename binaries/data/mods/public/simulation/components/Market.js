@@ -1,4 +1,14 @@
-function Market() {}
+function Market() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{TradeType: string, InternationalBonus: string}} */
+	this.template;
+
+	/** @type {Set<EntityId>} */
+	this.traders;
+	/** @type {Set<"land"|"naval">} */
+	this.tradeType;
+}
 
 Market.prototype.Schema =
 	"<element name='TradeType' a:help='Specifies the type of possible trade route (land or naval).'>" +
@@ -18,14 +28,17 @@ Market.prototype.Schema =
 Market.prototype.Init = function()
 {
 	this.traders = new Set();	// list of traders with a route on this market
+	// @ts-expect-error enforced by schema
 	this.tradeType = new Set(this.template.TradeType.split(/\s+/));
 };
 
+/** @param {EntityId} ent */
 Market.prototype.AddTrader = function(ent)
 {
 	this.traders.add(ent);
 };
 
+/** @param {EntityId} ent */
 Market.prototype.RemoveTrader = function(ent)
 {
 	this.traders.delete(ent);
@@ -36,6 +49,7 @@ Market.prototype.GetInternationalBonus = function()
 	return ApplyValueModificationsToEntity("Market/InternationalBonus", +this.template.InternationalBonus, this.entity);
 };
 
+/** @param {("land" | "naval")} type */
 Market.prototype.HasType = function(type)
 {
 	return this.tradeType.has(type);
@@ -54,8 +68,8 @@ Market.prototype.GetTraders = function()
 /**
  * Check if the traders attached to this market can still trade with it
  * Warning: traders currently trading with a mirage of this market are dealt with in Mirage.js
+ * @param {boolean} onDestruction
  */
-
 Market.prototype.UpdateTraders = function(onDestruction)
 {
 	for (let trader of this.traders)
@@ -74,14 +88,19 @@ Market.prototype.UpdateTraders = function(onDestruction)
 	}
 };
 
+/**
+ * @param {EntityId} secondMarket
+ * @param {{ GainMultiplier: string }} traderTemplate
+ * @param {EntityId} trader
+ */
 Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, trader)
 {
 	let cmpMarket2 = QueryMiragedInterface(secondMarket, IID_Market);
 	if (!cmpMarket2)
 		return null;
 
-	let cmpMarket1Player = QueryOwnerInterface(this.entity);
-	let cmpMarket2Player = QueryOwnerInterface(secondMarket);
+	let cmpMarket1Player = QueryOwnerInterface(this.entity, IID_Player);
+	let cmpMarket2Player = QueryOwnerInterface(secondMarket, IID_Player);
 	if (!cmpMarket1Player || !cmpMarket2Player)
 		return null;
 
@@ -107,7 +126,7 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	{
 		if (!traderTemplate || !traderTemplate.GainMultiplier)
 			return null;
-		gainMultiplier *= traderTemplate.GainMultiplier;
+		gainMultiplier *= +traderTemplate.GainMultiplier;
 	}
 
 	let gain = {};
@@ -122,7 +141,7 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	gain.market1Owner = cmpMarket1Player.GetPlayerID();
 	gain.market2Owner = cmpMarket2Player.GetPlayerID();
 	// If trader undefined, the trader owner is supposed to be the same as the first market.
-	let cmpPlayer = trader ? QueryOwnerInterface(trader) : cmpMarket1Player;
+	let cmpPlayer = trader ? QueryOwnerInterface(trader, IID_Player) : cmpMarket1Player;
 	if (!cmpPlayer)
 		return null;
 	gain.traderOwner = cmpPlayer.GetPlayerID();
@@ -138,17 +157,41 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	return gain;
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Market.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.UpdateTraders(false);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Market.prototype.OnOwnershipChanged = function(msg)
 {
 	this.UpdateTraders(msg.to == INVALID_PLAYER);
 };
 
-function MarketMirage() {}
+function MarketMirage() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {EntityId} */
+	this.parent;
+	/** @type {number} */
+	this.player;
+
+	/** @type {Set<"land" | "naval">} */
+	this.marketType;
+
+	/** @type {Set<EntityId>} */
+	this.traders;
+
+	/** @type {number} */
+	this.internationalBonus;
+}
+/**
+ * @param {Market} cmpMarket
+ * @param {EntityId} entity
+ * @param {EntityId} parent
+ * @param {number} player
+ */
 MarketMirage.prototype.Init = function(cmpMarket, entity, parent, player)
 {
 	this.entity = entity;
@@ -175,12 +218,16 @@ MarketMirage.prototype.Init = function(cmpMarket, entity, parent, player)
 	this.internationalBonus = cmpMarket.GetInternationalBonus();
 };
 
+/** @type {Market["HasType"]} */
 MarketMirage.prototype.HasType = function(type) { return this.marketType.has(type); };
+/** @type {Market["GetInternationalBonus"]} */
 MarketMirage.prototype.GetInternationalBonus = function() { return this.internationalBonus; };
+/** @type {Market["AddTrader"]} */
 MarketMirage.prototype.AddTrader = function(trader) { this.traders.add(trader); };
+/** @type {Market["RemoveTrader"]} */
 MarketMirage.prototype.RemoveTrader = function(trader) { this.traders.delete(trader); };
 
-MarketMirage.prototype.UpdateTraders = function(msg)
+MarketMirage.prototype.UpdateTraders = function()
 {
 	let cmpMarket = Engine.QueryInterface(this.parent, IID_Market);
 	if (!cmpMarket)	// The parent market does not exist anymore
@@ -210,6 +257,10 @@ MarketMirage.prototype.CalculateTraderGain = Market.prototype.CalculateTraderGai
 
 Engine.RegisterGlobal("MarketMirage", MarketMirage);
 
+/**
+ * @param {EntityId} mirageID
+ * @param {number} miragePlayer
+ */
 Market.prototype.Mirage = function(mirageID, miragePlayer)
 {
 	let mirage = new MarketMirage();

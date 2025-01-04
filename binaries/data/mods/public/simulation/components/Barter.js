@@ -1,4 +1,10 @@
-function Barter() {}
+function Barter() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Record<string, number>} */
+	this.priceDifferences;
+}
 
 Barter.prototype.Schema =
 	"<a:component type='system'/><empty/>";
@@ -43,23 +49,31 @@ Barter.prototype.RESTORE_TIMER_INTERVAL = 5000;
 Barter.prototype.Init = function()
 {
 	this.priceDifferences = {};
-	for (const resource of Resources.GetBarterableCodes())
+	for (const resource of g_Resources.GetBarterableCodes())
 		this.priceDifferences[resource] = 0;
 };
 
+/** @param {Player} cmpPlayer */
 Barter.prototype.GetPrices = function(cmpPlayer)
 {
+	/** @type {{ buy: Record<GenericResName, number>, sell: Record<GenericResName, number> }} */
 	const prices = { "buy": {}, "sell": {} };
 	const multiplier = cmpPlayer.GetBarterMultiplier();
 	for (const resource in this.priceDifferences)
 	{
-		const truePrice = Resources.GetResource(resource).truePrice;
+		const truePrice = g_Resources.GetResource(resource).truePrice;
 		prices.buy[resource] = truePrice * (this.DEAL_AMOUNT + this.CONSTANT_DIFFERENCE + this.priceDifferences[resource]) * multiplier.buy[resource] / this.DEAL_AMOUNT;
 		prices.sell[resource] = truePrice * (this.DEAL_AMOUNT - this.CONSTANT_DIFFERENCE + this.priceDifferences[resource]) * multiplier.sell[resource] / this.DEAL_AMOUNT;
 	}
 	return prices;
 };
 
+/**
+ * @param {number} playerID
+ * @param {GenericResName} resourceToSell
+ * @param {GenericResName} resourceToBuy
+ * @param {number} amount
+ */
 Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resourceToBuy, amount)
 {
 	if (amount <= 0)
@@ -83,7 +97,7 @@ Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resource
 	if (amount !== this.DEAL_AMOUNT && amount !== (this.BATCH_SIZE * this.DEAL_AMOUNT))
 		return;
 
-	const cmpPlayer = QueryPlayerIDInterface(playerID);
+	const cmpPlayer = QueryPlayerIDInterface(playerID, IID_Player);
 	if (!cmpPlayer?.CanBarter())
 		return;
 
@@ -127,6 +141,7 @@ Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resource
 		this.restoreTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).SetInterval(this.entity, IID_Barter, "ProgressTimeout", this.RESTORE_TIMER_INTERVAL, this.RESTORE_TIMER_INTERVAL, null);
 };
 
+/** @param {null} data */
 Barter.prototype.ProgressTimeout = function(data)
 {
 	let needRestore = false;
@@ -141,7 +156,7 @@ Barter.prototype.ProgressTimeout = function(data)
 
 	if (!needRestore)
 	{
-		Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).CancelTimer(this.restoreTimer);
+		Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).CancelTimer(/** @type {number} */(this.restoreTimer));
 		delete this.restoreTimer;
 	}
 };

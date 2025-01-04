@@ -1,8 +1,26 @@
+// @ts-expect-error (redeclared)
 const VIS_HIDDEN = 0;
+// @ts-expect-error (redeclared)
 const VIS_FOGGED = 1;
+// @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Fogging() {}
+function Fogging() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {boolean} */
+	this.activated;
+
+	/** @type {EntityId[]} */
+	this.mirages;
+
+	/** @type {boolean[]} */
+	this.miraged;
+
+	/** @type {boolean[]} */
+	this.seen;
+}
 
 Fogging.prototype.Schema =
 	"<a:help>Allows this entity to be replaced by mirage entities in the fog-of-war.</a:help>" +
@@ -12,7 +30,7 @@ Fogging.prototype.Schema =
  * The components that we want to mirage when present.
  * Assumes that a function "Mirage()" is present.
  */
-Fogging.prototype.componentsToMirage = [
+Fogging.prototype.componentsToMirage = /** @type {const} */([
 	IID_Capturable,
 	IID_Foundation,
 	IID_Health,
@@ -21,7 +39,7 @@ Fogging.prototype.componentsToMirage = [
 	IID_Repairable,
 	IID_Resistance,
 	IID_ResourceSupply
-];
+]);
 
 Fogging.prototype.Init = function()
 {
@@ -60,6 +78,9 @@ Fogging.prototype.IsActivated = function()
 	return this.activated;
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.LoadMirage = function(player)
 {
 	if (!this.activated)
@@ -134,6 +155,7 @@ Fogging.prototype.LoadMirage = function(player)
 /**
  * Should only be called for entities that are currently explored, but not visible or
  * things will 'bug out' (double entities and such).
+ * @param {number} player
  */
 Fogging.prototype.ForceMiraging = function(player)
 {
@@ -145,6 +167,9 @@ Fogging.prototype.ForceMiraging = function(player)
 	this.LoadMirage(player);
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.IsMiraged = function(player)
 {
 	if (player < 0 || player >= this.mirages.length)
@@ -153,6 +178,9 @@ Fogging.prototype.IsMiraged = function(player)
 	return this.miraged[player];
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.GetMirage = function(player)
 {
 	if (player < 0 || player >= this.mirages.length)
@@ -161,6 +189,9 @@ Fogging.prototype.GetMirage = function(player)
 	return this.mirages[player];
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.WasSeen = function(player)
 {
 	if (player < 0 || player >= this.seen.length)
@@ -169,6 +200,7 @@ Fogging.prototype.WasSeen = function(player)
 	return this.seen[player];
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Fogging.prototype.OnOwnershipChanged = function(msg)
 {
 	// Always activate fogging for non-Gaia entities.
@@ -198,6 +230,7 @@ Fogging.prototype.OnOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageVisibilityChanged} msg */
 Fogging.prototype.OnVisibilityChanged = function(msg)
 {
 	if (msg.player < 0 || msg.player >= this.mirages.length)

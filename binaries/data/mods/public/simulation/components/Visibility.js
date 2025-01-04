@@ -1,8 +1,17 @@
+// @ts-expect-error (redeclared)
 const VIS_HIDDEN = 0;
+// @ts-expect-error (redeclared)
 const VIS_FOGGED = 1;
+// @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Visibility() {}
+function Visibility() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ RetainInFog: string, AlwaysVisible: string, Corpse: string, Preview: string }} */
+	this.template;
+}
 
 Visibility.prototype.Schema =
 	"<element name='RetainInFog'>" +
@@ -33,6 +42,7 @@ Visibility.prototype.Init = function()
 
 /**
  * Sets the range manager scriptedVisibility flag for this entity.
+ * @param {boolean} status
  */
 Visibility.prototype.SetActivated = function(status)
 {
@@ -55,8 +65,9 @@ Visibility.prototype.IsActivated = function()
 /**
  * This function is called if the range manager scriptedVisibility flag is set to true for this entity.
  * If so, the return value supersedes the visibility computed by the range manager.
- * isVisible: true if the entity is in the vision range of a unit, false otherwise
- * isExplored: true if the entity is in explored territory, false otherwise
+ * @param {number} player: the player ID
+ * @param {boolean} isVisible: true if the entity is in the vision range of a unit, false otherwise
+ * @param {boolean} isExplored: true if the entity is in explored territory, false otherwise
  */
 Visibility.prototype.GetVisibility = function(player, isVisible, isExplored)
 {

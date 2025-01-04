@@ -6,14 +6,19 @@
  * newPlayers if true will remove old player entities or add new ones until
  * the new number of player entities is obtained
  * (used when loading a map or when Atlas changes the number of players).
+ * @param {InitAttributesType} settings
+ * @param {boolean} newPlayers
  */
 function LoadPlayerSettings(settings, newPlayers)
 {
+	/** @ts-expect-error; @type {Record<string, any>} */
 	const playerDefaults = Engine.ReadJSONFile("simulation/data/settings/player_defaults.json").PlayerData;
+	/** @type {(Record<string, any> | null)[]} */
 	const playerData = settings.PlayerData;
 	if (!playerData)
 		warn("Player.js: Setup has no player data - using defaults.");
 
+	/** @type {function(number, string): any} */
 	const getPlayerSetting = (idx, property) => {
 		if (playerData && playerData[idx] && (property in playerData[idx]))
 			return playerData[idx][property];
@@ -59,10 +64,10 @@ function LoadPlayerSettings(settings, newPlayers)
 
 	for (let i = 0; i < numPlayers; ++i)
 	{
-		QueryPlayerIDInterface(i, IID_Identity).SetName(getPlayerSetting(i, "Name"));
+		/** @type {Identity} */(QueryPlayerIDInterface(i, IID_Identity)).SetName(getPlayerSetting(i, "Name"));
 
 		const color = getPlayerSetting(i, "Color");
-		const cmpPlayer = QueryPlayerIDInterface(i);
+		const cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(i));
 		cmpPlayer.SetColor(color.r, color.g, color.b);
 
 		// Special case for gaia
@@ -90,7 +95,7 @@ function LoadPlayerSettings(settings, newPlayers)
 		else if (settings.StartingResources)
 		{
 			let resourceCounts = cmpPlayer.GetResourceCounts();
-			let newResourceCounts = {};
+			let newResourceCounts = /** @type {Record<string, number>} */({});
 			for (let resources in resourceCounts)
 				newResourceCounts[resources] = settings.StartingResources;
 			cmpPlayer.SetResourceCounts(newResourceCounts);
@@ -107,9 +112,9 @@ function LoadPlayerSettings(settings, newPlayers)
 		// If diplomacy explicitly defined, use that; otherwise use teams.
 		const diplomacy = getPlayerSetting(i, "Diplomacy");
 		if (diplomacy !== undefined)
-			QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(diplomacy);
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetDiplomacy(diplomacy);
 		else
-			QueryPlayerIDInterface(i, IID_Diplomacy).ChangeTeam(getPlayerSetting(i, "Team") ?? -1);
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).ChangeTeam(getPlayerSetting(i, "Team") ?? -1);
 
 		const formations = getPlayerSetting(i, "Formations");
 		if (formations)
@@ -124,16 +129,19 @@ function LoadPlayerSettings(settings, newPlayers)
 	// otherwise we can't ally the players above.
 	if (settings.LockTeams)
 		for (let i = 0; i < numPlayers; ++i)
-			QueryPlayerIDInterface(i, IID_Diplomacy).LockTeam();
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).LockTeam();
 }
 
+/**
+ * @param {string} civ The civ name
+ */
 function GetPlayerTemplateName(civ)
 {
 	return "special/players/" + civ;
 }
 
 /**
- * @param id An entity's ID
+ * @param {EntityId} ent An entity's ID
  * @returns The entity ID of the owner player (not his player ID) or ent if ent is a player entity.
  */
 function QueryOwnerEntityID(ent)
@@ -161,16 +169,20 @@ function QueryOwnerEntityID(ent)
  * Similar to Engine.QueryInterface but applies to the player entity
  * that owns the given entity.
  * iid is typically IID_Player.
+ * @param {EntityId} ent
+ * @template {keyof IIDs} T
+ * @param {T} iid
  */
+// @ts-expect-error (some weird annoying thing about default arguments, TS2322)
 function QueryOwnerInterface(ent, iid = IID_Player)
 {
 	var cmpOwnership = Engine.QueryInterface(ent, IID_Ownership);
 	if (!cmpOwnership)
-		return null;
+		return undefined;
 
 	var owner = cmpOwnership.GetOwner();
 	if (owner == INVALID_PLAYER)
-		return null;
+		return undefined;
 
 	return QueryPlayerIDInterface(owner, iid);
 }
@@ -179,14 +191,19 @@ function QueryOwnerInterface(ent, iid = IID_Player)
  * Similar to Engine.QueryInterface but applies to the player entity
  * with the given ID number.
  * iid is typically IID_Player.
+ * @param {number} id
+ * @template {keyof IIDs} T
+ * @param {T} iid
+ * @returns {IIDs[T] | undefined}
  */
+// @ts-expect-error (some weird annoying thing about default arguments, TS2322)
 function QueryPlayerIDInterface(id, iid = IID_Player)
 {
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 
 	var playerEnt = cmpPlayerManager.GetPlayerByID(id);
 	if (!playerEnt)
-		return null;
+		return undefined;
 
 	return Engine.QueryInterface(playerEnt, iid);
 }
@@ -194,12 +211,15 @@ function QueryPlayerIDInterface(id, iid = IID_Player)
 /**
  * Similar to Engine.QueryInterface but first checks if the entity
  * mirages the interface.
+ * @param {EntityId} ent
+ * @template {Fogging["componentsToMirage"][number]} T
+ * @param {T} iid
  */
 function QueryMiragedInterface(ent, iid)
 {
 	let cmpMirage = Engine.QueryInterface(ent, IID_Mirage);
 	if (cmpMirage && !cmpMirage.Mirages(iid))
-		return null;
+		return undefined;
 	else if (!cmpMirage)
 		return Engine.QueryInterface(ent, iid);
 
@@ -210,6 +230,7 @@ function QueryMiragedInterface(ent, iid)
  * Similar to Engine.QueryInterface, but checks for all interfaces
  * implementing a builder list (currently Foundation and Repairable)
  * TODO Foundation and Repairable could both implement a BuilderList component
+ * @param {EntityId} ent
  */
 function QueryBuilderListInterface(ent)
 {
@@ -219,17 +240,28 @@ function QueryBuilderListInterface(ent)
 /**
  * Returns true if the entity 'target' is owned by an ally of
  * the owner of 'entity'.
+ * @param {EntityId} entity
+ * @param {EntityId} target
  */
 function IsOwnedByAllyOfEntity(entity, target)
 {
 	return IsOwnedByEntityHelper(entity, target, "IsAlly");
 }
 
+/**
+ * @param {EntityId} entity
+ * @param {EntityId} target
+ */
 function IsOwnedByMutualAllyOfEntity(entity, target)
 {
 	return IsOwnedByEntityHelper(entity, target, "IsMutualAlly");
 }
 
+/**
+ * @param {EntityId} entity
+ * @param {EntityId} target
+ * @param {keyof Diplomacy} check
+ */
 function IsOwnedByEntityHelper(entity, target, check)
 {
 	const owner = Engine.QueryInterface(entity, IID_Ownership)?.GetOwner() || 0;
@@ -238,13 +270,18 @@ function IsOwnedByEntityHelper(entity, target, check)
 
 /**
  * Returns true if the entity 'target' is owned by player
+ * @param {number} player
+ * @param {EntityId} target
  */
 function IsOwnedByPlayer(player, target)
 {
 	var cmpOwnershipTarget = Engine.QueryInterface(target, IID_Ownership);
-	return cmpOwnershipTarget && player == cmpOwnershipTarget.GetOwner();
+	return !!cmpOwnershipTarget && player == cmpOwnershipTarget.GetOwner();
 }
 
+/**
+ * @param {EntityId} target
+ */
 function IsOwnedByGaia(target)
 {
 	return IsOwnedByPlayer(0, target);
@@ -252,31 +289,52 @@ function IsOwnedByGaia(target)
 
 /**
  * Returns true if the entity 'target' is owned by an ally of player
+ * @param {number} player
+ * @param {EntityId} target
  */
 function IsOwnedByAllyOfPlayer(player, target)
 {
 	return IsOwnedByHelper(player, target, "IsAlly");
 }
 
+/**
+ * @param {number} player
+ * @param {EntityId} target
+ */
 function IsOwnedByMutualAllyOfPlayer(player, target)
 {
 	return IsOwnedByHelper(player, target, "IsMutualAlly");
 }
 
+/**
+ * @param {number} player
+ * @param {EntityId} target
+ */
 function IsOwnedByNeutralOfPlayer(player, target)
 {
 	return IsOwnedByHelper(player, target, "IsNeutral");
 }
 
+/**
+ * @param {number} player
+ * @param {EntityId} target
+ */
 function IsOwnedByEnemyOfPlayer(player, target)
 {
 	return IsOwnedByHelper(player, target, "IsEnemy");
 }
 
+/**
+ * @param {number} player
+ * @param {EntityId} target
+ * @param {keyof Diplomacy} check
+ */
 function IsOwnedByHelper(player, target, check)
 {
 	const targetOwner = Engine.QueryInterface(target, IID_Ownership)?.GetOwner() || 0;
+	/** @ts-expect-error; @type {Diplomacy} */
 	const cmpDiplomacy = QueryPlayerIDInterface(player, IID_Diplomacy);
+	// @ts-expect-error
 	return cmpDiplomacy && cmpDiplomacy[check](targetOwner);
 }
 

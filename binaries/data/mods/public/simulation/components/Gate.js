@@ -1,4 +1,16 @@
-function Gate() {}
+function Gate() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ PassRange: string }} */
+	this.template;
+
+	/** @type {unknown[]} */
+	this.allies = [];
+	/** @type {unknown[]} */
+	this.ignoreList = [];
+	this.opened = false;
+	this.locked = false;
+}
 
 Gate.prototype.Schema =
 	"<a:help>Controls behavior of wall gates</a:help>" +
@@ -14,12 +26,9 @@ Gate.prototype.Schema =
  */
 Gate.prototype.Init = function()
 {
-	this.allies = [];
-	this.ignoreList = [];
-	this.opened = false;
-	this.locked = false;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Gate.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)
@@ -31,6 +40,7 @@ Gate.prototype.OnOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Gate.prototype.OnDiplomacyChanged = function(msg)
 {
 	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
@@ -63,6 +73,7 @@ Gate.prototype.OnDestroy = function()
 
 /**
  * Setup the range query to detect units coming in & out of range
+ * @param {number} owner - The player ID of the owner
  */
 Gate.prototype.SetupRangeQuery = function(owner)
 {
@@ -72,7 +83,8 @@ Gate.prototype.SetupRangeQuery = function(owner)
 		cmpRangeManager.DestroyActiveQuery(this.unitsQuery);
 
 	// Only allied units can make the gate open.
-	const players = QueryPlayerIDInterface(owner, IID_Diplomacy).GetAllies();
+	/** @type {number[]} */
+	const players = /** @type {Diplomacy} */(QueryPlayerIDInterface(owner, IID_Diplomacy)).GetAllies();
 
 	var range = this.GetPassRange();
 	if (range > 0)
@@ -86,6 +98,7 @@ Gate.prototype.SetupRangeQuery = function(owner)
 /**
  * Called when units enter or leave range
  */
+/** @param {MessageRangeUpdate} msg */
 Gate.prototype.OnRangeUpdate = function(msg)
 {
 	if (msg.tag != this.unitsQuery)
@@ -113,6 +126,7 @@ Gate.prototype.OnRangeUpdate = function(msg)
 	this.OperateGate();
 };
 
+/** @param {MessageUnitAbleToMoveChanged} msg */
 Gate.prototype.OnGlobalUnitAbleToMoveChanged = function(msg)
 {
 	if (this.allies.indexOf(msg.entity) === -1)
@@ -195,8 +209,9 @@ Gate.prototype.LockGate = function()
 /**
  * Unlock the gate, with sound. May open the gate if allied units are within range.
  * If quiet is true, no sound will be played (used for initial setup).
+ * @param {boolean} quiet
  */
-Gate.prototype.UnlockGate = function(quiet)
+Gate.prototype.UnlockGate = function(quiet = false)
 {
 	var cmpObstruction = Engine.QueryInterface(this.entity, IID_Obstruction);
 	if (!cmpObstruction)

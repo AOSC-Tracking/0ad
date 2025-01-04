@@ -9,12 +9,13 @@ class DamageTypesMetadata
 {
 	constructor()
 	{
+		/** @type {Record<string, any>} */
 		this.damageTypeData = {};
 
 		let files = Engine.ListDirectoryFiles("simulation/data/damage_types", "*.json", false);
 		for (let filename of files)
 		{
-			let data = Engine.ReadJSONFile(filename);
+			let data = /** @type {any} */(Engine.ReadJSONFile(filename));
 			if (!data)
 				continue;
 
@@ -27,7 +28,9 @@ class DamageTypesMetadata
 			this.damageTypeData[data.code] = data;
 		}
 
+		/** @param {string} a */
 		let hasMetadata = (a) => this.damageTypeData[a] ? -1 : 1;
+		/** @param {string} a @param {string} b */
 		this._sort = (a, b) => {
 			if (this.damageTypeData[a] && this.damageTypeData[b])
 				return this.damageTypeData[a].order - this.damageTypeData[b].order;
@@ -48,7 +51,7 @@ class DamageTypesMetadata
 	}
 
 	/**
-	 * @returns the name of the @param code damage type, or @code if no metadata exists in JSON files.
+	 * @returns the name of the @param {string} code damage type, or @code if no metadata exists in JSON files.
 	 */
 	getName(code)
 	{

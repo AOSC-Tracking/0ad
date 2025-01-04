@@ -1,9 +1,19 @@
-function ResourceTrickle() {}
+function ResourceTrickle()
+{
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ Rates: { [key: string]: string }, Interval: string }} */
+	this.template;
+	/** @type {number} */
+	this.trickleInterval;
+	/** @type {{ [key: string]: number }} */
+	this.rates;
+};
 
 ResourceTrickle.prototype.Schema =
 	"<a:help>Controls the resource trickle ability of the unit.</a:help>" +
 	"<element name='Rates' a:help='Trickle Rates'>" +
-		Resources.BuildSchema("nonNegativeDecimal") +
+		g_Resources.BuildSchema("nonNegativeDecimal") +
 	"</element>" +
 	"<element name='Interval' a:help='Number of milliseconds must pass for the player to gain the next trickle.'>" +
 		"<ref name='nonNegativeDecimal'/>" +
@@ -45,16 +55,18 @@ ResourceTrickle.prototype.ComputeRates = function()
 	return hasTrickle;
 };
 
+/** @param {any} data; @param {number} lateness */
 ResourceTrickle.prototype.Trickle = function(data, lateness)
 {
 	// The player entity may also have a ResourceTrickle component
-	let cmpPlayer = QueryOwnerInterface(this.entity) || Engine.QueryInterface(this.entity, IID_Player);
+	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player) || Engine.QueryInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
 		return;
 
 	cmpPlayer.AddResources(this.rates);
 };
 
+/** @param {MessageValueModification} msg */
 ResourceTrickle.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "ResourceTrickle")
@@ -63,6 +75,7 @@ ResourceTrickle.prototype.OnValueModification = function(msg)
 	this.CheckTimer();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 ResourceTrickle.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)
@@ -86,9 +99,11 @@ ResourceTrickle.prototype.CheckTimer = function()
 	this.trickleInterval = ApplyValueModificationsToEntity("ResourceTrickle/Interval", +this.template.Interval, this.entity);
 	if (this.trickleInterval < 0)
 	{
-		let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-		cmpTimer.CancelTimer(this.timer);
-		delete this.timer;
+		if (this.timer) {
+			let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
+			cmpTimer.CancelTimer(this.timer);
+			delete this.timer;
+		}
 		return;
 	}
 

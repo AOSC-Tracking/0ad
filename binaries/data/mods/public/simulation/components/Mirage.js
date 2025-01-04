@@ -1,8 +1,22 @@
+// @ts-expect-error (redeclared)
 const VIS_HIDDEN = 0;
+// @ts-expect-error (redeclared)
 const VIS_FOGGED = 1;
+// @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Mirage() {}
+function Mirage() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {EntityId} */
+	this.parent = INVALID_ENTITY;
+	/** @ts-expect-error; @type {number} */
+	this.player = null;
+
+	/** @type {Map<IID, unknown>} */
+	this.miragedIids = new Map();
+}
 
 Mirage.prototype.Schema =
 	"<a:help>Mirage entities replace real entities in the fog-of-war.</a:help>" +
@@ -10,12 +24,11 @@ Mirage.prototype.Schema =
 
 Mirage.prototype.Init = function()
 {
-	this.parent = INVALID_ENTITY;
-	this.player = null;
-
-	this.miragedIids = new Map();
 };
 
+/**
+ * @param {EntityId} ent
+ */
 Mirage.prototype.SetParent = function(ent)
 {
 	this.parent = ent;
@@ -26,6 +39,9 @@ Mirage.prototype.GetParent = function()
 	return this.parent;
 };
 
+/**
+ * @param {number} player
+ */
 Mirage.prototype.SetPlayer = function(player)
 {
 	this.player = player;
@@ -36,21 +52,28 @@ Mirage.prototype.GetPlayer = function()
 	return this.player;
 };
 
+/**
+ * @param {IID} iid
+ */
 Mirage.prototype.Mirages = function(iid)
 {
 	return this.miragedIids.has(iid);
 };
 
+/**
+ * @template {Fogging["componentsToMirage"][number]} T
+ * @param {T} iid
+ */
 Mirage.prototype.Get = function(iid)
 {
-	return this.miragedIids.get(iid);
+	return /** @type {ReturnType<IIDs[T]["Mirage"]>} */(this.miragedIids.get(iid));
 };
 
 // ============================
 // Parent entity data
 
 /**
- * @param {number} iid - The component to mirage.
+ * @param {Fogging["componentsToMirage"][number]} iid - The component to mirage.
  */
 Mirage.prototype.CopyComponent = function(iid)
 {
@@ -61,6 +84,7 @@ Mirage.prototype.CopyComponent = function(iid)
 
 // ============================
 
+/** @param {MessageVisibilityChanged} msg */
 Mirage.prototype.OnVisibilityChanged = function(msg)
 {
 	// Mirages get VIS_HIDDEN when the original entity becomes VIS_VISIBLE.
@@ -68,7 +92,7 @@ Mirage.prototype.OnVisibilityChanged = function(msg)
 		return;
 
 	if (this.miragedIids.has(IID_Market))
-		this.miragedIids.get(IID_Market).UpdateTraders(msg);
+		/** @type {MarketMirage} */(this.miragedIids.get(IID_Market)).UpdateTraders();
 
 	if (this.parent == INVALID_ENTITY)
 		Engine.DestroyEntity(this.entity);

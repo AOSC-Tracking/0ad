@@ -1,4 +1,43 @@
-function BattleDetection() {}
+function BattleDetection() {
+	/** @type {EntityId} */
+	this.entity;
+	/**
+	 * @type {{
+	 *   TimerInterval: string,
+	 *   RecordLength: string,
+	 *   DamageRateThreshold: string,
+	 *   AlertnessBattleThreshold: string,
+	 *   AlertnessPeaceThreshold: string,
+	 * 	 AlertnessMax: string,
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.interval;
+	/** @type {number} */
+	this.recordLength;
+	/** @type {number} */
+	this.damageRateThreshold;
+	/** @type {number} */
+	this.alertnessBattleThreshold;
+	/** @type {number} */
+	this.alertnessPeaceThreshold;
+	/** @type {number} */
+	this.alertnessMax;
+
+	/** @type {number} */
+	this.damage;
+	/** @type {number[]} */
+	this.damageRecord;
+	/** @type {number} */
+	this.alertness;
+	/** @type {"PEACE" | "BATTLE"} */
+	this.state;
+
+	/** @type {number} */
+	this.recordControl;
+}
 
 BattleDetection.prototype.Schema =
 	"<a:help>Detects the occurrence of battles.</a:help>" +
@@ -39,13 +78,14 @@ BattleDetection.prototype.Init = function()
 	this.state = "PEACE";
 };
 
+/** @param {"PEACE" | "BATTLE"} state */
 BattleDetection.prototype.SetState = function(state)
 {
 	if (state == this.state)
 		return;
 
 	this.state = state;
-	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
+	var cmpPlayer = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player));
 	Engine.PostMessage(this.entity, MT_BattleStateChanged, { "player": cmpPlayer.GetPlayerID(), "to": this.state });
 };
 
@@ -54,7 +94,8 @@ BattleDetection.prototype.GetState = function()
 	return this.state;
 };
 
-BattleDetection.prototype.TimerHandler = function(data, lateness)
+/** @param {{ timerRepeat: number | undefined }} data */
+BattleDetection.prototype.TimerHandler = function(data)
 {
 	// Reset the timer
 	if (data.timerRepeat === undefined)
@@ -96,6 +137,8 @@ BattleDetection.prototype.TimerHandler = function(data, lateness)
  * Set up the damage rate timer to run after 'offset' msecs, and then optionally
  * every 'repeat' msecs until StopTimer is called, if 'repeat' is set. A "Timer" message
  * will be sent each time the timer runs. Must not be called if a timer is already active.
+ * @param {number} offset
+ * @param {number | undefined} repeat
  */
 BattleDetection.prototype.StartTimer = function(offset, repeat)
 {
@@ -129,9 +172,10 @@ BattleDetection.prototype.StopTimer = function()
 	this.timer = undefined;
 };
 
+/** @param {MessageAttacked} msg */
 BattleDetection.prototype.OnGlobalAttacked = function(msg)
 {
-	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
+	var cmpPlayer = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player));
 	// Only register attacks dealt by myself.
 	var cmpAttackerOwnership = Engine.QueryInterface(msg.attacker, IID_Ownership);
 	if (!cmpAttackerOwnership || cmpAttackerOwnership.GetOwner() != cmpPlayer.GetPlayerID())

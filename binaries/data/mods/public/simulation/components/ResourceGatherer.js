@@ -1,4 +1,34 @@
-function ResourceGatherer() {}
+function ResourceGatherer()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ MaxDistance: string, BaseSpeed: string, Rates: Record<FullResName, string>, Capacities: Record<GenericResName, string> }} */
+	this.template;
+
+	// Cached. Currently not a target of modifiers.
+	this.range = { max: +this.template.MaxDistance, min: 0 };
+
+	/** @type {Record<GenericResName, number>} */
+	this.capacities = {};
+	/** @type {Record<GenericResName, number>} */
+	this.carrying = {}; // { generic type: integer amount currently carried }
+	// (Note that this component supports carrying multiple types of resources,
+	// each with an independent capacity, but the rest of the game currently
+	// ensures and assumes we'll only be carrying one type at once)
+
+	/** @type {Record<FullResName, number>} */
+	this.rates;
+
+	/**
+	 * The last exact type gathered, so we can render appropriate props
+	 * @type {{ generic: GenericResName, specific: SpecificResName } | undefined}
+	 */
+	this.lastCarriedType = undefined; // { generic, specific }
+
+	/** @type {IID_UnitAI | undefined} */
+	this.callerIID;
+};
 
 ResourceGatherer.prototype.Schema =
 	"<a:help>Lets the unit gather resources from entities that have the ResourceSupply component.</a:help>" +
@@ -25,10 +55,10 @@ ResourceGatherer.prototype.Schema =
 		"<ref name='positiveDecimal'/>" +
 	"</element>" +
 	"<element name='Rates' a:help='Per-resource-type gather rate multipliers. If a resource type is not specified then it cannot be gathered by this unit'>" +
-		Resources.BuildSchema("positiveDecimal", [], true) +
+		g_Resources.BuildSchema("positiveDecimal", [], true) +
 	"</element>" +
 	"<element name='Capacities' a:help='Per-resource-type maximum carrying capacity'>" +
-		Resources.BuildSchema("positiveDecimal") +
+		g_Resources.BuildSchema("positiveDecimal") +
 	"</element>";
 
 /*
@@ -37,20 +67,7 @@ ResourceGatherer.prototype.Schema =
  */
 ResourceGatherer.prototype.GATHER_AMOUNT = 1;
 
-ResourceGatherer.prototype.Init = function()
-{
-	// Cached. Currently not a target of modifiers.
-	this.range = { "max": +this.template.MaxDistance, "min": 0 };
-
-	this.capacities = {};
-	this.carrying = {}; // { generic type: integer amount currently carried }
-	// (Note that this component supports carrying multiple types of resources,
-	// each with an independent capacity, but the rest of the game currently
-	// ensures and assumes we'll only be carrying one type at once)
-
-	// The last exact type gathered, so we can render appropriate props
-	this.lastCarriedType = undefined; // { generic, specific }
-};
+ResourceGatherer.prototype.Init = function() {};
 
 /**
  * Returns data about what resources the unit is currently carrying,
@@ -72,7 +89,7 @@ ResourceGatherer.prototype.GetCarryingStatus = function()
 
 /**
  * Used to instantly give resources to unit
- * @param resources The same structure as returned form GetCarryingStatus
+ * @param {ReturnType<ResourceGatherer["GetCarryingStatus"]>} resources The same structure as returned from GetCarryingStatus
  */
 ResourceGatherer.prototype.GiveResources = function(resources)
 {
@@ -106,6 +123,7 @@ ResourceGatherer.prototype.GetLastCarriedType = function()
 	return undefined;
 };
 
+/** @param {{ generic: GenericResName, specific: SpecificResName } | undefined} lastCarriedType */
 ResourceGatherer.prototype.SetLastCarriedType = function(lastCarriedType)
 {
 	this.lastCarriedType = lastCarriedType;
@@ -121,7 +139,7 @@ ResourceGatherer.prototype.RecalculateGatherRates = function()
 	{
 		let type = r.split(".");
 
-		if (!Resources.GetResource(type[0]).subtypes[type[1]])
+		if (!g_Resources.GetResource(type[0]).subtypes[type[1]])
 		{
 			error("Resource subtype not found: " + type[0] + "." + type[1]);
 			continue;
@@ -139,6 +157,7 @@ ResourceGatherer.prototype.RecalculateCapacities = function()
 		this.capacities[r] = ApplyValueModificationsToEntity("ResourceGatherer/Capacities/" + r, +this.template.Capacities[r], this.entity);
 };
 
+/** @param {GenericResName} type */
 ResourceGatherer.prototype.RecalculateCapacity = function(type)
 {
 	if (type in this.capacities)
@@ -150,6 +169,7 @@ ResourceGatherer.prototype.GetGatherRates = function()
 	return this.rates;
 };
 
+/** @param {FullResName} resourceType */
 ResourceGatherer.prototype.GetGatherRate = function(resourceType)
 {
 	if (!this.template.Rates[resourceType])
@@ -158,6 +178,7 @@ ResourceGatherer.prototype.GetGatherRate = function(resourceType)
 	return this.rates[resourceType];
 };
 
+/** @param {GenericResName} resourceType */
 ResourceGatherer.prototype.GetCapacity = function(resourceType)
 {
 	if (!this.template.Capacities[resourceType])
@@ -172,7 +193,7 @@ ResourceGatherer.prototype.GetRange = function()
 
 /**
  * @param {number} target - The target to gather from.
- * @param {number} callerIID - The IID to notify on specific events.
+ * @param {IID_UnitAI} callerIID - The IID to notify on specific events.
  * @return {boolean} - Whether we started gathering.
  */
 ResourceGatherer.prototype.StartGathering = function(target, callerIID)
@@ -213,7 +234,7 @@ ResourceGatherer.prototype.StartGathering = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped gathering used to notify the caller.
+ * @param {string=} reason - The reason why we stopped gathering used to notify the caller.
  */
 ResourceGatherer.prototype.StopGathering = function(reason)
 {
@@ -221,7 +242,8 @@ ResourceGatherer.prototype.StopGathering = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	let cmpResourceSupply = Engine.QueryInterface(this.target, IID_ResourceSupply);
@@ -236,6 +258,7 @@ ResourceGatherer.prototype.StopGathering = function(reason)
 
 	// The callerIID component may start again,
 	// replacing the callerIID, hence save that.
+	/** @type {IID_UnitAI | undefined} */
 	let callerIID = this.callerIID;
 	delete this.callerIID;
 
@@ -243,31 +266,33 @@ ResourceGatherer.prototype.StopGathering = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason);
 	}
 };
 
 /**
  * Gather from our target entity.
- * @params - data and lateness are unused.
+ * @param {any} data - Unused.
+ * @param {number} lateness - Unused.
  */
 ResourceGatherer.prototype.PerformGather = function(data, lateness)
 {
-	let cmpResourceSupply = Engine.QueryInterface(this.target, IID_ResourceSupply);
+	let target = /** @type {number} */ (this.target);
+	let cmpResourceSupply = Engine.QueryInterface(target, IID_ResourceSupply);
 	if (!cmpResourceSupply || cmpResourceSupply.GetCurrentAmount() <= 0)
 	{
 		this.StopGathering("TargetInvalidated");
 		return;
 	}
 
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(target))
 	{
 		this.StopGathering("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
 
 	let type = cmpResourceSupply.GetType();
 	if (!this.carrying[type.generic])
@@ -295,6 +320,7 @@ ResourceGatherer.prototype.PerformGather = function(data, lateness)
  * Compute the amount of resources collected per second from the target.
  * Returns 0 if resources cannot be collected (e.g. the target doesn't
  * exist, or is the wrong type).
+ * @param {EntityId} target
  */
 ResourceGatherer.prototype.GetTargetGatherRate = function(target)
 {
@@ -330,6 +356,7 @@ ResourceGatherer.prototype.CanGather = function(target)
  * Returns whether this unit can carry more of the given type of resource.
  * (This ignores whether the unit is actually able to gather that
  * resource type or not.)
+ * @param {GenericResName} type
  */
 ResourceGatherer.prototype.CanCarryMore = function(type)
 {
@@ -337,7 +364,7 @@ ResourceGatherer.prototype.CanCarryMore = function(type)
 	return amount < this.GetCapacity(type);
 };
 
-
+/** @param {GenericResName} type */
 ResourceGatherer.prototype.IsCarrying = function(type)
 {
 	let amount = this.carrying[type] || 0;
@@ -348,6 +375,7 @@ ResourceGatherer.prototype.IsCarrying = function(type)
  * Returns whether this unit is carrying any resources of a type that is
  * not the requested type. (This is to support cases where the unit is
  * only meant to be able to carry one type at once.)
+ * @param {GenericResName} exceptedType
  */
 ResourceGatherer.prototype.IsCarryingAnythingExcept = function(exceptedType)
 {
@@ -422,7 +450,7 @@ ResourceGatherer.prototype.DropResources = function()
 };
 
 /**
- * @return {string} - A generic resource type if we were tasked to gather.
+ * @return {GenericResName | undefined} - A generic resource type if we were tasked to gather.
  */
 ResourceGatherer.prototype.GetTaskedResourceType = function()
 {
@@ -430,7 +458,7 @@ ResourceGatherer.prototype.GetTaskedResourceType = function()
 };
 
 /**
- * @param {string} type - A generic resource type.
+ * @param {GenericResName} type - A generic resource type.
  */
 ResourceGatherer.prototype.AddToPlayerCounter = function(type)
 {
@@ -446,7 +474,7 @@ ResourceGatherer.prototype.AddToPlayerCounter = function(type)
 };
 
 /**
- * @param {number} playerid - Optionally a player ID.
+ * @param {number=} playerid - Optionally a player ID.
  */
 ResourceGatherer.prototype.RemoveFromPlayerCounter = function(playerid)
 {
@@ -454,7 +482,7 @@ ResourceGatherer.prototype.RemoveFromPlayerCounter = function(playerid)
 		return;
 
 	let cmpPlayer = playerid != undefined ?
-		QueryPlayerIDInterface(playerid) :
+		QueryPlayerIDInterface(playerid, IID_Player) :
 		QueryOwnerInterface(this.entity, IID_Player);
 
 	if (cmpPlayer)
@@ -464,7 +492,7 @@ ResourceGatherer.prototype.RemoveFromPlayerCounter = function(playerid)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {EntityId} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 ResourceGatherer.prototype.IsTargetInRange = function(target)
@@ -475,6 +503,7 @@ ResourceGatherer.prototype.IsTargetInRange = function(target)
 
 // Since we cache gather rates, we need to make sure we update them when tech changes.
 // and when our owner change because owners can had different techs.
+/** @param {MessageValueModification} msg */
 ResourceGatherer.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "ResourceGatherer")
@@ -495,6 +524,7 @@ ResourceGatherer.prototype.OnValueModification = function(msg)
 	}
 };
 
+/** @param {MessageOwnershipChanged} msg */
 ResourceGatherer.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -502,7 +532,8 @@ ResourceGatherer.prototype.OnOwnershipChanged = function(msg)
 		this.RemoveFromPlayerCounter(msg.from);
 		return;
 	}
-	if (this.lastGathered && msg.from !== INVALID_PLAYER)
+	// TODO investigate
+	if (this.taskedResourceType && msg.from !== INVALID_PLAYER)
 	{
 		const resource = this.taskedResourceType;
 		this.RemoveFromPlayerCounter(msg.from);
@@ -513,12 +544,14 @@ ResourceGatherer.prototype.OnOwnershipChanged = function(msg)
 	this.RecalculateCapacities();
 };
 
+/** @param {MessageInitGame} msg */
 ResourceGatherer.prototype.OnGlobalInitGame = function(msg)
 {
 	this.RecalculateGatherRates();
 	this.RecalculateCapacities();
 };
 
+/** @param {MessageMultiplierChanged} msg */
 ResourceGatherer.prototype.OnMultiplierChanged = function(msg)
 {
 	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);

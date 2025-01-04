@@ -1,4 +1,9 @@
-function Turretable() {}
+function Turretable() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {EntityId | undefined} */
+	this.holder;
+}
 
 Turretable.prototype.Schema =
 	"<empty/>";
@@ -10,7 +15,7 @@ Turretable.prototype.Init = function()
 /**
  * @param {string} type - Unused.
  * @param {number} target - The entity ID of the target to check.
- * @return {Object} - The range this entity needs to be in in order to occupy a turret point on the target.
+ * @return {{ min: number, max: number } | undefined} - The range this entity needs to be in in order to occupy a turret point on the target.
  */
 Turretable.prototype.GetRange = function(type, target)
 {
@@ -39,7 +44,7 @@ Turretable.prototype.IsTurreted = function()
  */
 Turretable.prototype.IsEjectable = function()
 {
-	return this.ejectable;
+	return this.ejectable || false;
 };
 
 /**
@@ -52,7 +57,7 @@ Turretable.prototype.CanOccupy = function(target)
 		return false;
 
 	let cmpTurretHolder = Engine.QueryInterface(target, IID_TurretHolder);
-	return cmpTurretHolder && cmpTurretHolder.CanOccupy(this.entity);
+	return cmpTurretHolder && cmpTurretHolder.CanOccupy(this.entity) || false;
 };
 
 /**
@@ -161,6 +166,7 @@ Turretable.prototype.LeaveTurret = function(forced = false)
 	return true;
 };
 
+/** @param {MessageEntityRenamed} msg */
 Turretable.prototype.OnEntityRenamed = function(msg)
 {
 	if (!this.holder)
@@ -178,6 +184,7 @@ Turretable.prototype.OnEntityRenamed = function(msg)
 		cmpTurretableNew.OccupyTurret(holder, currentPoint);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Turretable.prototype.OnOwnershipChanged = function(msg)
 {
 	if (!this.holder)

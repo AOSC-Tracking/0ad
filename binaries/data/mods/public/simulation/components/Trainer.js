@@ -1,4 +1,18 @@
-function Trainer() {}
+function Trainer()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ BatchTimeModifier: string, Entities: { _string: string } }} */
+	this.template;
+
+	this.entitiesMap = new Map();
+
+	this.nextID = 1;
+	this.queue = new Map();
+	/** @type {Record<string, number>} */
+	this.trainCostMultiplier = {};
+};
 
 Trainer.prototype.Schema =
 	"<a:help>Allows the entity to train new units.</a:help>" +
@@ -29,22 +43,28 @@ Trainer.prototype.Schema =
  * @param {number} trainer - The entity ID of our trainer.
  * @param {string} metadata - Optionally any metadata to attach to us.
  */
-Trainer.prototype.Item = function(templateName, count, trainer, metadata)
+function TrainerQueueItem(templateName, count, trainer, metadata)
 {
 	this.count = count;
 	this.templateName = templateName;
 	this.trainer = trainer;
 	this.metadata = metadata;
-};
+
+	/** @type {EntityId[] | undefined} */
+	this.entities;
+
+	/** @type {number} */
+	this.player;
+}
 
 /**
  * Prepare for the queue.
- * @param {Object} trainCostMultiplier - The multipliers to use when calculating costs.
+ * @param {Record<string, number>} trainCostMultiplier - The multipliers to use when calculating costs.
  * @param {number} batchTimeMultiplier - The factor to use when training this batches.
  *
  * @return {boolean} - Whether the item was successfully initiated.
  */
-Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTimeMultiplier)
+TrainerQueueItem.prototype.Queue = function(trainCostMultiplier, batchTimeMultiplier)
 {
 	if (!Number.isInteger(this.count) || this.count <= 0)
 	{
@@ -56,12 +76,14 @@ Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTime
 	if (!template)
 		return false;
 
-	const cmpPlayer = QueryOwnerInterface(this.trainer);
+	const cmpPlayer = QueryOwnerInterface(this.trainer, IID_Player);
 	if (!cmpPlayer)
 		return false;
 	this.player = cmpPlayer.GetPlayerID();
 
+	/** @type {Record<string, number>} */
 	this.resources = {};
+	/** @type {Record<string, number>} */
 	const totalResources = {};
 
 	for (const res in template.Cost.Resources)
@@ -121,7 +143,7 @@ Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTime
 /**
  * Destroy cached entities, refund resources and free (population) limits.
  */
-Trainer.prototype.Item.prototype.Stop = function()
+TrainerQueueItem.prototype.Stop = function()
 {
 	// Destroy any cached entities (those which didn't spawn for some reason).
 	if (this.entities?.length)
@@ -132,7 +154,7 @@ Trainer.prototype.Item.prototype.Stop = function()
 		delete this.entities;
 	}
 
-	const cmpPlayer = QueryPlayerIDInterface(this.player);
+	const cmpPlayer = QueryPlayerIDInterface(this.player, IID_Player);
 
 	const cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 	const template = cmpTemplateManager.GetTemplate(this.templateName);
@@ -140,16 +162,19 @@ Trainer.prototype.Item.prototype.Stop = function()
 	{
 		const cmpPlayerEntityLimits = QueryPlayerIDInterface(this.player, IID_EntityLimits);
 		if (cmpPlayerEntityLimits)
+		{
 			cmpPlayerEntityLimits.ChangeCount(template.TrainingRestrictions.Category, -this.count);
-		if (template.TrainingRestrictions.MatchLimit)
-			cmpPlayerEntityLimits.ChangeMatchCount(this.templateName, -this.count);
+			if (template.TrainingRestrictions.MatchLimit)
+				cmpPlayerEntityLimits.ChangeMatchCount(this.templateName, -this.count);
+		}
 	}
 
 	if (cmpPlayer)
 	{
 		if (this.started)
-			cmpPlayer.UnReservePopulationSlots(this.population * this.count);
+			cmpPlayer.UnReservePopulationSlots(/** @type {number} */ (this.population) * this.count);
 
+		/** @type {Record<string, number>} */
 		const totalCosts = {};
 		for (const resource in this.resources)
 			totalCosts[resource] = Math.floor(this.count * this.resources[resource]);
@@ -165,9 +190,9 @@ Trainer.prototype.Item.prototype.Stop = function()
  * This starts the item, reserving population.
  * @return {boolean} - Whether the item was started successfully.
  */
-Trainer.prototype.Item.prototype.Start = function()
+TrainerQueueItem.prototype.Start = function()
 {
-	const cmpPlayer = QueryPlayerIDInterface(this.player);
+	const cmpPlayer = QueryPlayerIDInterface(this.player, IID_Player);
 	if (!cmpPlayer)
 		return false;
 
@@ -192,7 +217,7 @@ Trainer.prototype.Item.prototype.Start = function()
 	return true;
 };
 
-Trainer.prototype.Item.prototype.Finish = function()
+TrainerQueueItem.prototype.Finish = function()
 {
 	this.Spawn();
 	if (!this.count)
@@ -202,7 +227,7 @@ Trainer.prototype.Item.prototype.Finish = function()
 /**
  * @return {boolean} -
  */
-Trainer.prototype.Item.prototype.IsFinished = function()
+TrainerQueueItem.prototype.IsFinished = function()
 {
 	return !!this.finished;
 };
@@ -211,7 +236,7 @@ Trainer.prototype.Item.prototype.IsFinished = function()
  * This function creates the entities and places them in world if possible
  * (some of these entities may be garrisoned directly if autogarrison, the others are spawned).
  */
-Trainer.prototype.Item.prototype.Spawn = function()
+TrainerQueueItem.prototype.Spawn = function()
 {
 	const createdEnts = [];
 	const spawnedEnts = [];
@@ -252,23 +277,23 @@ Trainer.prototype.Item.prototype.Spawn = function()
 			if (cmpGarrisonable)
 			{
 				// Temporary owner affectation needed for GarrisonHolder checks.
-				cmpNewOwnership.SetOwnerQuiet(this.player);
+				cmpNewOwnership?.SetOwnerQuiet(this.player);
 				garrisoned = cmpGarrisonable.Garrison(this.trainer);
-				cmpNewOwnership.SetOwnerQuiet(INVALID_PLAYER);
+				cmpNewOwnership?.SetOwnerQuiet(INVALID_PLAYER);
 			}
 		}
 
-		if (!garrisoned)
+		if (!garrisoned && cmpFootprint)
 		{
 			const pos = cmpFootprint.PickSpawnPoint(ent);
 			if (pos.y < 0)
 				break;
 
 			const cmpNewPosition = Engine.QueryInterface(ent, IID_Position);
-			cmpNewPosition.JumpTo(pos.x, pos.z);
+			cmpNewPosition?.JumpTo(pos.x, pos.z);
 
 			if (positionTrainer)
-				cmpNewPosition.SetYRotation(positionTrainer.horizAngleTo(pos));
+				cmpNewPosition?.SetYRotation(positionTrainer.horizAngleTo(pos));
 
 			spawnedEnts.push(ent);
 		}
@@ -283,7 +308,7 @@ Trainer.prototype.Item.prototype.Spawn = function()
 			if (cmpTrainingRestrictions)
 				cmpPlayerEntityLimits.ChangeCount(cmpTrainingRestrictions.GetCategory(), -1);
 		}
-		cmpNewOwnership.SetOwner(this.player);
+		cmpNewOwnership?.SetOwner(this.player);
 
 		if (cmpPlayerStatisticsTracker)
 			cmpPlayerStatisticsTracker.IncreaseTrainedUnitsCounter(ent);
@@ -297,7 +322,7 @@ Trainer.prototype.Item.prototype.Spawn = function()
 		for (const com of GetRallyPointCommands(cmpRallyPoint, spawnedEnts))
 			ProcessCommand(this.player, com);
 
-	const cmpPlayer = QueryOwnerInterface(this.trainer);
+	const cmpPlayer = /** @type {Player} */ (QueryOwnerInterface(this.trainer, IID_Player));
 	if (createdEnts.length)
 	{
 		if (this.population)
@@ -335,7 +360,7 @@ Trainer.prototype.Item.prototype.Spawn = function()
  * @param {number} allocatedTime - The time allocated to this item.
  * @return {number} - The time used for this item.
  */
-Trainer.prototype.Item.prototype.Progress = function(allocatedTime)
+TrainerQueueItem.prototype.Progress = function(allocatedTime)
 {
 	if (this.paused)
 		this.Unpause();
@@ -343,48 +368,49 @@ Trainer.prototype.Item.prototype.Progress = function(allocatedTime)
 	if (!this.started && !this.Start())
 		return allocatedTime;
 
-	if (this.timeRemaining > allocatedTime)
+	let timeRemaining = /** @type {number} */ (this.timeRemaining);
+	if (timeRemaining > allocatedTime)
 	{
-		this.timeRemaining -= allocatedTime;
+		timeRemaining -= allocatedTime;
 		return allocatedTime;
 	}
 	this.Finish();
-	return this.timeRemaining;
+	return timeRemaining;
 };
 
-Trainer.prototype.Item.prototype.Pause = function()
+TrainerQueueItem.prototype.Pause = function()
 {
 	if (this.started)
 		this.paused = true;
 	else if (this.missingPopSpace)
 	{
 		delete this.missingPopSpace;
-		QueryOwnerInterface(this.trainer)?.UnBlockTraining();
+		QueryOwnerInterface(this.trainer, IID_Player)?.UnBlockTraining();
 	}
 };
 
-Trainer.prototype.Item.prototype.Unpause = function()
+TrainerQueueItem.prototype.Unpause = function()
 {
 	delete this.paused;
 };
 
 /**
- * @return {Object} - Some basic information of this batch.
+ * @return - Some basic information of this batch.
  */
-Trainer.prototype.Item.prototype.GetBasicInfo = function()
+TrainerQueueItem.prototype.GetBasicInfo = function()
 {
 	return {
 		"unitTemplate": this.templateName,
 		"count": this.count,
 		"neededSlots": this.missingPopSpace,
-		"progress": 1 - (this.timeRemaining / (this.timeTotal || 1)),
+		"progress": 1 - (/**@type {number} */(this.timeRemaining) / (this.timeTotal || 1)),
 		"timeRemaining": this.timeRemaining,
 		"paused": this.paused,
 		"metadata": this.metadata
 	};
 };
 
-Trainer.prototype.Item.prototype.SerializableAttributes = [
+TrainerQueueItem.prototype.SerializableAttributes = [
 	"count",
 	"entities",
 	"metadata",
@@ -400,30 +426,30 @@ Trainer.prototype.Item.prototype.SerializableAttributes = [
 	"timeTotal"
 ];
 
-Trainer.prototype.Item.prototype.Serialize = function(id)
+/** @param {any} id */
+TrainerQueueItem.prototype.Serialize = function(id)
 {
+	/** @type {any} */
 	const result = {
 		"id": id
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 	return result;
 };
 
-Trainer.prototype.Item.prototype.Deserialize = function(data)
+/** @param {any} data */
+TrainerQueueItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 };
 
-Trainer.prototype.Init = function()
-{
-	this.nextID = 1;
-	this.queue = new Map();
-	this.trainCostMultiplier = {};
-};
+Trainer.prototype.Init = function() {};
 
 Trainer.prototype.SerializableAttributes = [
 	"entitiesMap",
@@ -442,21 +468,25 @@ Trainer.prototype.Serialize = function()
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 
 	return result;
 };
 
+/** @param {any} data */
 Trainer.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 
 	this.queue = new Map();
 	for (const item of data.queue)
-	{
-		const newItem = new this.Item();
+{
+		// @ts-ignore
+		const newItem = new TrainerQueueItem();
 		newItem.Deserialize(item);
 		this.queue.set(item.id, newItem);
 	}
@@ -476,20 +506,16 @@ Trainer.prototype.GetEntitiesList = function()
  */
 Trainer.prototype.CalculateEntitiesMap = function()
 {
-	// Don't reset the map, it's used below to update entities.
-	if (!this.entitiesMap)
-		this.entitiesMap = new Map();
-
 	const string = this.template?.Entities?._string || "";
 	// Tokens can be added -> process an empty list to get them.
-	let addedTokens = ApplyValueModificationsToEntity("Trainer/Entities/_string", "", this.entity);
-	if (!addedTokens && !string)
+	let rawAddedTokens = ApplyValueModificationsToEntity("Trainer/Entities/_string", "", this.entity);
+	if (!rawAddedTokens && !string)
 		return;
 
-	addedTokens = addedTokens == "" ? [] : addedTokens.split(/\s+/);
+	let addedTokens = rawAddedTokens == "" ? [] : rawAddedTokens.split(/\s+/);
 
 	const cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	const cmpPlayer = QueryOwnerInterface(this.entity);
+	const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 
 	const disabledEntities = cmpPlayer ? cmpPlayer.GetDisabledTemplates() : {};
 
@@ -500,8 +526,8 @@ Trainer.prototype.CalculateEntitiesMap = function()
 	 * - remove disabled entities
 	 * - upgrade templates where necessary
 	 * This also updates currently queued production (it's more convenient to do it here).
+	 * @param {string} token - The token to process.
 	 */
-
 	const removeAllQueuedTemplate = (token) => {
 		const queue = clone(this.queue);
 		const template = this.entitiesMap.get(token);
@@ -510,7 +536,11 @@ Trainer.prototype.CalculateEntitiesMap = function()
 				this.StopBatch(id);
 	};
 
-	// ToDo: Notice this doesn't account for entity limits changing due to the template change.
+	/**
+	 * ToDo: Notice this doesn't account for entity limits changing due to the template change.
+	 * @param {string} token - The token to update.
+	 * @param {string} updateTo - The new template to use.
+	 */
 	const updateAllQueuedTemplate = (token, updateTo) => {
 		const template = this.entitiesMap.get(token);
 		for (const [id, item] of this.queue)
@@ -525,21 +555,21 @@ Trainer.prototype.CalculateEntitiesMap = function()
 	const nativeCiv = Engine.QueryInterface(this.entity, IID_Identity)?.GetCiv();
 	const playerCiv = QueryOwnerInterface(this.entity, IID_Identity)?.GetCiv();
 
-	const addedDict = addedTokens.reduce((out, token) => { out[token] = true; return out; }, {});
+	const addedDict = addedTokens.reduce((out, token) => { out[token] = true; return out;}, /** @type {Record<string, true>} */ ({}));
 	this.entitiesMap = toks.reduce((entMap, token) => {
 		const rawToken = token;
-		if (!(token in addedDict))
+		if (!(rawToken in addedDict))
 		{
 			// This is a bit wasteful but I can't think of a simpler/better way.
 			// The list of token is unlikely to be a performance bottleneck anyways.
-			token = ApplyValueModificationsToEntity("Trainer/Entities/_string", token, this.entity);
-			token = token.split(/\s+/);
-			if (token.every(tok => addedTokens.indexOf(tok) !== -1))
+			let modToken = ApplyValueModificationsToEntity("Trainer/Entities/_string", token, this.entity);
+			let arrToken = modToken.split(/\s+/);
+			if (arrToken.every(tok => addedTokens.indexOf(tok) !== -1))
 			{
 				removeAllQueuedTemplate(rawToken);
 				return entMap;
 			}
-			token = token[0];
+			token = arrToken[0];
 		}
 		// Replace the "{civ}" and "{native}" codes with the owner's civ ID and entity's civ ID.
 		if (nativeCiv)
@@ -554,7 +584,8 @@ Trainer.prototype.CalculateEntitiesMap = function()
 			return entMap;
 		}
 
-		token = GetUpgradedTemplate(cmpPlayer.GetPlayerID(), token);
+		if (cmpPlayer)
+			token = GetUpgradedTemplate(cmpPlayer.GetPlayerID(), token);
 		entMap.set(rawToken, token);
 		updateAllQueuedTemplate(rawToken, token);
 		return entMap;
@@ -565,22 +596,25 @@ Trainer.prototype.CalculateEntitiesMap = function()
 
 Trainer.prototype.CalculateTrainCostMultiplier = function()
 {
-	for (const res of Resources.GetCodes().concat(["time"]))
+	for (const res of g_Resources.GetCodes().concat(["time"]))
 		this.trainCostMultiplier[res] = ApplyValueModificationsToEntity(
-		    "Trainer/TrainCostMultiplier/" + res,
-		    +(this.template?.TrainCostMultiplier?.[res] || 1),
-		    this.entity);
+			"Trainer/TrainCostMultiplier/" + res,
+			// @ts-expect-error TODO: this doesn't actually seem possible?
+			+(this.template?.TrainCostMultiplier?.[res] || 1),
+			this.entity
+		);
 };
 
 /**
- * @return {Object} - The multipliers to change the costs of any training activity with.
+ * @return The multipliers to change the costs of any training activity with.
  */
 Trainer.prototype.TrainCostMultiplier = function()
 {
 	return this.trainCostMultiplier;
 };
 
-/*
+/**
+ * @param {number} batchSize - The size of the batch we want to train.
  * Returns batch build time.
  */
 Trainer.prototype.GetBatchTime = function(batchSize)
@@ -610,7 +644,7 @@ Trainer.prototype.CanTrain = function(templateName)
  */
 Trainer.prototype.QueueBatch = function(templateName, count, metadata)
 {
-	const item = new this.Item(templateName, count, this.entity, metadata);
+	const item = new TrainerQueueItem(templateName, count, this.entity, metadata);
 	if (!item.Queue(this.TrainCostMultiplier(), this.GetBatchTime(count)))
 		return -1;
 
@@ -646,7 +680,7 @@ Trainer.prototype.HasBatch = function(id)
 };
 
 /**
- * @parameter {number} id - The id of the training.
+ * @param {number} id - The id of the training.
  * @return {Object} - Some basic information about the training.
  */
 Trainer.prototype.GetBatch = function(id)
@@ -664,28 +698,30 @@ Trainer.prototype.Progress = function(id, allocatedTime)
 {
 	const item = this.queue.get(id);
 	const usedTime = item.Progress(allocatedTime);
-	if (item.IsFinished())
-		this.queue.delete(id);
+	if (item.IsFinished()) this.queue.delete(id);
 	return usedTime;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Trainer.prototype.OnOwnershipChanged = function(msg)
 {
-	if (msg.to != INVALID_PLAYER)
-		this.CalculateEntitiesMap();
+	if (msg.to != INVALID_PLAYER) this.CalculateEntitiesMap();
 };
 
+/** @param {MessageValueModification} msg */
 Trainer.prototype.OnValueModification = function(msg)
 {
 	// If the promotion requirements of units is changed,
 	// update the entities list so that automatically promoted units are shown
 	// appropriately in the list.
-	if (msg.component != "Promotion" && (msg.component != "Trainer" ||
-	        !msg.valueNames.some(val => val.startsWith("Trainer/Entities/"))))
+	if (
+		msg.component != "Promotion" &&
+		(msg.component != "Trainer" ||
+			!msg.valueNames.some((val) => val.startsWith("Trainer/Entities/")))
+	)
 		return;
 
-	if (msg.entities.indexOf(this.entity) === -1)
-		return;
+	if (msg.entities.indexOf(this.entity) === -1) return;
 
 	// This also updates the queued production if necessary.
 	this.CalculateEntitiesMap();
@@ -693,11 +729,12 @@ Trainer.prototype.OnValueModification = function(msg)
 	// Inform the GUI that it'll need to recompute the selection panel.
 	// TODO: it would be better to only send the message if something actually changing
 	// for the current training queue.
-	const cmpPlayer = QueryOwnerInterface(this.entity);
+	const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 	if (cmpPlayer)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).SetSelectionDirty(cmpPlayer.GetPlayerID());
 };
 
+/** @param {MessageDisabledTemplatesChanged} msg */
 Trainer.prototype.OnDisabledTemplatesChanged = function(msg)
 {
 	this.CalculateEntitiesMap();

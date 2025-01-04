@@ -1,4 +1,18 @@
-function Capturable() {}
+function Capturable() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {Template} */
+	this.template;
+
+	/** @type {number} */
+	this.maxCapturePoints;
+	/** @type {number} */
+	this.garrisonRegenRate;
+	/** @type {number} */
+	this.regenRate;
+	/** @type {number[]} */
+	this.capturePoints;
+}
 
 Capturable.prototype.Schema =
 	"<element name='CapturePoints' a:help='Maximum capture points.'>" +
@@ -43,7 +57,7 @@ Capturable.prototype.GetGarrisonRegenRate = function()
  * Set the new capture points, used for cloning entities.
  * The caller should assure that the sum of capture points
  * matches the max.
- * @param {number[]} - Array with for all players the new value.
+ * @param {number[]} capturePointsArray - Array with for all players the new value.
  */
 Capturable.prototype.SetCapturePoints = function(capturePointsArray)
 {
@@ -105,7 +119,7 @@ Capturable.prototype.Reduce = function(amount, playerID)
 		numberOfEnemies = 0;
 		for (let i in this.capturePoints)
 		{
-			if (!this.capturePoints[i] || !cmpDiplomacySource.IsEnemy(i))
+			if (!this.capturePoints[i] || !cmpDiplomacySource.IsEnemy(+i))
 				continue;
 			if (this.capturePoints[i] > distributedAmount)
 			{
@@ -140,12 +154,14 @@ Capturable.prototype.CanCapture = function(playerID)
 {
 	const cmpDiplomacySource = QueryPlayerIDInterface(playerID, IID_Diplomacy);
 
-	if (!cmpDiplomacySource)
+	if (!cmpDiplomacySource) {
 		warn(playerID + " has no diplomacy component defined on its id.");
+		return false;
+	}
 	let capturePoints = this.GetCapturePoints();
 	let sourceEnemyCapturePoints = 0;
 	for (let i in this.GetCapturePoints())
-		if (cmpDiplomacySource.IsEnemy(i))
+		if (cmpDiplomacySource.IsEnemy(+i))
 			sourceEnemyCapturePoints += capturePoints[i];
 	return sourceEnemyCapturePoints > 0;
 };
@@ -221,7 +237,7 @@ Capturable.prototype.TimerTick = function()
 
 		if (totalNeighbours)
 			for (let p in neighbours)
-				this.capturePoints[p] += decay * neighbours[p] / totalNeighbours;
+				this.capturePoints[+p] += decay * neighbours[p] / totalNeighbours;
 		// Decay to gaia as default.
 		else
 			this.capturePoints[0] += decay;
@@ -241,7 +257,8 @@ Capturable.prototype.TimerTick = function()
 
 	// Nothing changed, stop the timer.
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 	Engine.PostMessage(this.entity, MT_CaptureRegenStateChanged, { "regenerating": false, "regenRate": 0, "territoryDecay": 0 });
 };
@@ -280,7 +297,7 @@ Capturable.prototype.UpdateCachedValues = function()
 /**
  * Update all chached values that could be affected by modifications.
  * Check timer and send changed messages when required.
- * @param {boolean} message - Whether not to send a CapturePointsChanged message. When false, caller should take care of sending that message.
+ * @param sendMessage - Whether not to send a CapturePointsChanged message. When false, caller should take care of sending that message.
 */
 Capturable.prototype.UpdateCachedValuesAndNotify = function(sendMessage = true)
 {
@@ -305,28 +322,33 @@ Capturable.prototype.UpdateCachedValuesAndNotify = function(sendMessage = true)
 
 // Message Listeners
 
+/** @param {MessageValueModification} msg */
 Capturable.prototype.OnValueModification = function(msg)
 {
 	if (msg.component == "Capturable")
 		this.UpdateCachedValuesAndNotify();
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 Capturable.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	this.CheckTimer();
 };
 
+/** @param {MessageTerritoryDecayChanged} msg */
 Capturable.prototype.OnTerritoryDecayChanged = function(msg)
 {
 	if (msg.to)
 		this.CheckTimer();
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Capturable.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.CheckTimer();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Capturable.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -366,6 +388,7 @@ Capturable.prototype.OnOwnershipChanged = function(msg)
  * When a player is defeated, reassign the capture points of non-owned entities to gaia.
  * Those owned by the defeated player are dealt with onOwnershipChanged.
  */
+/** @param {MessagePlayerDefeated} msg */
 Capturable.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	if (!this.capturePoints[msg.playerId])
@@ -380,15 +403,24 @@ Capturable.prototype.OnGlobalPlayerDefeated = function(msg)
 	this.CheckTimer();
 };
 
-function CapturableMirage() {}
+function CapturableMirage() {
+	/** @type {number[]} */
+	this.capturePoints;
+	/** @type {number} */
+	this.maxCapturePoints;
+}
+/** @param {Capturable} cmpCapturable */
 CapturableMirage.prototype.Init = function(cmpCapturable)
 {
 	this.capturePoints = clone(cmpCapturable.GetCapturePoints());
 	this.maxCapturePoints = cmpCapturable.GetMaxCapturePoints();
 };
 
+/** @type {Capturable["GetCapturePoints"]} */
 CapturableMirage.prototype.GetCapturePoints = function() { return this.capturePoints; };
+/** @type {Capturable["GetMaxCapturePoints"]} */
 CapturableMirage.prototype.GetMaxCapturePoints = function() { return this.maxCapturePoints; };
+/** @type {Capturable["CanCapture"]} */
 CapturableMirage.prototype.CanCapture = Capturable.prototype.CanCapture;
 
 Engine.RegisterGlobal("CapturableMirage", CapturableMirage);

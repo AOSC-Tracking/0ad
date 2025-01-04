@@ -13,6 +13,7 @@
 
 /**
  * Approximation of cosine of a (radians)
+ * @param {number} a
  */
 Math.cos = function(a)
 {
@@ -37,6 +38,7 @@ Math.cos = function(a)
 
 /**
  * Approximation of sine of a (radians)
+ * @param {number} a
  */
 Math.sin = function(a)
 {
@@ -45,6 +47,7 @@ Math.sin = function(a)
 
 /**
  * Approximation of arctangent of a, returns angle from -pi/2 to pi/2
+ * @param {number} a
  */
 Math.atan = function(a)
 {
@@ -89,6 +92,8 @@ Math.atan = function(a)
 
 /**
  * Approximation of arctangent of y/x, returns angle from -pi to pi
+ * @param {number} y
+ * @param {number} x
  */
 Math.atan2 = function(y,x)
 {
@@ -140,16 +145,19 @@ Math.atan2 = function(y,x)
 	}
 };
 
+// @ts-expect-error
 Math.acos = function()
 {
 	error("Math.acos() does not yet have a synchronization safe implementation");
 };
 
+// @ts-expect-error
 Math.asin = function()
 {
 	error("Math.asin() does not yet have a synchronization safe implementation");
 };
 
+// @ts-expect-error
 Math.tan = function()
 {
 	error("Math.tan() does not yet have a synchronization safe implementation");
@@ -157,6 +165,8 @@ Math.tan = function()
 
 /**
  * Approximation of raising x to the power y
+ * @param {number} x
+ * @param {number} y
  */
 Math.pow = function(x, y)
 {

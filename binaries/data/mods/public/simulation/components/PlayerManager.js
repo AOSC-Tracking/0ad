@@ -1,12 +1,16 @@
-function PlayerManager() {}
+function PlayerManager() {
+	/**
+	 * List of player entity IDs.
+	 * @type {number[]}
+	 */
+	this.playerEntities = [];
+}
 
 PlayerManager.prototype.Schema =
 	"<a:component type='system'/><empty/>";
 
 PlayerManager.prototype.Init = function()
 {
-	// List of player entity IDs.
-	this.playerEntities = [];
 };
 
 /**
@@ -17,17 +21,17 @@ PlayerManager.prototype.AddPlayer = function(templateName)
 {
 	const ent = Engine.AddEntity(templateName);
 	const id = this.playerEntities.length;
-	Engine.QueryInterface(ent, IID_Player).SetPlayerID(id);
+	/** @type {Player} */(Engine.QueryInterface(ent, IID_Player)).SetPlayerID(id);
 	this.playerEntities.push(ent);
 
 	const newDiplo = [];
 	for (let i = 0; i < id; i++)
 	{
-		Engine.QueryInterface(this.GetPlayerByID(i), IID_Diplomacy).diplomacy[id] = -1;
+		/** @type {Diplomacy} */(Engine.QueryInterface(this.GetPlayerByID(i), IID_Diplomacy)).diplomacy[id] = -1;
 		newDiplo[i] = -1;
 	}
 	newDiplo[id] = 1;
-	Engine.QueryInterface(ent, IID_Diplomacy).SetDiplomacy(newDiplo);
+	/** @type {Diplomacy} */(Engine.QueryInterface(ent, IID_Diplomacy)).SetDiplomacy(newDiplo);
 
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": id,
@@ -53,14 +57,18 @@ PlayerManager.prototype.ReplacePlayerTemplate = function(id, newTemplateName)
 		Engine.QueryInterface(e, IID_Ownership)?.SetOwner(INVALID_PLAYER);
 
 	const oldent = this.playerEntities[id];
-	const oldCmpPlayer = Engine.QueryInterface(oldent, IID_Player);
-	const newCmpPlayer = Engine.QueryInterface(ent, IID_Player);
+	const oldCmpPlayer = /** @type {Player} */(Engine.QueryInterface(oldent, IID_Player));
+	const newCmpPlayer = /** @type {Player} */(Engine.QueryInterface(ent, IID_Player));
 
 	newCmpPlayer.SetPlayerID(id);
 	this.playerEntities[id] = ent;
 
-	newCmpPlayer.SetColor(oldCmpPlayer.GetColor());
-	Engine.QueryInterface(ent, IID_Diplomacy).SetDiplomacy(Engine.QueryInterface(oldent, IID_Diplomacy).GetDiplomacy());
+	let oldColor = oldCmpPlayer.GetColor();
+	newCmpPlayer.SetColor(oldColor.r, oldColor.g, oldColor.b);
+	const oldCmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(oldent, IID_Diplomacy));
+	const newCmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(ent, IID_Diplomacy));
+
+	newCmpDiplomacy.SetDiplomacy(oldCmpDiplomacy.GetDiplomacy());
 
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": id,
@@ -78,6 +86,7 @@ PlayerManager.prototype.ReplacePlayerTemplate = function(id, newTemplateName)
 /**
  * Returns the player entity ID for the given player ID.
  * The player ID must be valid (else there will be an error message).
+ * @param {number} id - The player number.
  */
 PlayerManager.prototype.GetPlayerByID = function(id)
 {
@@ -88,7 +97,7 @@ PlayerManager.prototype.GetPlayerByID = function(id)
 	if (id == INVALID_PLAYER)
 		return INVALID_ENTITY;
 
-	const stack = new Error().stack.trimRight().replace(/^/mg, '  '); // indent each line
+	const stack = new Error().stack?.trimRight().replace(/^/mg, '  '); // indent each line
 	warn("GetPlayerByID: no player defined for id '"+id+"'\n"+stack);
 
 	return INVALID_ENTITY;
@@ -130,7 +139,7 @@ PlayerManager.prototype.GetNonGaiaPlayers = function()
 PlayerManager.prototype.GetActivePlayers = function()
 {
 	return this.GetNonGaiaPlayers().filter(playerID =>
-		Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player).IsActive()
+		/** @type {Player} */(Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player)).IsActive()
 	);
 };
 
@@ -143,7 +152,7 @@ PlayerManager.prototype.RemoveLastPlayer = function()
 	if (!this.playerEntities.length)
 		return;
 
-	const lastId = this.playerEntities.pop();
+	const lastId = /** @type {number} */(this.playerEntities.pop());
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": this.playerEntities.length + 1,
 		"from": lastId,
@@ -152,6 +161,7 @@ PlayerManager.prototype.RemoveLastPlayer = function()
 	Engine.DestroyEntity(lastId);
 };
 
+/** @param {number} max */
 PlayerManager.prototype.SetMaxWorldPopulation = function(max)
 {
 	this.maxWorldPopulation = max;
@@ -175,9 +185,10 @@ PlayerManager.prototype.RedistributeWorldPopulation = function()
 
 	const newMaxPopulation = worldPopulation / activePlayers.length;
 	for (const playerID of activePlayers)
-		Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player).SetMaxPopulation(newMaxPopulation);
+		/** @type {Player} */(Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player)).SetMaxPopulation(newMaxPopulation);
 };
 
+/** @param {MessagePlayerDefeated} msg */
 PlayerManager.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.RedistributeWorldPopulation();

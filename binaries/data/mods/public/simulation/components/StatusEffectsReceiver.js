@@ -1,4 +1,22 @@
-function StatusEffectsReceiver() {}
+function StatusEffectsReceiver() {
+	/** @type {EntityId} */
+	this.entity;
+	/**
+	 * @typedef {{
+	 *    baseCode: string,
+	 *    Damage?: any,
+	 *    Capture?: any,
+	 *    Duration?: number,
+	 *    Interval?: number,
+	 *    Stackability: "Ignore" | "Extend" | "Replace" | "Stack",
+	 *    Modifiers: unknown[],
+	 *    StatusEffect: boolean,
+	 * }} StatusEffect
+	 * @typedef { StatusEffect & { _interval: number, _timeElapsed: number, _firstTime: boolean, source: { entity: number, owner: number }, _timer: number }} ActiveStatusEffect
+	 * @type {Record<string, ActiveStatusEffect>}
+	 */
+	this.activeStatusEffects;
+}
 
 StatusEffectsReceiver.prototype.DefaultInterval = 1000;
 
@@ -13,7 +31,7 @@ StatusEffectsReceiver.prototype.Init = function()
 /**
  * Which status effects are active on this entity.
  *
- * @return {Object} - An object containing the status effects which currently affect the entity.
+ * @return An object containing the status effects which currently affect the entity.
  */
 StatusEffectsReceiver.prototype.GetActiveStatuses = function()
 {
@@ -23,10 +41,9 @@ StatusEffectsReceiver.prototype.GetActiveStatuses = function()
 /**
  * Called by Attacking effects. Adds status effects for each entry in the effectData.
  *
- * @param {Object} effectData - An object containing the status effects to give to the entity.
+ * @param {Record<string, StatusEffect>} effectData - An object containing the status effects to give to the entity.
  * @param {number} attacker - The entity ID of the attacker.
  * @param {number} attackerOwner - The player ID of the attacker.
- * @param {number} bonusMultiplier - A value to multiply the damage with (not implemented yet for SE).
  *
  * @return {Object} - The codes of the status effects which were processed.
  */
@@ -43,8 +60,8 @@ StatusEffectsReceiver.prototype.ApplyStatus = function(effectData, attacker, att
 /**
  * Adds a status effect to the entity.
  *
- * @param {string} statusCode - The code of the status effect.
- * @param {Object} data - The various effects and timings.
+ * @param {string} baseCode - The code of the status effect.
+ * @param {StatusEffect} data - The various effects and timings.
  * @param {number} attacker - optional, the entity ID of the attacker.
  * @param {number} attackerOwner - optional, the player ID of the attacker.
  */
@@ -57,6 +74,7 @@ StatusEffectsReceiver.prototype.AddStatus = function(baseCode, data, attacker = 
 			return;
 		if (data.Stackability == "Extend")
 		{
+			// @ts-expect-error
 			this.activeStatusEffects[statusCode].Duration += data.Duration;
 			return;
 		}
@@ -73,6 +91,7 @@ StatusEffectsReceiver.prototype.AddStatus = function(baseCode, data, attacker = 
 		}
 	}
 
+	// @ts-expect-error
 	this.activeStatusEffects[statusCode] = {
 		"baseCode": baseCode
 	};

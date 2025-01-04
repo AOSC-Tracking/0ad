@@ -1,4 +1,14 @@
-function Pack() {}
+function Pack() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{Entity: string, Time: string, State: string}} */
+	this.template;
+
+	/** @type {number | undefined} */
+	this.timer;
+	/** @type {number} */
+	this.elapsedTime;
+}
 
 Pack.prototype.Schema =
 	"<element name='Entity' a:help='Entity to transform into'>" +
@@ -14,7 +24,7 @@ Pack.prototype.Schema =
 		"</choice>" +
 	"</element>";
 
-/**
+/**s
  * Interval of the timer that updates the packing progress.
  * @type {number}
  */
@@ -123,12 +133,17 @@ Pack.prototype.GetProgress = function()
 	return Math.min(this.elapsedTime / this.GetPackTime(), 1);
 };
 
+/** @param {number} time */
 Pack.prototype.SetElapsedTime = function(time)
 {
 	this.elapsedTime = time;
 	Engine.PostMessage(this.entity, MT_PackProgressUpdate, { "progress": this.elapsedTime });
 };
 
+/**
+ * @param {unknown} data
+ * @param {number} lateness
+ */
 Pack.prototype.PackProgress = function(data, lateness)
 {
 	if (this.elapsedTime < this.GetPackTime())

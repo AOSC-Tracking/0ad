@@ -1,4 +1,19 @@
-function Promotion() {}
+function Promotion() {
+	/** @type {number} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *   Entity: string,
+	 *   RequiredXp: string,
+	 *   TrickleRate?: string
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.currentXp;
+}
 
 Promotion.prototype.Schema =
 	"<element name='Entity'>" +
@@ -34,6 +49,9 @@ Promotion.prototype.GetPromotedTemplateName = function()
 	return this.template.Entity;
 };
 
+/**
+ * @param {string} promotedTemplateName
+ */
 Promotion.prototype.Promote = function(promotedTemplateName)
 {
 	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -54,6 +72,9 @@ Promotion.prototype.SetPromotedEntity = function(entity)
 	this.promotedUnitEntity = entity;
 };
 
+/**
+ * @param {number} amount
+ */
 Promotion.prototype.IncreaseXp = function(amount)
 {
 	// if the unit was already promoted, but is waiting for the engine to be destroyed
@@ -126,9 +147,10 @@ Promotion.prototype.CheckTrickleTimer = function()
 
 Promotion.prototype.TrickleTick = function()
 {
-	this.IncreaseXp(this.trickleRate);
+	this.IncreaseXp(/** @type {number} */(this.trickleRate));
 };
 
+/** @param {MessageValueModification} msg */
 Promotion.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Promotion")

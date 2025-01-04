@@ -1,13 +1,82 @@
-function Player() {}
+function Player()
+{
+	/** @type {number} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 * 	Formations: { _string: string },
+	 * 	SpyCostMultiplier: string,
+	 * 	BarterMultiplier: { Buy: Record<string, string>, Sell: Record<string, string>}
+	 * }}
+	 */
+	this.template;
+
+	/** @type {{ buy: Record<string, number>, sell: Record<string, number> }} */
+	this.barterMultiplier;
+
+	/** @type {number} */
+	this.spyCostMultiplier;
+
+	/** @ts-expect-error; @type {number} */
+	this.playerID = undefined;
+	/** @ts-expect-error; @type {{ r: number, g: number, b: number, a: number }} */
+	this.color = undefined;
+	this.popUsed = 0; // Population of units owned or trained by this player.
+	this.popBonuses = 0; // Sum of population bonuses of player's entities.
+	this.maxPop = 300; // Maximum population.
+	this.trainingBlocked = false; // Indicates whether any training queue is currently blocked.
+
+	/** @type {Record<GenericResName, number>} */
+	this.resourceCount = {};
+	/** @type {Record<GenericResName, string>} */
+	this.resourceNames = {};
+	/** @type {Record<GenericResName, number>} */
+	this.resourceGatherers = {};
+
+	this.tradingGoods = []; // Goods for next trade-route and its probabilities * 100.
+	this.state = this.STATE_ACTIVE;
+	/** @type {{ position: Vector3D, rotation: Vector3D } | undefined} */
+	this.startCam = undefined;
+	this.controlAllUnits = false;
+	this.isAI = false;
+	this.cheatsEnabled = false;
+	/** @type {EntityId[]} */
+	this.panelEntities = [];
+	/** @type {Record<string, boolean>} */
+	this.disabledTemplates = {};
+	/** @type {Record<string, boolean>} */
+	this.disabledTechnologies = {};
+	/** @type {EntityId[]} */
+	this.barterEntities = [];
+
+	// Initial resources.
+	let resCodes = g_Resources.GetCodes();
+	for (let res of resCodes)
+{
+		this.resourceCount[res] = 300;
+		this.resourceNames[res] = g_Resources.GetResource(res).name;
+		this.resourceGatherers[res] = 0;
+	}
+	// Trading goods probability in steps of 5.
+	let resTradeCodes = g_Resources.GetTradableCodes();
+	let quotient = Math.floor(20 / resTradeCodes.length);
+	let remainder = 20 % resTradeCodes.length;
+	for (let i in resTradeCodes)
+		this.tradingGoods.push({
+			goods: resTradeCodes[i],
+			proba: 5 * (quotient + (+i < remainder ? 1 : 0)),
+		});
+}
 
 Player.prototype.Schema =
 	"<element name='BarterMultiplier' a:help='Multipliers for barter prices.'>" +
 		"<interleave>" +
 			"<element name='Buy' a:help='Multipliers for the buy prices.'>" +
-				Resources.BuildSchema("positiveDecimal") +
+				g_Resources.BuildSchema("positiveDecimal") +
 			"</element>" +
 			"<element name='Sell' a:help='Multipliers for the sell prices.'>" +
-				Resources.BuildSchema("positiveDecimal") +
+				g_Resources.BuildSchema("positiveDecimal") +
 			"</element>" +
 		"</interleave>" +
 	"</element>" +
@@ -28,6 +97,7 @@ Player.prototype.STATE_WON = "won";
 
 Player.prototype.Serialize = function()
 {
+	/** @type {any} */
 	let state = {};
 	for (let key in this)
 		if (this.hasOwnProperty(key))
@@ -38,9 +108,11 @@ Player.prototype.Serialize = function()
 	return state;
 };
 
+/** @param {any} state */
 Player.prototype.Deserialize = function(state)
 {
 	for (let prop in state)
+		// @ts-expect-error
 		this[prop] = state[prop];
 };
 
@@ -51,51 +123,15 @@ var panelEntityClasses = "Hero Relic";
 
 Player.prototype.Init = function()
 {
-	this.playerID = undefined;
-	this.color = undefined;
-	this.popUsed = 0; // Population of units owned or trained by this player.
-	this.popBonuses = 0; // Sum of population bonuses of player's entities.
-	this.maxPop = 300; // Maximum population.
-	this.trainingBlocked = false; // Indicates whether any training queue is currently blocked.
-	this.resourceCount = {};
-	this.resourceGatherers = {};
-	this.tradingGoods = []; // Goods for next trade-route and its probabilities * 100.
-	this.state = this.STATE_ACTIVE;
 	this.formations = this.template.Formations._string.split(" ");
-	this.startCam = undefined;
-	this.controlAllUnits = false;
-	this.isAI = false;
-	this.cheatsEnabled = false;
-	this.panelEntities = [];
-	this.resourceNames = {};
-	this.disabledTemplates = {};
-	this.disabledTechnologies = {};
 	this.spyCostMultiplier = +this.template.SpyCostMultiplier;
-	this.barterEntities = [];
-	this.barterMultiplier = {
-		"buy": clone(this.template.BarterMultiplier.Buy),
-		"sell": clone(this.template.BarterMultiplier.Sell)
-	};
-
-	// Initial resources.
-	let resCodes = Resources.GetCodes();
-	for (let res of resCodes)
-	{
-		this.resourceCount[res] = 300;
-		this.resourceNames[res] = Resources.GetResource(res).name;
-		this.resourceGatherers[res] = 0;
-	}
-	// Trading goods probability in steps of 5.
-	let resTradeCodes = Resources.GetTradableCodes();
-	let quotient = Math.floor(20 / resTradeCodes.length);
-	let remainder = 20 % resTradeCodes.length;
-	for (let i in resTradeCodes)
-		this.tradingGoods.push({
-			"goods": resTradeCodes[i],
-			"proba": 5 * (quotient + (+i < remainder ? 1 : 0))
-		});
+	for (let res in this.template.BarterMultiplier.Buy)
+		this.barterMultiplier.buy[res] = +this.template.BarterMultiplier.Buy[res];
+	for (let res in this.template.BarterMultiplier.Sell)
+		this.barterMultiplier.sell[res] = +this.template.BarterMultiplier.Sell[res];
 };
 
+/** @param {number} id */
 Player.prototype.SetPlayerID = function(id)
 {
 	this.playerID = id;
@@ -106,6 +142,11 @@ Player.prototype.GetPlayerID = function()
 	return this.playerID;
 };
 
+/**
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ */
 Player.prototype.SetColor = function(r, g, b)
 {
 	let colorInitialized = !!this.color;
@@ -119,6 +160,7 @@ Player.prototype.SetColor = function(r, g, b)
 		});
 };
 
+/** @param {unknown} displayDiplomacyColor */
 Player.prototype.SetDisplayDiplomacyColor = function(displayDiplomacyColor)
 {
 	this.displayDiplomacyColor = displayDiplomacyColor;
@@ -131,10 +173,13 @@ Player.prototype.GetColor = function()
 
 Player.prototype.GetDisplayedColor = function()
 {
-	return this.displayDiplomacyColor ? Engine.QueryInterface(this.entity, IID_Diplomacy).GetColor() : this.color;
+	return this.displayDiplomacyColor ? /** @type {Diplomacy} */ (Engine.QueryInterface(this.entity, IID_Diplomacy)).GetColor() : this.color;
 };
 
-// Try reserving num population slots. Returns 0 on success or number of missing slots otherwise.
+/**
+ * Try reserving num population slots. Returns 0 on success or number of missing slots otherwise.
+ * @param {number} num
+ */
 Player.prototype.TryReservePopulationSlots = function(num)
 {
 	if (num != 0 && num > (this.GetPopulationLimit() - this.popUsed))
@@ -144,6 +189,7 @@ Player.prototype.TryReservePopulationSlots = function(num)
 	return 0;
 };
 
+/** @param {number} num */
 Player.prototype.UnReservePopulationSlots = function(num)
 {
 	this.popUsed -= num;
@@ -154,16 +200,19 @@ Player.prototype.GetPopulationCount = function()
 	return this.popUsed;
 };
 
+/** @param {number} num */
 Player.prototype.AddPopulation = function(num)
 {
 	this.popUsed += num;
 };
 
+/** @param {number} num */
 Player.prototype.SetPopulationBonuses = function(num)
 {
 	this.popBonuses = num;
 };
 
+/** @param {number} num */
 Player.prototype.AddPopulationBonuses = function(num)
 {
 	this.popBonuses += num;
@@ -174,6 +223,7 @@ Player.prototype.GetPopulationLimit = function()
 	return Math.min(this.GetMaxPopulation(), this.popBonuses);
 };
 
+/** @param {number} max */
 Player.prototype.SetMaxPopulation = function(max)
 {
 	this.maxPop = max;
@@ -219,6 +269,7 @@ Player.prototype.UnBlockTraining = function()
 	this.trainingBlocked = false;
 };
 
+/** @param {Record<GenericResName, number>} resources */
 Player.prototype.SetResourceCounts = function(resources)
 {
 	for (let res in resources)
@@ -263,6 +314,7 @@ Player.prototype.AddResource = function(type, amount)
 
 /**
  * Add resources to player.
+ * @param {Record<GenericResName, number>} amounts
  */
 Player.prototype.AddResources = function(amounts)
 {
@@ -270,9 +322,11 @@ Player.prototype.AddResources = function(amounts)
 		this.resourceCount[type] += +amounts[type];
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.GetNeededResources = function(amounts)
 {
 	// Check if we can afford it all.
+	/** @type {Record<GenericResName, number>} */
 	let amountsNeeded = {};
 	for (let type in amounts)
 		if (this.resourceCount[type] != undefined && amounts[type] > this.resourceCount[type])
@@ -283,6 +337,7 @@ Player.prototype.GetNeededResources = function(amounts)
 	return amountsNeeded;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.SubtractResourcesOrNotify = function(amounts)
 {
 	let amountsNeeded = this.GetNeededResources(amounts);
@@ -290,6 +345,7 @@ Player.prototype.SubtractResourcesOrNotify = function(amounts)
 	// If we don't have enough resources, send a notification to the player.
 	if (amountsNeeded)
 	{
+		/** @type {Record<string, any>} */
 		let parameters = {};
 		let i = 0;
 		for (let type in amountsNeeded)
@@ -338,6 +394,7 @@ Player.prototype.SubtractResourcesOrNotify = function(amounts)
 	return true;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.TrySubtractResources = function(amounts)
 {
 	if (!this.SubtractResourcesOrNotify(amounts))
@@ -351,6 +408,7 @@ Player.prototype.TrySubtractResources = function(amounts)
 	return true;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.RefundResources = function(amounts)
 {
 	const cmpStatisticsTracker = QueryPlayerIDInterface(this.playerID, IID_StatisticsTracker);
@@ -377,6 +435,7 @@ Player.prototype.GetNextTradingGoods = function()
 
 Player.prototype.GetTradingGoods = function()
 {
+	/** @type {Record<string, number>} */
 	let tradingGoods = {};
 	for (let resource of this.tradingGoods)
 		tradingGoods[resource.goods] = resource.proba;
@@ -384,9 +443,10 @@ Player.prototype.GetTradingGoods = function()
 	return tradingGoods;
 };
 
+/** @param {Record<GenericResName, number>} tradingGoods */
 Player.prototype.SetTradingGoods = function(tradingGoods)
 {
-	let resTradeCodes = Resources.GetTradableCodes();
+	let resTradeCodes = g_Resources.GetTradableCodes();
 	let sumProba = 0;
 	for (let resource in tradingGoods)
 	{
@@ -413,7 +473,7 @@ Player.prototype.SetTradingGoods = function(tradingGoods)
 };
 
 /**
- * @param {string} message - The message to send in the chat. May be undefined.
+ * @param {string=} message - The message to send in the chat. May be undefined.
  */
 Player.prototype.Win = function(message)
 {
@@ -421,7 +481,7 @@ Player.prototype.Win = function(message)
 };
 
 /**
- * @param {string} message - The message to send in the chat. May be undefined.
+ * @param {string=} message - The message to send in the chat. May be undefined.
  */
 Player.prototype.Defeat = function(message)
 {
@@ -500,7 +560,7 @@ Player.prototype.SetState = function(newState, message)
 		for (let entity of entities)
 		{
 			let cmpOwnership = Engine.QueryInterface(entity, IID_Ownership);
-			cmpOwnership.SetOwnerQuiet(0);
+			cmpOwnership?.SetOwnerQuiet(0);
 		}
 
 		// With the real ownership change complete, send OwnershipChanged messages.
@@ -531,6 +591,7 @@ Player.prototype.GetFormations = function()
 	return this.formations;
 };
 
+/** @param {string[]} formations */
 Player.prototype.SetFormations = function(formations)
 {
 	this.formations = formations;
@@ -538,17 +599,21 @@ Player.prototype.SetFormations = function(formations)
 
 Player.prototype.GetStartingCameraPos = function()
 {
-	return this.startCam.position;
+	return this.startCam?.position;
 };
 
 Player.prototype.GetStartingCameraRot = function()
 {
-	return this.startCam.rotation;
+	return this.startCam?.rotation;
 };
 
+/**
+ * @param {Vector3D} pos
+ * @param {Vector3D} rot
+ */
 Player.prototype.SetStartingCamera = function(pos, rot)
 {
-	this.startCam = { "position": pos, "rotation": rot };
+	this.startCam = { position: pos, rotation: rot };
 };
 
 Player.prototype.HasStartingCamera = function()
@@ -556,6 +621,7 @@ Player.prototype.HasStartingCamera = function()
 	return this.startCam !== undefined;
 };
 
+/** @param {boolean} c */
 Player.prototype.SetControlAllUnits = function(c)
 {
 	this.controlAllUnits = c;
@@ -566,6 +632,7 @@ Player.prototype.CanControlAllUnits = function()
 	return this.controlAllUnits;
 };
 
+/** @param {boolean} flag */
 Player.prototype.SetAI = function(flag)
 {
 	this.isAI = flag;
@@ -578,13 +645,14 @@ Player.prototype.IsAI = function()
 
 /**
  * Do some map dependant initializations
+ * @param {MessageInitGame} msg
  */
 Player.prototype.OnGlobalInitGame = function(msg)
 {
 	// Replace the "{civ}" code with this civ ID.
 	let disabledTemplates = this.disabledTemplates;
 	this.disabledTemplates = {};
-	const civ = Engine.QueryInterface(this.entity, IID_Identity).GetCiv();
+	const civ = /** @type {Identity} */ (Engine.QueryInterface(this.entity, IID_Identity)).GetCiv();
 	for (let template in disabledTemplates)
 		if (disabledTemplates[template])
 			this.disabledTemplates[template.replace(/\{civ\}/g, civ)] = true;
@@ -593,6 +661,7 @@ Player.prototype.OnGlobalInitGame = function(msg)
 /**
  * Keep track of population effects of all entities that
  * become owned or unowned by this player.
+ * @param {MessageOwnershipChanged} msg
  */
 Player.prototype.OnGlobalOwnershipChanged = function(msg)
 {
@@ -631,6 +700,7 @@ Player.prototype.OnGlobalOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageValueModification} msg */
 Player.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Player")
@@ -641,12 +711,13 @@ Player.prototype.OnValueModification = function(msg)
 
 	if (msg.valueNames.some(mod => mod.startsWith("Player/BarterMultiplier/")))
 		for (let res in this.template.BarterMultiplier.Buy)
-		{
+{
 			this.barterMultiplier.buy[res] = ApplyValueModificationsToEntity("Player/BarterMultiplier/Buy/"+res, +this.template.BarterMultiplier.Buy[res], this.entity);
 			this.barterMultiplier.sell[res] = ApplyValueModificationsToEntity("Player/BarterMultiplier/Sell/"+res, +this.template.BarterMultiplier.Sell[res], this.entity);
 		}
 };
 
+/** @param {boolean} flag */
 Player.prototype.SetCheatsEnabled = function(flag)
 {
 	this.cheatsEnabled = flag;
@@ -657,21 +728,25 @@ Player.prototype.GetCheatsEnabled = function()
 	return this.cheatsEnabled;
 };
 
+/**
+ * @param {number} player
+ * @param {Record<GenericResName, number>} amounts
+ */
 Player.prototype.TributeResource = function(player, amounts)
 {
-	let cmpPlayer = QueryPlayerIDInterface(player);
+	let cmpPlayer = QueryPlayerIDInterface(player, IID_Player);
 	if (!cmpPlayer)
 		return;
 
 	if (!this.IsActive() || !cmpPlayer.IsActive())
 		return;
 
-	let resTribCodes = Resources.GetTributableCodes();
+	let resTribCodes = g_Resources.GetTributableCodes();
 	for (let resCode in amounts)
 		if (resTribCodes.indexOf(resCode) == -1 ||
-		    !Number.isInteger(amounts[resCode]) ||
+			!Number.isInteger(amounts[resCode]) ||
 		    amounts[resCode] < 0)
-		{
+{
 			warn("Invalid tribute amounts: " + uneval(resCode) + ": " + uneval(amounts));
 			return;
 		}
@@ -704,18 +779,21 @@ Player.prototype.TributeResource = function(player, amounts)
 	});
 };
 
+/** @param {string} template */
 Player.prototype.AddDisabledTemplate = function(template)
 {
 	this.disabledTemplates[template] = true;
 	Engine.BroadcastMessage(MT_DisabledTemplatesChanged, { "player": this.playerID });
 };
 
+/** @param {string} template */
 Player.prototype.RemoveDisabledTemplate = function(template)
 {
 	this.disabledTemplates[template] = false;
 	Engine.BroadcastMessage(MT_DisabledTemplatesChanged, { "player": this.playerID });
 };
 
+/** @param {string[]} templates */
 Player.prototype.SetDisabledTemplates = function(templates)
 {
 	this.disabledTemplates = {};
@@ -729,18 +807,21 @@ Player.prototype.GetDisabledTemplates = function()
 	return this.disabledTemplates;
 };
 
+/** @param {string} tech */
 Player.prototype.AddDisabledTechnology = function(tech)
 {
 	this.disabledTechnologies[tech] = true;
 	Engine.BroadcastMessage(MT_DisabledTechnologiesChanged, { "player": this.playerID });
 };
 
+/** @param {string} tech */
 Player.prototype.RemoveDisabledTechnology = function(tech)
 {
 	this.disabledTechnologies[tech] = false;
 	Engine.BroadcastMessage(MT_DisabledTechnologiesChanged, { "player": this.playerID });
 };
 
+/** @param {string[]} techs */
 Player.prototype.SetDisabledTechnologies = function(techs)
 {
 	this.disabledTechnologies = {};
@@ -754,13 +835,15 @@ Player.prototype.GetDisabledTechnologies = function()
 	return this.disabledTechnologies;
 };
 
+/** @param {MessagePlayerDefeated} msg */
 Player.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	let cmpSound = Engine.QueryInterface(this.entity, IID_Sound);
 	if (!cmpSound)
 		return;
 
-	const soundGroup = cmpSound.GetSoundGroup(this.playerID === msg.playerId ? "defeated" : Engine.QueryInterface(this.entity, IID_Diplomacy).IsAlly(msg.playerId) ? "defeated_ally" : this.HasWon() ? "won" : "defeated_enemy");
+	const cmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(this.entity, IID_Diplomacy));
+	const soundGroup = cmpSound.GetSoundGroup(this.playerID === msg.playerId ? "defeated" : cmpDiplomacy.IsAlly(msg.playerId) ? "defeated_ally" : this.HasWon() ? "won" : "defeated_enemy");
 	if (soundGroup)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_SoundManager).PlaySoundGroupForPlayer(soundGroup, this.playerID);
 };

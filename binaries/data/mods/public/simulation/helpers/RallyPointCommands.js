@@ -1,9 +1,14 @@
-// Returns an array of commands suitable for ProcessCommand() based on the rally point data.
-// This assumes that the rally point has a valid position.
+/**
+ * Returns an array of commands suitable for ProcessCommand() based on the rally point data.
+ * This assumes that the rally point has a valid position.
+ * @param {RallyPoint} cmpRallyPoint - The rally point component.
+ * @param {number[]} spawnedEnts - The entities to command.
+ */
 function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 {
 	let data = cmpRallyPoint.GetData();
 	let rallyPos = cmpRallyPoint.GetPositions();
+	/** @type {{ type: string, entities: EntityId[], queued: boolean, target?: EntityId, x?: number, z?: number, [prop: string]: unknown }[]} */
 	let ret = [];
 	for (let i = 0; i < rallyPos.length; ++i)
 	{
@@ -14,7 +19,7 @@ function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 		// has a valid position, then just walk to the rally point.
 		if (data[i] && data[i].target)
 		{
-			let cmpPosition = Engine.QueryInterface(data[i].target, IID_Position);
+			let cmpPosition = Engine.QueryInterface(/** @type {EntityId} */(data[i].target), IID_Position);
 			if (!cmpPosition || !cmpPosition.IsInWorld())
 			{
 				if (command == "gather")
@@ -148,6 +153,7 @@ function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 	// (we do not modify the RallyPoint before, as we want it to be displayed with all way-points)
 	if (ret.length > 1 && ret[ret.length-1].type == "setup-trade-route")
 	{
+		/** @type {{ x: number, z: number }[] | undefined} */
 		let route = [];
 		let waypoints = ret.length - 1;
 
@@ -158,6 +164,7 @@ function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 				route = undefined;
 				break;
 			}
+			// @ts-expect-error(we check above)
 			route.push({ "x": ret[i].x, "z": ret[i].z });
 		}
 

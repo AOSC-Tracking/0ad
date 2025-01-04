@@ -1,6 +1,7 @@
 /**
  * Returns a pair of independent and normally distributed (zero mean, variance 1) random numbers.
  * Uses the Polar-Rejection method.
+ * @returns {[number, number]}
  */
 function randomNormal2D()
 {
@@ -17,6 +18,8 @@ function randomNormal2D()
 
 /**
  * Return a random element of the source array.
+ * @template T
+ * @param {T[]} source
  */
 function pickRandom(source)
 {
@@ -25,6 +28,8 @@ function pickRandom(source)
 
 /**
  * Return a random floating point number in the interval [min, max).
+ * @param {number} min
+ * @param {number} max
  */
 function randFloat(min, max)
 {
@@ -36,6 +41,9 @@ function randFloat(min, max)
  *
  * If an argument is not integer, the uniform distribution is cut off at that endpoint.
  * For example randIntInclusive(1.5, 2.5) yields 50% chance to get 2 and 25% chance for 1 and 3.
+ * 
+ * @param {number} min
+ * @param {number} max
  */
 function randIntInclusive(min, max)
 {
@@ -47,6 +55,9 @@ function randIntInclusive(min, max)
  *
  * If an argument is not integer, the uniform distribution is cut off at that endpoint.
  * For example randIntExclusive(1.5, 3.5) yields 50% chance to get 2 and 25% chance for 1 and 3.
+ * 
+ * @param {number} min
+ * @param {number} max
  */
 function randIntExclusive(min, max)
 {

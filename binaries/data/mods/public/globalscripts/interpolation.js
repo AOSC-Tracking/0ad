@@ -5,6 +5,10 @@
  *
  * @param {number} tension - determines how sharply the curve bends at the given points.
  * @param {number} x - Location of the point to interpolate, relative to p1
+ * @param {number} p0
+ * @param {number} p1
+ * @param {number} p2
+ * @param {number} p3
  */
 function cubicInterpolation(tension, x, p0, p1, p2, p3)
 {
@@ -20,6 +24,22 @@ function cubicInterpolation(tension, x, p0, p1, p2, p3)
  * Two dimensional interpolation within a square grid using a polynomial of degree three.
  *
  * @param {Vector2D} position - Location of the point to interpolate, relative to p11
+ * @param {number} p00
+ * @param {number} p01
+ * @param {number} p02
+ * @param {number} p03
+ * @param {number} p10
+ * @param {number} p11
+ * @param {number} p12
+ * @param {number} p13
+ * @param {number} p20
+ * @param {number} p21
+ * @param {number} p22
+ * @param {number} p23
+ * @param {number} p30
+ * @param {number} p31
+ * @param {number} p32
+ * @param {number} p33
  */
 function bicubicInterpolation
 (

@@ -16,22 +16,29 @@ DelayedDamage.prototype.MISSILE_HIT_RADIUS = 2;
 
 /**
  * Handles hit logic (after a delay has passed).
- * @param {Object}   data - The data sent by the caller.
- * @param {string}   data.type - The type of damage.
- * @param {Object}   data.attackData - Data of the form { 'effectType': { ...opaque effect data... }, 'Bonuses': {...} }.
- * @param {number}   data.target - The entity id of the target.
- * @param {number}   data.attacker - The entity id of the attacker.
- * @param {number}   data.attackerOwner - The player id of the owner of the attacker.
- * @param {Vector3D} data.position - The expected position of the target.
- * @param {number}   data.projectileId - The id of the projectile.
- * @param {Vector3D} data.direction - The unit vector defining the direction.
- * @param {string}   data.attackImpactSound - The name of the sound emited on impact.
- * @param {boolean}  data.friendlyFire - A flag indicating whether allied entities can also be damaged.
+ * @typedef {Object} DelayedDamageData
+ * @prop {g_AttackTypes[number]}   data.type - The type of damage.
+ * @prop {Template}   data.attackData - Data of the form { 'effectType': { ...opaque effect data... }, 'Bonuses': {...} }.
+ * @prop {EntityId}   data.target - The entity id of the target.
+ * @prop {EntityId}   data.attacker - The entity id of the attacker.
+ * @prop {number}   data.attackerOwner - The player id of the owner of the attacker.
+ * @prop {Vector3D} data.position - The expected position of the target.
+ * @prop {Vector3D} data.direction - The unit vector defining the direction.
+ * @prop {number}   data.projectileId - The id of the projectile.
+ * @prop {string=}   data.attackImpactSound - The name of the sound emited on impact.
+ * @prop {boolean=}  data.friendlyFire - A flag indicating whether allied entities can also be damaged.
  * ***When splash damage***
- * @param {boolean}  data.splash.friendlyFire - A flag indicating if allied entities are also damaged.
- * @param {number}   data.splash.radius - The radius of the splash damage.
- * @param {string}   data.splash.shape - The shape of the splash range.
- * @param {Object}   data.splash.attackData - same as attackData, for splash.
+ * @prop {DelayedDamageSplashData=}   data.splash - The splash damage data.
+ * 
+ * @typedef {Object} DelayedDamageSplashData
+ * @prop {boolean}  data.splash.friendlyFire - A flag indicating if allied entities are also damaged.
+ * @prop {number}   data.splash.radius - The radius of the splash damage.
+ * @prop {"Circular" | "Linear"}   data.splash.shape - The shape of the splash range.
+ * @prop {Object}   data.splash.attackData - same as attackData, for splash.
+ */
+/**
+ * @param {DelayedDamageData} data
+ * @param {number} lateness - How long after the turn tick the hit occurred.
  */
 DelayedDamage.prototype.Hit = function(data, lateness)
 {

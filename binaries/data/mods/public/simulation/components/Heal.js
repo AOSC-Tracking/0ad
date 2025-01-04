@@ -1,4 +1,22 @@
-function Heal() {}
+function Heal() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *  Range: string,
+	 *  RangeOverlay: { LineTexture: string, LineTextureMask: string, LineThickness: string },
+	 *  Health: string,
+	 *  Interval: string,
+	 *  UnhealableClasses: { _string: string },
+	 *  HealableClasses: { _string: string }
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number | undefined} */
+	this.timer;
+}
 
 Heal.prototype.Schema =
 	"<a:help>Controls the healing abilities of the unit.</a:help>" +
@@ -107,7 +125,7 @@ Heal.prototype.CanHeal = function(target)
 
 	let targetClasses = cmpIdentity.GetClassesList();
 	return !MatchesClassList(targetClasses, this.GetUnhealableClasses()) &&
-		MatchesClassList(targetClasses, this.GetHealableClasses());
+		MatchesClassList(targetClasses, this.GetHealableClasses()) || false;
 };
 
 Heal.prototype.GetRangeOverlays = function()
@@ -125,7 +143,7 @@ Heal.prototype.GetRangeOverlays = function()
 
 /**
  * @param {number} target - The target to heal.
- * @param {number} callerIID - The IID to notify on specific events.
+ * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
  * @return {boolean} - Whether we started healing.
  */
 Heal.prototype.StartHealing = function(target, callerIID)
@@ -166,7 +184,7 @@ Heal.prototype.StartHealing = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped healing.
+ * @param {string=} reason - The reason why we stopped healing.
  */
 Heal.prototype.StopHealing = function(reason)
 {
@@ -174,7 +192,8 @@ Heal.prototype.StopHealing = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	delete this.target;
@@ -192,39 +211,40 @@ Heal.prototype.StopHealing = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason, undefined);
 	}
 };
 
 /**
  * Heal our target entity.
- * @param data - Unused.
+ * @param {any} data - Unused.
  * @param {number} lateness - The offset of the actual call and when it was expected.
  */
 Heal.prototype.PerformHeal = function(data, lateness)
 {
-	if (!this.CanHeal(this.target))
+	let target = /** @type {number} */ (this.target);
+	if (!this.CanHeal(target))
 	{
 		this.StopHealing("TargetInvalidated");
 		return;
 	}
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(target))
 	{
 		this.StopHealing("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
 	this.lastHealed = cmpTimer.GetTime() - lateness;
 
-	let cmpHealth = Engine.QueryInterface(this.target, IID_Health);
+	let cmpHealth = /** @type {Health} */(Engine.QueryInterface(target, IID_Health));
 	let targetState = cmpHealth.Increase(this.GetHealth());
 
 	// Add experience.
-	let cmpLoot = Engine.QueryInterface(this.target, IID_Loot);
+	let cmpLoot = Engine.QueryInterface(target, IID_Loot);
 	let cmpPromotion = Engine.QueryInterface(this.entity, IID_Promotion);
 	if (targetState !== undefined && cmpLoot && cmpPromotion)
 		// Health healed times experience per health.
@@ -253,7 +273,7 @@ Heal.prototype.PerformHeal = function(data, lateness)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {number} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Heal.prototype.IsTargetInRange = function(target)
@@ -263,6 +283,7 @@ Heal.prototype.IsTargetInRange = function(target)
 	return cmpObstructionManager.IsInTargetRange(this.entity, target, range.min, range.max, false);
 };
 
+/** @param {MessageValueModification} msg */
 Heal.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Heal" || msg.valueNames.indexOf("Heal/Range") === -1)

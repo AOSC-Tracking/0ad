@@ -1,4 +1,10 @@
-function Garrisonable() {}
+function Garrisonable() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Size: string }} */
+	this.template;
+}
 
 Garrisonable.prototype.Schema =
 	"<a:help>Controls the garrisonability of an entity.</a:help>" +
@@ -16,7 +22,7 @@ Garrisonable.prototype.Init = function()
 /**
  * @param {string} type - Unused.
  * @param {number} target - The entity ID of the target to check.
- * @return {Object} - Min and max ranges this entity needs to be in in order to garrison the target.
+ * @return {{ min: number, max: number }} - Min and max ranges this entity needs to be in in order to garrison the target.
  */
 Garrisonable.prototype.GetRange = function(type, target)
 {
@@ -73,7 +79,7 @@ Garrisonable.prototype.CanGarrison = function(target)
 		return false;
 
 	let cmpGarrisonHolder = Engine.QueryInterface(target, IID_GarrisonHolder);
-	return cmpGarrisonHolder && cmpGarrisonHolder.IsAllowedToGarrison(this.entity);
+	return !!cmpGarrisonHolder && cmpGarrisonHolder.IsAllowedToGarrison(this.entity);
 };
 
 /**
@@ -132,7 +138,7 @@ Garrisonable.prototype.UnGarrison = function(forced = false)
 	}
 
 	let cmpHolderPosition = Engine.QueryInterface(this.holder, IID_Position);
-	if (cmpHolderPosition)
+	if (cmpPosition && cmpHolderPosition)
 		cmpPosition.SetYRotation(cmpHolderPosition.GetPosition().horizAngleTo(pos));
 
 	let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
@@ -159,16 +165,17 @@ Garrisonable.prototype.UnGarrison = function(forced = false)
 	return true;
 };
 
+/** @param {MessageEntityRenamed} msg */
 Garrisonable.prototype.OnEntityRenamed = function(msg)
 {
 	if (!this.holder)
 		return;
 
 	let holder = this.holder;
-	this.UnGarrison(true, true);
+	this.UnGarrison(true);
 	let cmpGarrisonable = Engine.QueryInterface(msg.newentity, IID_Garrisonable);
 	if (cmpGarrisonable)
-		cmpGarrisonable.Garrison(holder, true);
+		cmpGarrisonable.Garrison(holder);
 };
 
 Engine.RegisterComponentType(IID_Garrisonable, "Garrisonable", Garrisonable);

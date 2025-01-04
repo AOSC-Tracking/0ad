@@ -1,4 +1,13 @@
-function Auras() {}
+// @ts-nocheck (the 'this' indexing cannot be typed without switching to ES6 classes)
+function Auras() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ _string: string }} */
+	this.template;
+
+	/** @type {Record<string, number[]>} */
+	this.affectedPlayers;
+}
 
 Auras.prototype.Schema =
 	"<attribute name='datatype'>" +
@@ -18,7 +27,10 @@ Auras.prototype.Init = function()
 	this.Clean();
 };
 
-// We can modify identifier if we want stackable auras in some case.
+/**
+ * We can modify identifier if we want stackable auras in some case.
+ * @param {string} name
+ */
 Auras.prototype.GetModifierIdentifier = function(name)
 {
 	if (AuraTemplates.Get(name).stackable)
@@ -28,6 +40,7 @@ Auras.prototype.GetModifierIdentifier = function(name)
 
 Auras.prototype.GetDescriptions = function()
 {
+	/** @type {Record<string, { name: { generic: string }, description: string | null, radius: number | null }>} */
 	var ret = {};
 	for (let auraID of this.GetAuraNames())
 	{
@@ -48,16 +61,21 @@ Auras.prototype.GetAuraNames = function()
 	return this.template._string.split(/\s+/);
 };
 
+/** @param {string} name */
 Auras.prototype.GetOverlayIcon = function(name)
 {
 	return AuraTemplates.Get(name).overlayIcon || "";
 };
 
+/**
+ * @param {string} name
+ */
 Auras.prototype.GetAffectedEntities = function(name)
 {
 	return this[name].targetUnits;
 };
 
+/** @param {string} name */
 Auras.prototype.GetRange = function(name)
 {
 	if (this.IsRangeAura(name))
@@ -65,16 +83,19 @@ Auras.prototype.GetRange = function(name)
 	return undefined;
 };
 
+/** @param {string} name */
 Auras.prototype.GetClasses = function(name)
 {
 	return AuraTemplates.Get(name).affects;
 };
 
+/** @param {string} name */
 Auras.prototype.GetModifications = function(name)
 {
 	return AuraTemplates.Get(name).modifications;
 };
 
+/** @param {string} name */
 Auras.prototype.GetAffectedPlayers = function(name)
 {
 	return this.affectedPlayers[name];
@@ -94,14 +115,14 @@ Auras.prototype.GetRangeOverlays = function()
 		rangeOverlays.push(
 			rangeOverlay ?
 				{
-					"radius": this.GetRange(name),
+					"radius": /** @type {number} */(this.GetRange(name)),
 					"texture": rangeOverlay.lineTexture,
 					"textureMask": rangeOverlay.lineTextureMask,
 					"thickness": rangeOverlay.lineThickness
 				} :
 				// Specify default in order not to specify it in about 40 auras
 				{
-					"radius": this.GetRange(name),
+					"radius": /** @type {number} */(this.GetRange(name)),
 					"texture": "outline_border.png",
 					"textureMask": "outline_border_mask.png",
 					"thickness": 0.2
@@ -111,34 +132,38 @@ Auras.prototype.GetRangeOverlays = function()
 	return rangeOverlays;
 };
 
+/** @param {string} name */
 Auras.prototype.CalculateAffectedPlayers = function(name)
 {
+	/** @type {string[]} */
 	var affectedPlayers = AuraTemplates.Get(name).affectedPlayers || ["Player"];
 	this.affectedPlayers[name] = [];
 
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
-		cmpPlayer = QueryOwnerInterface(this.entity);
+		cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 
 	if (!cmpPlayer || cmpPlayer.IsDefeated())
 		return;
 
 	const playerID = cmpPlayer.GetPlayerID();
-	const cmpDiplomacy = Engine.QueryInterface(this.entity, IID_Diplomacy) ??
-		QueryPlayerIDInterface(playerID, IID_Diplomacy);
+	const cmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(this.entity, IID_Diplomacy) ??
+		QueryPlayerIDInterface(playerID, IID_Diplomacy));
 
 	let cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	for (let i of cmpPlayerManager.GetAllPlayers())
 	{
-		let cmpAffectedPlayer = QueryPlayerIDInterface(i);
+		let cmpAffectedPlayer = QueryPlayerIDInterface(i, IID_Player);
 		if (!cmpAffectedPlayer || cmpAffectedPlayer.IsDefeated())
 			continue;
 
+		// @ts-expect-error
 		if (affectedPlayers.some(p => p == "Player" ? playerID == i : cmpDiplomacy["Is" + p](i)))
 			this.affectedPlayers[name].push(i);
 	}
 };
 
+/** @param {string} name */
 Auras.prototype.CanApply = function(name)
 {
 	if (!AuraTemplates.Get(name).requiredTechnology)
@@ -166,53 +191,62 @@ Auras.prototype.HasGarrisonedUnitsAura = function()
 	return this.GetAuraNames().some(n => this.IsGarrisonedUnitsAura(n));
 };
 
+/** @param {string} name */
 Auras.prototype.GetType = function(name)
 {
 	return AuraTemplates.Get(name).type;
 };
 
+/** @param {string} name */
 Auras.prototype.IsFormationAura = function(name)
 {
 	return this.GetType(name) == "formation";
 };
 
+/** @param {string} name */
 Auras.prototype.IsGarrisonAura = function(name)
 {
 	return this.GetType(name) == "garrison";
 };
 
+/** @param {string} name */
 Auras.prototype.IsGarrisonedUnitsAura = function(name)
 {
 	return this.GetType(name) == "garrisonedUnits";
 };
 
+/** @param {string} name */
 Auras.prototype.IsTurretedUnitsAura = function(name)
 {
 	return this.GetType(name) == "turretedUnits";
 };
 
+/** @param {string} name */
 Auras.prototype.IsRangeAura = function(name)
 {
 	return this.GetType(name) == "range";
 };
 
+/** @param {string} name */
 Auras.prototype.IsGlobalAura = function(name)
 {
 	return this.GetType(name) == "global";
 };
 
+/** @param {string} name */
 Auras.prototype.IsPlayerAura = function(name)
 {
 	return this.GetType(name) == "player";
 };
 
 /**
- * clean all bonuses. Remove the old ones and re-apply the new ones
+ * Clean all bonuses. Remove the old ones and re-apply the new ones
  */
 Auras.prototype.Clean = function()
 {
 	var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
 	var auraNames = this.GetAuraNames();
+	/** @type {Record<string, EntityId[]>} */
 	let targetUnitsClone = {};
 	let needVisualizationUpdate = false;
 	// remove all bonuses
@@ -243,9 +277,10 @@ Auras.prototype.Clean = function()
 		// this makes sure the template bonuses are removed from the correct players
 		this.CalculateAffectedPlayers(name);
 		// initialise range query
-		this[name] = {};
-		this[name].targetUnits = [];
-		this[name].isApplied = this.CanApply(name);
+		this[name] = {
+			targetUnits: [],
+			isApplied: this.CanApply(name)
+		};
 		var affectedPlayers = this.GetAffectedPlayers(name);
 
 		if (!affectedPlayers.length)
@@ -284,7 +319,7 @@ Auras.prototype.Clean = function()
 			this[name].rangeQuery = cmpRangeManager.CreateActiveQuery(
 				this.entity,
 				0,
-				this.GetRange(name),
+				this.GetRange(name) || -1,
 				affectedPlayers,
 				IID_Identity,
 				cmpRangeManager.GetEntityFlagMask("normal"),
@@ -305,6 +340,10 @@ Auras.prototype.Clean = function()
 	}
 };
 
+/**
+ * @param {string} auraName
+ * @param {EntityId[]} entityList
+ */
 Auras.prototype.GiveMembersWithValidClass = function(auraName, entityList)
 {
 	var match = this.GetClasses(auraName);
@@ -314,6 +353,7 @@ Auras.prototype.GiveMembersWithValidClass = function(auraName, entityList)
 	});
 };
 
+/** @param {MessageRangeUpdate} msg */
 Auras.prototype.OnRangeUpdate = function(msg)
 {
 	for (let name of this.GetAuraNames().filter(n => this[n] && msg.tag == this[n].rangeQuery))
@@ -323,6 +363,7 @@ Auras.prototype.OnRangeUpdate = function(msg)
 	}
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 Auras.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsGarrisonedUnitsAura(n)))
@@ -332,6 +373,7 @@ Auras.prototype.OnGarrisonedUnitsChanged = function(msg)
 	}
 };
 
+/** @param {MessageTurretsChanged} msg */
 Auras.prototype.OnTurretsChanged = function(msg)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsTurretedUnitsAura(n)))
@@ -341,18 +383,28 @@ Auras.prototype.OnTurretsChanged = function(msg)
 	}
 };
 
+/**
+ * @param {EntityId[]} memberList
+ */
 Auras.prototype.ApplyFormationAura = function(memberList)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsFormationAura(n)))
 		this.ApplyAura(name, memberList);
 };
 
+/**
+ * @param {EntityId} structure
+ */
 Auras.prototype.ApplyGarrisonAura = function(structure)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsGarrisonAura(n)))
 		this.ApplyAura(name, [structure]);
 };
 
+/**
+ * @param {string} name
+ * @param {number[]} players
+ */
 Auras.prototype.ApplyTemplateAura = function(name, players)
 {
 	if (!this[name].isApplied)
@@ -373,18 +425,27 @@ Auras.prototype.ApplyTemplateAura = function(name, players)
 		cmpModifiersManager.AddModifiers(modifName, derivedModifiers, cmpPlayerManager.GetPlayerByID(player));
 };
 
+/**
+ * @param {EntityId[]} memberList
+ */
 Auras.prototype.RemoveFormationAura = function(memberList)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsFormationAura(n)))
 		this.RemoveAura(name, memberList);
 };
 
+/** 
+ * @param {EntityId} structure
+ */
 Auras.prototype.RemoveGarrisonAura = function(structure)
 {
 	for (let name of this.GetAuraNames().filter(n => this.IsGarrisonAura(n)))
 		this.RemoveAura(name, [structure]);
 };
 
+/**
+ * @param {string} name
+ */
 Auras.prototype.RemoveTemplateAura = function(name)
 {
 	if (!this[name].isApplied)
@@ -409,6 +470,10 @@ Auras.prototype.RemoveTemplateAura = function(name)
 	}
 };
 
+/**
+ * @param {string} name
+ * @param {EntityId[]} ents
+ */
 Auras.prototype.ApplyAura = function(name, ents)
 {
 	var validEnts = this.GiveMembersWithValidClass(name, ents);
@@ -446,6 +511,10 @@ Auras.prototype.ApplyAura = function(name, ents)
 		cmpModifiersManager.AddModifiers(modifName, derivedModifiers, ent);
 };
 
+/**
+ * @param {string} name
+ * @param {EntityId[]} ents
+ */
 Auras.prototype.RemoveAura = function(name, ents, skipModifications = false)
 {
 	var validEnts = this.GiveMembersWithValidClass(name, ents);
@@ -484,11 +553,13 @@ Auras.prototype.RemoveAura = function(name, ents, skipModifications = false)
 			cmpModifiersManager.RemoveModifier(modifierPath, modifName, ent);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Auras.prototype.OnOwnershipChanged = function(msg)
 {
 	this.Clean();
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Auras.prototype.OnDiplomacyChanged = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -498,6 +569,7 @@ Auras.prototype.OnDiplomacyChanged = function(msg)
 		this.Clean();
 };
 
+/** @param {MessageResearchFinished} msg */
 Auras.prototype.OnGlobalResearchFinished = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -517,6 +589,7 @@ Auras.prototype.OnGlobalResearchFinished = function(msg)
 /**
  * Update auras of the player entity and entities affecting player entities that didn't change ownership.
  */
+/** @param {MessagePlayerDefeated} msg */
 Auras.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	let cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -525,6 +598,7 @@ Auras.prototype.OnGlobalPlayerDefeated = function(msg)
 		this.Clean();
 };
 
+/** @param {MessageGarrisonedStateChanged} msg */
 Auras.prototype.OnGarrisonedStateChanged = function(msg)
 {
 	if (!this.HasGarrisonAura())

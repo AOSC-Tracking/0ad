@@ -7,20 +7,21 @@
  *
  * All the pieces in the resulting array are ordered left-to-right (or right-to-left) as they appear in the physical wall.
  *
- * @param placementData Object that associates the wall piece template names with information about those kinds of pieces.
+ * @param {Record<string, { templateData: Template }>} placementData Object that associates the wall piece template names with information about those kinds of pieces.
  *                        Expects placementData[templateName].templateData to contain the parsed template information about
  *                        the template whose filename is <i>templateName</i>.
- * @param wallSet Object that primarily holds the template names for the supported wall pieces in this set (under the
+ * @typedef {{ templates: { tower: string, gate: string, long: string, medium: string, short: string }, minTowerOverlap: number, maxTowerOverlap: number}} WallSetArgs
+ * @param {WallSetArgs} wallSet Object that primarily holds the template names for the supported wall pieces in this set (under the
  *                  'templates' key), as well as the min and max allowed overlap factors (see GetWallSegmentsRec). Expected
  *                  to contain template names for keys "long" (long wall segment), "medium" (medium wall segment), "short"
  *                  (short wall segment), "tower" (intermediate tower between wall segments), "gate" (replacement for long
  *                  walls).
- * @param start Object holding the starting position of the wall. Must contain keys 'x' and 'z'.
- * @param end   Object holding the ending position of the wall. Must contains keys 'x' and 'z'.
+ * @param {{ pos: { x: number, z: number }}} start Object holding the starting position of the wall.
+ * @param {{ pos: { x: number, z: number }}} end   Object holding the ending position of the wall.
  */
 function GetWallPlacement(placementData, wallSet, start, end)
 {
-	let candidateSegments = ["long", "medium", "short"].map(size => ({
+	let candidateSegments = /** @type {const} */(["long", "medium", "short"]).map(size => ({
 		"template": wallSet.templates[size],
 		"len": placementData[wallSet.templates[size]].templateData.wallPiece.length
 	}));
@@ -110,18 +111,19 @@ function GetWallPlacement(placementData, wallSet, start, end)
  * distance "r" that will suffice to construct a wall of the given distance. It is understood that two extra towers will
  * be placed centered at the starting and ending points of the wall.
  *
- * @param d Total distance between starting and ending points (constant throughout calls).
- * @param candidateSegments List of candidate segments (constant throughout calls). Should be ordered longer-to-shorter
+ * @param {number} d Total distance between starting and ending points (constant throughout calls).
+ * @param {{ template: string, len: number }[]} candidateSegments List of candidate segments (constant throughout calls). Should be ordered longer-to-shorter
  *                            for better execution speed.
- * @param minOverlap Minimum overlap factor (constant throughout calls). Must have a value between 0 (meaning walls are
+ * @param {number} minOverlap Minimum overlap factor (constant throughout calls). Must have a value between 0 (meaning walls are
  *                     not allowed to overlap towers) and 1 (meaning they're allowed to overlap towers entirely).
  *                     Must be <= maxOverlap.
- * @param maxOverlap Maximum overlap factor (constant throughout calls). Must have a value between 0 (meaning walls are
+ * @param {number} maxOverlap Maximum overlap factor (constant throughout calls). Must have a value between 0 (meaning walls are
  *                     not allowed to overlap towers) and 1 (meaning they're allowed to overlap towers entirely).
  *                     Must be >= minOverlap.
- * @param t Length of a single tower (constant throughout calls). Acts as buffer space for wall segments (see comments).
- * @param distSoFar Sum of all the wall segments' lengths in 'segments'.
- * @param segments Current list of wall segments placed.
+ * @param {number} t Length of a single tower (constant throughout calls). Acts as buffer space for wall segments (see comments).
+ * @param {number} distSoFar Sum of all the wall segments' lengths in 'segments'.
+ * @param {{ template: string, len: number }[]} segments Current list of wall segments placed.
+ * @return {false | { segments: { template: string, len: number }[], r: number }}
  */
 function GetWallSegmentsRec(d, candidateSegments, minOverlap, maxOverlap, t, distSoFar, segments)
 {

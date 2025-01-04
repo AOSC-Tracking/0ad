@@ -1,4 +1,16 @@
-function VisionSharing() {}
+function VisionSharing() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Bribable: string, Duration?: string, FailureCostRatio?: string }} */
+	this.template;
+
+	/** @type {Set<number> | undefined} */
+	this.shared;
+
+	/** @type {number} */
+	this.spyId;
+}
 
 VisionSharing.prototype.Schema =
 	"<element name='Bribable'>" +
@@ -83,9 +95,11 @@ VisionSharing.prototype.CheckVisionSharings = function()
 
 	// compare with previous vision sharing, and update if needed
 	for (let player of shared)
+		// @ts-expect-error (not undefined here)
 		if (!this.shared.has(player))
 			Engine.PostMessage(this.entity, MT_VisionSharingChanged,
 				{ "entity": this.entity, "player": player, "add": true });
+	// @ts-expect-error (not undefined here)
 	for (let player of this.shared)
 		if (!shared.has(player))
 			Engine.PostMessage(this.entity, MT_VisionSharingChanged,
@@ -98,17 +112,23 @@ VisionSharing.prototype.IsBribable = function()
 	return this.template.Bribable == "true";
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 VisionSharing.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	this.CheckVisionSharings();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 VisionSharing.prototype.OnOwnershipChanged = function(msg)
 {
 	if (this.activated)
 		this.CheckVisionSharings();
 };
 
+/**
+ * @param {number} player
+ * @param {number=} timeLength
+ */
 VisionSharing.prototype.AddSpy = function(player, timeLength)
 {
 	if (!this.IsBribable())
@@ -157,19 +177,23 @@ VisionSharing.prototype.AddSpy = function(player, timeLength)
 	return this.spyId;
 };
 
+/**
+ * @param {{ id: number }} data
+ */
 VisionSharing.prototype.RemoveSpy = function(data)
 {
-	this.spies.delete(data.id);
+	this.spies?.delete(data.id);
 	this.CheckVisionSharings();
 };
 
 /**
  * Returns true if this entity share its vision with player
+ * @param {number} player
  */
 VisionSharing.prototype.ShareVisionWith = function(player)
 {
 	if (this.activated)
-		return this.shared.has(player);
+		return this.shared?.has(player);
 
 	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	return cmpOwnership && cmpOwnership.GetOwner() == player;

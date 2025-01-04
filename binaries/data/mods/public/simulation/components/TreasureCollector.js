@@ -1,4 +1,9 @@
-function TreasureCollector() {}
+function TreasureCollector() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ MaxDistance: string }} */
+	this.template;
+}
 
 TreasureCollector.prototype.Schema =
 	"<a:help>Defines the treasure collecting abilities.</a:help>" +
@@ -14,7 +19,7 @@ TreasureCollector.prototype.Init = function()
 };
 
 /**
- * @return {Object} - Min/Max range at which this entity can claim a treasure.
+ * @return - Min/Max range at which this entity can claim a treasure.
  */
 TreasureCollector.prototype.GetRange = function()
 {
@@ -22,13 +27,13 @@ TreasureCollector.prototype.GetRange = function()
 };
 
 /**
- * @param {number} target - Entity ID of the target.
+ * @param {EntityId} target - Entity ID of the target.
  * @return {boolean} - Whether we can collect from the target.
  */
 TreasureCollector.prototype.CanCollect = function(target)
 {
 	let cmpTreasure = Engine.QueryInterface(target, IID_Treasure);
-	return cmpTreasure && cmpTreasure.IsAvailable();
+	return cmpTreasure && cmpTreasure.IsAvailable() || false;
 };
 
 /**
@@ -61,7 +66,7 @@ TreasureCollector.prototype.StartCollecting = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped collecting, used to notify the caller.
+ * @param {string=} reason - The reason why we stopped collecting, used to notify the caller.
  */
 TreasureCollector.prototype.StopCollecting = function(reason)
 {
@@ -69,7 +74,8 @@ TreasureCollector.prototype.StopCollecting = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	delete this.target;
@@ -85,25 +91,25 @@ TreasureCollector.prototype.StopCollecting = function(reason)
 
 	if (reason && callerIID)
 	{
-		let component = Engine.QueryInterface(this.entity, callerIID);
+		let component = /** @type {UnitAI} */(Engine.QueryInterface(this.entity, callerIID));
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason);
 	}
 };
 
 /**
  * @params - Data and lateness are unused.
  */
-TreasureCollector.prototype.CollectTreasure = function(data, lateness)
+TreasureCollector.prototype.CollectTreasure = function()
 {
-	let cmpTreasure = Engine.QueryInterface(this.target, IID_Treasure);
+	let cmpTreasure = Engine.QueryInterface(/** @type {EntityId} */(this.target), IID_Treasure);
 	if (!cmpTreasure || !cmpTreasure.IsAvailable())
 	{
 		this.StopCollecting("TargetInvalidated");
 		return;
 	}
 
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(/** @type {EntityId} */(this.target)))
 	{
 		this.StopCollecting("OutOfRange");
 		return;
@@ -114,7 +120,7 @@ TreasureCollector.prototype.CollectTreasure = function(data, lateness)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {number} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 TreasureCollector.prototype.IsTargetInRange = function(target)

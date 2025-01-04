@@ -1,9 +1,22 @@
-function Upkeep() {}
+function Upkeep()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Rates: Record<string, string>, Interval: string }} */
+	this.template;
+
+	/** @type {number} */
+	this.upkeepInterval;
+
+	/** @type {Record<string, number>} */
+	this.rates = {};
+};
 
 Upkeep.prototype.Schema =
 	"<a:help>Controls the resource upkeep of an entity.</a:help>" +
 	"<element name='Rates' a:help='Upkeep Rates'>" +
-		Resources.BuildSchema("nonNegativeDecimal") +
+		g_Resources.BuildSchema("nonNegativeDecimal") +
 	"</element>" +
 	"<element name='Interval' a:help='Number of milliseconds must pass for the player to pay the next upkeep.'>" +
 		"<ref name='nonNegativeDecimal'/>" +
@@ -54,10 +67,11 @@ Upkeep.prototype.ComputeRates = function()
 /**
  * Try to subtract the needed resources.
  * Data and lateness are unused.
+ * @param {any} data; @param {number} lateness
  */
 Upkeep.prototype.Pay = function(data, lateness)
 {
-	let cmpPlayer = QueryOwnerInterface(this.entity);
+	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
 		return;
 
@@ -95,6 +109,7 @@ Upkeep.prototype.HandleSufficientUpkeep = function()
 	delete this.unpayed;
 };
 
+/** @param {MessageValueModification} msg */
 Upkeep.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Upkeep")
@@ -123,9 +138,12 @@ Upkeep.prototype.CheckTimer = function()
 	this.upkeepInterval = ApplyValueModificationsToEntity("Upkeep/Interval", +this.template.Interval, this.entity);
 	if (this.upkeepInterval < 0)
 	{
-		let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-		cmpTimer.CancelTimer(this.timer);
-		delete this.timer;
+		if (this.timer)
+		{
+			let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
+			cmpTimer.CancelTimer(this.timer);
+			delete this.timer;
+		}
 		return;
 	}
 

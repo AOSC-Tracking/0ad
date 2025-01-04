@@ -1,5 +1,7 @@
 /**
  * "Inside-out" implementation of Fisher-Yates shuffle
+ * @template T
+ * @param {T[]} source - The array to shuffle
  */
 function shuffleArray(source)
 {
@@ -21,6 +23,10 @@ function shuffleArray(source)
  * Uses the given clone function on each item of the array.
  * Creating arrays with all permutations of the given array has a bad memory footprint.
  * Algorithm by B. R. Heap. Changes the input array.
+ * @template T
+ * @param {T[]} array - The array to permute
+ * @param {function(T):T} cloneFunc - Function to clone an item of the array
+ * @param {function(T[]):void} callback - Function to call with each permutation
  */
 function heapsPermute(array, cloneFunc, callback)
 {
@@ -55,8 +61,8 @@ function heapsPermute(array, cloneFunc, callback)
  * Compare two variables recursively. This compares better than a quick
  * JSON.stringify check since we also check undefineds, Sets and the like.
  *
- * @param first - Any javascript instance.
- * @param second - Any javascript instance.
+ * @param {any} first - Any javascript instance.
+ * @param {any} second - Any javascript instance.
  * @return {boolean} Whether first and second are equal.
  */
 function deepCompare(first, second)
@@ -118,6 +124,7 @@ function deepCompare(first, second)
  * Removes prefixing path from a path or filename, leaving just the file's name (with extension)
  *
  * ie. a/b/c/file.ext -> file.ext
+ * @param {string} path
  */
 function basename(path)
 {
@@ -128,6 +135,7 @@ function basename(path)
  * Returns the directories of a given path.
  *
  * ie. a/b/c/file.ext -> a/b/c
+ * @param {string} path
  */
 function dirname(path)
 {
@@ -136,6 +144,9 @@ function dirname(path)
 
 /**
  * Returns names of files found in the given directory, stripping the directory path and file extension.
+ * @param {string} path - The directory to search
+ * @param {string} extension - The file extension to search for
+ * @param {boolean} recurse - Whether to search subdirectories
  */
 function listFiles(path, extension, recurse)
 {
