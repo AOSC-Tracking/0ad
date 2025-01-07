@@ -32,7 +32,7 @@ cmpDiplomacy.ChangeTeam(2);
 TS_ASSERT_EQUALS(cmpDiplomacy.GetTeam(), 1);
 
 cmpDiplomacy.UnLockTeam();
-cmpDiplomacy.SetEnemy(0);
+cmpDiplomacy.Befoe(0);
 
 TS_ASSERT(!cmpDiplomacy.IsAlly(0));
 TS_ASSERT(!cmpDiplomacy.IsNeutral(0));

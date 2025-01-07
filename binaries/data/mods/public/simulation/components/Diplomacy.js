@@ -147,7 +147,7 @@ Diplomacy.prototype.SetDiplomacy = function(dipl)
 };
 
 /**
- * Helper function for allying etc.
+ * Helper function for changing diplomacy.
  * @param {number} idx - The player number.
  * @param {number} value - The diplomacy value.
  */
@@ -253,7 +253,7 @@ Diplomacy.prototype.IsExclusiveMutualAlly = function(id)
 /**
  * @param {number} id -
  */
-Diplomacy.prototype.SetEnemy = function(id)
+Diplomacy.prototype.Befoe = function(id)
 {
 	this.SetDiplomacyIndex(id, -1);
 };

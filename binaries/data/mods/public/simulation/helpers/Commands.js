@@ -104,7 +104,7 @@ var g_Commands = {
 			cmpDiplomacy.SetNeutral(cmd.player);
 			break;
 		case "enemy":
-			cmpDiplomacy.SetEnemy(cmd.player);
+			cmpDiplomacy.Befoe(cmd.player);
 			break;
 		default:
 			warn("Invalid command: Could not set "+player+" diplomacy status of player "+cmd.player+" to "+cmd.to);
