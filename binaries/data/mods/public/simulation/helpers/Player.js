@@ -110,9 +110,13 @@ function LoadPlayerSettings(settings, newPlayers)
 			QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(diplomacy);
 		else
 		{
+			const cmpDiplomacy = QueryPlayerIDInterface(i, IID_Diplomacy);
 			const team = getPlayerSetting(i, "Team")
 			if (team !== undefined)
-				QueryPlayerIDInterface(i, IID_Diplomacy).ChangeTeam(team);
+				cmpDiplomacy.ChangeTeam(team);
+
+			if (settings.LockTeams)
+				cmpDiplomacy.LockTeam();
 		}
 
 		const formations = getPlayerSetting(i, "Formations");
@@ -123,12 +127,6 @@ function LoadPlayerSettings(settings, newPlayers)
 		if (startCam)
 			cmpPlayer.SetStartingCamera(startCam.Position, startCam.Rotation);
 	}
-
-	// NOTE: We need to do the team locking here, as
-	// otherwise we can't ally the players above.
-	if (settings.LockTeams)
-		for (let i = 0; i < numPlayers; ++i)
-			QueryPlayerIDInterface(i, IID_Diplomacy).LockTeam();
 }
 
 function GetPlayerTemplateName(civ)
