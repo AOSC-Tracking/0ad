@@ -109,7 +109,11 @@ function LoadPlayerSettings(settings, newPlayers)
 		if (diplomacy !== undefined)
 			QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(diplomacy);
 		else
-			QueryPlayerIDInterface(i, IID_Diplomacy).ChangeTeam(getPlayerSetting(i, "Team") ?? -1);
+		{
+			const team = getPlayerSetting(i, "Team")
+			if (team !== undefined)
+				QueryPlayerIDInterface(i, IID_Diplomacy).ChangeTeam(team);
+		}
 
 		const formations = getPlayerSetting(i, "Formations");
 		if (formations)

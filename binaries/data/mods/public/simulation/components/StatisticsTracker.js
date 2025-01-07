@@ -420,10 +420,9 @@ StatisticsTracker.prototype.GetTeamPercentMapExplored = function()
 	if (!cmpDiplomacy)
 		return 0;
 
-	const team = cmpDiplomacy.GetTeam();
 	const cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
 	// If teams are not locked, this statistic won't be displayed, so don't bother computing
-	if (team == -1 || !cmpDiplomacy.IsTeamLocked())
+	if (!cmpDiplomacy.HasTeam() || !cmpDiplomacy.IsTeamLocked())
 	{
 		const cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
@@ -434,7 +433,7 @@ StatisticsTracker.prototype.GetTeamPercentMapExplored = function()
 	const teamPlayers = [];
 	const numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 	for (let i = 1; i < numPlayers; ++i)
-		if (QueryPlayerIDInterface(i, IID_Diplomacy)?.GetTeam() === team)
+		if (cmpDiplomacy.IsPlayerOnTheSameTeam(i))
 			teamPlayers.push(i);
 
 	return cmpRangeManager.GetUnionPercentMapExplored(teamPlayers);
@@ -455,9 +454,8 @@ StatisticsTracker.prototype.GetTeamPercentMapControlled = function()
 	if (!cmpDiplomacy)
 		return 0;
 
-	const team = cmpDiplomacy.GetTeam();
 	const cmpTerritoryManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TerritoryManager);
-	if (team === -1 || !cmpDiplomacy.IsTeamLocked())
+	if (!cmpDiplomacy.HasTeam() || !cmpDiplomacy.IsTeamLocked())
 	{
 		let cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
@@ -468,7 +466,7 @@ StatisticsTracker.prototype.GetTeamPercentMapControlled = function()
 	let teamPercent = 0;
 	const numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 	for (let i = 1; i < numPlayers; ++i)
-		if (QueryPlayerIDInterface(i, IID_Diplomacy)?.GetTeam() === team)
+		if (cmpDiplomacy.IsPlayerOnTheSameTeam(i))
 			teamPercent += cmpTerritoryManager.GetTerritoryPercentage(i);
 
 	return teamPercent;

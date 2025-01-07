@@ -8,6 +8,8 @@ Diplomacy.prototype.Schema =
 		"<text/>" +
 	"</element>";
 
+Diplomacy.prototype.NO_TEAM = -1
+
 Diplomacy.prototype.SerializableAttributes = [
 	"team",
 	"teamLocked",
@@ -35,7 +37,7 @@ Diplomacy.prototype.Deserialize = function(state)
 Diplomacy.prototype.Init = function()
 {
 	// Team number of the player, players on the same team will always have ally diplomatic status. Also this is useful for team emblems, scoring, etc.
-	this.team = -1;
+	this.team = this.NO_TEAM;
 
 	// Array of diplomatic stances for this player with respect to other players (including gaia and self).
 	this.diplomacy = [];
@@ -66,11 +68,41 @@ Diplomacy.prototype.GetTeam = function()
 };
 
 /**
- * @param {number} team - The new team number, -1 for no team.
+ * @return {boolean} -
+ */
+Diplomacy.prototype.HasTeam = function()
+{
+	return this.team !== this.NO_TEAM;
+};
+
+/**
+ * @param {number} team -
+ * @return {boolean} -
+ */
+Diplomacy.prototype.IsPartOfTeam = function(team)
+{
+	return this.team === team;
+};
+
+/**
+ * @param {number} playerID -
+ * @return {boolean} -
+ */
+Diplomacy.prototype.IsPlayerOnTheSameTeam = function(playerID)
+{
+	if (!this.HasTeam())
+		return false;
+
+	const cmpDiplomacy = QueryPlayerIDInterface(playerID, IID_Diplomacy);
+	return cmpDiplomacy && cmpDiplomacy.IsPartOfTeam(this.team);
+}
+
+/**
+ * @param {number} team - The new team number, this.NO_TEAM for no team.
  */
 Diplomacy.prototype.ChangeTeam = function(team)
 {
-	if (this.teamLocked || this.team === team)
+	if (this.teamLocked || this.IsPartOfTeam(team))
 		return;
 
 	const playerID = Engine.QueryInterface(this.entity, IID_Player)?.GetPlayerID();
@@ -78,18 +110,18 @@ Diplomacy.prototype.ChangeTeam = function(team)
 		return;
 
 	// ToDo: Fix this.
-	if (this.team !== -1)
+	if (this.HasTeam())
 		warn("A change in teams is requested while the player already had a team, previous alliances are maintained.");
 
 	this.team = team;
 
-	if (this.team !== -1)
+	if (this.HasTeam())
 	{
 		const numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 		for (let i = 0; i < numPlayers; ++i)
 		{
 			const cmpDiplomacy = QueryPlayerIDInterface(i, IID_Diplomacy);
-			if (this.team !== cmpDiplomacy.GetTeam())
+			if (!cmpDiplomacy.IsPartOfTeam(this.team))
 				continue;
 
 			this.Ally(i);
