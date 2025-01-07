@@ -18,18 +18,38 @@
 
 import argparse
 import multiprocessing
-import os
+import re
 import sys
+from collections.abc import Generator
+from pathlib import Path
 
 from i18n_helper import L10N_FOLDER_NAME, PROJECT_ROOT_DIRECTORY
 from i18n_helper.catalog import Catalog
-from i18n_helper.globber import get_catalogs
 
 
 DEBUG_PREFIX = "X_X "
 
+WORD_WRAP_REGEX = re.compile(r"\s|-")
 
-def generate_long_strings(root_path, input_file_name, output_file_name, languages=None):
+
+def get_catalogs(
+    input_file_path, filters: list[str] | None = None
+) -> Generator[Catalog, None, None]:
+    """Yield catalogs for each language for the given path and category."""
+    category = input_file_path.stem.split(".")[0]
+    for file_path in input_file_path.parent.glob(f"*.{category}.po"):
+        if file_path.stem.startswith("long"):
+            continue
+        if not filters or file_path.stem.split(".")[0] in filters:
+            yield Catalog.read_from(file_path, locale=file_path.stem.split(".")[0])
+
+
+def longest_word(x: str) -> int:
+    """Return the length of the longest word in x."""
+    return len(max(WORD_WRAP_REGEX.split(x), key=len))
+
+
+def generate_long_strings(input_file_path, output_file_path, languages=None, comparator=len):
     """Generate the 'long strings' debug catalog.
 
     This catalog contains the longest singular and plural string,
@@ -37,9 +57,7 @@ def generate_long_strings(root_path, input_file_name, output_file_name, language
     It can be used to check if GUI elements are large enough.
     The catalog is long.*.po
     """
-    print("Generating", output_file_name)
-    input_file_path = os.path.join(root_path, input_file_name)
-    output_file_path = os.path.join(root_path, output_file_name)
+    print("Generating", output_file_path.name)
 
     template_catalog = Catalog.read_from(input_file_path)
     # Pretend we write English to get plurals.
@@ -70,49 +88,40 @@ def generate_long_strings(root_path, input_file_name, output_file_name, language
                 not long_string_catalog_message.pluralizable
                 or not translation_message.pluralizable
             ):
-                if len(translation_message.string) > len(long_string_catalog_message.string):
-                    long_string_catalog_message.string = translation_message.string
+                long_string_catalog_message.string = max(
+                    [long_string_catalog_message.string, translation_message.string],
+                    key=comparator,
+                )
                 continue
 
-            longest_singular_string = translation_message.string[0]
-            longest_plural_string = translation_message.string[
-                1 if len(translation_message.string) > 1 else 0
+            longest_singular_string = max(
+                [long_string_catalog_message.string[0], translation_message.string[0]],
+                key=comparator,
+            )
+            longest_plural_string = max(
+                [
+                    *list(long_string_catalog_message.string[1:]),
+                    translation_message.string[1 if len(translation_message.string) > 1 else 0],
+                ],
+                key=comparator,
+            )
+
+            long_string_catalog_message.string = [
+                longest_singular_string,
+                longest_plural_string,
             ]
 
-            candidate_singular_string = long_string_catalog_message.string[0]
-            # There might be between 0 and infinite plural forms.
-            candidate_plural_string = ""
-            for candidate_string in long_string_catalog_message.string[1:]:
-                if len(candidate_string) > len(candidate_plural_string):
-                    candidate_plural_string = candidate_string
-
-            changed = False
-            if len(candidate_singular_string) > len(longest_singular_string):
-                longest_singular_string = candidate_singular_string
-                changed = True
-            if len(candidate_plural_string) > len(longest_plural_string):
-                longest_plural_string = candidate_plural_string
-                changed = True
-
-            if changed:
-                long_string_catalog_message.string = [
-                    longest_singular_string,
-                    longest_plural_string,
-                ]
-                translation_message = long_string_catalog_message
     long_string_catalog.write_to(output_file_path)
 
 
-def generate_debug(root_path, input_file_name, output_file_name):
+def generate_debug(input_file_path, output_file_path):
     """Generate a debug catalog to identify untranslated strings.
 
     This prefixes all strings with DEBUG_PREFIX, to easily identify
     untranslated strings while still making the game navigable.
     The catalog is debug.*.po
     """
-    print("Generating", output_file_name)
-    input_file_path = os.path.join(root_path, input_file_name)
-    output_file_path = os.path.join(root_path, output_file_name)
+    print("Generating", output_file_path.name)
 
     template_catalog = Catalog.read_from(input_file_path)
     # Pretend we write English to get plurals.
@@ -141,12 +150,20 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--debug",
-        help="Generate debug localisation to identify non-translated strings.",
+        help="Generate debug translation to identify non-translated strings.",
         action="store_true",
     )
     parser.add_argument(
         "--long",
-        help="Generate 'long strings' localisation to identify GUI elements too small.",
+        help='Generate the "long" translations, containing the longest strings across all '
+        "languages. Useful to identify GUI elements which are too small.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--long2",
+        help='Generate the "long2" translation, containing the strings with the longest '
+        "individual words across all languages. Useful to identify GUI elements which are too "
+        "small.",
         action="store_true",
     )
     parser.add_argument(
@@ -154,28 +171,30 @@ def main():
     )
     args = parser.parse_args()
 
-    if not args.debug and not args.long:
+    if not args.debug and not args.long and not args.long2:
         parser.print_help()
         sys.exit(0)
 
     found_pot_files = 0
-    for root, _, filenames in os.walk(PROJECT_ROOT_DIRECTORY):
-        for filename in filenames:
-            if (
-                len(filename) > 4
-                and filename[-4:] == ".pot"
-                and os.path.basename(root) == L10N_FOLDER_NAME
-            ):
-                found_pot_files += 1
-                if args.debug:
-                    multiprocessing.Process(
-                        target=generate_debug, args=(root, filename, "debug." + filename[:-1])
-                    ).start()
-                if args.long:
-                    multiprocessing.Process(
-                        target=generate_long_strings,
-                        args=(root, filename, "long." + filename[:-1], args.languages),
-                    ).start()
+    for input_file_path in Path(PROJECT_ROOT_DIRECTORY).glob(f"**/{L10N_FOLDER_NAME}/*.pot"):
+        found_pot_files += 1
+        if args.debug:
+            output_file_path = input_file_path.parent / f"debug.{input_file_path.stem}.po"
+            multiprocessing.Process(
+                target=generate_debug, args=(input_file_path, output_file_path)
+            ).start()
+        if args.long:
+            output_file_path = input_file_path.parent / f"long.{input_file_path.stem}.po"
+            multiprocessing.Process(
+                target=generate_long_strings,
+                args=(input_file_path, output_file_path, args.languages),
+            ).start()
+        if args.long2:
+            output_file_path = input_file_path.parent / f"long2.{input_file_path.stem}.po"
+            multiprocessing.Process(
+                target=generate_long_strings,
+                args=(input_file_path, output_file_path, args.languages, longest_word),
+            ).start()
 
     if found_pot_files == 0:
         print(
