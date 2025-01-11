@@ -890,6 +890,7 @@ function setup_all_libs ()
 		"sdl",
 		"openal",
 		"libpng",
+		"libjpeg",
 		"zlib",
 		"valgrind",
 		"cxxtest",
@@ -1011,6 +1012,7 @@ used_extern_libs = {
 	"sdl",
 
 	"libpng",
+	"libjpeg",
 	"zlib",
 
 	"spidermonkey",

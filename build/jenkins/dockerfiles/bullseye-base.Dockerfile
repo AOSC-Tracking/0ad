@@ -23,6 +23,7 @@ RUN apt-get -qqy update && apt-get install -qqy --no-install-recommends \
       libopenal-dev \
       libpng-dev \
       libsdl2-dev \
+      libjpeg-dev \
       libsodium-dev \
       libvorbis-dev \
       libwxgtk3.0-gtk3-dev \

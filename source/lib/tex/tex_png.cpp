@@ -271,7 +271,7 @@ TIMER_ADD_CLIENT(tc_png_decode);
 // limitation: palette images aren't supported
 Status TexCodecPng::decode(u8* RESTRICT data, size_t size, Tex* RESTRICT t) const
 {
-	TIMER_ACCRUE(tc_png_decode);
+TIMER_ACCRUE(tc_png_decode);
 
 	png_infop info_ptr = 0;
 
@@ -304,7 +304,7 @@ Status TexCodecPng::decode(u8* RESTRICT data, size_t size, Tex* RESTRICT t) cons
 
 
 // limitation: palette images aren't supported
-Status TexCodecPng::encode(Tex* RESTRICT t, DynArray* RESTRICT da) const
+Status TexCodecPng::encode(Tex* RESTRICT t, DynArray* RESTRICT da, int UNUSED(quality)) const
 {
 	png_infop info_ptr = 0;
 

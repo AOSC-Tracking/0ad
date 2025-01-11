@@ -18,6 +18,7 @@ RUN apt-get -qqy update && apt-get install -qqy --no-install-recommends \
       libgnutls28-dev \
       libgtk-3-dev \
       libicu-dev \
+      libjpeg-dev \
       libminiupnpc-dev \
       libogg-dev \
       libopenal-dev \

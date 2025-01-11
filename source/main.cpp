@@ -368,6 +368,17 @@ static void Frame(RL::Interface* rlInterface)
 	g_Profiler2.IncrementFrameNumber();
 	PROFILE2_ATTR("%d", g_Profiler2.GetFrameNumber());
 
+	bool takeScreenshots;
+	float screenshotsFPS;
+	int screenshotsStartTime;
+
+	CFG_GET_VAL("videorendering.enabled", takeScreenshots);
+	CFG_GET_VAL("videorendering.fps", screenshotsFPS);
+	CFG_GET_VAL("videorendering.start", screenshotsStartTime);
+
+	bool doScreenshot = takeScreenshots && g_Game &&
+		g_Game->IsGameStarted() && g_Game->SimTime() >= screenshotsStartTime * 1000;
+
 	// get elapsed time
 	const double time = timer_Time();
 	g_frequencyFilter->Update(time);
@@ -381,12 +392,12 @@ static void Frame(RL::Interface* rlInterface)
 
 	// .. new method - filtered and more smooth, but errors may accumulate
 #else
-	const float realTimeSinceLastFrame = 1.0 / g_frequencyFilter->SmoothedFrequency();
+	const float realTimeSinceLastFrame = 1.0f / (doScreenshot ? screenshotsFPS : g_frequencyFilter->SmoothedFrequency());
 #endif
 	ENSURE(realTimeSinceLastFrame > 0.0f);
 
 	// Decide if update is necessary
-	const bool needUpdate{g_app_has_focus || g_NetClient || !g_PauseOnFocusLoss};
+	const bool needUpdate{g_app_has_focus || g_NetClient || !g_PauseOnFocusLoss || doScreenshot};
 
 	// If we are not running a multiplayer game, disable updates when the game is
 	// minimized or out of focus and relinquish the CPU a bit, in order to make
@@ -449,6 +460,9 @@ static void Frame(RL::Interface* rlInterface)
 		g_SoundManager->IdleTask();
 
 	g_Renderer.RenderFrame(true);
+
+	if (doScreenshot)
+		g_Renderer.MakeScreenShotOnNextFrame(CRenderer::ScreenShotType::DEFAULT);
 
 	g_Profiler.Frame();
 

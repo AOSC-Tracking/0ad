@@ -47,6 +47,9 @@ tar xf nvtt-${PV}.tar.xz
 # build
 (
 	cd nvtt-${PV}
+	
+	patch -p0 <../patches/vegetation-hack.patch
+
 	mkdir bin lib
 	./build.sh
 )

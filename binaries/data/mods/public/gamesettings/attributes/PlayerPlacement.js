@@ -43,6 +43,9 @@ GameSettings.prototype.Attributes.PlayerPlacement = class PlayerPlacement extend
 		if (this.settings.map.map === "random" || this.value !== "random")
 			return false;
 
+		if(!this.available)
+			return false;
+
 		this.value = pickRandom(this.available);
 		return true;
 	}

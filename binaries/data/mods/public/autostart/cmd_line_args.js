@@ -7,6 +7,7 @@
  *                                 TYPEDIR is skirmishes, scenarios, or random
  * -autostart-biome=BIOME          sets BIOME for a random map
  * -autostart-seed=SEED            sets randomization seed value (default 0, use -1 for random)
+ * -autostart-speed=SPEED          sets the sim rate speed (default 1)
  * -autostart-ai=PLAYER:AI         sets the AI for PLAYER (e.g. 2:petra)
  * -autostart-aidiff=PLAYER:DIFF   sets the DIFFiculty of PLAYER's AI
  *                                 (default 3, 0: sandbox, 5: very hard)
@@ -70,6 +71,8 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 	settings.map.selectMap("maps/" + cmdLineArgs['autostart']);
 	settings.mapSize.setSize(+(cmdLineArgs['autostart-size'] ?? 192));
 	settings.biome.setBiome(cmdLineArgs['autostart-biome'] || "random");
+	settings.playerPlacement.setValue(cmdLineArgs['autostart-placement'] || "random");
+	settings.mapExploration.setRevealed(cmdLineArgs['autostart-revealed'] === "true" || false);
 
 	settings.playerCount.setNb(+(cmdLineArgs['autostart-players'] ?? 2));
 
@@ -111,6 +114,9 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 
 	if (cmdLineArgs['autostart-ceasefire'])
 		settings.seeds.ceaserfire.setValue(+cmdLineArgs['autostart-ceasefire']);
+
+	if (cmdLineArgs['autostart-speed'])
+		settings.gameSpeed.setSpeed(+cmdLineArgs['autostart-speed']);
 
 	if ('autostart-nonvisual' in cmdLineArgs && cmdLineArgs['autostart-nonvisual'] !== "false")
 		settings.triggerScripts.customScripts.add("scripts/NonVisualTrigger.js");
