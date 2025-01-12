@@ -238,6 +238,8 @@ public:
 
 	std::string GenerateSchema();
 
+	std::string GenerateTypes();
+
 	/////////////////////////////////////////////////////////////////////////////
 	// Some functions for Atlas UI to be able to access VFS data
 

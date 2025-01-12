@@ -1188,3 +1188,28 @@ std::string CComponentManager::GenerateSchema() const
 
 	return schema;
 }
+
+std::string CComponentManager::GenerateTypes() const
+{
+	std::string types;
+
+	// Declare the implementation of each interface
+	for (std::map<std::string, InterfaceId>::const_iterator it = m_InterfaceIdsByName.begin(); it != m_InterfaceIdsByName.end(); ++it)
+		types += "declare const IID_" + it->first + " = " + std::to_string(it->second) + ";\n";
+	// Declare a type map
+	types += "\ninterface IIDs {\n";
+	for (std::map<std::string, InterfaceId>::const_iterator it = m_InterfaceIdsByName.begin(); it != m_InterfaceIdsByName.end(); ++it)
+		types += "\t[IID_" + it->first + "]: " + it->first + ";\n";
+	types += "}\n\n";
+
+	// Now declare all messages.
+	for (const auto& mdata : m_MessageTypeIdsByName)
+		types += "declare const MT_" + mdata.first + " = " + std::to_string(mdata.second) + ";\n";
+	// Declare a type map
+	types += "\ninterface MessageMap {\n";
+	for (const auto& mdata : m_MessageTypeIdsByName)
+		types += "\t[MT_" + mdata.first + "]: Message" + mdata.first + ";\n";
+	types += "}\n";
+
+	return types;
+}

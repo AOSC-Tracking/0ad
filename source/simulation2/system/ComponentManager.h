@@ -281,6 +281,7 @@ public:
 	bool DeserializeState(std::istream& stream);
 
 	std::string GenerateSchema() const;
+	std::string GenerateTypes() const;
 
 	ScriptInterface& GetScriptInterface() { return m_ScriptInterface; }
 

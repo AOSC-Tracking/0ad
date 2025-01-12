@@ -582,6 +582,9 @@ bool Init(const CmdLineArgs& args, int flags)
 		std::ofstream f("entity.rng", std::ios_base::out | std::ios_base::trunc);
 		f << sim.GenerateSchema();
 		debug_printf("Generated entity.rng\n");
+		std::ofstream f2("components.d.ts", std::ios_base::out | std::ios_base::trunc);
+		f2 << sim.GenerateTypes();
+		debug_printf("Generated components.d.ts\n");
 		return false;
 	}
 

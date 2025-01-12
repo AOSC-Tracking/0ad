@@ -909,6 +909,11 @@ std::string CSimulation2::GenerateSchema()
 	return m->m_ComponentManager.GenerateSchema();
 }
 
+std::string CSimulation2::GenerateTypes()
+{
+	return m->m_ComponentManager.GenerateTypes();
+}
+
 static std::vector<std::string> GetJSONData(const VfsPath& path)
 {
 	VfsPaths pathnames;
