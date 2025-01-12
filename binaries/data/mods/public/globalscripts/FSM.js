@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 // Hierarchical finite state machine implementation.
 //
 // FSMs are specified as a JS data structure;

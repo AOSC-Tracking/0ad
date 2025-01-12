@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
 sprintf() for JavaScript v1.1.2
 https://github.com/alexei/sprintf.js

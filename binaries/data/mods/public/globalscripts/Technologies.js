@@ -9,12 +9,10 @@
  * Returns modified property value modified by the applicable tech
  * modifications.
  *
- * @template T
- * @param {Modification[]} modifications array of modifications
- * @param {string[]} classes Array containing the class list of the template.
- * @param {T} originalValue Number storing the original value. Can also be
+ * @param modifications array of modificiations
+ * @param classes Array containing the class list of the template.
+ * @param originalValue Number storing the original value. Can also be
  * non-numeric, but then only "replace" and "tokens" techs can be supported.
- * @returns {T}
  */
 function GetTechModifiedProperty(modifications, classes, originalValue)
 {
@@ -24,18 +22,12 @@ function GetTechModifiedProperty(modifications, classes, originalValue)
 	// From indicative profiling, splitting in two sub-functions or checking directly
 	// is about as efficient, but splitting makes it easier to report errors.
 	if (typeof originalValue === "string")
-		return /** @type {T} */(GetTechModifiedProperty_string(modifications, classes, originalValue));
+		return GetTechModifiedProperty_string(modifications, classes, originalValue);
 	if (typeof originalValue === "number")
-		return /** @type {T} */(GetTechModifiedProperty_numeric(modifications, classes, originalValue));
+		return GetTechModifiedProperty_numeric(modifications, classes, originalValue);
 	return GetTechModifiedProperty_generic(modifications, classes, originalValue);
 }
 
-/**
- * @template T
- * @param {Modification[]} modifications array of modifications
- * @param {string[]} classes
- * @param {T} originalValue
- */
 function GetTechModifiedProperty_generic(modifications, classes, originalValue)
 {
 	for (let modification of modifications)
@@ -45,17 +37,12 @@ function GetTechModifiedProperty_generic(modifications, classes, originalValue)
 		if (!modification.replace)
 			warn("GetTechModifiedProperty: modification format not recognised : " + uneval(modification));
 
-		return /** @type {T} */(modification.replace);
+		return modification.replace;
 	}
 
 	return originalValue;
 }
 
-/**
- * @param {Modification[]} modifications array of modifications
- * @param {string[]} classes Array containing the class list of the template.
- * @param {number} originalValue Number storing the original value.
- */
 function GetTechModifiedProperty_numeric(modifications, classes, originalValue)
 {
 	let multiply = 1;
@@ -66,7 +53,7 @@ function GetTechModifiedProperty_numeric(modifications, classes, originalValue)
 		if (!DoesModificationApply(modification, classes))
 			continue;
 		if (modification.replace !== undefined)
-			return /** @type {number} */(modification.replace);
+			return modification.replace;
 		if (modification.multiply)
 			multiply *= modification.multiply;
 		else if (modification.add)
@@ -77,11 +64,6 @@ function GetTechModifiedProperty_numeric(modifications, classes, originalValue)
 	return originalValue * multiply + add;
 }
 
-/**
- * @param {Modification[]} modifications
- * @param {string[]} classes
- * @param {string} originalValue
- */
 function GetTechModifiedProperty_string(modifications, classes, originalValue)
 {
 	let value = originalValue;
@@ -90,7 +72,7 @@ function GetTechModifiedProperty_string(modifications, classes, originalValue)
 		if (!DoesModificationApply(modification, classes))
 			continue;
 		if (modification.replace !== undefined)
-			return /** @type {string} */(modification.replace);
+			return modification.replace;
 		// Multiple token replacement works, though ordering is not technically guaranteed.
 		// In practice, the order will be that of 'research', which ought to be fine,
 		// and operations like adding tokens are order-independent anyways,
@@ -107,8 +89,6 @@ function GetTechModifiedProperty_string(modifications, classes, originalValue)
 /**
  * Returns whether the given modification applies to the entity containing the given class list
  * NB: returns true if modifications.affects is empty, to allow "affects anything" modifiers.
- * @param {Modification} modification - The modification object.
- * @param {string[]} classes
  */
 function DoesModificationApply(modification, classes)
 {
@@ -120,8 +100,6 @@ function DoesModificationApply(modification, classes)
 /**
  * Returns a modified list of tokens.
  * Supports "A>B" to replace A by B, "-A" to remove A, and the rest will add tokens.
- * @param {string} originalValue - The original token list.
- * @param {string} modification - The modification to apply.
  */
 function HandleTokens(originalValue, modification)
 {
@@ -152,8 +130,7 @@ function HandleTokens(originalValue, modification)
  * Derives the technology requirements from a given technology template.
  * Takes into account the `supersedes` attribute.
  *
- * @param {TechTemplate} template - The template object. Loading of the template must have already occured.
- * @param {string} civ - The civ code.
+ * @param {Object} template - The template object. Loading of the template must have already occured.
  *
  * @return Derived technology requirements. See `InterpretTechRequirements` for object's syntax.
  */
@@ -165,7 +142,6 @@ function DeriveTechnologyRequirements(template, civ)
 	{
 		let op = Object.keys(template.requirements)[0];
 		let val = template.requirements[op];
-		// @ts-expect-error op should be OK
 		requirements = InterpretTechRequirements(civ, op, val);
 	}
 
@@ -214,15 +190,14 @@ function DeriveTechnologyRequirements(template, civ)
  * 2. need 2 entities with the `human` class
  * 3. cannot research this tech at all)
  *
- * @param {string | null} civ - The civ code
- * @param {"civ" | "notciv" | "entity" | "tech" | "all" | "any"} operator - The base operation. Can be "civ", "notciv", "tech", "entity", "all" or "any".
- * @param {any} value - The value associated with the above operation.
+ * @param {string} civ - The civ code
+ * @param {string} operator - The base operation. Can be "civ", "notciv", "tech", "entity", "all" or "any".
+ * @param {mixed} value - The value associated with the above operation.
  *
- * @return {any | false} Object containing the requirements for the given civ, or false if the civ cannot research the tech.
+ * @return Object containing the requirements for the given civ, or false if the civ cannot research the tech.
  */
 function InterpretTechRequirements(civ, operator, value)
 {
-	/** @type {any} */
 	let requirements = [];
 
 	switch (operator)
@@ -260,7 +235,6 @@ function InterpretTechRequirements(civ, operator, value)
 		{
 			let newOper = Object.keys(subvalue)[0];
 			let newValue = subvalue[newOper];
-			// @ts-expect-error newOper should be OK
 			let result = InterpretTechRequirements(civ, newOper, newValue);
 
 			switch (newOper)
@@ -304,7 +278,6 @@ function InterpretTechRequirements(civ, operator, value)
 					for (let currReq of requirements)
 						for (let res of result)
 						{
-							/** @type {any} */
 							let newReq = {};
 							for (let subtype in currReq)
 								newReq[subtype] = currReq[subtype];
@@ -336,7 +309,6 @@ function InterpretTechRequirements(civ, operator, value)
 		{
 			let newOper = Object.keys(subvalue)[0];
 			let newValue = subvalue[newOper];
-			// @ts-expect-error newOper should be OK
 			let result = InterpretTechRequirements(civ, newOper, newValue);
 
 			switch (newOper)
@@ -392,12 +364,11 @@ function InterpretTechRequirements(civ, operator, value)
 /**
  * Determine order of phases.
  *
- * @param {Record<string, any>} phases - The current available store of phases.
- * @return List of phases
+ * @param {Object} phases - The current available store of phases.
+ * @return {array} List of phases
  */
 function UnravelPhases(phases)
 {
-	/** @type {Record<string, string>} */
 	let phaseMap = {};
 	for (let phaseName in phases)
 	{
@@ -412,7 +383,7 @@ function UnravelPhases(phases)
 
 		phaseMap[myPhase] = reqPhase;
 		if (!phaseMap[reqPhase])
-			delete phaseMap[reqPhase];
+			phaseMap[reqPhase] = undefined;
 	}
 
 	let phaseList = Object.keys(phaseMap);

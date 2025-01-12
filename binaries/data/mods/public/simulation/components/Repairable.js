@@ -1,25 +1,4 @@
-function Repairable() {
-	/** @type {number} */
-	this.entity;
-
-	/** @type { { RepairTimeRatio: string } } */
-	this.template;
-
-	/** @type {Map<number, number>} */
-	this.builders;
-
-	/** @type {number} */
-	this.totalBuilderRate;
-
-	/** @type {number} */
-	this.buildMultiplier;
-
-	/** @type {number} */
-	this.buildTimePenalty;
-
-	/** @type {number} */
-	this.repairTimeRatio;
-}
+function Repairable() {}
 
 Repairable.prototype.Schema =
 	"<a:help>Deals with repairable structures and units.</a:help>" +
@@ -62,7 +41,6 @@ Repairable.prototype.IsRepairable = function()
 	return !this.unrepairable;
 };
 
-/** @param {boolean} repairable */
 Repairable.prototype.SetRepairability = function(repairable)
 {
 	this.unrepairable = !repairable;
@@ -86,7 +64,7 @@ Repairable.prototype.GetNumBuilders = function()
 /**
  * Adds an array of builders.
  *
- * @param {number[]} builders - An array containing the entity IDs of builders to assign.
+ * @param {number[]} - An array containing the entity IDs of builders to assign.
  */
 Repairable.prototype.AddBuilders = function(builders)
 {
@@ -94,24 +72,22 @@ Repairable.prototype.AddBuilders = function(builders)
 		this.AddBuilder(builder);
 };
 
-/** @param {EntityId} builderEnt */
 Repairable.prototype.AddBuilder = function(builderEnt)
 {
 	if (this.builders.has(builderEnt))
 		return;
 
-	this.builders.set(builderEnt, /** @type {Builder} */(Engine.QueryInterface(builderEnt, IID_Builder)).GetRate());
-	this.totalBuilderRate += /** @type {number} */(this.builders.get(builderEnt));
+	this.builders.set(builderEnt, Engine.QueryInterface(builderEnt, IID_Builder).GetRate());
+	this.totalBuilderRate += this.builders.get(builderEnt);
 	this.SetBuildMultiplier();
 };
 
-/** @param {EntityId} builderEnt */
 Repairable.prototype.RemoveBuilder = function(builderEnt)
 {
 	if (!this.builders.has(builderEnt))
 		return;
 
-	this.totalBuilderRate -= /** @type {number} */(this.builders.get(builderEnt));
+	this.totalBuilderRate -= this.builders.get(builderEnt);
 	this.builders.delete(builderEnt);
 	this.SetBuildMultiplier();
 };
@@ -119,7 +95,6 @@ Repairable.prototype.RemoveBuilder = function(builderEnt)
 /**
  * The build multiplier is a penalty that is applied to each builder.
  * For example, ten women build at a combined rate of 10^0.7 = 5.01 instead of 10.
- * @param {number} num
  */
 Repairable.prototype.CalculateBuildMultiplier = function(num)
 {
@@ -134,7 +109,7 @@ Repairable.prototype.SetBuildMultiplier = function()
 
 Repairable.prototype.GetBuildTime = function()
 {
-	let timeLeft = (1 - this.GetBuildProgress()) * (Engine.QueryInterface(this.entity, IID_Cost)?.GetBuildTime() || 0) * this.repairTimeRatio;
+	let timeLeft = (1 - this.GetBuildProgress()) * Engine.QueryInterface(this.entity, IID_Cost).GetBuildTime() * this.repairTimeRatio;
 	let rate = this.totalBuilderRate * this.buildMultiplier;
 	// The rate if we add another woman to the repairs
 	let rateNew = (this.totalBuilderRate + 1) * this.CalculateBuildMultiplier(this.GetNumBuilders() + 1);
@@ -145,11 +120,7 @@ Repairable.prototype.GetBuildTime = function()
 	};
 };
 
-/**
- * TODO: should we have resource costs?
- * @param {EntityId} builderEnt
- * @param {number} rate
- */
+// TODO: should we have resource costs?
 Repairable.prototype.Repair = function(builderEnt, rate)
 {
 	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -166,7 +137,7 @@ Repairable.prototype.Repair = function(builderEnt, rate)
 	cmpHealth.Increase(amount);
 
 	// Update the total builder rate
-	this.totalBuilderRate += rate - /** @type {number} */(this.builders.get(builderEnt));
+	this.totalBuilderRate += rate - this.builders.get(builderEnt);
 	this.builders.set(builderEnt, rate);
 
 	// If we repaired all the damage, send a message to entities to stop repairing this building
@@ -187,13 +158,12 @@ Repairable.prototype.Repair = function(builderEnt, rate)
 
 Repairable.prototype.GetRepairRate = function()
 {
-	let cmpHealth = /** @type {Health} */(Engine.QueryInterface(this.entity, IID_Health));
+	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
 	let cmpCost = Engine.QueryInterface(this.entity, IID_Cost);
-	let repairTime = this.repairTimeRatio * (cmpCost?.GetBuildTime() || 0);
+	let repairTime = this.repairTimeRatio * cmpCost.GetBuildTime();
 	return repairTime ? cmpHealth.GetMaxHitpoints() / repairTime : 1;
 };
 
-/** @param {MessageEntityRenamed} msg */
 Repairable.prototype.OnEntityRenamed = function(msg)
 {
 	let cmpRepairableNew = Engine.QueryInterface(msg.newentity, IID_Repairable);
@@ -201,16 +171,7 @@ Repairable.prototype.OnEntityRenamed = function(msg)
 		cmpRepairableNew.AddBuilders(this.GetBuilders());
 };
 
-function RepairableMirage() {
-	/** @type {ReturnType<Repairable["GetNumBuilders"]>} */
-	this.numBuilders;
-	/** @type {ReturnType<Repairable["GetBuildTime"]>} */
-	this.buildTime;
-	/** @type {boolean} */
-	this.unrepairable;
-}
-
-/** @param {Repairable} cmpRepairable */
+function RepairableMirage() {}
 RepairableMirage.prototype.Init = function(cmpRepairable)
 {
 	this.numBuilders = cmpRepairable.GetNumBuilders();
@@ -219,11 +180,8 @@ RepairableMirage.prototype.Init = function(cmpRepairable)
 		this.unrepairable = cmpRepairable.unrepairable;
 };
 
-/** @type {Repairable["GetNumBuilders"]} */
 RepairableMirage.prototype.GetNumBuilders = function() { return this.numBuilders; };
-/** @type {Repairable["GetBuildTime"]} */
 RepairableMirage.prototype.GetBuildTime = function() { return this.buildTime; };
-/** @type {Repairable["IsRepairable"]} */
 RepairableMirage.prototype.IsRepairable = function() { return !this.unrepairable; };
 
 Engine.RegisterGlobal("RepairableMirage", RepairableMirage);

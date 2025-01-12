@@ -7,15 +7,8 @@ function ValueModificationManager() {}
 ValueModificationManager.prototype.Schema =
 	"<a:component type='system'/><empty/>";
 
-// @ts-ignore
 ValueModificationManager.prototype.Serialize = null;
 
-/**
- * @template T
- * @param {string} valueName
- * @param {T} currentValue
- * @param {EntityId} entity
- */
 ValueModificationManager.prototype.ApplyModifications = function(valueName, currentValue, entity)
 {
 	return ApplyValueModificationsToEntity(valueName, currentValue, entity);

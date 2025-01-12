@@ -1,10 +1,6 @@
 // Helper functions to change an entity's template and check if the transformation is possible
 
-/**
- * @param {EntityId} oldEnt - the entity to replace.
- * @param {string} newTemplate - the new template to use.
- * @returns {EntityId} the ID of the new entity or INVALID_ENTITY.
- */
+// returns the ID of the new entity or INVALID_ENTITY.
 function ChangeEntityTemplate(oldEnt, newTemplate)
 {
 	// Done un/packing, copy our parameters to the final entity
@@ -65,7 +61,7 @@ function ChangeEntityTemplate(oldEnt, newTemplate)
 			owner = cmpOwnership.GetOwner();
 	}
 	let cmpNewOwnership = Engine.QueryInterface(newEnt, IID_Ownership);
-	if (cmpNewOwnership && owner)
+	if (cmpNewOwnership)
 		cmpNewOwnership.SetOwner(owner);
 
 	CopyControlGroups(oldEnt, newEnt);
@@ -181,8 +177,6 @@ function ChangeEntityTemplate(oldEnt, newTemplate)
  * This is the mechanism that is used to e.g. enable wall pieces to be built closely
  * together, ignoring their mutual obstruction shapes (since they would
  * otherwise be prevented from being built so closely together).
- * @param {EntityId} oldEnt - the entity to copy the control groups from.
- * @param {EntityId} newEnt - the entity to copy the control groups to.
  */
 function CopyControlGroups(oldEnt, newEnt)
 {
@@ -195,10 +189,6 @@ function CopyControlGroups(oldEnt, newEnt)
 	}
 }
 
-/**
- * @param {EntityId} ent - the entity to check for obstructions.
- * @param {string} templateArg - the new template to check for obstructions.
- */
 function ObstructionsBlockingTemplateChange(ent, templateArg)
 {
 	var previewEntity = Engine.AddEntity("preview|"+templateArg);
@@ -215,7 +205,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 
 	// Return false if no ownership as BuildRestrictions.CheckPlacement needs an owner and I have no idea if false or true is better
 	// Plus there are no real entities without owners currently.
-	if (!cmpBuildRestrictions || !cmpPosition || !cmpOwnership || !cmpNewPosition)
+	if (!cmpBuildRestrictions || !cmpPosition || !cmpOwnership)
 		return DeleteEntityAndReturn(previewEntity, cmpPosition, null, null, cmpNewPosition, false);
 
 	var pos = cmpPosition.GetPosition2D();
@@ -226,7 +216,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 	cmpNewPosition.JumpTo(pos.x, pos.y);
 	cmpNewPosition.SetYRotation(angle.y);
 
-	var cmpNewOwnership = /** @type {Ownership} */(Engine.QueryInterface(previewEntity, IID_Ownership));
+	var cmpNewOwnership = Engine.QueryInterface(previewEntity, IID_Ownership);
 	cmpNewOwnership.SetOwner(cmpOwnership.GetOwner());
 
 	var checkPlacement = cmpBuildRestrictions.CheckPlacement();
@@ -259,7 +249,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 				 newTemplate.Obstruction.Unit["@radius"] > template.Obstruction.Static["@depth"]))
 		{
 			var cmpNewObstruction = Engine.QueryInterface(previewEntity, IID_Obstruction);
-			if (cmpNewObstruction && cmpNewObstruction.GetBlockMovementFlag(false))
+			if (cmpNewObstruction && cmpNewObstruction.GetBlockMovementFlag())
 			{
 				// Remove all obstructions at the new entity, especially animal corpses
 				for (let ent of cmpNewObstruction.GetEntitiesDeletedUponConstruction())
@@ -275,33 +265,20 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 	return DeleteEntityAndReturn(previewEntity, cmpPosition, pos, angle, cmpNewPosition, false);
 }
 
-/**
- * @param {EntityId} ent - the entity to delete.
- * @param {Position | undefined} cmpPosition - the position component of the entity.
- * @param {Vector2D | null} position - the position of the entity.
- * @param {Vector3D | null} angle - the angle of the entity.
- * @param {Position | undefined} cmpNewPosition - the position component of the new entity.
- * @param {boolean} ret - the value to return.
- */
 function DeleteEntityAndReturn(ent, cmpPosition, position, angle, cmpNewPosition, ret)
 {
 	// prevent preview from interfering in the world
-	cmpNewPosition?.MoveOutOfWorld();
+	cmpNewPosition.MoveOutOfWorld();
 	if (position !== null)
 	{
-		cmpPosition?.JumpTo(position.x, position.y);
-		// @ts-expect-error (we know in this case that angle is not null)
-		cmpPosition?.SetYRotation(angle.y);
+		cmpPosition.JumpTo(position.x, position.y);
+		cmpPosition.SetYRotation(angle.y);
 	}
 
 	Engine.DestroyEntity(ent);
 	return ret;
 }
 
-/**
- * @param {EntityId} oldEnt - the entity to transfer garrisoned units from.
- * @param {EntityId} newEnt - the entity to transfer garrisoned units to.
- */
 function TransferGarrisonedUnits(oldEnt, newEnt)
 {
 	// Transfer garrisoned units if possible, or unload them

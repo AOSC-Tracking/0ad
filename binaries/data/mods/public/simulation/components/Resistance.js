@@ -1,24 +1,4 @@
-/**
- * @typedef {{
- *   Damage?: Record<string, number>,
- *   Capture?: number,
- *   ApplyStatus?: Record<string, { duration: number, blockChance: number }>
- *   [effectType: string]: unknown
- * }} ResistanceData
- */
-
-function Resistance() {
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {Record<string, any>} */
-	this.template;
-
-	/** @type {boolean} */
-	this.invulnerable;
-	/** @type {Set<EntityId>} */
-	this.attackers;
-}
+function Resistance() {}
 
 /**
  * Builds a RelaxRNG schema of possible attack effects.
@@ -123,7 +103,6 @@ Resistance.prototype.RemoveAttacker = function(attacker)
 	return this.attackers.delete(attacker);
 };
 
-/** @param {boolean} invulnerability - Whether the entity is invulnerable. */
 Resistance.prototype.SetInvulnerability = function(invulnerability)
 {
 	this.invulnerable = invulnerability;
@@ -134,11 +113,10 @@ Resistance.prototype.SetInvulnerability = function(invulnerability)
  * Calculate the effective resistance of an entity to a particular effect.
  * ToDo: Support resistance against status effects.
  * @param {string} effectType - The type of attack effect the resistance has to be calculated for (e.g. "Damage", "Capture").
- * @return - An object of the type { "Damage": { "Crush": number, "Hack": number }, "Capture": number }.
+ * @return {Object} - An object of the type { "Damage": { "Crush": number, "Hack": number }, "Capture": number }.
  */
 Resistance.prototype.GetEffectiveResistanceAgainst = function(effectType)
 {
-	/** @type {Partial<ResistanceData>} */
 	let ret = {};
 
 	let template = this.GetResistanceOfForm(Engine.QueryInterface(this.entity, IID_Foundation) ? "Foundation" : "Entity");
@@ -150,11 +128,10 @@ Resistance.prototype.GetEffectiveResistanceAgainst = function(effectType)
 
 /**
  * Get all separate resistances for showing in the GUI.
- * @return - All resistances ordered by type.
+ * @return {Object} - All resistances ordered by type.
  */
 Resistance.prototype.GetFullResistance = function()
 {
-	/** @type {Record<string, ResistanceData>} */
 	let ret = {};
 	for (let entityForm in this.template)
 		ret[entityForm] = this.GetResistanceOfForm(entityForm);
@@ -165,11 +142,10 @@ Resistance.prototype.GetFullResistance = function()
 /**
  * Get the resistance of a particular type, i.e. Foundation or Entity.
  * @param {string} entityForm - The form of the entity to query.
- * @return {ResistanceData} - An object containing the resistances.
+ * @return {Object} - An object containing the resistances.
  */
 Resistance.prototype.GetResistanceOfForm = function(entityForm)
 {
-	/** @type {ResistanceData} */
 	let ret = {};
 	let template = this.template && this.template[entityForm];
 	if (!template)
@@ -198,7 +174,6 @@ Resistance.prototype.GetResistanceOfForm = function(entityForm)
 	return ret;
 };
 
-/** @param {MessageOwnershipChanged} msg */
 Resistance.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to === INVALID_PLAYER)
@@ -207,12 +182,7 @@ Resistance.prototype.OnOwnershipChanged = function(msg)
 };
 
 
-function ResistanceMirage() {
-	/** @type {Record<string, ResistanceData>} */
-	this.resistanceOfForm = {};
-}
-
-/** @param {Resistance} cmpResistance */
+function ResistanceMirage() {}
 ResistanceMirage.prototype.Init = function(cmpResistance)
 {
 	this.invulnerable = cmpResistance.invulnerable;
@@ -223,26 +193,20 @@ ResistanceMirage.prototype.Init = function(cmpResistance)
 	this.attackers = new Set();
 };
 
-/** @type {Resistance["IsInvulnerable"]} */
 ResistanceMirage.prototype.IsInvulnerable = Resistance.prototype.IsInvulnerable;
-/** @type {Resistance["AddAttacker"]} */
 ResistanceMirage.prototype.AddAttacker = Resistance.prototype.AddAttacker;
-/** @type {Resistance["RemoveAttacker"]} */
 ResistanceMirage.prototype.RemoveAttacker = Resistance.prototype.RemoveAttacker;
 
-/** @type {Resistance["GetEffectiveResistanceAgainst"]} */
 ResistanceMirage.prototype.GetEffectiveResistanceAgainst = function(entityForm)
 {
 	return this.GetResistanceOfForm(this.isFoundation ? "Foundation" : "Entity");
 };
 
-/** @type {Resistance["GetResistanceOfForm"]} */
 ResistanceMirage.prototype.GetResistanceOfForm = function(entityForm)
 {
 	return this.resistanceOfForm[entityForm] || {};
 };
 
-/** @type {Resistance["GetFullResistance"]} */
 ResistanceMirage.prototype.GetFullResistance = function()
 {
 	return this.resistanceOfForm;

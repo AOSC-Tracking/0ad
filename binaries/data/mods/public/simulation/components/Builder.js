@@ -1,15 +1,4 @@
-function Builder() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {{ Rate: string, Entities: { _string: string }}} */
-	this.template;
-
-	/** @type {number | undefined} */
-	this.target;
-
-	/** @type {typeof IID_UnitAI | undefined} */
-	this.callerIID;
-}
+function Builder() {}
 
 Builder.prototype.Schema =
 	"<a:help>Allows the unit to construct and repair buildings.</a:help>" +
@@ -44,7 +33,7 @@ Builder.prototype.GetEntitiesList = function()
 	if (!string)
 		return [];
 
-	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
+	let cmpPlayer = QueryOwnerInterface(this.entity);
 	if (!cmpPlayer)
 		return [];
 
@@ -54,7 +43,7 @@ Builder.prototype.GetEntitiesList = function()
 	if (cmpIdentity)
 		string = string.replace(/\{native\}/g, cmpIdentity.GetCiv());
 
-	const entities = string.replace(/\{civ\}/g, /** @type {Identity} */(QueryOwnerInterface(this.entity, IID_Identity)).GetCiv()).split(/\s+/);
+	const entities = string.replace(/\{civ\}/g, QueryOwnerInterface(this.entity, IID_Identity).GetCiv()).split(/\s+/);
 
 	let disabledTemplates = cmpPlayer.GetDisabledTemplates();
 
@@ -95,7 +84,7 @@ Builder.prototype.CanRepair = function(target)
 
 /**
  * @param {number} target - The target to repair.
- * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
+ * @param {number} callerIID - The IID to notify on specific events.
  * @return {boolean} - Whether we started repairing.
  */
 Builder.prototype.StartRepairing = function(target, callerIID)
@@ -124,7 +113,7 @@ Builder.prototype.StartRepairing = function(target, callerIID)
 };
 
 /**
- * @param {string=} reason - The reason why we stopped repairing.
+ * @param {string} reason - The reason why we stopped repairing.
  */
 Builder.prototype.StopRepairing = function(reason)
 {
@@ -132,8 +121,7 @@ Builder.prototype.StopRepairing = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	if (this.timer)
-		cmpTimer.CancelTimer(this.timer);
+	cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	let cmpBuilderList = QueryBuilderListInterface(this.target);
@@ -155,41 +143,39 @@ Builder.prototype.StopRepairing = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason);
+			component.ProcessMessage(reason, null);
 	}
 };
 
 /**
  * Repair our target entity.
- * @param {any} data - Unused.
- * @param {number} lateness - Unused.
+ * @params - data and lateness are unused.
  */
 Builder.prototype.PerformBuilding = function(data, lateness)
 {
-	let target = /** @type {number} */(this.target);
-	if (!this.CanRepair(target))
+	if (!this.CanRepair(this.target))
 	{
 		this.StopRepairing("TargetInvalidated");
 		return;
 	}
 
-	if (!this.IsTargetInRange(target))
+	if (!this.IsTargetInRange(this.target))
 	{
 		this.StopRepairing("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
 
-	let cmpFoundation = Engine.QueryInterface(target, IID_Foundation);
+	let cmpFoundation = Engine.QueryInterface(this.target, IID_Foundation);
 	if (cmpFoundation)
 	{
 		cmpFoundation.Build(this.entity, this.GetRate());
 		return;
 	}
 
-	let cmpRepairable = Engine.QueryInterface(target, IID_Repairable);
+	let cmpRepairable = Engine.QueryInterface(this.target, IID_Repairable);
 	if (cmpRepairable)
 	{
 		cmpRepairable.Repair(this.entity, this.GetRate());
@@ -198,7 +184,7 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 };
 
 /**
- * @param {number} target - The entity ID of the target to check.
+ * @param {number} - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Builder.prototype.IsTargetInRange = function(target)
@@ -208,7 +194,6 @@ Builder.prototype.IsTargetInRange = function(target)
 	return cmpObstructionManager.IsInTargetRange(this.entity, target, range.min, range.max, false);
 };
 
-/** @param {MessageValueModification} msg */
 Builder.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Builder" || !msg.valueNames.some(name => name.endsWith('_string')))

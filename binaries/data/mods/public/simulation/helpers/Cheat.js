@@ -1,10 +1,3 @@
-/**
- * @param {{
- *  player: number,
- *  action: string,
- *  [prop: string]: any
- * }} input
- */
 function Cheat(input)
 {
 	if (input.player < 0)
@@ -15,7 +8,7 @@ function Cheat(input)
 	if (playerEnt == INVALID_ENTITY)
 		return;
 	const cmpPlayer = Engine.QueryInterface(playerEnt, IID_Player);
-	if (cmpPlayer === undefined || !cmpPlayer?.GetCheatsEnabled())
+	if (!cmpPlayer?.GetCheatsEnabled())
 		return;
 
 	const cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
@@ -43,7 +36,7 @@ function Cheat(input)
 	case "convertunit":
 		if (isNaN(input.parameter))
 			return;
-		const playerID = (input.parameter > -1 && QueryPlayerIDInterface(input.parameter, IID_Player) || cmpPlayer).GetPlayerID();
+		const playerID = (input.parameter > -1 && QueryPlayerIDInterface(input.parameter) || cmpPlayer).GetPlayerID();
 		for (const ent of input.selected)
 			Engine.QueryInterface(ent, IID_Ownership)?.SetOwner(playerID);
 		return;
@@ -60,7 +53,7 @@ function Cheat(input)
 	case "defeatplayer":
 		if (isNaN(input.parameter))
 			return;
-		QueryPlayerIDInterface(input.parameter, IID_Player)?.Defeat(
+		QueryPlayerIDInterface(input.parameter)?.Defeat(
 			markForTranslation("%(player)s has been defeated (cheat).")
 		);
 		return;
@@ -125,9 +118,8 @@ function Cheat(input)
 		else
 			return;
 
-		const civ = Engine.QueryInterface(playerEnt, IID_Identity)?.GetCiv();
-		if (civ)
-			parameter += TechnologyTemplates.Has(parameter + "_" + civ) ? "_" + civ : "_generic";
+		const civ = Engine.QueryInterface(playerEnt, IID_Identity).GetCiv();
+		parameter += TechnologyTemplates.Has(parameter + "_" + civ) ? "_" + civ : "_generic";
 
 		Cheat({
 			"player": input.player,
@@ -170,8 +162,8 @@ function Cheat(input)
 							return;
 
 						// get name of tech
-						if (tech instanceof Object)
-							techname = tech.top
+						if (tech.pair)
+							techname = tech[pair];
 						else
 							techname = tech;
 					}
@@ -186,7 +178,7 @@ function Cheat(input)
 		return;
 	}
 	case "metaCheat":
-		for (const resource of g_Resources.GetCodes())
+		for (const resource of Resources.GetCodes())
 			Cheat({ "player": input.player, "action": "addresource", "text": resource, "parameter": input.parameter });
 		Cheat({ "player": input.player, "action": "maxpopulation" });
 		Cheat({ "player": input.player, "action": "changemaxpopulation" });

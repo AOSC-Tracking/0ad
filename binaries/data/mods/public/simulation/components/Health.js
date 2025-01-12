@@ -1,35 +1,4 @@
-function Health() {
-	/** @type {EntityId} */
-	this.entity;
-	/**
-	 * @type {{
-	 *   Max: string,
-	 *   Initial: string | undefined,
-	 *   DamageVariants: { [prop:string]: number } | undefined,
-	 *   RegenRate: string,
-	 *   IdleRegenRate: string,
-	 *   DeathType: string,
-	 *   SpawnEntityOnDeath: string | undefined,
-	 *   Unhealable: string
-	 * }}
-	 */
-	this.template;
-
-	/** @type {number} */
-	this.maxHitpoints;
-
-	/** @type {number} */
-	this.regenRate;
-
-	/** @type {number} */
-	this.idleRegenRate;
-
-	/** @type {number | undefined} */
-	this.regenTimer;
-
-	/** @type {string} */
-	this.damageVariant;
-}
+function Health() {}
 
 Health.prototype.Schema =
 	"<a:help>Deals with hitpoints and death.</a:help>" +
@@ -117,9 +86,6 @@ Health.prototype.IsInjured = function()
 	return this.hitpoints > 0 && this.hitpoints < this.GetMaxHitpoints();
 };
 
-/**
- * @param {number} value - The new hitpoint value.
- */
 Health.prototype.SetHitpoints = function(value)
 {
 	// If we're already dead, don't allow resurrection
@@ -216,13 +182,14 @@ Health.prototype.Kill = function()
  * @param {number} amount - The amount of damage to be taken.
  * @param {number} attacker - The entityID of the attacker.
  * @param {number} attackerOwner - The playerID of the owner of the attacker.
+ *
+ * @eturn {Object} - Object of the form { "healthChange": number }.
  */
 Health.prototype.TakeDamage = function(amount, attacker, attackerOwner)
 {
 	if (!amount || !this.hitpoints)
 		return { "healthChange": 0 };
 
-	/** @type {{ healthChange: number, xp?: number }} */
 	let change = this.Reduce(amount);
 
 	let cmpLoot = Engine.QueryInterface(this.entity, IID_Loot);
@@ -339,9 +306,6 @@ Health.prototype.HandleDeath = function()
 	Engine.DestroyEntity(this.entity);
 };
 
-/**
- * @param {number} amount - The amount of hitpoints to add.
- */
 Health.prototype.Increase = function(amount)
 {
 	// Before changing the value, activate Fogging if necessary to hide changes
@@ -392,7 +356,7 @@ Health.prototype.CreateCorpse = function()
 		entCorpse = Engine.AddLocalEntity("corpse|" + templateName);
 
 	// Copy various parameters so it looks just like us.
-	let cmpPositionCorpse = /** @type {Position} */(Engine.QueryInterface(entCorpse, IID_Position));
+	let cmpPositionCorpse = Engine.QueryInterface(entCorpse, IID_Position);
 	let pos = cmpPosition.GetPosition();
 	cmpPositionCorpse.JumpTo(pos.x, pos.z);
 	let rot = cmpPosition.GetRotation();
@@ -435,14 +399,14 @@ Health.prototype.CreateDeathSpawnedEntity = function()
 	// If the unit died while not in the world, don't spawn a death entity for it
 	// since there's nowhere for it to be placed
 	let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
-	if (!cmpPosition?.IsInWorld())
+	if (!cmpPosition.IsInWorld())
 		return INVALID_ENTITY;
 
 	// Create SpawnEntityOnDeath entity
-	let spawnedEntity = Engine.AddLocalEntity(/** @type {string} */(this.template.SpawnEntityOnDeath));
+	let spawnedEntity = Engine.AddLocalEntity(this.template.SpawnEntityOnDeath);
 
 	// Move to same position
-	let cmpSpawnedPosition = /** @type {Position} */(Engine.QueryInterface(spawnedEntity, IID_Position));
+	let cmpSpawnedPosition = Engine.QueryInterface(spawnedEntity, IID_Position);
 	let pos = cmpPosition.GetPosition();
 	cmpSpawnedPosition.JumpTo(pos.x, pos.z);
 	let rot = cmpPosition.GetRotation();
@@ -511,21 +475,18 @@ Health.prototype.RecalculateValues = function()
 		this.CheckRegenTimer();
 };
 
-/** @param {MessageValueModification} msg */
 Health.prototype.OnValueModification = function(msg)
 {
 	if (msg.component == "Health")
 		this.RecalculateValues();
 };
 
-/** @param {MessageOwnershipChanged} msg */
 Health.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)
 		this.RecalculateValues();
 };
 
-/** @param {number} from */
 Health.prototype.RegisterHealthChanged = function(from)
 {
 	this.CheckRegenTimer();
@@ -533,19 +494,7 @@ Health.prototype.RegisterHealthChanged = function(from)
 	Engine.PostMessage(this.entity, MT_HealthChanged, { "from": from, "to": this.hitpoints });
 };
 
-function HealthMirage() {
-	/** @type {ReturnType<Health["GetMaxHitpoints"]>} */
-	this.maxHitpoints;
-	/** @type {ReturnType<Health["GetHitpoints"]>} */
-	this.hitpoints;
-	/** @type {ReturnType<Health["IsRepairable"]>} */
-	this.repairable;
-	/** @type {ReturnType<Health["IsInjured"]>} */
-	this.injured;
-	/** @type {ReturnType<Health["IsUnhealable"]>} */
-	this.unhealable;
-}
-/** @param {Health} cmpHealth */
+function HealthMirage() {}
 HealthMirage.prototype.Init = function(cmpHealth)
 {
 	this.maxHitpoints = cmpHealth.GetMaxHitpoints();
@@ -554,16 +503,10 @@ HealthMirage.prototype.Init = function(cmpHealth)
 	this.injured = cmpHealth.IsInjured();
 	this.unhealable = cmpHealth.IsUnhealable();
 };
-
-/** @type {Health["GetMaxHitpoints"]} */
 HealthMirage.prototype.GetMaxHitpoints = function() { return this.maxHitpoints; };
-/** @type {Health["GetHitpoints"]} */
 HealthMirage.prototype.GetHitpoints = function() { return this.hitpoints; };
-/** @type {Health["IsRepairable"]} */
 HealthMirage.prototype.IsRepairable = function() { return this.repairable; };
-/** @type {Health["IsInjured"]} */
 HealthMirage.prototype.IsInjured = function() { return this.injured; };
-/** @type {Health["IsUnhealable"]} */
 HealthMirage.prototype.IsUnhealable = function() { return this.unhealable; };
 
 Engine.RegisterGlobal("HealthMirage", HealthMirage);

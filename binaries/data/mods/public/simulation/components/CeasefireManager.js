@@ -1,9 +1,4 @@
-function CeasefireManager() {
-	/** @type {number} */
-	this.countdownMessageDuration;
-	/** @type {number[][]} */
-	this.diplomacyBeforeCeasefire;
-}
+function CeasefireManager() {}
 
 CeasefireManager.prototype.Schema = "<a:component type='system'/><empty/>";
 
@@ -48,7 +43,6 @@ CeasefireManager.prototype.GetDiplomacyBeforeCeasefire = function()
 	return this.diplomacyBeforeCeasefire;
 };
 
-/** @param {number} ceasefireTime */
 CeasefireManager.prototype.StartCeasefire = function(ceasefireTime)
 {
 	// If invalid timeout given, return
@@ -77,13 +71,13 @@ CeasefireManager.prototype.StartCeasefire = function(ceasefireTime)
 		// Save diplomacy
 		let numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 		for (let i = 1; i < numPlayers; ++i)
-			this.diplomacyBeforeCeasefire.push(/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).GetDiplomacy());
+			this.diplomacyBeforeCeasefire.push(QueryPlayerIDInterface(i, IID_Diplomacy).GetDiplomacy());
 
 		// Set every enemy (except gaia) to neutral
 		for (let i = 1; i < numPlayers; ++i)
 			for (let j = 1; j < numPlayers; ++j)
 				if (this.diplomacyBeforeCeasefire[i-1][j] < 0)
-					/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetNeutral(j);
+					QueryPlayerIDInterface(i, IID_Diplomacy).SetNeutral(j);
 	}
 
 	this.ceasefireIsActive = true;
@@ -122,7 +116,7 @@ CeasefireManager.prototype.StopCeasefire = function()
 	// Reset diplomacies to original settings
 	let numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 	for (let i = 1; i < numPlayers; ++i)
-		/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetDiplomacy(this.diplomacyBeforeCeasefire[i-1]);
+		QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(this.diplomacyBeforeCeasefire[i-1]);
 
 	this.ceasefireIsActive = false;
 	this.ceasefireTime = 0;

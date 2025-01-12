@@ -1,8 +1,8 @@
-function RequirementsHelperClass() {}
+function RequirementsHelper() {}
 
-RequirementsHelperClass.prototype.DEFAULT_RECURSION_DEPTH = 1;
+RequirementsHelper.prototype.DEFAULT_RECURSION_DEPTH = 1;
 
-RequirementsHelperClass.prototype.EntityRequirementsSchema =
+RequirementsHelper.prototype.EntityRequirementsSchema =
 	"<element name='Entities' a:help='Entities that need to be controlled.'>" +
 		"<oneOrMore>" +
 			"<element a:help='Class of entity that needs to be controlled.'>" +
@@ -21,7 +21,7 @@ RequirementsHelperClass.prototype.EntityRequirementsSchema =
 		"</oneOrMore>" +
 	"</element>";
 
-RequirementsHelperClass.prototype.TechnologyRequirementsSchema =
+RequirementsHelper.prototype.TechnologyRequirementsSchema =
 	"<element name='Techs' a:help='White-space separated list of technologies that need to be researched. ! negates a tech.'>" +
 		"<attribute name='datatype'>" +
 			"<value>tokens</value>" +
@@ -33,7 +33,7 @@ RequirementsHelperClass.prototype.TechnologyRequirementsSchema =
  * @param {number} recursionDepth - How deep we recurse.
  * @return {string} - A RelaxRNG schema for requirements.
  */
-RequirementsHelperClass.prototype.RequirementsSchema = function(recursionDepth)
+RequirementsHelper.prototype.RequirementsSchema = function(recursionDepth)
 {
 	return "" +
 		"<oneOrMore>" +
@@ -45,7 +45,7 @@ RequirementsHelperClass.prototype.RequirementsSchema = function(recursionDepth)
  * @param {number} recursionDepth - How deep we recurse.
  * @return {string} - A RelaxRNG schema for chosing requirements.
  */
-RequirementsHelperClass.prototype.ChoicesSchema = function(recursionDepth)
+RequirementsHelper.prototype.ChoicesSchema = function(recursionDepth)
 {
 	const allAnySchema = recursionDepth > 0 ? "" +
 		"<element name='All' a:help='Requires all of the conditions to be met.'>" +
@@ -67,8 +67,7 @@ RequirementsHelperClass.prototype.ChoicesSchema = function(recursionDepth)
  * @param {number} recursionDepth - How deeply recursive we build the schema.
  * @return {string} - A RelaxRNG schema for requirements.
  */
-// @ts-expect-error
-RequirementsHelperClass.prototype.BuildSchema = function(recursionDepth = this.DEFAULT_RECURSION_DEPTH)
+RequirementsHelper.prototype.BuildSchema = function(recursionDepth = this.DEFAULT_RECURSION_DEPTH)
 {
 	return "" +
 		"<element name='Requirements' a:help='The requirements that ought to be met before this entity can be produced.'>" +
@@ -88,21 +87,21 @@ RequirementsHelperClass.prototype.BuildSchema = function(recursionDepth = this.D
  * @param {number} playerID -
  * @return {boolean} -
  */
-RequirementsHelperClass.prototype.AreRequirementsMet = function(template, playerID)
+RequirementsHelper.prototype.AreRequirementsMet = function(template, playerID)
 {
 	if (!template || !Object.keys(template).length)
 		return true;
 
-	const cmpTechManager = /** @type {TechnologyManager} */(QueryPlayerIDInterface(playerID, IID_TechnologyManager));
+	const cmpTechManager = QueryPlayerIDInterface(playerID, IID_TechnologyManager);
 	return cmpTechManager && this.AllRequirementsMet(template, cmpTechManager);
 };
 
 /**
- * @param {Template} template - The requirements template for "all".
- * @param {TechnologyManager} cmpTechManager -
+ * @param {Object} template - The requirements template for "all".
+ * @param {component} cmpTechManager -
  * @return {boolean} -
  */
-RequirementsHelperClass.prototype.AllRequirementsMet = function(template, cmpTechManager)
+RequirementsHelper.prototype.AllRequirementsMet = function(template, cmpTechManager)
 {
 	for (const requirementType in template)
 	{
@@ -132,11 +131,11 @@ RequirementsHelperClass.prototype.AllRequirementsMet = function(template, cmpTec
 };
 
 /**
- * @param {Template} template - The requirements template for "any".
- * @param {TechnologyManager} cmpTechManager -
+ * @param {Object} template - The requirements template for "any".
+ * @param {component} cmpTechManager -
  * @return {boolean} -
  */
-RequirementsHelperClass.prototype.AnyRequirementsMet = function(template, cmpTechManager)
+RequirementsHelper.prototype.AnyRequirementsMet = function(template, cmpTechManager)
 {
 	for (const requirementType in template)
 	{
@@ -165,4 +164,4 @@ RequirementsHelperClass.prototype.AnyRequirementsMet = function(template, cmpTec
 	return false;
 };
 
-Engine.RegisterGlobal("RequirementsHelper", new RequirementsHelperClass());
+Engine.RegisterGlobal("RequirementsHelper", new RequirementsHelper());

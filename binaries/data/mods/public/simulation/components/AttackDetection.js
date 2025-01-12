@@ -1,21 +1,4 @@
-/**
- * @typedef {{ target: EntityId, position: Vector2D, time: number, targetIsDomesticAnimal: boolean }} AttackEvent
- */
-function AttackDetection() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {{ SuppressionTransferRange: number, SuppressionRange: number, SuppressionTime: number }} */
-	this.template;
-
-	/** @type {number} */
-	this.suppressionTime;
-	/** @type {number} */
-	this.suppressionTransferRangeSquared;
-	/** @type {number} */
-	this.suppressionRangeSquared;
-	/** @type {AttackEvent[]} */
-	this.suppressedList;
-}
+function AttackDetection() {}
 
 AttackDetection.prototype.Schema =
 	"<a:help>Detects incoming attacks.</a:help>" +
@@ -44,19 +27,12 @@ AttackDetection.prototype.ActivateTimer = function()
 	Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).SetTimeout(this.entity, IID_AttackDetection, "HandleTimeout", this.suppressionTime);
 };
 
-/**
- * @param {AttackEvent} event
- */
 AttackDetection.prototype.AddSuppression = function(event)
 {
 	this.suppressedList.push(event);
 	this.ActivateTimer();
 };
 
-/**
- * @param {number} index
- * @param {AttackEvent} event
- */
 AttackDetection.prototype.UpdateSuppressionEvent = function(index, event)
 {
 	this.suppressedList[index] = event;
@@ -65,12 +41,11 @@ AttackDetection.prototype.UpdateSuppressionEvent = function(index, event)
 
 // Message handlers
 
-/** @param {MessageAttacked} msg */
 AttackDetection.prototype.OnGlobalAttacked = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 	var cmpOwnership = Engine.QueryInterface(msg.target, IID_Ownership);
-	if (cmpOwnership?.GetOwner() != cmpPlayer?.GetPlayerID())
+	if (cmpOwnership.GetOwner() != cmpPlayer.GetPlayerID())
 		return;
 
 	Engine.PostMessage(msg.target, MT_MinimapPing);
@@ -80,18 +55,12 @@ AttackDetection.prototype.OnGlobalAttacked = function(msg)
 
 // External interface
 
-/**
- * @param {EntityId} target
- * @param {EntityId} attacker
- * @param {string} type
- * @param {number} attackerOwner
- */
 AttackDetection.prototype.AttackAlert = function(target, attacker, type, attackerOwner)
 {
-	let playerID = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID();
+	let playerID = Engine.QueryInterface(this.entity, IID_Player).GetPlayerID();
 
 	// Don't register attacks dealt against other players
-	if (Engine.QueryInterface(target, IID_Ownership)?.GetOwner() != playerID)
+	if (Engine.QueryInterface(target, IID_Ownership).GetOwner() != playerID)
 		return;
 
 	let cmpAttackerOwnership = Engine.QueryInterface(attacker, IID_Ownership);
@@ -105,14 +74,14 @@ AttackDetection.prototype.AttackAlert = function(target, attacker, type, attacke
 	// we have a lower priority notification for it, which can be
 	// overriden by a regular one.
 	var cmpTargetIdentity = Engine.QueryInterface(target, IID_Identity);
-	var targetIsDomesticAnimal = cmpTargetIdentity && cmpTargetIdentity.HasClass("Animal") && cmpTargetIdentity.HasClass("Domestic") || false;
+	var targetIsDomesticAnimal = cmpTargetIdentity && cmpTargetIdentity.HasClass("Animal") && cmpTargetIdentity.HasClass("Domestic");
 
 	var cmpPosition = Engine.QueryInterface(target, IID_Position);
 	if (!cmpPosition || !cmpPosition.IsInWorld())
 		return;
 	var event = {
 		"target": target,
-		"position": cmpPosition.GetPosition2D(),
+		"position": cmpPosition.GetPosition(),
 		"time": Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).GetTime(),
 		"targetIsDomesticAnimal": targetIsDomesticAnimal
 	};
@@ -127,7 +96,7 @@ AttackDetection.prototype.AttackAlert = function(target, attacker, type, attacke
 
 		// If the new attack is within suppression distance of this element,
 		// then check if the element should be updated and return
-		var dist = event.position.distanceToSquared(element.position);
+		var dist = event.position.horizDistanceToSquared(element.position);
 		if (dist >= this.suppressionRangeSquared)
 			continue;
 

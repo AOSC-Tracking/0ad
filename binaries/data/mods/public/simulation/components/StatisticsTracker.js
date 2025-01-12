@@ -1,4 +1,3 @@
-// @ts-nocheck
 function StatisticsTracker() {}
 
 StatisticsTracker.prototype.Schema =

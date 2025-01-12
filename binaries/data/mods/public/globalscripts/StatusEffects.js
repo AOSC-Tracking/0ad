@@ -1,14 +1,4 @@
 /**
- * @typedef {{
- *   applierTooltip?: string,
- *   code: string,
- *   icon?: string,
- *   statusName?: string,
- *   receiverTooltip?: string
- * }} StatusEffectJSONData
- */
-
-/**
  * This class provides a cache for accessing status effects metadata stored in JSON files.
  * This class must be initialised before using, as initialising it directly in globalscripts would
  * introduce disk I/O every time e.g. a GUI page is loaded.
@@ -17,13 +7,12 @@ class StatusEffectsMetadata
 {
 	constructor()
 	{
-		/** @type {Record<string, StatusEffectJSONData>} */
 		this.statusEffectData = {};
 
 		let files = Engine.ListDirectoryFiles("simulation/data/status_effects", "*.json", false);
 		for (let filename of files)
 		{
-			let data = /** @type {StatusEffectJSONData} */(Engine.ReadJSONFile(filename));
+			let data = Engine.ReadJSONFile(filename);
 			if (!data)
 				continue;
 
@@ -47,7 +36,7 @@ class StatusEffectsMetadata
 
 	/**
 	 * @param {string} code - The code of the Status Effect.
-	 * @return {StatusEffectJSONData | undefined} - The JSON data corresponding to the code.
+	 * @return {Object} - The JSON data corresponding to the code.
 	 */
 	getData(code)
 	{
@@ -55,29 +44,26 @@ class StatusEffectsMetadata
 			return this.statusEffectData[code];
 
 		warn("No status effects data found for: " + code + ".");
+		return {};
 	}
 
-	/** @param {string} code */
 	getApplierTooltip(code)
 	{
-		return this.getData(code)?.applierTooltip || "";
+		return this.getData(code).applierTooltip;
 	}
 
-	/** @param {string} code */
 	getIcon(code)
 	{
-		return this.getData(code)?.icon || "default";
+		return this.getData(code).icon;
 	}
 
-	/** @param {string} code */
 	getName(code)
 	{
-		return this.getData(code)?.statusName || code;
+		return this.getData(code).statusName;
 	}
 
-	/** @param {string} code */
 	getReceiverTooltip(code)
 	{
-		return this.getData(code)?.receiverTooltip || "";
+		return this.getData(code).receiverTooltip;
 	}
 }

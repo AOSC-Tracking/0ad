@@ -50,7 +50,6 @@ WallSet.prototype.Init = function()
 {
 };
 
-// @ts-ignore
 WallSet.prototype.Serialize = null;
 
 Engine.RegisterComponentType(IID_WallSet, "WallSet", WallSet);

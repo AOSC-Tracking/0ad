@@ -1,36 +1,17 @@
 /**
- * @typedef {{
- *  code: GenericResName,
- *  name: string,
- *  description: string,
- * 	order: number,
- * 	subtypes: Record<SpecificResName, string>,
- * 	properties: ("barterable" | "tradable" | "tributable")[],
- * 	truePrice: number,
- *  aiAnalysisInfluenceGroup?: string
- * }} ResourceData
- */
-
-/**
  * This class provides a cache to all resource names and properties defined by the JSON files.
- * @constructor
  */
 function Resources()
 {
-	/** @type {ResourceData[]} */
 	this.resourceData = [];
-	/** @type {Record<GenericResName, ResourceData>} */
 	this.resourceDataObj = {};
-	/** @type {GenericResName[]} */
 	this.resourceCodes = [];
-	/** @type {Record<GenericResName, FullResName>} */
 	this.resourceNames = {};
-	/** @type {Record<string, GenericResName[]>} */
 	this.resourceCodesByProperty = {};
 
 	for (let filename of Engine.ListDirectoryFiles("simulation/data/resources/", "*.json", false))
 	{
-		let data = /** @type {ResourceData} */(Engine.ReadJSONFile(filename));
+		let data = Engine.ReadJSONFile(filename);
 		if (!data)
 			continue;
 
@@ -53,18 +34,10 @@ function Resources()
 	}
 
 	// Sort arrays by specified order
-	/**
-	 * @param {ResourceData} a
-	 * @param {ResourceData} b
-	 */
 	let resDataSort = (a, b) => a.order < b.order ? -1 : a.order > b.order ? +1 : 0;
-	/**
-	 * @param {GenericResName} a
-	 * @param {GenericResName} b
-	 */
 	let resSort = (a, b) => resDataSort(
-		/** @type {ResourceData} */(this.resourceData.find(resource => resource.code == a)),
-		/** @type {ResourceData} */(this.resourceData.find(resource => resource.code == b))
+		this.resourceData.find(resource => resource.code == a),
+		this.resourceData.find(resource => resource.code == b)
 	);
 
 	this.resourceData.sort(resDataSort);
@@ -90,7 +63,6 @@ Resources.prototype.GetResources = function()
 
 /**
  * Returns the object defined in the JSON file for the given resource.
- * @param {GenericResName} type - The resource code.
  */
 Resources.prototype.GetResource = function(type)
 {
@@ -99,7 +71,7 @@ Resources.prototype.GetResource = function(type)
 
 /**
  * Returns an array containing all resource codes ordered as defined in the resource files.
- * @return {GenericResName[]} - Data of the form [ "food", "wood", ... ].
+ * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
 Resources.prototype.GetCodes = function()
 {
@@ -108,7 +80,7 @@ Resources.prototype.GetCodes = function()
 
 /**
  * Returns an array containing all barterable resource codes ordered as defined in the resource files.
- * @return {GenericResName[]} - Data of the form [ "food", "wood", ... ].
+ * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
 Resources.prototype.GetBarterableCodes = function()
 {
@@ -117,7 +89,7 @@ Resources.prototype.GetBarterableCodes = function()
 
 /**
  * Returns an array containing all tradable resource codes ordered as defined in the resource files.
- * @return {GenericResName[]} - Data of the form [ "food", "wood", ... ].
+ * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
 Resources.prototype.GetTradableCodes = function()
 {
@@ -126,7 +98,7 @@ Resources.prototype.GetTradableCodes = function()
 
 /**
  * Returns an array containing all tributable resource codes ordered as defined in the resource files.
- * @return {GenericResName[]} - Data of the form [ "food", "wood", ... ].
+ * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
 Resources.prototype.GetTributableCodes = function()
 {

@@ -1,10 +1,4 @@
-function SkirmishReplacer() {
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {{general?: string}} */
-	this.template;
-}
+function SkirmishReplacer() {}
 
 SkirmishReplacer.prototype.Schema =
 		"<optional>" +
@@ -19,20 +13,13 @@ SkirmishReplacer.prototype.Init = function()
 {
 };
 
-// @ts-expect-error
 SkirmishReplacer.prototype.Serialize = null; // We have no dynamic state to save
 
-/**
- * @param {string} civ
- * @return {Record<string, string>}
-*/
 function getReplacementEntities(civ)
 {
-	// @ts-expect-error
 	return Engine.ReadJSONFile("simulation/data/civs/" + civ + ".json").SkirmishReplacements;
 }
 
-/** @param {MessageOwnershipChanged} msg */
 SkirmishReplacer.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == 0)
@@ -56,7 +43,7 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
 	if (templateName in replacementEntities)
 		templateName = replacementEntities[templateName];
 	else if (this.template && "general" in this.template)
-		templateName = /** @type {string} */(this.template.general);
+		templateName = this.template.general;
 	else
 		templateName = "";
 
@@ -76,17 +63,13 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
 		return;
 	}
 	var cmpReplacementPosition = Engine.QueryInterface(replacement, IID_Position);
-	if (cmpCurPosition && cmpReplacementPosition)
-	{
-		var pos = cmpCurPosition.GetPosition2D();
-		cmpReplacementPosition.JumpTo(pos.x, pos.y);
-		var rot = cmpCurPosition.GetRotation();
-		cmpReplacementPosition.SetYRotation(rot.y);
-	}
+	var pos = cmpCurPosition.GetPosition2D();
+	cmpReplacementPosition.JumpTo(pos.x, pos.y);
+	var rot = cmpCurPosition.GetRotation();
+	cmpReplacementPosition.SetYRotation(rot.y);
 	var cmpCurOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	var cmpReplacementOwnership = Engine.QueryInterface(replacement, IID_Ownership);
-	if (cmpCurOwnership && cmpReplacementOwnership)
-		cmpReplacementOwnership.SetOwner(cmpCurOwnership.GetOwner());
+	cmpReplacementOwnership.SetOwner(cmpCurOwnership.GetOwner());
 
 	let msg = { "entity": this.entity, "newentity": replacement };
 	Engine.PostMessage(this.entity, MT_EntityRenamed, msg);
@@ -99,7 +82,6 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
  * Message is sent right before InitGame() is called, in InitGame.js
  * Replacement needs to happen early on real games to not confuse the AI
  */
-/** @param {MessageSkirmishReplace} msg */
 SkirmishReplacer.prototype.OnSkirmishReplace = function(msg)
 {
 	this.ReplaceEntities();
@@ -110,7 +92,6 @@ SkirmishReplacer.prototype.OnSkirmishReplace = function(msg)
  * This is needed for Atlas, when the entity isn't replaced before the game starts,
  * so it needs to be replaced on the first turn.
  */
-/** @param {MessageUpdate} msg */
 SkirmishReplacer.prototype.OnUpdate = function(msg)
 {
 	this.ReplaceEntities();

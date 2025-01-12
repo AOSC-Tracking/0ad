@@ -1,39 +1,20 @@
 /**
- * @typedef {{
- *   Code: string,
- *   Name: string,
- *   Emblem: string,
- *   History: unknown,
- *   Culture: string,
- *   Music: unknown[],
- *   CivBonuses: unknown[],
- *   StartEntities: unknown[],
- *   WallSets: string[],
- *   AINames: string[],
- *   SkirmishReplacements: Record<string, string>,
- *   SelectableInGameSetup: boolean,
- * }} CivMetadata
- */
-
-/**
  * Loads history and gameplay data of all civs.
  *
- * @param {boolean} selectableOnly - Only load civs that can be selected
+ * @param selectableOnly {boolean} - Only load civs that can be selected
  *        in the gamesetup. Scenario maps might set non-selectable civs.
  */
 function loadCivFiles(selectableOnly)
 {
-	let propertyNames = /** @type {const} */([
+	let propertyNames = [
 		"Code", "Culture", "Music", "CivBonuses", "StartEntities",
-		"AINames", "SkirmishReplacements", "SelectableInGameSetup"]);
+		"AINames", "SkirmishReplacements", "SelectableInGameSetup"];
 
-	/** @type {Record<string, CivMetadata>} */
 	let civData = {};
 
 	for (let filename of Engine.ListDirectoryFiles("simulation/data/civs/", "*.json", false))
 	{
-		// These don't have Name/Emblem/History but we lie to TS to simplify the commments.
-		let data = /** @type {CivMetadata} */(Engine.ReadJSONFile(filename));
+		let data = Engine.ReadJSONFile(filename);
 
 		for (let prop of propertyNames)
 			if (data[prop] === undefined)
@@ -54,7 +35,6 @@ function loadCivFiles(selectableOnly)
 }
 
 /**
- * @param {Template} template
  * @return {string[]} - All the classes for this identity template.
  */
 function GetIdentityClasses(template)
@@ -76,7 +56,6 @@ function GetIdentityClasses(template)
 /**
  * Gets an array with all classes for this identity template
  * that should be shown in the GUI
- * @param {Template} template
  */
 function GetVisibleIdentityClasses(template)
 {
@@ -87,8 +66,8 @@ function GetVisibleIdentityClasses(template)
  * Check if a given list of classes matches another list of classes.
  * Useful f.e. for checking identity classes.
  *
- * @param {string[]} classes - List of the classes to check against.
- * @param {string | (string | string[])[]} match - Either a string in the form
+ * @param classes - List of the classes to check against.
+ * @param match - Either a string in the form
  *     "Class1 Class2+Class3"
  * where spaces are handled as OR and '+'-signs as AND,
  * and ! is handled as NOT, thus Class1+!Class2 = Class1 AND NOT Class2.
@@ -126,9 +105,9 @@ function MatchesClassList(classes, match)
 /**
  * Gets the value originating at the value_path as-is, with no modifiers applied.
  *
- * @param {Template} template - A valid template as returned from a template loader.
+ * @param {Object} template - A valid template as returned from a template loader.
  * @param {string} value_path - Route to value within the xml template structure.
- * @param {number=} default_value - A value to use if one is not specified in the template.
+ * @param {number} default_value - A value to use if one is not specified in the template.
  * @return {number}
  */
 function GetBaseTemplateDataValue(template, value_path, default_value)
@@ -142,13 +121,13 @@ function GetBaseTemplateDataValue(template, value_path, default_value)
 /**
  * Gets the value originating at the value_path with the modifiers dictated by the mod_key applied.
  *
- * @param {Template} template - A valid template as returned from a template loader.
+ * @param {Object} template - A valid template as returned from a template loader.
  * @param {string} value_path - Route to value within the xml template structure.
- * @param {string=} mod_key - Tech modification key, if different from value_path.
- * @param {number=} player - Optional player id.
- * @param {Record<string, Modification[]>=} modifiers - Value modifiers from auto-researched techs, unit upgrades,
+ * @param {string} mod_key - Tech modification key, if different from value_path.
+ * @param {number} player - Optional player id.
+ * @param {Object} modifiers - Value modifiers from auto-researched techs, unit upgrades,
  *                             etc. Optional as only used if no player id provided.
- * @param {number=} default_value - A value to use if one is not specified in the template.
+ * @param {number} default_value - A value to use if one is not specified in the template.
  * @return {number} Modifier altered value.
  */
 function GetModifiedTemplateDataValue(template, value_path, mod_key, player, modifiers={}, default_value)
@@ -171,28 +150,25 @@ function GetModifiedTemplateDataValue(template, value_path, mod_key, player, mod
  * NOTICE: The data returned here should have the same structure as
  * the object returned by GetEntityState and GetExtendedEntityState!
  *
- * @param {Template} template - A valid template as returned by the template loader.
+ * @param {Object} template - A valid template as returned by the template loader.
  * @param {number} player - An optional player id to get the technology modifications
  *                          of properties.
- * @param {{ [name: string]: { auraName: string, auraDescription: string }}} auraTemplates - In the form of { key: { "auraName": "", "auraDescription": "" } }.
- * @param {Resources} resources - An instance of the Resources class.
- * @param {Record<string, Modification[]>} modifiers - Modifications from auto-researched techs, unit upgrades
+ * @param {Object} auraTemplates - In the form of { key: { "auraName": "", "auraDescription": "" } }.
+ * @param {Object} resources - An instance of the Resources class.
+ * @param {Object} modifiers - Modifications from auto-researched techs, unit upgrades
  *                             etc. Optional as only used if there's no player
  *                             id provided.
  */
 function GetTemplateDataHelper(template, player, auraTemplates, resources, modifiers = {})
 {
-	/**
-	 * Return data either from template (in tech tree) or sim state (ingame).
-	 * @param {string} value_path - Route to the value within the template.
-	 * @param {string=} mod_key - Modification key, if not the same as the value_path.
-	 * @param {number=} default_value - A value to use if one is not specified in the template.
-	 */
+	// Return data either from template (in tech tree) or sim state (ingame).
+	// @param {string} value_path - Route to the value within the template.
+	// @param {string} mod_key - Modification key, if not the same as the value_path.
+	// @param {number} default_value - A value to use if one is not specified in the template.
 	const getEntityValue = function(value_path, mod_key, default_value = 0) {
 		return GetModifiedTemplateDataValue(template, value_path, mod_key, player, modifiers, default_value);
 	};
 
-	/** @type {Record<string, any>} */
 	let ret = {};
 
 	if (template.Resistance)
@@ -221,12 +197,7 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 		}
 	}
 
-	/**
-	 * @param {Template} temp
-	 * @param {string} path
-	 */
 	let getAttackEffects = (temp, path) => {
-		/** @type {Record<string, any>} */
 		let effects = {};
 		if (temp.Capture)
 			effects.Capture = getEntityValue(path + "/Capture");
@@ -249,7 +220,6 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 		ret.attack = {};
 		for (let type in template.Attack)
 		{
-			/** @param {string} stat */
 			let getAttackStat = function(stat) {
 				return getEntityValue("Attack/" + type + "/" + stat);
 			};
@@ -495,7 +465,6 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 		{
 			let upgrade = template.Upgrade[upgradeName];
 
-			/** @type {Record<GenericResName, number>} */
 			let cost = {};
 			if (upgrade.Cost)
 				for (let res in upgrade.Cost)
@@ -517,7 +486,7 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 	{
 		ret.techCostMultiplier = {};
 		for (const res of resources.GetCodes().concat(["time"]))
-			ret.techCostMultiplier[res] = getEntityValue("Researcher/TechCostMultiplier/" + res, undefined, 1);
+			ret.techCostMultiplier[res] = getEntityValue("Researcher/TechCostMultiplier/" + res, null, 1);
 	}
 
 	if (template.Trader)
@@ -583,7 +552,7 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 
 /**
  * Get basic information about a technology template.
- * @param {TechTemplate} template - A valid template as obtained by loading the tech JSON file.
+ * @param {Object} template - A valid template as obtained by loading the tech JSON file.
  * @param {string} civ - Civilization for which the tech requirements should be calculated.
  */
 function GetTechnologyBasicDataHelper(template, civ)
@@ -603,21 +572,12 @@ function GetTechnologyBasicDataHelper(template, civ)
 
 /**
  * Get information about a technology template.
- * @param {TechTemplate} template - A valid template as obtained by loading the tech JSON file.
+ * @param {Object} template - A valid template as obtained by loading the tech JSON file.
  * @param {string} civ - Civilization for which the specific name and tech requirements should be returned.
- * @param {Resources} resources - An instance of the Resources class.
+ * @param {Object} resources - An instance of the Resources class.
  */
 function GetTechnologyDataHelper(template, civ, resources)
 {
-	/**
-	 * @type {ReturnType<GetTechnologyBasicDataHelper> & {
-	 *  cost: Record<GenericResName, number>,
-	 *  name: { specific: string },
-	 *  tooltip: string,
-	 *  requirementsTooltip: string
-	 * }}
-	 */
-	// @ts-expect-error
 	let ret = GetTechnologyBasicDataHelper(template, civ);
 
 	if (template.specificName)
@@ -635,7 +595,7 @@ function GetTechnologyDataHelper(template, civ, resources)
 
 /**
  * Get information about an aura template.
- * @param {AuraTemplate} template - A valid template as obtained by loading the aura JSON file.
+ * @param {object} template - A valid template as obtained by loading the aura JSON file.
  */
 function GetAuraDataHelper(template)
 {
@@ -649,20 +609,15 @@ function GetAuraDataHelper(template)
 	};
 }
 
-/**
- * @param {{ type: GenericResName, amount: number }[] | undefined} carriedResources
- * @param {{ type: GenericResName | null, amount: TraderGain | null } | undefined} tradingGoods
- */
 function calculateCarriedResources(carriedResources, tradingGoods)
 {
-	/** @type {Record<GenericResName, number>} */
 	var resources = {};
 
 	if (carriedResources)
 		for (let resource of carriedResources)
 			resources[resource.type] = (resources[resource.type] || 0) + resource.amount;
 
-	if (tradingGoods && tradingGoods.amount && tradingGoods.type)
+	if (tradingGoods && tradingGoods.amount)
 		resources[tradingGoods.type] =
 			(resources[tradingGoods.type] || 0) +
 			(tradingGoods.amount.traderGain || 0) +
@@ -676,9 +631,8 @@ function calculateCarriedResources(carriedResources, tradingGoods)
  * Remove filter prefix (mirage, corpse, etc) from template name.
  *
  * ie. filter|dir/to/template -> dir/to/template
- * @param {string} templateName
  */
 function removeFiltersFromTemplateName(templateName)
 {
-	return /** @type {string} */(templateName.split("|").pop());
+	return templateName.split("|").pop();
 }

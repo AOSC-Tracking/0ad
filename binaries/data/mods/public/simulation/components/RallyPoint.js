@@ -1,22 +1,4 @@
-/**
- * @typedef {{
- *  command?: unknown,
- *  source?: EntityId,
- *  target?: EntityId,
- *  resourceType?: string,
- *  resourceTemplate?: string,
- *  targetClasses?: string[],
- *  allowCapture?: boolean
- * }} RallyPointData
- */
-function RallyPoint() {
-	/** @type {number} */
-	this.entity;
-	/** @type {{ x: number, z: number }[]} */
-	this.pos;
-	/** @type {RallyPointData[]} */
-	this.data;
-}
+function RallyPoint() {}
 
 RallyPoint.prototype.Schema =
 	"<a:component/><empty/>";
@@ -27,10 +9,6 @@ RallyPoint.prototype.Init = function()
 	this.data = [];
 };
 
-/**
- * @param {number} x
- * @param {number} z
- */
 RallyPoint.prototype.AddPosition = function(x, z)
 {
 	this.pos.push({
@@ -64,18 +42,16 @@ RallyPoint.prototype.GetPositions = function()
 		ret.push(this.pos[i]);
 
 		// Update the rallypoint coordinates if the target is alive
-		if (!this.data[i] || !this.data[i].target || !this.TargetIsAlive(/** @type {number} */(this.data[i].target)))
+		if (!this.data[i] || !this.data[i].target || !this.TargetIsAlive(this.data[i].target))
 			continue;
-
-		let target = /** @type {number} */(this.data[i].target);
 
 		// and visible
 		if (cmpRangeManager && cmpOwnership &&
-				cmpRangeManager.GetLosVisibility(target, cmpOwnership.GetOwner()) != "visible")
+				cmpRangeManager.GetLosVisibility(this.data[i].target, cmpOwnership.GetOwner()) != "visible")
 			continue;
 
 		// Get the actual position of the target entity
-		var cmpPosition = Engine.QueryInterface(target, IID_Position);
+		var cmpPosition = Engine.QueryInterface(this.data[i].target, IID_Position);
 		if (!cmpPosition || !cmpPosition.IsInWorld())
 			continue;
 
@@ -95,11 +71,8 @@ RallyPoint.prototype.GetPositions = function()
 	return ret;
 };
 
-/**
- * Extra data for the rally point, should have a command property and then helpful data for that command
- * See getActionInfo in gui/input.js
- * @param {RallyPointData} data
- */
+// Extra data for the rally point, should have a command property and then helpful data for that command
+// See getActionInfo in gui/input.js
 RallyPoint.prototype.AddData = function(data)
 {
 	this.data.push(data);
@@ -152,7 +125,6 @@ RallyPoint.prototype.OrderToRallyPoint = function(entity, ignore = [])
 		ProcessCommand(owner, command);
 };
 
-/** @param {MessageEntityRenamed} msg */
 RallyPoint.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	for (let data of this.data)
@@ -181,7 +153,6 @@ RallyPoint.prototype.OnGlobalEntityRenamed = function(msg)
 	}
 };
 
-/** @param {MessageOwnershipChanged} msg */
 RallyPoint.prototype.OnOwnershipChanged = function(msg)
 {
 	// No need to reset when constructing or destructing the entity
@@ -193,7 +164,6 @@ RallyPoint.prototype.OnOwnershipChanged = function(msg)
 
 /**
  * Returns true if the target exists and has non-zero hitpoints.
- * @param {EntityId} ent
  */
 RallyPoint.prototype.TargetIsAlive = function(ent)
 {

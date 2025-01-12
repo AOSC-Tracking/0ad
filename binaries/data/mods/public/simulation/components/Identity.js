@@ -1,17 +1,4 @@
-function Identity() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {Template} */
-	this.template
-	/** @type {string[]} */
-	this.classesList = GetIdentityClasses(this.template);
-	/** @type {string[]} */
-	this.visibleClassesList = GetVisibleIdentityClasses(this.template);
-	/** @type {string} */
-	this.phenotype;
-	/** @type {boolean} */
-	this.controllable;
-}
+function Identity() {}
 
 Identity.prototype.Schema =
 	"<a:help>Specifies various names and values associated with the entity, typically for GUI display to users.</a:help>" +
@@ -118,7 +105,6 @@ Identity.prototype.Init = function()
 	this.controllable = this.template.Controllable ? this.template.Controllable == "true" : true;
 };
 
-/** @param {ReturnType<Identity["Serialize"]>} data */
 Identity.prototype.Deserialize = function (data)
 {
 	this.Init();
@@ -128,9 +114,8 @@ Identity.prototype.Deserialize = function (data)
 		this.name = data.name;
 };
 
-Identity.prototype.Serialize = function()
+ Identity.prototype.Serialize = function()
 {
-	/** @type {{phenotype: string, controllable: boolean, name?: string}} */
 	const result = {
 		"phenotype": this.phenotype,
 		"controllable": this.controllable,
@@ -188,7 +173,6 @@ Identity.prototype.GetVisibleClassesList = function()
 	return this.visibleClassesList;
 };
 
-/** @param {string} name */
 Identity.prototype.HasClass = function(name)
 {
 	return this.GetClassesList().indexOf(name) != -1;
@@ -214,7 +198,6 @@ Identity.prototype.IsControllable = function()
 	return this.controllable;
 };
 
-/** @param {boolean} controllability */
 Identity.prototype.SetControllable = function(controllability)
 {
 	this.controllable = controllability;
@@ -252,11 +235,7 @@ Identity.prototype.GetName = function()
 	return this.name || this.template.GenericName;
 };
 
-function IdentityMirage() {
-	/** @type {ReturnType<Identity["GetClassesList"]>} */
-	this.classes;
-}
-/** @param {Identity} cmpIdentity */
+function IdentityMirage() {}
 IdentityMirage.prototype.Init = function(cmpIdentity)
 {
 	// Mirages don't get identity classes via the template-filter, so that code can query
@@ -265,7 +244,6 @@ IdentityMirage.prototype.Init = function(cmpIdentity)
 	// and that array is deleted when serializing (as it's not seralized), which ends in OOS.
 	this.classes = clone(cmpIdentity.GetClassesList());
 };
-/** @type {Identity["GetClassesList"]} */
 IdentityMirage.prototype.GetClassesList = function() { return this.classes; };
 
 Engine.RegisterGlobal("IdentityMirage", IdentityMirage);

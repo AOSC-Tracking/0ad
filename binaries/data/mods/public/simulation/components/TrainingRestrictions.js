@@ -20,12 +20,10 @@ TrainingRestrictions.prototype.Init = function()
 {
 };
 
-// @ts-ignore
 TrainingRestrictions.prototype.Serialize = null;
 
 TrainingRestrictions.prototype.GetCategory = function()
 {
-	/** @ts-expect-error @type {string} */
 	return this.template.Category;
 };
 

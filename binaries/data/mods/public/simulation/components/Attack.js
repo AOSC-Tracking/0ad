@@ -1,16 +1,6 @@
-function Attack() {
-	/** @type {EntityId} */
-	this.entity;
+function Attack() {}
 
-	/**
-	 * @type {{
-	 *   [prop in typeof g_AttackTypes[number] | "Slaughter"]: Record<string, any>
-	 * }}s
-	 */
-	this.template;
-}
-
-var g_AttackTypes = /** @type {const} */(["Melee", "Ranged", "Capture"]);
+var g_AttackTypes = ["Melee", "Ranged", "Capture"];
 
 Attack.prototype.preferredClassesSchema =
 	"<optional>" +
@@ -217,15 +207,6 @@ Attack.prototype.Init = function()
 {
 };
 
-
-Attack.prototype.CanAttackAsFormation = function()
-{
-	return false;
-};
-
-/**
- * @param {string[]=} wantedTypes
- */
 Attack.prototype.GetAttackTypes = function(wantedTypes)
 {
 	let types = g_AttackTypes.filter(type => !!this.template[type]);
@@ -237,7 +218,6 @@ Attack.prototype.GetAttackTypes = function(wantedTypes)
 	      (!wantedTypesReal || !wantedTypesReal.length || wantedTypesReal.indexOf(type) != -1));
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetPreferredClasses = function(type)
 {
 	if (this.template[type] && this.template[type].PreferredClasses &&
@@ -247,7 +227,6 @@ Attack.prototype.GetPreferredClasses = function(type)
 	return [];
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRestrictedClasses = function(type)
 {
 	if (this.template[type] && this.template[type].RestrictedClasses &&
@@ -257,10 +236,6 @@ Attack.prototype.GetRestrictedClasses = function(type)
 	return [];
 };
 
-/**
- * @param {EntityId} target
- * @param {string[]=} wantedTypes
- */
 Attack.prototype.CanAttack = function(target, wantedTypes)
 {
 	const cmpFormation = Engine.QueryInterface(target, IID_Formation);
@@ -286,8 +261,8 @@ Attack.prototype.CanAttack = function(target, wantedTypes)
 	   (!wantedTypes || !wantedTypes.filter(wType => wType.indexOf("!") != 0).length || wantedTypes.indexOf("Slaughter") != -1))
 		return true;
 
-	const cmpEntityPlayer = QueryOwnerInterface(this.entity, IID_Player);
-	const cmpTargetPlayer = QueryOwnerInterface(target, IID_Player);
+	const cmpEntityPlayer = QueryOwnerInterface(this.entity);
+	const cmpTargetPlayer = QueryOwnerInterface(target);
 	if (!cmpTargetPlayer || !cmpEntityPlayer)
 		return false;
 
@@ -326,7 +301,6 @@ Attack.prototype.CanAttack = function(target, wantedTypes)
 
 /**
  * Returns undefined if we have no preference or the lowest index of a preferred class.
- * @param {EntityId} target
  */
 Attack.prototype.GetPreference = function(target)
 {
@@ -369,11 +343,7 @@ Attack.prototype.GetFullAttackRange = function()
 	return ret;
 };
 
-/**
- * @param {g_AttackTypes[number]} type
- * @param {boolean} splash
- */
-Attack.prototype.GetAttackEffectsData = function(type, splash = false)
+Attack.prototype.GetAttackEffectsData = function(type, splash)
 {
 	let template = this.template[type];
 	if (!template)
@@ -385,11 +355,11 @@ Attack.prototype.GetAttackEffectsData = function(type, splash = false)
 
 /**
  * Find the best attack against a target.
- * @param {EntityId} target - The entity-ID of the target.
+ * @param {number} target - The entity-ID of the target.
  * @param {boolean} allowCapture - Whether capturing is allowed.
- * @return {g_AttackTypes[number] | "Slaughter" | undefined} - The best attack type.
+ * @return {string} - The preferred attack type.
  */
-Attack.prototype.GetBestAttackAgainst = function(target, allowCapture = false)
+Attack.prototype.GetBestAttackAgainst = function(target, allowCapture)
 {
 	let types = this.GetAttackTypes();
 	if (Engine.QueryInterface(target, IID_Formation))
@@ -405,7 +375,6 @@ Attack.prototype.GetBestAttackAgainst = function(target, allowCapture = false)
 		return "Slaughter";
 
 	const targetClasses = cmpIdentity.GetClassesList();
-	/** @param {g_AttackTypes[number]} attackType */
 	const getPreferrence = attackType => {
 		let pref = 0;
 		if (MatchesClassList(targetClasses, this.GetPreferredClasses(attackType)))
@@ -423,22 +392,17 @@ Attack.prototype.GetBestAttackAgainst = function(target, allowCapture = false)
 	}).pop();
 };
 
-/**
- * @param {EntityId} a
- * @param {EntityId} b
- */
 Attack.prototype.CompareEntitiesByPreference = function(a, b)
 {
 	let aPreference = this.GetPreference(a);
 	let bPreference = this.GetPreference(b);
 
-	if (aPreference === undefined && bPreference === undefined) return 0;
-	if (aPreference === undefined) return 1;
-	if (bPreference === undefined) return -1;
+	if (aPreference === null && bPreference === null) return 0;
+	if (aPreference === null) return 1;
+	if (bPreference === null) return -1;
 	return aPreference - bPreference;
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetAttackName = function(type)
 {
 	return {
@@ -447,7 +411,6 @@ Attack.prototype.GetAttackName = function(type)
 	};
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRepeatTime = function(type)
 {
 	let repeatTime = 1000;
@@ -458,7 +421,6 @@ Attack.prototype.GetRepeatTime = function(type)
 	return ApplyValueModificationsToEntity("Attack/" + type + "/RepeatTime", repeatTime, this.entity);
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetTimers = function(type)
 {
 	return {
@@ -467,7 +429,6 @@ Attack.prototype.GetTimers = function(type)
 	};
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetSplashData = function(type)
 {
 	if (!this.template[type].Splash)
@@ -481,7 +442,6 @@ Attack.prototype.GetSplashData = function(type)
 	};
 };
 
-/** @param {g_AttackTypes[number] | "Slaughter"} type */
 Attack.prototype.GetRange = function(type)
 {
 	if (!type)
@@ -496,7 +456,6 @@ Attack.prototype.GetRange = function(type)
 	return { "max": max, "min": min };
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetAttackYOrigin = function(type)
 {
 	if (!this.template[type].Origin)
@@ -504,16 +463,15 @@ Attack.prototype.GetAttackYOrigin = function(type)
 	return ApplyValueModificationsToEntity("Attack/" + type + "/Origin/Y", +this.template[type].Origin.Y, this.entity);
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.RepeatRangeCheck = function (type) {
-	if (!this.IsTargetInRange(/** @type {EntityId} */(this.target), type))
+	if (!this.IsTargetInRange(this.target, type))
 		this.StopAttacking("OutOfRange");
 };
 
 /**
- * @param {EntityId} target - The target to attack.
- * @param {g_AttackTypes[number]} type - The type of attack to use.
- * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
+ * @param {number} target - The target to attack.
+ * @param {string} type - The type of attack to use.
+ * @param {number} callerIID - The IID to notify on specific events.
  *
  * @return {boolean} - Whether we started attacking.
  */
@@ -573,7 +531,7 @@ Attack.prototype.StartAttacking = function(target, type, callerIID)
 };
 
 /**
- * @param {string=} reason - The reason why we stopped attacking.
+ * @param {string} reason - The reason why we stopped attacking.
  */
 Attack.prototype.StopAttacking = function(reason)
 {
@@ -581,10 +539,8 @@ Attack.prototype.StopAttacking = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	if (this.timer)
-		cmpTimer.CancelTimer(this.timer);
-	if (this.checkTimer)
-		cmpTimer.CancelTimer(this.checkTimer);
+	cmpTimer.CancelTimer(this.timer);
+	cmpTimer.CancelTimer(this.checkTimer);
 	delete this.timer;
 	delete this.checkTimer;
 
@@ -605,41 +561,40 @@ Attack.prototype.StopAttacking = function(reason)
 
 	if (reason && callerIID)
 	{
-		let component = /** @type {UnitAI} */(Engine.QueryInterface(this.entity, callerIID));
+		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason);
+			component.ProcessMessage(reason, null);
 	}
 };
 
 /**
  * Attack our target entity.
- * @param {g_AttackTypes[number]} type - The type of attack to use.
+ * @param {string} data - The attack type to use.
  * @param {number} lateness - The offset of the actual call and when it was expected.
  */
 Attack.prototype.Attack = function(type, lateness)
 {
-	let target = /** @type {EntityId} */(this.target);
-	if (!this.CanAttack(target, [type]))
+	if (!this.CanAttack(this.target, [type]))
 	{
 		this.StopAttacking("TargetInvalidated");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
 	this.lastAttacked = cmpTimer.GetTime() - lateness;
 
 	// BuildingAI has its own attack routine.
 	if (!Engine.QueryInterface(this.entity, IID_BuildingAI))
-		this.PerformAttack(type, target);
+		this.PerformAttack(type, this.target);
 
-	if (!target)
+	if (!this.target)
 		return;
 
 	// We check the range after the attack to facilitate chasing.
-	if (!this.IsTargetInRange(target, type))
+	if (!this.IsTargetInRange(this.target, type))
 	{
 		this.StopAttacking("OutOfRange");
 		return;
@@ -662,8 +617,6 @@ Attack.prototype.Attack = function(type, lateness)
  * Attack the target entity. This should only be called after a successful range check,
  * and should only be called after GetTimers().repeat msec has passed since the last
  * call to PerformAttack.
- * @param {g_AttackTypes[number]} type - The type of attack to use.
- * @param {EntityId} target - The target entity to attack.
  */
 Attack.prototype.PerformAttack = function(type, target)
 {
@@ -682,15 +635,14 @@ Attack.prototype.PerformAttack = function(type, target)
 		return;
 	let attackerOwner = cmpOwnership.GetOwner();
 
-	/** @ts-expect-error; @type {DelayedDamageData} */
 	let data = {
 		"type": type,
-		"attackData": /** @type {Template} */(this.GetAttackEffectsData(type)),
-		"splash": /** @type {any} */(this.GetSplashData(type)),
+		"attackData": this.GetAttackEffectsData(type),
+		"splash": this.GetSplashData(type),
 		"attacker": this.entity,
 		"attackerOwner": attackerOwner,
 		"target": target,
-	}
+	};
 
 	let delay = +(this.template[type].EffectDelay || 0);
 
@@ -802,8 +754,7 @@ Attack.prototype.PerformAttack = function(type, target)
 };
 
 /**
- * @param {EntityId} target - The entity ID of the target to check.
- * @param {g_AttackTypes[number]} type - The type of attack to use.
+ * @param {number} - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Attack.prototype.IsTargetInRange = function(target, type)
@@ -818,7 +769,6 @@ Attack.prototype.IsTargetInRange = function(target, type)
 		false);
 };
 
-/** @param {MessageValueModification} msg */
 Attack.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Attack")
@@ -833,7 +783,6 @@ Attack.prototype.OnValueModification = function(msg)
 		cmpUnitAI.UpdateRangeQueries();
 };
 
-/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRangeOverlays = function(type = "Ranged")
 {
 	if (!this.template[type] || !this.template[type].RangeOverlay)

@@ -1,39 +1,4 @@
-function ResourceSupply()
-{
-	/** @type {EntityId} */
-	this.entity;
-
-	/**
-	 * @type {{
-	 *   "Max": string,
-	 *   "Initial"?: string,
-	 *   "Type": FullResName,
-	 *   "KillBeforeGather": string,
-	 *   "MaxGatherers": string,
-	 *   "DiminishingReturns"?: string,
-	 *   "Change"?: Record<string, any>,
-	 * }}
-	 */
-	this.template;
-
-	/** @type {number} */
-	this.amount;
-	/** @type {number} */
-	this.maxAmount;
-
-	/** @type {EntityId[]} */
-	this.gatherers;
-	/** @type {EntityId[]} */
-	this.activeGatherers;
-
-	/** @type {{ "generic": GenericResName, "specific": SpecificResName }} */
-	this.cachedType;
-
-	/** @type {Record<string, number>} */
-	this.cachedChanges;
-	/** @type {Record<string, number>} */
-	this.timers;
-};
+function ResourceSupply() {}
 
 ResourceSupply.prototype.Schema =
 	"<a:help>Provides a supply of one particular type of resource.</a:help>" +
@@ -80,7 +45,7 @@ ResourceSupply.prototype.Schema =
 		"</element>" +
 	"</optional>" +
 	"<element name='Type' a:help='Type and Subtype of resource available from this entity'>" +
-		g_Resources.BuildChoicesSchema(true) +
+		Resources.BuildChoicesSchema(true) +
 	"</element>" +
 	"<element name='MaxGatherers' a:help='Amount of gatherers who can gather resources from this entity at the same time'>" +
 		"<data type='nonNegativeInteger'/>" +
@@ -210,7 +175,7 @@ ResourceSupply.prototype.IsAvailableTo = function(gathererID)
  */
 ResourceSupply.prototype.IsAvailable = function()
 {
-	return !!this.amount && this.gatherers.length < this.GetMaxGatherers();
+	return this.amount && this.gatherers.length < this.GetMaxGatherers();
 };
 
 /**
@@ -224,7 +189,7 @@ ResourceSupply.prototype.IsGatheringUs = function(entity)
 
 /**
  * Each additional gatherer decreases the rate following a geometric sequence, with diminishingReturns as ratio.
- * @return {number | null} The diminishing return if any, null otherwise.
+ * @return {number} The diminishing return if any, null otherwise.
  */
 ResourceSupply.prototype.GetDiminishingReturns = function()
 {
@@ -317,6 +282,7 @@ ResourceSupply.prototype.AddGatherer = function(gathererID)
 };
 
 /**
+ * @param {number} player - The playerID owning the gatherer.
  * @param {number} entity - The entityID gathering.
  *
  * @return {boolean} - Whether the gatherer was successfully added to the active-gatherers list
@@ -395,7 +361,7 @@ ResourceSupply.prototype.CheckTimers = function()
  */
 ResourceSupply.prototype.CheckState = function(changeKey)
 {
-	let template = this.template.Change?.[changeKey];
+	let template = this.template.Change[changeKey];
 	if (!template.State)
 		return true;
 
@@ -422,7 +388,7 @@ ResourceSupply.prototype.StartTimer = function(changeKey)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	let interval = ApplyValueModificationsToEntity("ResourceSupply/Change/" + changeKey + "/Interval", +(this.template.Change?.[changeKey].Interval || 1000), this.entity);
+	let interval = ApplyValueModificationsToEntity("ResourceSupply/Change/" + changeKey + "/Interval", +(this.template.Change[changeKey].Interval || 1000), this.entity);
 	this.timers[changeKey] = cmpTimer.SetInterval(this.entity, IID_ResourceSupply, "TimerTick", interval, interval, changeKey);
 };
 
@@ -444,7 +410,7 @@ ResourceSupply.prototype.StopTimer = function(changeKey)
  */
 ResourceSupply.prototype.TimerTick = function(changeKey)
 {
-	let template = this.template.Change?.[changeKey];
+	let template = this.template.Change[changeKey];
 	if (!template || !this.Change(this.cachedChanges[changeKey]))
 		this.StopTimer(changeKey);
 };
@@ -468,7 +434,6 @@ ResourceSupply.prototype.RecalculateValues = function()
 /**
  * @param {{ "component": string, "valueNames": string[] }} msg - Message containing a list of values that were changed.
  */
-/** @param {MessageValueModification} msg */
 ResourceSupply.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "ResourceSupply")
@@ -480,7 +445,6 @@ ResourceSupply.prototype.OnValueModification = function(msg)
 /**
  * @param {{ "from": number, "to": number }} msg - Message containing the old new owner.
  */
-/** @param {MessageOwnershipChanged} msg */
 ResourceSupply.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -496,7 +460,6 @@ ResourceSupply.prototype.OnOwnershipChanged = function(msg)
 /**
  * @param {{ "entity": number, "newentity": number }} msg - Message to what the entity has been renamed.
  */
-/** @param {MessageEntityRenamed} msg */
 ResourceSupply.prototype.OnEntityRenamed = function(msg)
 {
 	let cmpResourceSupplyNew = Engine.QueryInterface(msg.newentity, IID_ResourceSupply);
@@ -504,18 +467,7 @@ ResourceSupply.prototype.OnEntityRenamed = function(msg)
 		cmpResourceSupplyNew.SetAmount(this.GetCurrentAmount());
 };
 
-function ResourceSupplyMirage()
-{
-	/** @type {ReturnType<ResourceSupply["GetMaxAmount"]>} */ this.maxAmount;
-	/** @type {ReturnType<ResourceSupply["GetCurrentAmount"]>} */ this.amount;
-	/** @type {ReturnType<ResourceSupply["GetType"]>} */ this.type;
-	/** @type {ReturnType<ResourceSupply["IsInfinite"]>} */ this.isInfinite;
-	/** @type {ReturnType<ResourceSupply["GetKillBeforeGather"]>} */ this.killBeforeGather;
-	/** @type {ReturnType<ResourceSupply["GetMaxGatherers"]>} */ this.maxGatherers;
-	/** @type {ReturnType<ResourceSupply["GetNumGatherers"]>} */ this.numGatherers;
-}
-
-/** @param {ResourceSupply} cmpResourceSupply */
+function ResourceSupplyMirage() {}
 ResourceSupplyMirage.prototype.Init = function(cmpResourceSupply)
 {
 	this.maxAmount = cmpResourceSupply.GetMaxAmount();
@@ -527,24 +479,16 @@ ResourceSupplyMirage.prototype.Init = function(cmpResourceSupply)
 	this.numGatherers = cmpResourceSupply.GetNumGatherers();
 };
 
-/** @type {ResourceSupply["GetMaxAmount"]} */
 ResourceSupplyMirage.prototype.GetMaxAmount = function() { return this.maxAmount; };
-/** @type {ResourceSupply["GetCurrentAmount"]} */
 ResourceSupplyMirage.prototype.GetCurrentAmount = function() { return this.amount; };
-/** @type {ResourceSupply["GetType"]} */
 ResourceSupplyMirage.prototype.GetType = function() { return this.type; };
-/** @type {ResourceSupply["IsInfinite"]} */
 ResourceSupplyMirage.prototype.IsInfinite = function() { return this.isInfinite; };
-/** @type {ResourceSupply["GetKillBeforeGather"]} */
 ResourceSupplyMirage.prototype.GetKillBeforeGather = function() { return this.killBeforeGather; };
-/** @type {ResourceSupply["GetMaxGatherers"]} */
 ResourceSupplyMirage.prototype.GetMaxGatherers = function() { return this.maxGatherers; };
-/** @type {ResourceSupply["GetNumGatherers"]} */
 ResourceSupplyMirage.prototype.GetNumGatherers = function() { return this.numGatherers; };
 
 // Apply diminishing returns with more gatherers, for e.g. infinite farms. For most resources this has no effect
 // (GetDiminishingReturns will return null). We can assume that for resources that are miraged this is the case.
-/** @type {ResourceSupply["GetDiminishingReturns"]} */
 ResourceSupplyMirage.prototype.GetDiminishingReturns = function() { return null; };
 
 Engine.RegisterGlobal("ResourceSupplyMirage", ResourceSupplyMirage);

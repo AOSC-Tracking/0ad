@@ -1,9 +1,4 @@
-function AlertRaiser() {
-	/** @type {number} */
-	this.entity;
-	/** @type {{ List: { _string: string }, RaiseAlertRange: number, EndOfAlertRange: number, SearchRange: number }} */
-	this.template;
-}
+function AlertRaiser() {}
 
 AlertRaiser.prototype.Schema =
 	"<element name='List' a:help='Classes of entities which are affected by this alert raiser'>" +
@@ -27,9 +22,6 @@ AlertRaiser.prototype.GetTargetClasses = function()
 	return this.template.List._string;
 };
 
-/**
- * @param {EntityId} unit
- */
 AlertRaiser.prototype.UnitFilter = function(unit)
 {
 	let cmpIdentity = Engine.QueryInterface(unit, IID_Identity);
@@ -65,7 +57,7 @@ AlertRaiser.prototype.RaiseAlert = function()
 			continue;
 
 		let size = cmpGarrisonable.TotalSize();
-		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(unit, IID_UnitAI));
+		let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
 
 		let holder = cmpRangeManager.ExecuteQuery(unit, 0, +this.template.SearchRange, mutualAllies, IID_GarrisonHolder, true).find(ent => {
 			// Ignore moving garrison holders
@@ -79,7 +71,7 @@ AlertRaiser.prototype.RaiseAlert = function()
 			if (!cmpUnitAI.CheckTargetVisible(ent))
 				return false;
 
-			let cmpGarrisonHolder = /** @type{GarrisonHolder} */(Engine.QueryInterface(ent, IID_GarrisonHolder));
+			let cmpGarrisonHolder = Engine.QueryInterface(ent, IID_GarrisonHolder);
 			if (!reserved.has(ent))
 				reserved.set(ent, cmpGarrisonHolder.GetCapacity() - cmpGarrisonHolder.OccupiedSlots());
 
@@ -119,7 +111,7 @@ AlertRaiser.prototype.EndOfAlert = function()
 	let units = cmpRangeManager.ExecuteQuery(this.entity, 0, +this.template.EndOfAlertRange, [owner], IID_UnitAI, true).filter(ent => this.UnitFilter(ent));
 	for (let unit of units)
 	{
-		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(unit, IID_UnitAI));
+		let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
 		if (cmpUnitAI.HasWorkOrders() && cmpUnitAI.ShouldRespondToEndOfAlert())
 			cmpUnitAI.BackToWork();
 		else if (cmpUnitAI.ShouldRespondToEndOfAlert())
@@ -137,7 +129,7 @@ AlertRaiser.prototype.EndOfAlert = function()
 		if (Engine.QueryInterface(holder, IID_UnitAI))
 			continue;
 
-		let cmpGarrisonHolder = /** @type {GarrisonHolder} */(Engine.QueryInterface(holder, IID_GarrisonHolder));
+		let cmpGarrisonHolder = Engine.QueryInterface(holder, IID_GarrisonHolder);
 		let units = cmpGarrisonHolder.GetEntities().filter(ent => {
 			let cmpOwner = Engine.QueryInterface(ent, IID_Ownership);
 			return cmpOwner && cmpOwner.GetOwner() == owner && this.UnitFilter(ent);
@@ -147,11 +139,11 @@ AlertRaiser.prototype.EndOfAlert = function()
 			if (cmpGarrisonHolder.Unload(unit))
 			{
 				let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
-				if (cmpUnitAI?.HasWorkOrders())
+				if (cmpUnitAI.HasWorkOrders())
 					cmpUnitAI.BackToWork();
 				else
 					// Stop rather than walk to the rally point
-					cmpUnitAI?.ReplaceOrder("Stop", { "force": true });
+					cmpUnitAI.ReplaceOrder("Stop", { "force": true });
 			}
 	}
 };

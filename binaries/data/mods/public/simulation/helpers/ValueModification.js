@@ -1,12 +1,5 @@
 // Little helper functions to make applying technology and auras more convenient
 
-/**
- * @template T
- * @param {string} tech_type - The technology type to apply.
- * @param {T} current_value - The current value of the entity.
- * @param {number} entity - The entity to apply the technology to.
- * @returns {T} - The modified value.
- */
 function ApplyValueModificationsToEntity(tech_type, current_value, entity)
 {
 	let value = current_value;
@@ -18,14 +11,6 @@ function ApplyValueModificationsToEntity(tech_type, current_value, entity)
 	return value;
 }
 
-/**
- * @template T
- * @param {string} tech_type - The technology type to apply.
- * @param {T} current_value - The current value of the entity.
- * @param {number} playerID - The player to apply the technology to.
- * @param {Template} template - The template of the entity.
- * @returns {T} - The modified value.
- */
 function ApplyValueModificationsToTemplate(tech_type, current_value, playerID, template)
 {
 	let value = current_value;

@@ -1,14 +1,4 @@
-function TerritoryDecay() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {{ DecayRate: string, Territory: string }} */
-	this.template;
-	
-	/** @type {boolean} */
-	this.decaying;
-	/** @type {number[]} */
-	this.connectedNeighbours;
-}
+function TerritoryDecay() {}
 
 TerritoryDecay.prototype.Schema = `
 	<element name='DecayRate' a:help='Decay rate in capture points per second'>
@@ -41,7 +31,7 @@ TerritoryDecay.prototype.IsConnected = function()
 	if (!cmpPosition || !cmpPosition.IsInWorld())
 		return false;
 
-	var cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
+	var cmpPlayer = QueryOwnerInterface(this.entity);
 	if (!cmpPlayer)
 		return true;// something without ownership can't decay
 
@@ -138,7 +128,6 @@ TerritoryDecay.prototype.UpdateOwner = function()
 		cmpOwnership.SetOwner(tileOwner);
 };
 
-/** @param {MessageTerritoriesChanged} msg */
 TerritoryDecay.prototype.OnTerritoriesChanged = function(msg)
 {
 	if (this.territoryOwnership)
@@ -147,7 +136,6 @@ TerritoryDecay.prototype.OnTerritoriesChanged = function(msg)
 		this.UpdateDecayState();
 };
 
-/** @param {MessagePositionChanged} msg */
 TerritoryDecay.prototype.OnPositionChanged = function(msg)
 {
 	if (this.territoryOwnership)
@@ -156,7 +144,6 @@ TerritoryDecay.prototype.OnPositionChanged = function(msg)
 		this.UpdateDecayState();
 };
 
-/** @param {MessageDiplomacyChanged} msg */
 TerritoryDecay.prototype.OnDiplomacyChanged = function(msg)
 {
 	// Can change the connectedness of certain areas
@@ -164,7 +151,6 @@ TerritoryDecay.prototype.OnDiplomacyChanged = function(msg)
 		this.UpdateDecayState();
 };
 
-/** @param {MessageOwnershipChanged} msg */
 TerritoryDecay.prototype.OnOwnershipChanged = function(msg)
 {
 	// Update the list of TerritoryDecay components in the manager

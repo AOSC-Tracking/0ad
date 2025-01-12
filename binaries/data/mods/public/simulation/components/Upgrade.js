@@ -1,21 +1,4 @@
-function Upgrade()
-{
-	/** @type {number} */
-	this.entity;
-	/** @type {Template} */
-	this.template;
-
-	/** @type {Record<string, any>} */
-	this.upgradeTemplates;
-	/** @type {Record<string, number>} */
-	this.expendedResources;
-
-	/** @type {string | undefined} */
-	this.upgrading;
-
-	/** @type {number} */
-	this.owner;
-};
+function Upgrade() {}
 
 const UPGRADING_PROGRESS_INTERVAL = 250;
 
@@ -51,7 +34,7 @@ Upgrade.prototype.Schema =
 					"<element name='Cost' a:help='Resource cost to upgrade this unit'>" +
 						"<oneOrMore>" +
 							"<choice>" +
-								g_Resources.BuildSchema("nonNegativeInteger") +
+								Resources.BuildSchema("nonNegativeInteger") +
 							"</choice>" +
 						"</oneOrMore>" +
 					"</element>" +
@@ -73,7 +56,6 @@ Upgrade.prototype.Init = function()
 };
 
 // This will also deal with the "OnDestroy" case.
-/** @param {MessageOwnershipChanged} msg */
 Upgrade.prototype.OnOwnershipChanged = function(msg)
 {
 	if (!this.completed)
@@ -92,8 +74,8 @@ Upgrade.prototype.DetermineUpgrades = function()
 
 	for (const choice in this.template)
 	{
-		const nativeCiv = Engine.QueryInterface(this.entity, IID_Identity)?.GetCiv();
-		const playerCiv = QueryPlayerIDInterface(this.owner, IID_Identity)?.GetCiv();
+		const nativeCiv = Engine.QueryInterface(this.entity, IID_Identity).GetCiv();
+		const playerCiv = QueryPlayerIDInterface(this.owner, IID_Identity).GetCiv();
 		const name = this.template[choice].Entity.
 			replace(/\{native\}/g, nativeCiv).
 			replace(/\{civ\}/g, playerCiv);
@@ -108,14 +90,13 @@ Upgrade.prototype.DetermineUpgrades = function()
 	}
 };
 
-/** @param {number} amount */
 Upgrade.prototype.ChangeUpgradedEntityCount = function(amount)
 {
 	if (!this.IsUpgrading())
 		return;
 
 	let cmpTempMan = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	let template = cmpTempMan.GetTemplate(/** @type {string} */(this.upgrading));
+	let template = cmpTempMan.GetTemplate(this.upgrading);
 
 	let categoryTo;
 	if (template.TrainingRestrictions)
@@ -142,7 +123,6 @@ Upgrade.prototype.ChangeUpgradedEntityCount = function(amount)
 		cmpEntityLimits.ChangeCount(categoryTo, amount);
 };
 
-/** @param {string} template */
 Upgrade.prototype.CanUpgradeTo = function(template)
 {
 	return this.upgradeTemplates[template] !== undefined;
@@ -153,15 +133,14 @@ Upgrade.prototype.GetUpgrades = function()
 	let ret = [];
 
 	for (const option in this.upgradeTemplates)
-		{
+	{
 		const choice = this.template[this.upgradeTemplates[option]];
 
-		/** @type {Record<string, number>} */
 		let cost = {};
 		if (choice.Cost)
-			cost = /** @type {Record<string, number>} */(this.GetResourceCosts(option));
+			cost = this.GetResourceCosts(option);
 		if (choice.Time)
-			cost.time = /** @type {number} */(this.GetUpgradeTime(option));
+			cost.time = this.GetUpgradeTime(option);
 
 		let hasCost = choice.Cost || choice.Time;
 		ret.push({
@@ -196,7 +175,6 @@ Upgrade.prototype.GetUpgradingTo = function()
 	return this.upgrading;
 };
 
-/** @param {string} template */
 Upgrade.prototype.WillCheckPlacementRestrictions = function(template)
 {
 	if (!this.upgradeTemplates[template])
@@ -206,7 +184,6 @@ Upgrade.prototype.WillCheckPlacementRestrictions = function(template)
 	return "CheckPlacementRestrictions" in this.template[this.upgradeTemplates[template]];
 };
 
-/** @param {string} templateArg */
 Upgrade.prototype.GetRequirements = function(templateArg)
 {
 	let choice = this.upgradeTemplates[templateArg] || templateArg;
@@ -228,7 +205,6 @@ Upgrade.prototype.GetRequirements = function(templateArg)
 	return template.Identity.Requirements || undefined;
 };
 
-/** @param {string} template */
 Upgrade.prototype.GetResourceCosts = function(template)
 {
 	if (!this.upgradeTemplates[template])
@@ -241,7 +217,6 @@ Upgrade.prototype.GetResourceCosts = function(template)
 	if (!this.template[choice].Cost)
 		return {};
 
-	/** @type {Record<string, number>} */
 	let costs = {};
 	for (let r in this.template[choice].Cost)
 		costs[r] = ApplyValueModificationsToEntity("Upgrade/Cost/"+r, +this.template[choice].Cost[r], this.entity);
@@ -249,7 +224,6 @@ Upgrade.prototype.GetResourceCosts = function(template)
 	return costs;
 };
 
-/** @param {string} template */
 Upgrade.prototype.Upgrade = function(template)
 {
 	if (this.IsUpgrading() || !this.upgradeTemplates[template])
@@ -271,7 +245,7 @@ Upgrade.prototype.Upgrade = function(template)
 		return false;
 	}
 
-	this.expendedResources = /** @type {Record<string, number>} */(this.GetResourceCosts(template));
+	this.expendedResources = this.GetResourceCosts(template);
 	if (!cmpPlayer || !cmpPlayer.TrySubtractResources(this.expendedResources))
 	{
 		this.expendedResources = {};
@@ -295,7 +269,6 @@ Upgrade.prototype.Upgrade = function(template)
 	return true;
 };
 
-/** @param {number} owner */
 Upgrade.prototype.CancelUpgrade = function(owner)
 {
 	if (!this.IsUpgrading())
@@ -309,7 +282,7 @@ Upgrade.prototype.CancelUpgrade = function(owner)
 	this.ChangeUpgradedEntityCount(-1);
 
 	// Do not update visual actor if the animation didn't change.
-	let choice = this.upgradeTemplates[/** @type {string} */ (this.upgrading)];
+	let choice = this.upgradeTemplates[this.upgrading];
 	if (choice && this.template[choice].Variant)
 	{
 		let cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -322,21 +295,18 @@ Upgrade.prototype.CancelUpgrade = function(owner)
 	this.SetElapsedTime(0);
 };
 
-/** @param {string=} templateArg */
 Upgrade.prototype.GetUpgradeTime = function(templateArg)
 {
-	let template = templateArg || /** @type {String} */ (this.upgrading);
+	let template = this.upgrading || templateArg;
 	let choice = this.upgradeTemplates[template];
 
-	if (!choice) return undefined;
+	if (!choice)
+		return undefined;
 
-	if (!this.template[choice].Time) return 0;
+	if (!this.template[choice].Time)
+		return 0;
 
-	return ApplyValueModificationsToEntity(
-		"Upgrade/Time",
-		+this.template[choice].Time,
-		this.entity
-	);
+	return ApplyValueModificationsToEntity("Upgrade/Time", +this.template[choice].Time, this.entity);
 };
 
 Upgrade.prototype.GetElapsedTime = function()
@@ -348,22 +318,17 @@ Upgrade.prototype.GetProgress = function()
 {
 	if (!this.IsUpgrading())
 		return undefined;
-	let upgradeTime = /** @type {number} */ (this.GetUpgradeTime());
-	return upgradeTime == 0 ? 1 : Math.min(/** @type {number} */ (this.elapsedTime) / 1000.0 / upgradeTime, 1.0);
+	return this.GetUpgradeTime() == 0 ? 1 : Math.min(this.elapsedTime / 1000.0 / this.GetUpgradeTime(), 1.0);
 };
 
-/** @param {number} time */
 Upgrade.prototype.SetElapsedTime = function(time)
 {
 	this.elapsedTime = time;
-	Engine.PostMessage(this.entity, MT_UpgradeProgressUpdate);
+	Engine.PostMessage(this.entity, MT_UpgradeProgressUpdate, null);
 };
 
 Upgrade.prototype.SetUpgradeAnimationVariant = function()
 {
-	if (!this.upgrading)
-		return;
-
 	let choice = this.upgradeTemplates[this.upgrading];
 
 	if (!choice || !this.template[choice].Variant)
@@ -376,11 +341,11 @@ Upgrade.prototype.SetUpgradeAnimationVariant = function()
 	cmpVisual.SelectAnimation(this.template[choice].Variant, false, 1.0);
 };
 
-Upgrade.prototype.UpgradeProgress = function(data = undefined, lateness = 0)
+Upgrade.prototype.UpgradeProgress = function(data, lateness)
 {
-	if (/** @type {number} */(this.elapsedTime)/1000.0 < /** @type {number} */(this.GetUpgradeTime()))
+	if (this.elapsedTime/1000.0 < this.GetUpgradeTime())
 	{
-		this.SetElapsedTime(/** @type {number} */(this.GetElapsedTime()) + UPGRADING_PROGRESS_INTERVAL + lateness);
+		this.SetElapsedTime(this.GetElapsedTime() + UPGRADING_PROGRESS_INTERVAL + lateness);
 		return;
 	}
 
@@ -390,7 +355,7 @@ Upgrade.prototype.UpgradeProgress = function(data = undefined, lateness = 0)
 	this.ChangeUpgradedEntityCount(-1);
 	this.expendedResources = {};
 
-	let newEntity = ChangeEntityTemplate(this.entity, /** @type {string} */(this.upgrading));
+	let newEntity = ChangeEntityTemplate(this.entity, this.upgrading);
 
 	if (newEntity)
 		PlaySound("upgraded", newEntity);

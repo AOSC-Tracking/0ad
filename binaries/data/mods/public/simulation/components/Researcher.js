@@ -1,14 +1,4 @@
-function Researcher()
-{
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {{ Technologies?: { _string: string }, TechCostMultiplier: Record<string, string> }} */
-	this.template;
-
-	this.nextID = 1;
-	this.queue = new Map();
-};
+function Researcher() {}
 
 Researcher.prototype.Schema =
 	"<a:help>Allows the entity to research technologies.</a:help>" +
@@ -34,7 +24,7 @@ Researcher.prototype.Schema =
 	"</optional>" +
 	"<optional>" +
 		"<element name='TechCostMultiplier' a:help='Multiplier to modify resources cost and research time of technologies researched in this building.'>" +
-			g_Resources.BuildSchema("nonNegativeDecimal", ["time"]) +
+			Resources.BuildSchema("nonNegativeDecimal", ["time"]) +
 		"</element>" +
 	"</optional>";
 
@@ -44,13 +34,11 @@ Researcher.prototype.Schema =
  * @param {number} researcher - The entity ID of our researcher.
  * @param {string} metadata - Optionally any metadata to attach to us.
  */
-function ResearcherQueueItem(templateName, researcher, metadata)
+Researcher.prototype.Item = function(templateName, researcher, metadata)
 {
 	this.templateName = templateName;
 	this.researcher = researcher;
 	this.metadata = metadata;
-	/** @type {number} */
-	this.player;
 };
 
 /**
@@ -58,31 +46,31 @@ function ResearcherQueueItem(templateName, researcher, metadata)
  * @param {Object} techCostMultiplier - The multipliers to use when calculating costs.
  * @return {boolean} - Whether the item was successfully initiated.
  */
-ResearcherQueueItem.prototype.Queue = function(techCostMultiplier)
+Researcher.prototype.Item.prototype.Queue = function(techCostMultiplier)
 {
-	this.player = /** @type {Player} */ (QueryOwnerInterface(this.researcher, IID_Player)).GetPlayerID();
-	const cmpTechnologyManager = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager));
+	this.player = QueryOwnerInterface(this.researcher).GetPlayerID();
+	const cmpTechnologyManager = QueryPlayerIDInterface(this.player, IID_TechnologyManager);
 	if (!cmpTechnologyManager.QueuedResearch(this.templateName, this.researcher, techCostMultiplier))
 		return false;
 
 	return true;
 };
 
-ResearcherQueueItem.prototype.Stop = function()
+Researcher.prototype.Item.prototype.Stop = function()
 {
-	/** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).StoppedResearch(this.templateName);
+	QueryPlayerIDInterface(this.player, IID_TechnologyManager).StoppedResearch(this.templateName);
 	delete this.started;
 };
 
 /**
  * Called when the first work is performed.
  */
-ResearcherQueueItem.prototype.Start = function()
+Researcher.prototype.Item.prototype.Start = function()
 {
 	this.started = true;
 };
 
-ResearcherQueueItem.prototype.Finish = function()
+Researcher.prototype.Item.prototype.Finish = function()
 {
 	this.finished = true;
 };
@@ -91,26 +79,26 @@ ResearcherQueueItem.prototype.Finish = function()
  * @param {number} allocatedTime - The time allocated to this item.
  * @return {number} - The time used for this item.
  */
-ResearcherQueueItem.prototype.Progress = function(allocatedTime)
+Researcher.prototype.Item.prototype.Progress = function(allocatedTime)
 {
 	if (!this.started)
 		this.Start();
 	if (this.paused)
 		this.Unpause();
-	const cmpTechnologyManager = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager));
+	const cmpTechnologyManager = QueryPlayerIDInterface(this.player, IID_TechnologyManager);
 	const usedTime = cmpTechnologyManager.Progress(this.templateName, allocatedTime);
 	if (!cmpTechnologyManager.IsTechnologyQueued(this.templateName))
 		this.Finish();
 	return usedTime;
 };
 
-ResearcherQueueItem.prototype.Pause = function()
+Researcher.prototype.Item.prototype.Pause = function()
 {
-	/** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).Pause(this.templateName);
+	QueryPlayerIDInterface(this.player, IID_TechnologyManager).Pause(this.templateName);
 	this.paused = true;
 };
 
-ResearcherQueueItem.prototype.Unpause = function()
+Researcher.prototype.Item.prototype.Unpause = function()
 {
 	delete this.paused;
 };
@@ -118,16 +106,15 @@ ResearcherQueueItem.prototype.Unpause = function()
 /**
  * @return {Object} - Some basic information of this item.
  */
-ResearcherQueueItem.prototype.GetBasicInfo = function()
+Researcher.prototype.Item.prototype.GetBasicInfo = function()
 {
-	/** @type {Record<string, any>} */
-	const result = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).GetBasicInfo(this.templateName);
+	const result = QueryPlayerIDInterface(this.player, IID_TechnologyManager).GetBasicInfo(this.templateName);
 	result.technologyTemplate = this.templateName;
 	result.metadata = this.metadata;
 	return result;
 };
 
-ResearcherQueueItem.prototype.SerializableAttributes = [
+Researcher.prototype.Item.prototype.SerializableAttributes = [
 	"metadata",
 	"paused",
 	"player",
@@ -136,29 +123,29 @@ ResearcherQueueItem.prototype.SerializableAttributes = [
 	"templateName"
 ];
 
-/** @param {any} id */
-ResearcherQueueItem.prototype.Serialize = function(id)
+Researcher.prototype.Item.prototype.Serialize = function(id)
 {
 	const result = {
 		"id": id
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
-			// @ts-ignore
 			result[att] = this[att];
 	return result;
 };
 
-/** @param {any} data */
-ResearcherQueueItem.prototype.Deserialize = function(data)
+Researcher.prototype.Item.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
-			// @ts-ignore
 			this[att] = data[att];
 };
 
-Researcher.prototype.Init = function() {};
+Researcher.prototype.Init = function()
+{
+	this.nextID = 1;
+	this.queue = new Map();
+};
 
 Researcher.prototype.Serialize = function()
 {
@@ -172,15 +159,13 @@ Researcher.prototype.Serialize = function()
 	};
 };
 
-/** @param {ReturnType<Researcher["Serialize"]>} data */
 Researcher.prototype.Deserialize = function(data)
 {
 	this.Init();
 	this.nextID = data.nextID;
 	for (const item of data.queue)
-{
-		// @ts-expect-error
-		const newItem = new ResearcherQueueItem();
+	{
+		const newItem = new this.Item();
 		newItem.Deserialize(item);
 		this.queue.set(item.id, newItem);
 	}
@@ -214,7 +199,7 @@ Researcher.prototype.GetTechnologiesList = function()
 	let techs = string.split(/\s+/);
 
 	// Replace the civ specific technologies.
-	const civ = /** @type {Identity} */(Engine.QueryInterface(playerEnt, IID_Identity)).GetCiv();
+	const civ = Engine.QueryInterface(playerEnt, IID_Identity).GetCiv();
 	for (let i = 0; i < techs.length; ++i)
 	{
 		const tech = techs[i];
@@ -231,7 +216,6 @@ Researcher.prototype.GetTechnologiesList = function()
 			true));
 
 	const techList = [];
-	/** @type {Record<string, string>} */
 	const superseded = {};
 
 	const disabledTechnologies = cmpPlayer.GetDisabledTechnologies();
@@ -283,13 +267,12 @@ Researcher.prototype.GetTechnologiesList = function()
 };
 
 /**
- * @return The multipliers to change the costs of any research with.
+ * @return {Object} - The multipliers to change the costs of any research with.
  */
 Researcher.prototype.GetTechCostMultiplier = function()
 {
-	/** @type {Record<string, number>} */
 	const techCostMultiplier = {};
-	for (const res of g_Resources.GetCodes().concat(["time"]))
+	for (const res of Resources.GetCodes().concat(["time"]))
 		techCostMultiplier[res] = ApplyValueModificationsToEntity(
 		    "Researcher/TechCostMultiplier/" + res,
 		    +(this.template?.TechCostMultiplier?.[res] || 1),
@@ -300,7 +283,6 @@ Researcher.prototype.GetTechCostMultiplier = function()
 
 /**
  * Checks whether we can research the given technology, minding paired techs.
- * @param {string} tech - The technology to check.
  */
 Researcher.prototype.IsTechnologyResearchedOrInProgress = function(tech)
 {
@@ -330,13 +312,13 @@ Researcher.prototype.QueueTechnology = function(templateName, metadata)
 {
 	if (!this.GetTechnologiesList().some(tech =>
 		tech && (tech == templateName ||
-			tech instanceof Object && (tech.top == templateName || tech.bottom == templateName))))
+			tech.pair && (tech.top == templateName || tech.bottom == templateName))))
 	{
 		error("This entity cannot research " + templateName + ".");
 		return -1;
 	}
 
-	const item = new ResearcherQueueItem(templateName, this.entity, metadata);
+	const item = new this.Item(templateName, this.entity, metadata);
 
 	const techCostMultiplier = this.GetTechCostMultiplier();
 	if (!item.Queue(techCostMultiplier))
@@ -374,7 +356,7 @@ Researcher.prototype.HasItem = function(id)
 };
 
 /**
- * @param {number} id - The id of the research.
+ * @parameter {number} id - The id of the research.
  * @return {Object} - Some basic information about the research.
  */
 Researcher.prototype.GetResearchingTechnology = function(id)

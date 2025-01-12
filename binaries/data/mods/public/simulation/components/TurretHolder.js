@@ -1,28 +1,13 @@
 /**
  * This class holds the functions regarding entities being visible on
  * another entity, but tied to their parents location.
- * @typedef {Object} TurretPoint
- * @property {string} name - The name of the turret point.
- * @property {{x: number, y: number, z: number}} offset - The offset from the parent entity.
- * @property {string} allowedClasses - The classes of entities that can occupy this turret point.
- * @property {number=} angle - The angle in radians relative to the turretHolder direction.
- * @property {EntityId=} entity - The entity occupying this turret point.
- * @property {string=} template - The template of the entity to be created.
- * @property {boolean} ejectable - Whether this template is tied to the turret position (i.e. not allowed to leave the turret point).
  */
 class TurretHolder
 {
-	/** @type {TurretPoint[]} */
-	turretPoints = [];
-
-	/** @ts-expect-error; @type {EntityId} */
-	entity;
-
-	/** @ts-expect-error; @type {Template} */
-	template;
-
 	Init()
 	{
+		this.turretPoints = [];
+
 		let points = this.template.TurretPoints;
 		for (let point in points)
 			this.turretPoints.push({
@@ -33,8 +18,8 @@ class TurretHolder
 					"z": +points[point].Z
 				},
 				"allowedClasses": points[point].AllowedClasses?._string,
-				"angle": points[point].Angle ? +points[point].Angle * Math.PI / 180 : undefined,
-				"entity": undefined,
+				"angle": points[point].Angle ? +points[point].Angle * Math.PI / 180 : null,
+				"entity": null,
 				"template": points[point].Template,
 				"ejectable": "Ejectable" in points[point] ? points[point].Ejectable == "true" : true
 			});
@@ -44,7 +29,7 @@ class TurretHolder
 	 * Add a subunit as specified in the template.
 	 * This function creates an entity and places it on the turret point.
 	 *
-	 * @param {string} turretPointName - A turret point to (re)create the predefined subunit for.
+	 * @param {Object} turretPoint - A turret point to (re)create the predefined subunit for.
 	 *
 	 * @return {boolean} - Whether the turret creation has succeeded.
 	 */
@@ -56,16 +41,16 @@ class TurretHolder
 			this.reservedTurrets?.has(turretPointName))
 			return false;
 
-		const cmpOwnership = /** @type {Ownership} */(Engine.QueryInterface(this.entity, IID_Ownership));
+		const cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 
-		const upgradedTemplate = GetUpgradedTemplate(cmpOwnership.GetOwner(), /** @type {string} */(turretPoint.template));
+		const upgradedTemplate = GetUpgradedTemplate(cmpOwnership.GetOwner(), turretPoint.template);
 		const ent = Engine.AddEntity(upgradedTemplate);
 
 		const cmpEntOwnership = Engine.QueryInterface(ent, IID_Ownership);
 		cmpEntOwnership?.SetOwner(cmpOwnership.GetOwner());
 
 		const cmpTurretable = Engine.QueryInterface(ent, IID_Turretable);
-		return cmpTurretable?.OccupyTurret(this.entity, turretPoint.name, turretPoint.ejectable) || Engine.DestroyEntity(ent) || false;
+		return cmpTurretable?.OccupyTurret(this.entity, turretPoint.name, turretPoint.ejectable) || Engine.DestroyEntity(ent);
 	}
 
 	/**
@@ -87,8 +72,8 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {EntityId} entity - The entity to check for.
-	 * @param {TurretPoint} turretPoint - The turret point to use.
+	 * @param {number} entity - The entity to check for.
+	 * @param {Object} turretPoint - The turret point to use.
 	 *
 	 * @return {boolean} - Whether the entity is allowed to occupy the specified turret point.
 	 */
@@ -104,7 +89,7 @@ class TurretHolder
 			return true;
 
 		let cmpIdentity = Engine.QueryInterface(entity, IID_Identity);
-		return cmpIdentity && MatchesClassList(cmpIdentity.GetClassesList(), turretPoint.allowedClasses) || false;
+		return cmpIdentity && MatchesClassList(cmpIdentity.GetClassesList(), turretPoint.allowedClasses);
 	}
 
 	/**
@@ -119,7 +104,7 @@ class TurretHolder
 	/**
 	 * Occupy a turret point with the given entity.
 	 * @param {number} entity - The entity to use.
-	 * @param {TurretPoint=} requestedTurretPoint - Optionally the specific turret point to occupy.
+	 * @param {Object} requestedTurretPoint - Optionally the specific turret point to occupy.
 	 *
 	 * @return {boolean} - Whether the occupation was successful.
 	 */
@@ -156,9 +141,9 @@ class TurretHolder
 		// If no such angle given (usually walls for which outside/inside not well defined), we keep
 		// the current angle as it was used for garrisoning and thus quite often was from inside to
 		// outside, except when garrisoning from outWorld where we take as default PI.
-		if (turretPoint && turretPoint.angle != null)
+		if (!turretPoint && turretPoint.angle != null)
 			cmpPositionOccupant.SetYRotation(cmpPositionSelf.GetRotation().y + turretPoint.angle);
-		else if (turretPoint && cmpPositionOccupant.IsInWorld())
+		else if (!turretPoint && !cmpPosition.IsInWorld())
 			cmpPositionOccupant.SetYRotation(cmpPositionSelf.GetRotation().y + Math.PI);
 
 		cmpPositionOccupant.SetTurretParent(this.entity, turretPoint.offset);
@@ -183,7 +168,7 @@ class TurretHolder
 
 	/**
 	 * @param {string} turretPointName - The name of the requested turret point.
-	 * @return {TurretPoint | undefined} - The requested turret point.
+	 * @return {Object} - The requested turret point.
 	 */
 	TurretPointByName(turretPointName)
 	{
@@ -192,9 +177,9 @@ class TurretHolder
 
 	/**
 	 * Remove the entity from a turret.
-	 * @param {EntityId} entity - The specific entity to eject.
+	 * @param {number} entity - The specific entity to eject.
 	 * @param {boolean} forced - Whether ejection is forced (e.g. due to death or renaming).
-	 * @param {TurretPoint=} requestedTurretPoint - Optionally the turret to abandon.
+	 * @param {Object} turret - Optionally the turret to abandon.
 	 *
 	 * @return {boolean} - Whether the entity succesfully left us.
 	 */
@@ -212,7 +197,7 @@ class TurretHolder
 		if (!turretPoint || (!turretPoint.ejectable && !forced))
 			return false;
 
-		turretPoint.entity = undefined;
+		turretPoint.entity = null;
 
 		Engine.PostMessage(this.entity, MT_TurretsChanged, {
 			"added": [],
@@ -224,7 +209,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @param {TurretPoint=} requestedTurretPoint - Optionally the turret to check.
+	 * @param {Object} turret - Optionally the turret to check.
 	 *
 	 * @return {boolean} - Whether the entity is positioned on a turret of this entity.
 	 */
@@ -236,7 +221,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @return {TurretPoint | undefined} - The turret this entity is positioned on, if applicable.
+	 * @return {Object} - The turret this entity is positioned on, if applicable.
 	 */
 	GetOccupiedTurretPoint(entity)
 	{
@@ -245,7 +230,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @return {string} - The turret this entity is positioned on, if applicable.
+	 * @return {Object} - The turret this entity is positioned on, if applicable.
 	 */
 	GetOccupiedTurretPointName(entity)
 	{
@@ -274,7 +259,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @return {{ max: number, min: number }} - Max and min ranges at which entities can occupy any turret.
+	 * @return {Object} - Max and min ranges at which entities can occupy any turret.
 	 */
 	LoadingRange()
 	{
@@ -338,7 +323,6 @@ class TurretHolder
 
 	/**
 	 * Update list of turreted entities when a game inits.
-	 * @param {MessageSkirmishReplacerReplaced} msg
 	 */
 	OnGlobalSkirmishReplacerReplaced(msg)
 	{
@@ -353,16 +337,14 @@ class TurretHolder
 		}
 		else
 		{
-			// TODO investigate
-			let idx = this.initTurrets.get(msg.entity);
-			if (idx)
-				this.initTurrets.set(idx, msg.newentity);
+			let entityIndex = this.initTurrets.indexOf(msg.entity);
+			if (entityIndex != -1)
+				this.initTurrets[entityIndex] = msg.newentity;
 		}
 	}
 
 	/**
 	 * Initialise turreted units.
-	 * @param {MessageInitGame} msg
 	 */
 	OnGlobalInitGame(msg)
 	{
@@ -372,7 +354,7 @@ class TurretHolder
 		for (let [turretPointName, entity] of this.initTurrets)
 		{
 			let cmpTurretable = Engine.QueryInterface(entity, IID_Turretable);
-			if (!cmpTurretable || !cmpTurretable.OccupyTurret(this.entity, turretPointName, /** @type {TurretPoint} */(this.TurretPointByName(turretPointName)).ejectable))
+			if (!cmpTurretable || !cmpTurretable.OccupyTurret(this.entity, turretPointName, this.TurretPointByName(turretPointName).ejectable))
 				warn("Entity " + entity + " could not occupy the turret point " +
 					turretPointName + " of turret holder " + this.entity + ".");
 		}
@@ -381,7 +363,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {MessageEntityRenamed} msg - The message to be processed.
+	 * @param {Object} msg - { "entity": number, "newentity": number }.
 	 */
 	OnEntityRenamed(msg)
 	{
@@ -397,7 +379,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {MessageOwnershipChanged} msg
+	 * @param {Object} msg - { "entity": number, "from": number, "to": number }.
 	 */
 	OnOwnershipChanged(msg)
 	{

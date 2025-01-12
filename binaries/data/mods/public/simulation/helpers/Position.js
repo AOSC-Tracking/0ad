@@ -1,4 +1,4 @@
-function PositionHelperClass() {}
+function PositionHelper() {}
 
 /**
  * @param {number} firstEntity - The entityID of an entity.
@@ -7,7 +7,7 @@ function PositionHelperClass() {}
  * @return {number} - The horizontal distance between the two given entities. Returns
  *			infinity when the distance cannot be calculated.
  */
-PositionHelperClass.prototype.DistanceBetweenEntities = function(firstEntity, secondEntity)
+PositionHelper.prototype.DistanceBetweenEntities = function(firstEntity, secondEntity)
 {
 	let cmpFirstPosition = Engine.QueryInterface(firstEntity, IID_Position);
 	if (!cmpFirstPosition || !cmpFirstPosition.IsInWorld())
@@ -24,11 +24,11 @@ PositionHelperClass.prototype.DistanceBetweenEntities = function(firstEntity, se
  * @param {Vector2D} origin - The point to check around.
  * @param {number}   radius - The radius around the point to check.
  * @param {number[]} players - The players of which we need to check entities.
- * @param {IID | 0}   iid - Interface IID that returned entities must implement. Defaults to none.
+ * @param {number}   iid - Interface IID that returned entities must implement. Defaults to none.
  *
  * @return {number[]} The id's of the entities in range of the given point.
  */
-PositionHelperClass.prototype.EntitiesNearPoint = function(origin, radius, players, iid = 0)
+PositionHelper.prototype.EntitiesNearPoint = function(origin, radius, players, iid = 0)
 {
 	if (!origin || !radius || !players || !players.length)
 		return [];
@@ -44,9 +44,9 @@ PositionHelperClass.prototype.EntitiesNearPoint = function(origin, radius, playe
  * @param {number} ent - Entity id of the entity we are finding the location for.
  * @param {number} lateness - The time passed since the expected time to fire the function.
  *
- * @return {Vector3D | undefined} The interpolated location of the entity.
+ * @return {Vector3D} The interpolated location of the entity.
  */
-PositionHelperClass.prototype.InterpolatedLocation = function(ent, lateness)
+PositionHelper.prototype.InterpolatedLocation = function(ent, lateness)
 {
 	let cmpTargetPosition = Engine.QueryInterface(ent, IID_Position);
 	if (!cmpTargetPosition || !cmpTargetPosition.IsInWorld()) // TODO: handle dead target properly
@@ -72,7 +72,7 @@ PositionHelperClass.prototype.InterpolatedLocation = function(ent, lateness)
  *
  * @return {boolean} True if the point is inside of the entity's footprint.
  */
-PositionHelperClass.prototype.TestCollision = function(ent, point, lateness)
+PositionHelper.prototype.TestCollision = function(ent, point, lateness)
 {
 	let targetPosition = this.InterpolatedLocation(ent, lateness);
 	if (!targetPosition)
@@ -91,12 +91,11 @@ PositionHelperClass.prototype.TestCollision = function(ent, point, lateness)
 
 	if (targetShape.type == "square")
 	{
-		let angle = Engine.QueryInterface(ent, IID_Position)?.GetRotation().y || 0;
+		let angle = Engine.QueryInterface(ent, IID_Position).GetRotation().y;
 		let distance = Vector2D.from3D(Vector3D.sub(point, targetPosition)).rotate(-angle);
 		return Math.abs(distance.x) < targetShape.width / 2 && Math.abs(distance.y) < targetShape.depth / 2;
 	}
 
-	// @ts-expect-error TS detects this (correctly) as unreachable in correctly-formed code.
 	warn("TestCollision called with an invalid footprint shape: " + targetShape.type + ".");
 	return false;
 };
@@ -111,11 +110,11 @@ PositionHelperClass.prototype.TestCollision = function(ent, point, lateness)
  * @param {Vector3D} targetPosition - The 3D position of the target.
  * @param {Vector3D} targetVelocity - The 3D velocity vector of the target.
  *
- * @return {number|false} - The time to collision or false if the collision will not happen.
+ * @return {number|boolean} - The time to collision or false if the collision will not happen.
  */
-PositionHelperClass.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed, targetPosition, targetVelocity)
+PositionHelper.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed, targetPosition, targetVelocity)
 {
-	let relativePosition = Vector3D.sub(targetPosition, firstPosition);
+	let relativePosition = new Vector3D.sub(targetPosition, firstPosition);
 	let a = targetVelocity.x * targetVelocity.x + targetVelocity.z * targetVelocity.z - selfSpeed * selfSpeed;
 	let b = relativePosition.x * targetVelocity.x + relativePosition.z * targetVelocity.z;
 	let c = relativePosition.x * relativePosition.x + relativePosition.z * relativePosition.z;
@@ -138,9 +137,9 @@ PositionHelperClass.prototype.PredictTimeToTarget = function(firstPosition, self
  * @param {number} target - EntityID to find the spawn position for.
  * @param {number} entity - EntityID to find the spawn position for.
  * @param {boolean} forced - Optionally whether the spawning is forced.
- * @return {Vector3D | null} - An appropriate spawning position.
+ * @return {Vector3D} - An appropriate spawning position.
  */
-PositionHelperClass.prototype.GetSpawnPosition = function(target, entity, forced)
+PositionHelper.prototype.GetSpawnPosition = function(target, entity, forced)
 {
 	let cmpFootprint = Engine.QueryInterface(target, IID_Footprint);
 	let cmpHealth = Engine.QueryInterface(target, IID_Health);
@@ -164,10 +163,9 @@ PositionHelperClass.prototype.GetSpawnPosition = function(target, entity, forced
 
 		// If ejection is forced, we need to continue, so use center of the entity.
 		let cmpPosition = Engine.QueryInterface(target, IID_Position);
-		if (cmpPosition)
-			pos = cmpPosition.GetPosition();
+		pos = cmpPosition.GetPosition();
 	}
 	return pos;
 };
 
-Engine.RegisterGlobal("PositionHelper", new PositionHelperClass());
+Engine.RegisterGlobal("PositionHelper", new PositionHelper());

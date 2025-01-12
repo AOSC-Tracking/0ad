@@ -1,15 +1,4 @@
-function AIInterface() {
-	/** @type {Record<string, unknown[]>} */
-	this.events;
-	/** @type {Record<EntityId, 1>} */
-	this.changedEntities;
-	/** @type {Record<number, Record<string, { variable: string, value: unknown }[]>>} */
-	this.changedTemplateInfo;
-	/** @type {Record<EntityId, { variable: string, value: unknown }[]>} */
-	this.changedEntityTemplateInfo;
-	/** @type {string[] | undefined} */
-	this.templates;
-}
+function AIInterface() {}
 
 AIInterface.prototype.Schema =
 	"<a:component type='system'/><empty/>";
@@ -54,10 +43,8 @@ AIInterface.prototype.Init = function()
 	this.enabled = true;
 };
 
-/** @returns {Record<keyof AIInterface, unknown>} */
 AIInterface.prototype.Serialize = function()
 {
-	/** @type {Record<string, unknown>} */
 	let state = {};
 	for (var key in this)
 	{
@@ -72,16 +59,12 @@ AIInterface.prototype.Serialize = function()
 	return state;
 };
 
-/**
- * @param {ReturnType<AIInterface["Serialize"]>} data
- */
 AIInterface.prototype.Deserialize = function(data)
 {
 	for (let key in data)
 	{
 		if (!data.hasOwnProperty(key))
 			continue;
-		// @ts-expect-error
 		this[key] = data[key];
 	}
 	if (!this.enabled)
@@ -96,19 +79,12 @@ AIInterface.prototype.Disable = function()
 {
 	this.enabled = false;
 	let nop = function(){};
-	/** @ts-ignore; @type {NonNullable<typeof this["ChangedEntity"]>} */
 	this.ChangedEntity = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["PushEvent"]>} */
 	this.PushEvent = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["OnDiplomacyChanged"]>} */
 	this.OnGlobalPlayerDefeated = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalEntityRenamed"]>} */
 	this.OnGlobalEntityRenamed = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalTributeExchanged"]>} */
 	this.OnGlobalTributeExchanged = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["OnTerritoriesChanged"]>} */
 	this.OnTemplateModification = nop;
-	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalValueModification"]>} */
 	this.OnGlobalValueModification = nop;
 };
 
@@ -117,14 +93,11 @@ AIInterface.prototype.GetNonEntityRepresentation = function()
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 
 	// Return the same game state as the GUI uses
-	let state = {
-		...cmpGuiInterface.GetSimulationState(),
-		/** @type {Record<string, unknown[]>} */
-		events: {},
-	};
+	let state = cmpGuiInterface.GetSimulationState();
 
 	// Add some extra AI-specific data
 	// add custom events and reset them for the next turn
+	state.events = {};
 	for (let name of this.EventNames)
 	{
 		state.events[name] = this.events[name];
@@ -136,21 +109,16 @@ AIInterface.prototype.GetNonEntityRepresentation = function()
 
 AIInterface.prototype.GetRepresentation = function()
 {
-	let state = {
-		...this.GetNonEntityRepresentation(),
-		/** @type {Record<EntityId, unknown>} */
-		entities: {},
-		changedTemplateInfo: {},
-		changedEntityTemplateInfo: {},
-	};
+	let state = this.GetNonEntityRepresentation();
 
 	// Add entity representations
 	Engine.ProfileStart("proxy representations");
+	state.entities = {};
 	for (let id in this.changedEntities)
 	{
 		let cmpAIProxy = Engine.QueryInterface(+id, IID_AIProxy);
 		if (cmpAIProxy)
-			state.entities[+id] = cmpAIProxy.GetRepresentation();
+			state.entities[id] = cmpAIProxy.GetRepresentation();
 	}
 	this.changedEntities = {};
 	Engine.ProfileStop();
@@ -165,17 +133,10 @@ AIInterface.prototype.GetRepresentation = function()
 
 /**
  * Intended to be called first, during the map initialization: no caching
- * @param {boolean} flushEvents
  */
 AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 {
-	let state = {
-		...this.GetNonEntityRepresentation(),
-		/** @type {Record<EntityId, unknown>} */
-		entities: {},
-		changedTemplateInfo: {},
-		changedEntityTemplateInfo: {},
-	};
+	let state = this.GetNonEntityRepresentation();
 
 	if (flushEvents)
 		for (let name of this.EventNames)
@@ -186,7 +147,7 @@ AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 	state.entities = {};
 	// all entities are changed in the initial state.
 	for (let id of Engine.GetEntitiesWithInterface(IID_AIProxy))
-		state.entities[id] = /** @type {AIProxy} */(Engine.QueryInterface(id, IID_AIProxy)).GetFullRepresentation();
+		state.entities[id] = Engine.QueryInterface(id, IID_AIProxy).GetFullRepresentation();
 	Engine.ProfileStop();
 
 	state.changedTemplateInfo = this.changedTemplateInfo;
@@ -197,10 +158,6 @@ AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 	return state;
 };
 
-/**
- * @param {EntityId} ent
- */
-// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.ChangedEntity = function(ent)
 {
 	this.changedEntities[ent] = 1;
@@ -210,10 +167,7 @@ AIInterface.prototype.ChangedEntity = function(ent)
  * AIProxy sets up a load of event handlers to capture interesting things going on
  * in the world, which we will report to AI. Handle those, and add a few more handlers
  * for events that AIProxy won't capture.
- * @param {string} type
- * @param {unknown} msg
  */
-// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.PushEvent = function(type, msg)
 {
 	if (this.events[type] === undefined)
@@ -221,38 +175,32 @@ AIInterface.prototype.PushEvent = function(type, msg)
 	this.events[type].push(msg);
 };
 
-/** @param {MessageDiplomacyChanged} msg */
 AIInterface.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.events.DiplomacyChanged.push(msg);
 };
 
-/** @ts-expect-error (duplicate because we disable with nop), @param {MessagePlayerDefeated} msg */
 AIInterface.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.events.PlayerDefeated.push(msg);
 };
 
-/** @ts-expect-error (duplicate because we disable with nop), @param {MessageEntityRenamed} msg */
 AIInterface.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	if (!Engine.QueryInterface(msg.entity, IID_Mirage))
 		this.events.EntityRenamed.push(msg);
 };
 
-/** @ts-expect-error (duplicate because we disable with nop), @param {MessageTributeExchanged} msg */
 AIInterface.prototype.OnGlobalTributeExchanged = function(msg)
 {
 	this.events.TributeExchanged.push(msg);
 };
 
-/** @param {MessageTerritoriesChanged} msg */
 AIInterface.prototype.OnTerritoriesChanged = function(msg)
 {
 	this.events.TerritoriesChanged.push(msg);
 };
 
-/** @param {MessageCeasefireEnded} msg */
 AIInterface.prototype.OnCeasefireEnded = function(msg)
 {
 	this.events.CeasefireEnded.push(msg);
@@ -263,9 +211,7 @@ AIInterface.prototype.OnCeasefireEnded = function(msg)
  * and send the updated values to the AI.
  * this relies on the fact that any "value" in a technology can only ever change
  * one template value, and that the naming is the same (with / in place of .)
- * @param {MessageTemplateModification} msg
  */
-// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.OnTemplateModification = function(msg)
 {
 	let cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
@@ -306,13 +252,12 @@ AIInterface.prototype.OnTemplateModification = function(msg)
 			if (!ended)
 				continue;
 			// item now contains the template value for this.
-			// @ts-expect-error - TS doesn't like the "is this a number" check
-			let oldValue = /** @type {number | string} */(+item == item ? +item : item);
+			let oldValue = +item == item ? +item : item;
 			let newValue = ApplyValueModificationsToTemplate(valName, oldValue, msg.player, template);
 			// Apply the same roundings as in the components
 			if (valName === "Player/MaxPopulation" || valName === "Cost/Population" ||
 			    valName === "Population/Bonus")
-				newValue = Math.round(/** @type {number} */(newValue));
+				newValue = Math.round(newValue);
 			// TODO in some cases, we can have two opposite changes which bring us to the old value,
 			// and we should keep it. But how to distinguish it ?
 			if(newValue == oldValue)
@@ -327,7 +272,6 @@ AIInterface.prototype.OnTemplateModification = function(msg)
 	}
 };
 
-/** @ts-expect-error (duplicate because we disable with nop) @param {MessageValueModification} msg */
 AIInterface.prototype.OnGlobalValueModification = function(msg)
 {
 	this.events.ValueModification.push(msg);
@@ -357,13 +301,12 @@ AIInterface.prototype.OnGlobalValueModification = function(msg)
 			if (!ended)
 				continue;
 			// "item" now contains the unmodified template value for this.
-			// @ts-expect-error - TS doesn't like the "is this a number" check
-			let oldValue = /** @type {number | string} */(+item == item ? +item : item);
+			let oldValue = +item == item ? +item : item;
 			let newValue = ApplyValueModificationsToEntity(valName, oldValue, ent);
 			// Apply the same roundings as in the components
 			if (valName === "Player/MaxPopulation" || valName === "Cost/Population" ||
 			    valName === "Population/Bonus")
-				newValue = Math.round(/** @type {number} */(newValue));
+				newValue = Math.round(newValue);
 			// TODO in some cases, we can have two opposite changes which bring us to the old value,
 			// and we should keep it. But how to distinguish it ?
 			if (newValue == oldValue)

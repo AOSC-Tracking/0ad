@@ -1,10 +1,4 @@
-function FormationAttack() {
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {{CanAttackAsFormation: string}} */
-	this.template;
-}
+function FormationAttack() {}
 
 FormationAttack.prototype.Schema =
 	"<element name='CanAttackAsFormation'>" +
@@ -27,7 +21,6 @@ FormationAttack.prototype.GetAttackTypes = function()
 	return [];
 };
 
-/** @param {EntityId} target */
 FormationAttack.prototype.GetRange = function(target)
 {
 	var result = { "min": 0, "max": this.canAttackAsFormation ? -1 : 0 };

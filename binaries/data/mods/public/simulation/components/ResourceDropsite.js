@@ -1,17 +1,10 @@
-function ResourceDropsite()
-{
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {{ Types: string, Sharable: string }} */
-	this.template;
-}
+function ResourceDropsite() {}
 
 ResourceDropsite.prototype.Schema =
 	"<element name='Types'>" +
 		"<list>" +
 			"<zeroOrMore>" +
-				g_Resources.BuildChoicesSchema() +
+				Resources.BuildChoicesSchema() +
 			"</zeroOrMore>" +
 		"</list>" +
 	"</element>" +
@@ -37,7 +30,6 @@ ResourceDropsite.prototype.GetTypes = function()
 
 /**
  * Returns whether this dropsite accepts the given generic type of resource.
- * @param {string} type - The generic type of resource.
  */
 ResourceDropsite.prototype.AcceptsType = function(type)
 {
@@ -45,18 +37,17 @@ ResourceDropsite.prototype.AcceptsType = function(type)
 };
 
 /**
- * @param {Record<string, number>} resources - The resources to drop here in the form of { "resource": amount }.
+ * @param {Object} resources - The resources to drop here in the form of { "resource": amount }.
  * @param {number} entity - The entity that tries to drop their resources here.
  *
- * @return - Which resources could be dropped off here.
+ * @return {Object} - Which resources could be dropped off here.
  */
 ResourceDropsite.prototype.ReceiveResources = function(resources, entity)
 {
-	let cmpPlayer = QueryOwnerInterface(entity, IID_Player);
+	let cmpPlayer = QueryOwnerInterface(entity);
 	if (!cmpPlayer)
 		return {};
 
-	/** @type {Record<string, number>} */
 	let taken = {};
 	for (let type in resources)
 		if (this.AcceptsType(type))
@@ -76,9 +67,6 @@ ResourceDropsite.prototype.IsShared = function()
 	return this.shared;
 };
 
-/**
- * @param {boolean} value - Whether this dropsite should be shared.
- */
 ResourceDropsite.prototype.SetSharing = function(value)
 {
 	if (!this.sharable)

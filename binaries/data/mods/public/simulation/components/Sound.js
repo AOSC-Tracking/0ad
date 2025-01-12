@@ -1,9 +1,4 @@
-function Sound() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {Template} */
-	this.template;
-}
+function Sound() {}
 
 Sound.prototype.Schema =
 	"<a:help>Lists the sound groups associated with this unit.</a:help>" +
@@ -28,16 +23,13 @@ Sound.prototype.Init = function()
 {
 };
 
-// @ts-ignore
 Sound.prototype.Serialize = null; // we have no dynamic state to save
 
-/** @param {string} name */
 Sound.prototype.GetSoundGroup = function(name)
 {
 	return this.template.SoundGroups[name] || "";
 };
 
-/** @param {string} name */
 Sound.prototype.PlaySoundGroup = function(name)
 {
 	if (name in this.template.SoundGroups)

@@ -1,4 +1,3 @@
-// @ts-nocheck
 function GuiInterface() {}
 
 GuiInterface.prototype.Schema =

@@ -1,22 +1,4 @@
-function Diplomacy() {
-	/** @type {EntityId} */
-	this.entity;
-
-	/** @type {{ SharedLosTech: string, SharedDropsitesTech: string }} */
-	this.template;
-
-	// Team number of the player, players on the same team will always have ally diplomatic status. Also this is useful for team emblems, scoring, etc.
-	this.team = -1;
-
-	/**
-	 * Array of diplomatic stances for this player with respect to other players (including gaia and self).
-	 * @type {number[]}
-	*/
-	this.diplomacy = [];
-
-	/** @type {{ r: number, g: number, b: number, a: 1 }} */
-	this.diplomacyColor;
-}
+function Diplomacy() {}
 
 Diplomacy.prototype.Schema =
 	"<element name='SharedLosTech' a:help='Allies will share los when this technology is researched. Leave empty to never share LOS.'>" +
@@ -26,44 +8,50 @@ Diplomacy.prototype.Schema =
 		"<text/>" +
 	"</element>";
 
-Diplomacy.prototype.SerializableAttributes = /** @type {const} */([
+Diplomacy.prototype.SerializableAttributes = [
 	"team",
 	"teamLocked",
 	"diplomacy",
 	"sharedDropsites",
-]);
+];
 
 Diplomacy.prototype.Serialize = function()
 {
-	/** @type {any} */
 	const state = {};
 	for (const key of this.SerializableAttributes)
-		if (key in this)
+		if (this.hasOwnProperty(key))
 			state[key] = this[key];
 
 	return state;
 };
 
-/** @param {any} state */
 Diplomacy.prototype.Deserialize = function(state)
 {
-	for (const att in state)
-		// @ts-expect-error
-		this[att] = state[att];
+	for (const att of this.SerializableAttributes)
+		if (att in state)
+			this[att] = state[att];
 };
 
 Diplomacy.prototype.Init = function()
 {
+	// Team number of the player, players on the same team will always have ally diplomatic status. Also this is useful for team emblems, scoring, etc.
+	this.team = -1;
+
+	// Array of diplomatic stances for this player with respect to other players (including gaia and self).
+	this.diplomacy = [];
 };
 
 /**
- * @param {{ r: number, g: number, b: number }} color - r, g, b values of the diplomacy colour.
+ * @param {Object} color - r, g, b values of the diplomacy colour.
  */
 Diplomacy.prototype.SetDiplomacyColor = function(color)
 {
 	this.diplomacyColor = { "r": color.r / 255, "g": color.g / 255, "b": color.b / 255, "a": 1 };
 };
 
+/**
+ * @return {Object} -
+ */
 Diplomacy.prototype.GetColor = function()
 {
 	return this.diplomacyColor;
@@ -100,7 +88,7 @@ Diplomacy.prototype.ChangeTeam = function(team)
 		const numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 		for (let i = 0; i < numPlayers; ++i)
 		{
-			const cmpDiplomacy = /** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy));
+			const cmpDiplomacy = QueryPlayerIDInterface(i, IID_Diplomacy);
 			if (this.team !== cmpDiplomacy.GetTeam())
 				continue;
 
@@ -165,7 +153,7 @@ Diplomacy.prototype.SetDiplomacy = function(dipl)
  */
 Diplomacy.prototype.SetDiplomacyIndex = function(idx, value)
 {
-	if (!QueryPlayerIDInterface(idx, IID_Player)?.IsActive())
+	if (!QueryPlayerIDInterface(idx)?.IsActive())
 		return;
 
 	const cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -184,7 +172,7 @@ Diplomacy.prototype.SetDiplomacyIndex = function(idx, value)
 
 /**
  * Helper function for getting allies etc.
- * @param {"IsAlly" | "IsMutualAlly" | "IsExclusiveAlly" | "IsExclusiveMutualAlly" | "IsEnemy" | "IsNeutral"} func - The function to call.
+ * @param {string} func - Name of the function to test.
  * @return {number[]} - Player IDs matching the function.
  */
 Diplomacy.prototype.GetPlayersByDiplomacy = function(func)
@@ -197,7 +185,7 @@ Diplomacy.prototype.GetPlayersByDiplomacy = function(func)
 };
 
 /**
- * @param {number} id
+ * @param {number} - id
  */
 Diplomacy.prototype.Ally = function(id)
 {
@@ -235,6 +223,7 @@ Diplomacy.prototype.IsExclusiveAlly = function(id)
 /**
  * Check if given player is our ally, and we are its ally.
  * @param {number} id -
+ * @return {boolean} -
  */
 Diplomacy.prototype.IsMutualAlly = function(id)
 {
@@ -242,6 +231,9 @@ Diplomacy.prototype.IsMutualAlly = function(id)
 	return playerID !== undefined && this.IsAlly(id) && QueryPlayerIDInterface(id, IID_Diplomacy)?.IsAlly(playerID);
 };
 
+/**
+ * @return {number[]} -
+ */
 Diplomacy.prototype.GetMutualAllies = function()
 {
 	return this.GetPlayersByDiplomacy("IsMutualAlly");
@@ -249,7 +241,8 @@ Diplomacy.prototype.GetMutualAllies = function()
 
 /**
  * Check if given player is our ally, and we are its ally, excluding ourself.
- * @param {number} id
+ * @param {number} id -
+ * @return {boolean} -
  */
 Diplomacy.prototype.IsExclusiveMutualAlly = function(id)
 {
@@ -258,7 +251,7 @@ Diplomacy.prototype.IsExclusiveMutualAlly = function(id)
 };
 
 /**
- * @param {number} id
+ * @param {number} id -
  */
 Diplomacy.prototype.SetEnemy = function(id)
 {
@@ -267,20 +260,24 @@ Diplomacy.prototype.SetEnemy = function(id)
 
 /**
  * Check if given player is our enemy.
- * @param {number} id
+ * @param {number} id -
+ * @return {boolean} -
  */
 Diplomacy.prototype.IsEnemy = function(id)
 {
 	return this.diplomacy[id] < 0;
 };
 
+/**
+ * @return {number[]} -
+ */
 Diplomacy.prototype.GetEnemies = function()
 {
 	return this.GetPlayersByDiplomacy("IsEnemy");
 };
 
 /**
- * @param {number} id
+ * @param {number} id -
  */
 Diplomacy.prototype.SetNeutral = function(id)
 {
@@ -289,18 +286,25 @@ Diplomacy.prototype.SetNeutral = function(id)
 
 /**
  * Check if given player is neutral.
- * @param {number} id
+ * @param {number} id -
+ * @return {boolean} -
  */
 Diplomacy.prototype.IsNeutral = function(id)
 {
 	return this.diplomacy[id] === 0;
 };
 
+/**
+ * @return {boolean} -
+ */
 Diplomacy.prototype.HasSharedDropsites = function()
 {
 	return this.sharedDropsites;
 };
 
+/**
+ * @return {boolean} -
+ */
 Diplomacy.prototype.HasSharedLos = function()
 {
 	const cmpTechnologyManager = Engine.QueryInterface(this.entity, IID_TechnologyManager);
@@ -317,7 +321,6 @@ Diplomacy.prototype.UpdateSharedLos = function()
 		SetSharedLos(playerID, this.HasSharedLos() ? this.GetMutualAllies() : [playerID]);
 };
 
-/** @param {MessageResearchFinished} msg */
 Diplomacy.prototype.OnResearchFinished = function(msg)
 {
 	if (msg.tech === this.template.SharedLosTech)
@@ -326,7 +329,6 @@ Diplomacy.prototype.OnResearchFinished = function(msg)
 		this.sharedDropsites = true;
 };
 
-/** @param {MessageDiplomacyChanged} msg */
 Diplomacy.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.UpdateSharedLos();

@@ -1,16 +1,6 @@
 const g_NaturalColor = "255 255 255 255"; // pure white
 
-function StatusBars() {
-	/** @type {EntityId} */
-	this.entity;
-	/** @type {{ BarWidth: string, BarHeight: string, HeightOffset: string }} */
-	this.template;
-
-	/** @type {boolean} */
-	this.enabled;
-	/** @type {Map<EntityId, string[]>} */
-	this.auraSources;
-}
+function StatusBars() {}
 
 StatusBars.prototype.Schema =
 	"<element name='BarWidth'>" +
@@ -30,7 +20,7 @@ StatusBars.prototype.Schema =
  * Modders who need extra sprites can just modify this array, and
  * provide the right methods.
  */
-StatusBars.prototype.Sprites = /** @type {const} */([
+StatusBars.prototype.Sprites = [
 	"ExperienceBar",
 	"PackBar",
 	"UpgradeBar",
@@ -39,7 +29,7 @@ StatusBars.prototype.Sprites = /** @type {const} */([
 	"HealthBar",
 	"AuraIcons",
 	"RankIcon"
-]);
+];
 
 StatusBars.prototype.Init = function()
 {
@@ -61,18 +51,12 @@ StatusBars.prototype.Serialize = function()
 	return { "auraSources": this.auraSources };
 };
 
-/** @param {any} data */
 StatusBars.prototype.Deserialize = function(data)
 {
 	this.Init();
 	this.auraSources = data.auraSources;
 };
 
-/**
- * @param {boolean} enabled
- * @param {boolean} showRank
- * @param {boolean} showExperience
- */
 StatusBars.prototype.SetEnabled = function(enabled, showRank, showExperience)
 {
 	// Quick return if no change
@@ -87,60 +71,46 @@ StatusBars.prototype.SetEnabled = function(enabled, showRank, showExperience)
 	this.RegenerateSprites();
 };
 
-/**
- * @param {EntityId} source
- * @param {string} auraName
- */
 StatusBars.prototype.AddAuraSource = function(source, auraName)
 {
 	if (this.auraSources.has(source))
-		// @ts-expect-error
 		this.auraSources.get(source).push(auraName);
 	else
 		this.auraSources.set(source, [auraName]);
 	this.RegenerateSprites();
 };
 
-/**
- * @param {EntityId} source
- * @param {string} auraName
- */
 StatusBars.prototype.RemoveAuraSource = function(source, auraName)
 {
-	let names = /** @type {string[]} */(this.auraSources.get(source));
+	let names = this.auraSources.get(source);
 	names.splice(names.indexOf(auraName), 1);
 	this.RegenerateSprites();
 };
 
-/** @param {MessageHealthChanged} msg */
 StatusBars.prototype.OnHealthChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
-/** @param {MessageCapturePointsChanged} msg */
 StatusBars.prototype.OnCapturePointsChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
-/** @param {MessageResourceSupplyChanged} msg */
 StatusBars.prototype.OnResourceSupplyChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
-/** @param {MessagePackProgressUpdate} msg */
 StatusBars.prototype.OnPackProgressUpdate = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
-/** @param {MessageUpgradeProgressUpdate} msg */
 StatusBars.prototype.OnUpgradeProgressUpdate = function(msg)
 {
 	if (this.enabled)
@@ -159,7 +129,6 @@ StatusBars.prototype.UpdateColor = function()
 		this.RegenerateSprites();
 };
 
-/** @param {MessagePlayerColorChanged} msg */
 StatusBars.prototype.OnPlayerColorChanged = function(msg)
 {
 	if (this.enabled)
@@ -168,22 +137,17 @@ StatusBars.prototype.OnPlayerColorChanged = function(msg)
 
 StatusBars.prototype.RegenerateSprites = function()
 {
-	let cmpOverlayRenderer = /** @type {OverlayRenderer} */(Engine.QueryInterface(this.entity, IID_OverlayRenderer));
+	let cmpOverlayRenderer = Engine.QueryInterface(this.entity, IID_OverlayRenderer);
 	cmpOverlayRenderer.Reset();
 
 	let yoffset = 0;
 	for (let sprite of this.Sprites)
-		// @ts-expect-error
 		yoffset += this["Add" + sprite](cmpOverlayRenderer, yoffset);
 };
 
 // Internal helper functions
 /**
  * Generic piece of code to add a bar.
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- * @param {string} type
- * @param {number} amount
  */
 StatusBars.prototype.AddBar = function(cmpOverlayRenderer, yoffset, type, amount, heightMultiplier = 1)
 {
@@ -215,10 +179,6 @@ StatusBars.prototype.AddBar = function(cmpOverlayRenderer, yoffset, type, amount
 	return height * 1.2;
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddExperienceBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled || !this.showExperience)
@@ -231,10 +191,6 @@ StatusBars.prototype.AddExperienceBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "pack", cmpPromotion.GetCurrentXp() / cmpPromotion.GetRequiredXp(), 2/3);
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddPackBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -247,10 +203,6 @@ StatusBars.prototype.AddPackBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "pack", cmpPack.GetProgress());
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddUpgradeBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -260,13 +212,9 @@ StatusBars.prototype.AddUpgradeBar = function(cmpOverlayRenderer, yoffset)
 	if (!cmpUpgrade || !cmpUpgrade.IsUpgrading())
 		return 0;
 
-	return this.AddBar(cmpOverlayRenderer, yoffset, "upgrade", cmpUpgrade.GetProgress() || 0);
+	return this.AddBar(cmpOverlayRenderer, yoffset, "upgrade", cmpUpgrade.GetProgress());
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddHealthBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -279,10 +227,6 @@ StatusBars.prototype.AddHealthBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "health", cmpHealth.GetHitpoints() / cmpHealth.GetMaxHitpoints());
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddResourceSupplyBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -295,10 +239,6 @@ StatusBars.prototype.AddResourceSupplyBar = function(cmpOverlayRenderer, yoffset
 	return this.AddBar(cmpOverlayRenderer, yoffset, "supply", value);
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -308,7 +248,7 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	if (!cmpCapturable)
 		return 0;
 
-	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
+	let cmpOwnership = QueryMiragedInterface(this.entity, IID_Ownership);
 	if (!cmpOwnership)
 		return 0;
 
@@ -326,13 +266,9 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	// World-space offset from the unit's position
 	let offset = { "x": 0, "y": +this.template.HeightOffset, "z": 0 };
 
-	/**
-	 * @param {number} playerID
-	 * @param {number} startSize
-	 */
 	let setCaptureBarPart = function(playerID, startSize)
 	{
-		let c = /** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player)).GetDisplayedColor();
+		let c = QueryPlayerIDInterface(playerID).GetDisplayedColor();
 		let strColor = (c.r * 255) + " " + (c.g * 255) + " " + (c.b * 255) + " 255";
 		let size = width * capturePoints[playerID] / cmpCapturable.GetMaxCapturePoints();
 
@@ -350,20 +286,15 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	// First handle the owner's points, to keep those points on the left for clarity
 	let size = setCaptureBarPart(owner, -width / 2);
 	for (let i in capturePoints)
-		if (+i != owner && capturePoints[i] > 0)
-			size = setCaptureBarPart(+i, size);
+		if (i != owner && capturePoints[i] > 0)
+			size = setCaptureBarPart(i, size);
 
 	return height * 1.2;
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 {
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
-	// @ts-expect-error
 	let sources = cmpGuiInterface.GetEntitiesWithStatusBars().filter(e => this.auraSources.has(e) && this.auraSources.get(e).length);
 
 	if (!sources.length)
@@ -375,7 +306,6 @@ StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 		let cmpAuras = Engine.QueryInterface(ent, IID_Auras);
 		if (!cmpAuras) // probably the ent just died
 			continue;
-		// @ts-expect-error
 		for (let name of this.auraSources.get(ent))
 			iconSet.add(cmpAuras.GetOverlayIcon(name));
 	}
@@ -397,13 +327,9 @@ StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 		xoffset += iconSize * 1.2;
 	}
 
-	return iconSize + +this.template.BarHeight / 2;
+	return iconSize + this.template.BarHeight / 2;
 };
 
-/**
- * @param {OverlayRenderer} cmpOverlayRenderer
- * @param {number} yoffset
- */
 StatusBars.prototype.AddRankIcon = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled || !this.showRank)
@@ -421,7 +347,7 @@ StatusBars.prototype.AddRankIcon = function(cmpOverlayRenderer, yoffset)
 		{ "x": 0, "y": +this.template.HeightOffset + 0.1, "z": 0 },
 		g_NaturalColor);
 
-	return iconSize + +this.template.BarHeight / 2;
+	return iconSize + this.template.BarHeight / 2;
 };
 
 Engine.RegisterComponentType(IID_StatusBars, "StatusBars", StatusBars);

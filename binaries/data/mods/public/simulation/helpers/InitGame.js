@@ -24,10 +24,6 @@ function PreInitGame()
 	cmpRangeManager.ExploreTerritories();
 }
 
-/**
- * @typedef {Record<string, any>} InitAttributesType
- * @param {InitAttributesType} settings
- */
 function InitGame(settings)
 {
 	// No settings when loading a map in Atlas, so do nothing
@@ -48,7 +44,7 @@ function InitGame(settings)
 	const cmpAIManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIManager);
 	for (let i = 0; i < settings.PlayerData.length; ++i)
 	{
-		const cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(i, IID_Player));
+		const cmpPlayer = QueryPlayerIDInterface(i);
 		cmpPlayer.SetCheatsEnabled(!!settings.CheatsEnabled);
 
 		if (settings.PlayerData[i] && !!settings.PlayerData[i].AI)
@@ -60,11 +56,8 @@ function InitGame(settings)
 		if (settings.PopulationCap)
 			cmpPlayer.SetMaxPopulation(settings.PopulationCap);
 
-		if (settings.AllyView) {
-			let sharedLosTech = Engine.QueryInterface(cmpPlayer.entity, IID_Diplomacy)?.template.SharedLosTech;
-			if (sharedLosTech)
-				Engine.QueryInterface(cmpPlayer.entity, IID_TechnologyManager)?.ResearchTechnology(sharedLosTech);
-		}
+		if (settings.AllyView)
+			Engine.QueryInterface(cmpPlayer.entity, IID_TechnologyManager)?.ResearchTechnology(Engine.QueryInterface(cmpPlayer.entity, IID_Diplomacy).template.SharedLosTech);
 	}
 	if (settings.WorldPopulationCap)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).SetMaxWorldPopulation(settings.WorldPopulationCap);
