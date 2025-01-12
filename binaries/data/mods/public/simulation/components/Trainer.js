@@ -29,7 +29,7 @@ Trainer.prototype.Schema =
  * @param {number} trainer - The entity ID of our trainer.
  * @param {string} metadata - Optionally any metadata to attach to us.
  */
-Trainer.prototype.Item = function(templateName, count, trainer, metadata)
+function TrainerQueueItem(templateName, count, trainer, metadata)
 {
 	this.count = count;
 	this.templateName = templateName;
@@ -44,7 +44,7 @@ Trainer.prototype.Item = function(templateName, count, trainer, metadata)
  *
  * @return {boolean} - Whether the item was successfully initiated.
  */
-Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTimeMultiplier)
+TrainerQueueItem.prototype.Queue = function(trainCostMultiplier, batchTimeMultiplier)
 {
 	if (!Number.isInteger(this.count) || this.count <= 0)
 	{
@@ -121,7 +121,7 @@ Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTime
 /**
  * Destroy cached entities, refund resources and free (population) limits.
  */
-Trainer.prototype.Item.prototype.Stop = function()
+TrainerQueueItem.prototype.Stop = function()
 {
 	// Destroy any cached entities (those which didn't spawn for some reason).
 	if (this.entities?.length)
@@ -165,7 +165,7 @@ Trainer.prototype.Item.prototype.Stop = function()
  * This starts the item, reserving population.
  * @return {boolean} - Whether the item was started successfully.
  */
-Trainer.prototype.Item.prototype.Start = function()
+TrainerQueueItem.prototype.Start = function()
 {
 	const cmpPlayer = QueryPlayerIDInterface(this.player);
 	if (!cmpPlayer)
@@ -192,7 +192,7 @@ Trainer.prototype.Item.prototype.Start = function()
 	return true;
 };
 
-Trainer.prototype.Item.prototype.Finish = function()
+TrainerQueueItem.prototype.Finish = function()
 {
 	this.Spawn();
 	if (!this.count)
@@ -202,7 +202,7 @@ Trainer.prototype.Item.prototype.Finish = function()
 /**
  * @return {boolean} -
  */
-Trainer.prototype.Item.prototype.IsFinished = function()
+TrainerQueueItem.prototype.IsFinished = function()
 {
 	return !!this.finished;
 };
@@ -211,7 +211,7 @@ Trainer.prototype.Item.prototype.IsFinished = function()
  * This function creates the entities and places them in world if possible
  * (some of these entities may be garrisoned directly if autogarrison, the others are spawned).
  */
-Trainer.prototype.Item.prototype.Spawn = function()
+TrainerQueueItem.prototype.Spawn = function()
 {
 	const createdEnts = [];
 	const spawnedEnts = [];
@@ -335,7 +335,7 @@ Trainer.prototype.Item.prototype.Spawn = function()
  * @param {number} allocatedTime - The time allocated to this item.
  * @return {number} - The time used for this item.
  */
-Trainer.prototype.Item.prototype.Progress = function(allocatedTime)
+TrainerQueueItem.prototype.Progress = function(allocatedTime)
 {
 	if (this.paused)
 		this.Unpause();
@@ -352,7 +352,7 @@ Trainer.prototype.Item.prototype.Progress = function(allocatedTime)
 	return this.timeRemaining;
 };
 
-Trainer.prototype.Item.prototype.Pause = function()
+TrainerQueueItem.prototype.Pause = function()
 {
 	if (this.started)
 		this.paused = true;
@@ -363,7 +363,7 @@ Trainer.prototype.Item.prototype.Pause = function()
 	}
 };
 
-Trainer.prototype.Item.prototype.Unpause = function()
+TrainerQueueItem.prototype.Unpause = function()
 {
 	delete this.paused;
 };
@@ -371,7 +371,7 @@ Trainer.prototype.Item.prototype.Unpause = function()
 /**
  * @return {Object} - Some basic information of this batch.
  */
-Trainer.prototype.Item.prototype.GetBasicInfo = function()
+TrainerQueueItem.prototype.GetBasicInfo = function()
 {
 	return {
 		"unitTemplate": this.templateName,
@@ -384,7 +384,7 @@ Trainer.prototype.Item.prototype.GetBasicInfo = function()
 	};
 };
 
-Trainer.prototype.Item.prototype.SerializableAttributes = [
+TrainerQueueItem.prototype.SerializableAttributes = [
 	"count",
 	"entities",
 	"metadata",
@@ -400,7 +400,7 @@ Trainer.prototype.Item.prototype.SerializableAttributes = [
 	"timeTotal"
 ];
 
-Trainer.prototype.Item.prototype.Serialize = function(id)
+TrainerQueueItem.prototype.Serialize = function(id)
 {
 	const result = {
 		"id": id
@@ -411,7 +411,7 @@ Trainer.prototype.Item.prototype.Serialize = function(id)
 	return result;
 };
 
-Trainer.prototype.Item.prototype.Deserialize = function(data)
+TrainerQueueItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
@@ -456,7 +456,7 @@ Trainer.prototype.Deserialize = function(data)
 	this.queue = new Map();
 	for (const item of data.queue)
 	{
-		const newItem = new this.Item();
+		const newItem = new TrainerQueueItem();
 		newItem.Deserialize(item);
 		this.queue.set(item.id, newItem);
 	}
@@ -610,7 +610,7 @@ Trainer.prototype.CanTrain = function(templateName)
  */
 Trainer.prototype.QueueBatch = function(templateName, count, metadata)
 {
-	const item = new this.Item(templateName, count, this.entity, metadata);
+	const item = new TrainerQueueItem(templateName, count, this.entity, metadata);
 	if (!item.Queue(this.TrainCostMultiplier(), this.GetBatchTime(count)))
 		return -1;
 

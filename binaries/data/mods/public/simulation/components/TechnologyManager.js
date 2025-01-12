@@ -9,7 +9,7 @@ TechnologyManager.prototype.Schema =
  * @param {number} player - The player ID researching.
  * @param {number} researcher - The entity ID researching.
  */
-TechnologyManager.prototype.Technology = function(templateName, player, researcher)
+function TechnologyManagerItem(templateName, player, researcher)
 {
 	this.player = player;
 	this.researcher = researcher;
@@ -21,7 +21,7 @@ TechnologyManager.prototype.Technology = function(templateName, player, research
  * @param {Object} techCostMultiplier - The multipliers to use when calculating costs.
  * @return {boolean} - Whether the technology was successfully initiated.
  */
-TechnologyManager.prototype.Technology.prototype.Queue = function(techCostMultiplier)
+TechnologyManagerItem.prototype.Queue = function(techCostMultiplier)
 {
 	const template = TechnologyTemplates.Get(this.templateName);
 	if (!template)
@@ -52,7 +52,7 @@ TechnologyManager.prototype.Technology.prototype.Queue = function(techCostMultip
 	return true;
 };
 
-TechnologyManager.prototype.Technology.prototype.Stop = function()
+TechnologyManagerItem.prototype.Stop = function()
 {
 	const cmpPlayer = Engine.QueryInterface(this.player, IID_Player);
 	cmpPlayer?.RefundResources(this.resources);
@@ -70,7 +70,7 @@ TechnologyManager.prototype.Technology.prototype.Stop = function()
 /**
  * Called when the first work is performed.
  */
-TechnologyManager.prototype.Technology.prototype.Start = function()
+TechnologyManagerItem.prototype.Start = function()
 {
 	this.started = true;
 	if (!this.templateName.startsWith("phase"))
@@ -85,7 +85,7 @@ TechnologyManager.prototype.Technology.prototype.Start = function()
 	});
 };
 
-TechnologyManager.prototype.Technology.prototype.Finish = function()
+TechnologyManagerItem.prototype.Finish = function()
 {
 	this.finished = true;
 
@@ -132,7 +132,7 @@ TechnologyManager.prototype.Technology.prototype.Finish = function()
  * @param {number} allocatedTime - The time allocated to this item.
  * @return {number} - The time used for this item.
  */
-TechnologyManager.prototype.Technology.prototype.Progress = function(allocatedTime)
+TechnologyManagerItem.prototype.Progress = function(allocatedTime)
 {
 	if (!this.started)
 		this.Start();
@@ -147,17 +147,17 @@ TechnologyManager.prototype.Technology.prototype.Progress = function(allocatedTi
 	return this.timeRemaining;
 };
 
-TechnologyManager.prototype.Technology.prototype.Pause = function()
+TechnologyManagerItem.prototype.Pause = function()
 {
 	this.paused = true;
 };
 
-TechnologyManager.prototype.Technology.prototype.Unpause = function()
+TechnologyManagerItem.prototype.Unpause = function()
 {
 	delete this.paused;
 };
 
-TechnologyManager.prototype.Technology.prototype.GetBasicInfo = function()
+TechnologyManagerItem.prototype.GetBasicInfo = function()
 {
 	return {
 		"paused": this.paused,
@@ -168,7 +168,7 @@ TechnologyManager.prototype.Technology.prototype.GetBasicInfo = function()
 	};
 };
 
-TechnologyManager.prototype.Technology.prototype.SerializableAttributes = [
+TechnologyManagerItem.prototype.SerializableAttributes = [
 	"paused",
 	"player",
 	"researcher",
@@ -179,7 +179,7 @@ TechnologyManager.prototype.Technology.prototype.SerializableAttributes = [
 	"timeTotal"
 ];
 
-TechnologyManager.prototype.Technology.prototype.Serialize = function()
+TechnologyManagerItem.prototype.Serialize = function()
 {
 	const result = {};
 	for (const att of this.SerializableAttributes)
@@ -188,7 +188,7 @@ TechnologyManager.prototype.Technology.prototype.Serialize = function()
 	return result;
 };
 
-TechnologyManager.prototype.Technology.prototype.Deserialize = function(data)
+TechnologyManagerItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
@@ -246,7 +246,7 @@ TechnologyManager.prototype.Deserialize = function(data)
 	this.researchQueued = new Map();
 	for (const tech of data.researchQueued)
 	{
-		const newTech = new this.Technology();
+		const newTech = new TechnologyManagerItem();
 		newTech.Deserialize(tech);
 		this.researchQueued.set(tech.templateName, newTech);
 	}
@@ -445,7 +445,7 @@ TechnologyManager.prototype.ResearchTechnology = function(tech, researcher = INV
 {
 	if (this.IsTechnologyQueued(tech) || this.IsTechnologyResearched(tech))
 		return;
-	const technology = new this.Technology(tech, this.entity, researcher);
+	const technology = new TechnologyManagerItem(tech, this.entity, researcher);
 	technology.Finish();
 };
 
@@ -460,7 +460,7 @@ TechnologyManager.prototype.ResearchTechnology = function(tech, researcher = INV
 TechnologyManager.prototype.QueuedResearch = function(tech, researcher, techCostMultiplier)
 {
 	// ToDo: Check whether the technology is researched already?
-	const technology = new this.Technology(tech, this.entity, researcher);
+	const technology = new TechnologyManagerItem(tech, this.entity, researcher);
 	if (!technology.Queue(techCostMultiplier))
 		return false;
 	this.researchQueued.set(tech, technology);
