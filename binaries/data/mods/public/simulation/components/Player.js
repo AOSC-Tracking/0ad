@@ -1,4 +1,73 @@
-function Player() {}
+function Player()
+{
+	/** @type {number} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 * 	Formations: { _string: string },
+	 * 	SpyCostMultiplier: string,
+	 * 	BarterMultiplier: { Buy: Record<string, string>, Sell: Record<string, string>}
+	 * }}
+	 */
+	this.template;
+
+	/** @type {{ buy: Record<string, number>, sell: Record<string, number> }} */
+	this.barterMultiplier;
+
+	/** @type {number} */
+	this.spyCostMultiplier;
+
+	/** @ts-expect-error; @type {number} */
+	this.playerID = undefined;
+	/** @ts-expect-error; @type {{ r: number, g: number, b: number, a: number }} */
+	this.color = undefined;
+	this.popUsed = 0; // Population of units owned or trained by this player.
+	this.popBonuses = 0; // Sum of population bonuses of player's entities.
+	this.maxPop = 300; // Maximum population.
+	this.trainingBlocked = false; // Indicates whether any training queue is currently blocked.
+
+	/** @type {Record<GenericResName, number>} */
+	this.resourceCount = {};
+	/** @type {Record<GenericResName, string>} */
+	this.resourceNames = {};
+	/** @type {Record<GenericResName, number>} */
+	this.resourceGatherers = {};
+
+	this.tradingGoods = []; // Goods for next trade-route and its probabilities * 100.
+	this.state = this.STATE_ACTIVE;
+	/** @type {{ position: Vector3D, rotation: Vector3D } | undefined} */
+	this.startCam = undefined;
+	this.controlAllUnits = false;
+	this.isAI = false;
+	this.cheatsEnabled = false;
+	/** @type {EntityId[]} */
+	this.panelEntities = [];
+	/** @type {Record<string, boolean>} */
+	this.disabledTemplates = {};
+	/** @type {Record<string, boolean>} */
+	this.disabledTechnologies = {};
+	/** @type {EntityId[]} */
+	this.barterEntities = [];
+
+	// Initial resources.
+	let resCodes = g_Resources.GetCodes();
+	for (let res of resCodes)
+	{
+		this.resourceCount[res] = 300;
+		this.resourceNames[res] = g_Resources.GetResource(res).name;
+		this.resourceGatherers[res] = 0;
+	}
+	// Trading goods probability in steps of 5.
+	let resTradeCodes = g_Resources.GetTradableCodes();
+	let quotient = Math.floor(20 / resTradeCodes.length);
+	let remainder = 20 % resTradeCodes.length;
+	for (let i in resTradeCodes)
+		this.tradingGoods.push({
+			goods: resTradeCodes[i],
+			proba: 5 * (quotient + (+i < remainder ? 1 : 0)),
+		});
+};
 
 Player.prototype.Schema =
 	"<element name='BarterMultiplier' a:help='Multipliers for barter prices.'>" +

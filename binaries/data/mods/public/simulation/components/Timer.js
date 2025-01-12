@@ -1,4 +1,30 @@
-function Timer() {}
+/**
+ * @typedef {{
+ *   entity: number,
+ *   iid: IID,
+ *   functionName: string,
+ *   time: number,
+ *   repeatTime: number,
+ *   data: unknown
+ * }
+ * } TimerSpec
+ */
+function Timer() {
+	/** @type {number} */
+	this.id;
+
+	/** @type {number} */
+	this.time;
+
+	/** @type {number} */
+	this.turnLength;
+
+	/**
+	 * @template {IID} T
+	 * @type {Map<number, TimerSpec>}
+	 */
+	this.timers;
+}
 
 Timer.prototype.Schema =
 	"<a:component type='system'/><empty/>";

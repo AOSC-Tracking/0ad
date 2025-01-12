@@ -1,4 +1,15 @@
-function AIInterface() {}
+function AIInterface() {
+	/** @type {Record<string, unknown[]>} */
+	this.events;
+	/** @type {Record<EntityId, 1>} */
+	this.changedEntities;
+	/** @type {Record<number, Record<string, { variable: string, value: unknown }[]>>} */
+	this.changedTemplateInfo;
+	/** @type {Record<EntityId, { variable: string, value: unknown }[]>} */
+	this.changedEntityTemplateInfo;
+	/** @type {string[] | undefined} */
+	this.templates;
+}
 
 AIInterface.prototype.Schema =
 	"<a:component type='system'/><empty/>";

@@ -1,4 +1,22 @@
-function Heal() {}
+function Heal() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *  Range: string,
+	 *  RangeOverlay: { LineTexture: string, LineTextureMask: string, LineThickness: string },
+	 *  Health: string,
+	 *  Interval: string,
+	 *  UnhealableClasses: { _string: string },
+	 *  HealableClasses: { _string: string }
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number | undefined} */
+	this.timer;
+}
 
 Heal.prototype.Schema =
 	"<a:help>Controls the healing abilities of the unit.</a:help>" +

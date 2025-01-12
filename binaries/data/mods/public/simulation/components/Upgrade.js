@@ -1,4 +1,21 @@
-function Upgrade() {}
+function Upgrade()
+{
+	/** @type {number} */
+	this.entity;
+	/** @type {Template} */
+	this.template;
+
+	/** @type {Record<string, any>} */
+	this.upgradeTemplates;
+	/** @type {Record<string, number>} */
+	this.expendedResources;
+
+	/** @type {string | undefined} */
+	this.upgrading;
+
+	/** @type {number} */
+	this.owner;
+};
 
 const UPGRADING_PROGRESS_INTERVAL = 250;
 

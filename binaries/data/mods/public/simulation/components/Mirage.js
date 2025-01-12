@@ -5,7 +5,18 @@ const VIS_FOGGED = 1;
 // @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Mirage() {}
+function Mirage() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {EntityId} */
+	this.parent = INVALID_ENTITY;
+	/** @ts-expect-error; @type {number} */
+	this.player = null;
+
+	/** @type {Map<IID, unknown>} */
+	this.miragedIids = new Map();
+}
 
 Mirage.prototype.Schema =
 	"<a:help>Mirage entities replace real entities in the fog-of-war.</a:help>" +

@@ -1,4 +1,43 @@
-function BattleDetection() {}
+function BattleDetection() {
+	/** @type {EntityId} */
+	this.entity;
+	/**
+	 * @type {{
+	 *   TimerInterval: string,
+	 *   RecordLength: string,
+	 *   DamageRateThreshold: string,
+	 *   AlertnessBattleThreshold: string,
+	 *   AlertnessPeaceThreshold: string,
+	 * 	 AlertnessMax: string,
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.interval;
+	/** @type {number} */
+	this.recordLength;
+	/** @type {number} */
+	this.damageRateThreshold;
+	/** @type {number} */
+	this.alertnessBattleThreshold;
+	/** @type {number} */
+	this.alertnessPeaceThreshold;
+	/** @type {number} */
+	this.alertnessMax;
+
+	/** @type {number} */
+	this.damage;
+	/** @type {number[]} */
+	this.damageRecord;
+	/** @type {number} */
+	this.alertness;
+	/** @type {"PEACE" | "BATTLE"} */
+	this.state;
+
+	/** @type {number} */
+	this.recordControl;
+}
 
 BattleDetection.prototype.Schema =
 	"<a:help>Detects the occurrence of battles.</a:help>" +

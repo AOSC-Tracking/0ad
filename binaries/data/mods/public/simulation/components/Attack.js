@@ -1,4 +1,6 @@
-function Attack() {}
+function Attack() {
+	/** @type {EntityId} */
+	this.entity;
 
 	/**
 	 * @type {{

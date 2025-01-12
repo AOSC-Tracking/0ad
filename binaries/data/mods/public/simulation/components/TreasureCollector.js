@@ -1,4 +1,9 @@
-function TreasureCollector() {}
+function TreasureCollector() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ MaxDistance: string }} */
+	this.template;
+}
 
 TreasureCollector.prototype.Schema =
 	"<a:help>Defines the treasure collecting abilities.</a:help>" +

@@ -2,7 +2,26 @@
 const roundCount = 20;
 const attackType = "Ranged";
 
-function BuildingAI() {}
+function BuildingAI() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ DefaultArrowCount: string, MaxArrowCount?: string, GarrisonArrowMultiplier: string, GarrisonArrowClasses: string }} */
+	this.template;
+
+	/** @type {number} */
+	this.currentRound;
+	/** @type {number} */
+	this.archersGarrisoned;
+	/** @type {number} */
+	this.arrowsLeft;
+	/** @type {EntityId[]} */
+	this.targetUnits;
+	/** @type {{ entityId: number}[]} */
+	this.focusTargets;
+
+	/** @type {number | undefined} */
+	this.enemyUnitsQuery;
+}
 
 BuildingAI.prototype.Schema =
 	"<element name='DefaultArrowCount'>" +

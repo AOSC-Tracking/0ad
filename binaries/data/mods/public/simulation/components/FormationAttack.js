@@ -1,4 +1,10 @@
-function FormationAttack() {}
+function FormationAttack() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{CanAttackAsFormation: string}} */
+	this.template;
+}
 
 FormationAttack.prototype.Schema =
 	"<element name='CanAttackAsFormation'>" +

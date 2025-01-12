@@ -1,4 +1,55 @@
-function UnitAI() {}
+/** @typedef {{ type: string, data: any }} UnitAIOrder */
+
+function UnitAI() {
+	/** @type number */
+	this.entity;
+	/** @type Template */
+	this.template;
+
+	/** @type {(UnitAIOrder)[]} */
+	this.orderQueue;
+
+	// TODO: type this differently in FSM states and fix this any
+	/** @type {UnitAIOrder | any} */
+	this.order;
+
+	/** @type {keyof g_Stances} */
+	this.stance;
+
+	/** @type {UnitAIOrder[]} */
+	this.workOrders;
+
+	/** @type {unknown[] | undefined} */
+	this.waypoints;
+
+	/** @type {{ x: number, z: number }[] | undefined} */
+	this.expectedRoute;
+
+	/** @type {(Vector3D & {targetClasses: string[], allowCapture: boolean}) | undefined} */
+	this.patrolStartPosOrder;
+	
+	/** @type {number | undefined} */
+	this.stopSurveying;
+
+	/** @type {number | undefined} */
+	this.pickup;
+
+	/** @type {boolean | undefined} */
+	this.shouldCheer;
+
+	/** @type {number} */
+	this.cheeringTime;
+
+	/** @type {number | undefined} */
+	this.gatheringTarget;
+
+	/** @type {number | undefined} */
+	this.losRangeQuery;
+	/** @type {number | undefined} */
+	this.losHealRangeQuery;
+	/** @type {number | undefined} */
+	this.losAttackRangeQuery;
+}
 
 UnitAI.prototype.Schema =
 	"<a:help>Controls the unit's movement, attacks, etc, in response to commands from the player.</a:help>" +

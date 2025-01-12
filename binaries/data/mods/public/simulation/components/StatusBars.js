@@ -1,6 +1,16 @@
 const g_NaturalColor = "255 255 255 255"; // pure white
 
-function StatusBars() {}
+function StatusBars() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ BarWidth: string, BarHeight: string, HeightOffset: string }} */
+	this.template;
+
+	/** @type {boolean} */
+	this.enabled;
+	/** @type {Map<EntityId, string[]>} */
+	this.auraSources;
+}
 
 StatusBars.prototype.Schema =
 	"<element name='BarWidth'>" +

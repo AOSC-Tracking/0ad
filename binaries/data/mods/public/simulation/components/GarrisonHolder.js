@@ -1,4 +1,12 @@
-function GarrisonHolder() {}
+function GarrisonHolder() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {Template} */
+	this.template;
+
+	/** @type {EntityId[]} */
+	this.entities;
+}
 
 GarrisonHolder.prototype.Schema =
 	"<element name='Max' a:help='Maximum number of entities which can be garrisoned in this holder'>" +

@@ -1,4 +1,35 @@
-function Health() {}
+function Health() {
+	/** @type {EntityId} */
+	this.entity;
+	/**
+	 * @type {{
+	 *   Max: string,
+	 *   Initial: string | undefined,
+	 *   DamageVariants: { [prop:string]: number } | undefined,
+	 *   RegenRate: string,
+	 *   IdleRegenRate: string,
+	 *   DeathType: string,
+	 *   SpawnEntityOnDeath: string | undefined,
+	 *   Unhealable: string
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.maxHitpoints;
+
+	/** @type {number} */
+	this.regenRate;
+
+	/** @type {number} */
+	this.idleRegenRate;
+
+	/** @type {number | undefined} */
+	this.regenTimer;
+
+	/** @type {string} */
+	this.damageVariant;
+}
 
 Health.prototype.Schema =
 	"<a:help>Deals with hitpoints and death.</a:help>" +
@@ -502,7 +533,19 @@ Health.prototype.RegisterHealthChanged = function(from)
 	Engine.PostMessage(this.entity, MT_HealthChanged, { "from": from, "to": this.hitpoints });
 };
 
-function HealthMirage() {}
+function HealthMirage() {
+	/** @type {ReturnType<Health["GetMaxHitpoints"]>} */
+	this.maxHitpoints;
+	/** @type {ReturnType<Health["GetHitpoints"]>} */
+	this.hitpoints;
+	/** @type {ReturnType<Health["IsRepairable"]>} */
+	this.repairable;
+	/** @type {ReturnType<Health["IsInjured"]>} */
+	this.injured;
+	/** @type {ReturnType<Health["IsUnhealable"]>} */
+	this.unhealable;
+}
+/** @param {Health} cmpHealth */
 HealthMirage.prototype.Init = function(cmpHealth)
 {
 	this.maxHitpoints = cmpHealth.GetMaxHitpoints();

@@ -1,4 +1,10 @@
-function DeathDamage() {}
+function DeathDamage() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Range: string, Shape: "Circular", [prop:string]: unknown }} */
+	this.template;
+}
 
 DeathDamage.prototype.Schema =
 	"<a:help>When a unit or building is destroyed, it inflicts damage to nearby units.</a:help>" +

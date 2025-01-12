@@ -1,4 +1,22 @@
-function Diplomacy() {}
+function Diplomacy() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ SharedLosTech: string, SharedDropsitesTech: string }} */
+	this.template;
+
+	// Team number of the player, players on the same team will always have ally diplomatic status. Also this is useful for team emblems, scoring, etc.
+	this.team = -1;
+
+	/**
+	 * Array of diplomatic stances for this player with respect to other players (including gaia and self).
+	 * @type {number[]}
+	*/
+	this.diplomacy = [];
+
+	/** @type {{ r: number, g: number, b: number, a: 1 }} */
+	this.diplomacyColor;
+}
 
 Diplomacy.prototype.Schema =
 	"<element name='SharedLosTech' a:help='Allies will share los when this technology is researched. Leave empty to never share LOS.'>" +

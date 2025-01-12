@@ -1,4 +1,9 @@
-function AlertRaiser() {}
+function AlertRaiser() {
+	/** @type {number} */
+	this.entity;
+	/** @type {{ List: { _string: string }, RaiseAlertRange: number, EndOfAlertRange: number, SearchRange: number }} */
+	this.template;
+}
 
 AlertRaiser.prototype.Schema =
 	"<element name='List' a:help='Classes of entities which are affected by this alert raiser'>" +

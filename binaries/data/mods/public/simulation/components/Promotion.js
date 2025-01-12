@@ -1,4 +1,19 @@
-function Promotion() {}
+function Promotion() {
+	/** @type {number} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *   Entity: string,
+	 *   RequiredXp: string,
+	 *   TrickleRate?: string
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.currentXp;
+}
 
 Promotion.prototype.Schema =
 	"<element name='Entity'>" +

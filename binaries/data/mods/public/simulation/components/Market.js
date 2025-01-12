@@ -1,4 +1,14 @@
-function Market() {}
+function Market() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{TradeType: string, InternationalBonus: string}} */
+	this.template;
+
+	/** @type {Set<EntityId>} */
+	this.traders;
+	/** @type {Set<"land"|"naval">} */
+	this.tradeType;
+}
 
 Market.prototype.Schema =
 	"<element name='TradeType' a:help='Specifies the type of possible trade route (land or naval).'>" +
@@ -159,7 +169,29 @@ Market.prototype.OnOwnershipChanged = function(msg)
 	this.UpdateTraders(msg.to == INVALID_PLAYER);
 };
 
-function MarketMirage() {}
+function MarketMirage() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {EntityId} */
+	this.parent;
+	/** @type {number} */
+	this.player;
+
+	/** @type {Set<"land" | "naval">} */
+	this.marketType;
+
+	/** @type {Set<EntityId>} */
+	this.traders;
+
+	/** @type {number} */
+	this.internationalBonus;
+}
+/**
+ * @param {Market} cmpMarket
+ * @param {EntityId} entity
+ * @param {EntityId} parent
+ * @param {number} player
+ */
 MarketMirage.prototype.Init = function(cmpMarket, entity, parent, player)
 {
 	this.entity = entity;

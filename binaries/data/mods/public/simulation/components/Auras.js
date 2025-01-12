@@ -1,4 +1,13 @@
-function Auras() {}
+// @ts-nocheck (the 'this' indexing cannot be typed without switching to ES6 classes)
+function Auras() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ _string: string }} */
+	this.template;
+
+	/** @type {Record<string, number[]>} */
+	this.affectedPlayers;
+}
 
 Auras.prototype.Schema =
 	"<attribute name='datatype'>" +

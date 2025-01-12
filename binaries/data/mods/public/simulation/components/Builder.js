@@ -1,4 +1,15 @@
-function Builder() {}
+function Builder() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ Rate: string, Entities: { _string: string }}} */
+	this.template;
+
+	/** @type {number | undefined} */
+	this.target;
+
+	/** @type {typeof IID_UnitAI | undefined} */
+	this.callerIID;
+}
 
 Builder.prototype.Schema =
 	"<a:help>Allows the unit to construct and repair buildings.</a:help>" +

@@ -1,4 +1,10 @@
-function Loot() {}
+function Loot() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{xp?: string, [prop: string]: string | undefined}} */
+	this.template;
+}
 
 Loot.prototype.Schema =
 	"<a:help>Specifies the loot credited when this entity is killed.</a:help>" +

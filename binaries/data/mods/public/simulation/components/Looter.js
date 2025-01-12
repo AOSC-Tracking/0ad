@@ -1,4 +1,7 @@
-function Looter() {}
+function Looter() {
+	/** @type {EntityId} */
+	this.entity;
+}
 
 Looter.prototype.Schema = "<empty/>";
 

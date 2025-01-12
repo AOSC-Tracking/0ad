@@ -5,7 +5,22 @@ const VIS_FOGGED = 1;
 // @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Fogging() {}
+function Fogging() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {boolean} */
+	this.activated;
+
+	/** @type {EntityId[]} */
+	this.mirages;
+
+	/** @type {boolean[]} */
+	this.miraged;
+
+	/** @type {boolean[]} */
+	this.seen;
+}
 
 Fogging.prototype.Schema =
 	"<a:help>Allows this entity to be replaced by mirage entities in the fog-of-war.</a:help>" +

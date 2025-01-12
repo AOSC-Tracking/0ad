@@ -1,4 +1,13 @@
-function Cost() {}
+function Cost() {
+  /** @type {EntityId} */
+  this.entity;
+
+  /** @type {{ Population: string, BuildTime: string, Resources: { [key: string]: string } }} */
+  this.template;
+
+  /** @type {number} */
+  this.populationCost;
+}
 
 Cost.prototype.Schema =
   "<a:help>Specifies the construction/training costs of this entity.</a:help>" +

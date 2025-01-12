@@ -1,4 +1,34 @@
-function ResourceGatherer() {}
+function ResourceGatherer()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ MaxDistance: string, BaseSpeed: string, Rates: Record<FullResName, string>, Capacities: Record<GenericResName, string> }} */
+	this.template;
+
+	// Cached. Currently not a target of modifiers.
+	this.range = { max: +this.template.MaxDistance, min: 0 };
+
+	/** @type {Record<GenericResName, number>} */
+	this.capacities = {};
+	/** @type {Record<GenericResName, number>} */
+	this.carrying = {}; // { generic type: integer amount currently carried }
+	// (Note that this component supports carrying multiple types of resources,
+	// each with an independent capacity, but the rest of the game currently
+	// ensures and assumes we'll only be carrying one type at once)
+
+	/** @type {Record<FullResName, number>} */
+	this.rates;
+
+	/**
+	 * The last exact type gathered, so we can render appropriate props
+	 * @type {{ generic: GenericResName, specific: SpecificResName } | undefined}
+	 */
+	this.lastCarriedType = undefined; // { generic, specific }
+
+	/** @type {IID_UnitAI | undefined} */
+	this.callerIID;
+};
 
 ResourceGatherer.prototype.Schema =
 	"<a:help>Lets the unit gather resources from entities that have the ResourceSupply component.</a:help>" +

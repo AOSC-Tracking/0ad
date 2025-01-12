@@ -1,7 +1,30 @@
 // See helpers/TraderGain.js for the CalculateTaderGain() function which works out how many
 // resources a trader gets
 
-function Trader() {}
+/**
+ * @typedef {{
+ *  traderGain: number;
+ *  market1Owner: number;
+ *  market2Owner: number;
+ *  traderOwner: number;
+ *  market1Gain: number;
+ *  market2Gain: number;
+ * }} TraderGain
+ */
+
+function Trader() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{GainMultiplier: string, GarrisonGainMultiplier: string}} */
+	this.template;
+
+	/** @type {EntityId[]} */
+	this.markets;
+	/** @type {number} */
+	this.index;
+	/** @type {{type: string | null, amount: TraderGain | null}} */
+	this.goods;
+}
 
 Trader.prototype.Schema =
 	"<a:help>Lets the unit generate resources while moving between markets (or docks in case of water trading).</a:help>" +

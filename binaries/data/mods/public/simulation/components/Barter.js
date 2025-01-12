@@ -1,4 +1,10 @@
-function Barter() {}
+function Barter() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Record<string, number>} */
+	this.priceDifferences;
+}
 
 Barter.prototype.Schema =
 	"<a:component type='system'/><empty/>";

@@ -1,4 +1,10 @@
-function Garrisonable() {}
+function Garrisonable() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Size: string }} */
+	this.template;
+}
 
 Garrisonable.prototype.Schema =
 	"<a:help>Controls the garrisonability of an entity.</a:help>" +

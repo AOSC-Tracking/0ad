@@ -1,4 +1,17 @@
-function Identity() {}
+function Identity() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {Template} */
+	this.template
+	/** @type {string[]} */
+	this.classesList = GetIdentityClasses(this.template);
+	/** @type {string[]} */
+	this.visibleClassesList = GetVisibleIdentityClasses(this.template);
+	/** @type {string} */
+	this.phenotype;
+	/** @type {boolean} */
+	this.controllable;
+}
 
 Identity.prototype.Schema =
 	"<a:help>Specifies various names and values associated with the entity, typically for GUI display to users.</a:help>" +
@@ -239,7 +252,11 @@ Identity.prototype.GetName = function()
 	return this.name || this.template.GenericName;
 };
 
-function IdentityMirage() {}
+function IdentityMirage() {
+	/** @type {ReturnType<Identity["GetClassesList"]>} */
+	this.classes;
+}
+/** @param {Identity} cmpIdentity */
 IdentityMirage.prototype.Init = function(cmpIdentity)
 {
 	// Mirages don't get identity classes via the template-filter, so that code can query

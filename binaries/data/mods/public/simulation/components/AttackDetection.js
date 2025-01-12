@@ -1,4 +1,21 @@
-function AttackDetection() {}
+/**
+ * @typedef {{ target: EntityId, position: Vector2D, time: number, targetIsDomesticAnimal: boolean }} AttackEvent
+ */
+function AttackDetection() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ SuppressionTransferRange: number, SuppressionRange: number, SuppressionTime: number }} */
+	this.template;
+
+	/** @type {number} */
+	this.suppressionTime;
+	/** @type {number} */
+	this.suppressionTransferRangeSquared;
+	/** @type {number} */
+	this.suppressionRangeSquared;
+	/** @type {AttackEvent[]} */
+	this.suppressedList;
+}
 
 AttackDetection.prototype.Schema =
 	"<a:help>Detects incoming attacks.</a:help>" +

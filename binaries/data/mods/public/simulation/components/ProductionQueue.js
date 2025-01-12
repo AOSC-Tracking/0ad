@@ -1,4 +1,12 @@
-function ProductionQueue() {}
+function ProductionQueue() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {number} */
+	this.nextID;
+	/** @type {ProductionQueueItem[]} */
+	this.queue;
+}
 
 ProductionQueue.prototype.Schema =
 	"<a:help>Helps the building to train new units and research technologies.</a:help>" +

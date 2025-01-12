@@ -1,4 +1,14 @@
-function TerritoryDecay() {}
+function TerritoryDecay() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ DecayRate: string, Territory: string }} */
+	this.template;
+	
+	/** @type {boolean} */
+	this.decaying;
+	/** @type {number[]} */
+	this.connectedNeighbours;
+}
 
 TerritoryDecay.prototype.Schema = `
 	<element name='DecayRate' a:help='Decay rate in capture points per second'>

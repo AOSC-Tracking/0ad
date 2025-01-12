@@ -1,4 +1,24 @@
-function Resistance() {}
+/**
+ * @typedef {{
+ *   Damage?: Record<string, number>,
+ *   Capture?: number,
+ *   ApplyStatus?: Record<string, { duration: number, blockChance: number }>
+ *   [effectType: string]: unknown
+ * }} ResistanceData
+ */
+
+function Resistance() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Record<string, any>} */
+	this.template;
+
+	/** @type {boolean} */
+	this.invulnerable;
+	/** @type {Set<EntityId>} */
+	this.attackers;
+}
 
 /**
  * Builds a RelaxRNG schema of possible attack effects.
@@ -187,7 +207,12 @@ Resistance.prototype.OnOwnershipChanged = function(msg)
 };
 
 
-function ResistanceMirage() {}
+function ResistanceMirage() {
+	/** @type {Record<string, ResistanceData>} */
+	this.resistanceOfForm = {};
+}
+
+/** @param {Resistance} cmpResistance */
 ResistanceMirage.prototype.Init = function(cmpResistance)
 {
 	this.invulnerable = cmpResistance.invulnerable;

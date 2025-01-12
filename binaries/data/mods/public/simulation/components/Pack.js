@@ -1,4 +1,14 @@
-function Pack() {}
+function Pack() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{Entity: string, Time: string, State: string}} */
+	this.template;
+
+	/** @type {number | undefined} */
+	this.timer;
+	/** @type {number} */
+	this.elapsedTime;
+}
 
 Pack.prototype.Schema =
 	"<element name='Entity' a:help='Entity to transform into'>" +

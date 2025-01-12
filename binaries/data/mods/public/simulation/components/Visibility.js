@@ -5,7 +5,13 @@ const VIS_FOGGED = 1;
 // @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
-function Visibility() {}
+function Visibility() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ RetainInFog: string, AlwaysVisible: string, Corpse: string, Preview: string }} */
+	this.template;
+}
 
 Visibility.prototype.Schema =
 	"<element name='RetainInFog'>" +

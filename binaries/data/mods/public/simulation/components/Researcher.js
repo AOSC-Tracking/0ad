@@ -1,4 +1,14 @@
-function Researcher() {}
+function Researcher()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Technologies?: { _string: string }, TechCostMultiplier: Record<string, string> }} */
+	this.template;
+
+	this.nextID = 1;
+	this.queue = new Map();
+};
 
 Researcher.prototype.Schema =
 	"<a:help>Allows the entity to research technologies.</a:help>" +

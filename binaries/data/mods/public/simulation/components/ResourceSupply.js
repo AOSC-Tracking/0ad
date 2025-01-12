@@ -1,4 +1,39 @@
-function ResourceSupply() {}
+function ResourceSupply()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *   "Max": string,
+	 *   "Initial"?: string,
+	 *   "Type": FullResName,
+	 *   "KillBeforeGather": string,
+	 *   "MaxGatherers": string,
+	 *   "DiminishingReturns"?: string,
+	 *   "Change"?: Record<string, any>,
+	 * }}
+	 */
+	this.template;
+
+	/** @type {number} */
+	this.amount;
+	/** @type {number} */
+	this.maxAmount;
+
+	/** @type {EntityId[]} */
+	this.gatherers;
+	/** @type {EntityId[]} */
+	this.activeGatherers;
+
+	/** @type {{ "generic": GenericResName, "specific": SpecificResName }} */
+	this.cachedType;
+
+	/** @type {Record<string, number>} */
+	this.cachedChanges;
+	/** @type {Record<string, number>} */
+	this.timers;
+};
 
 ResourceSupply.prototype.Schema =
 	"<a:help>Provides a supply of one particular type of resource.</a:help>" +
@@ -469,7 +504,18 @@ ResourceSupply.prototype.OnEntityRenamed = function(msg)
 		cmpResourceSupplyNew.SetAmount(this.GetCurrentAmount());
 };
 
-function ResourceSupplyMirage() {}
+function ResourceSupplyMirage()
+{
+	/** @type {ReturnType<ResourceSupply["GetMaxAmount"]>} */ this.maxAmount;
+	/** @type {ReturnType<ResourceSupply["GetCurrentAmount"]>} */ this.amount;
+	/** @type {ReturnType<ResourceSupply["GetType"]>} */ this.type;
+	/** @type {ReturnType<ResourceSupply["IsInfinite"]>} */ this.isInfinite;
+	/** @type {ReturnType<ResourceSupply["GetKillBeforeGather"]>} */ this.killBeforeGather;
+	/** @type {ReturnType<ResourceSupply["GetMaxGatherers"]>} */ this.maxGatherers;
+	/** @type {ReturnType<ResourceSupply["GetNumGatherers"]>} */ this.numGatherers;
+}
+
+/** @param {ResourceSupply} cmpResourceSupply */
 ResourceSupplyMirage.prototype.Init = function(cmpResourceSupply)
 {
 	this.maxAmount = cmpResourceSupply.GetMaxAmount();

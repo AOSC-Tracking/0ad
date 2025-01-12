@@ -1,4 +1,16 @@
-function VisionSharing() {}
+function VisionSharing() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Bribable: string, Duration?: string, FailureCostRatio?: string }} */
+	this.template;
+
+	/** @type {Set<number> | undefined} */
+	this.shared;
+
+	/** @type {number} */
+	this.spyId;
+}
 
 VisionSharing.prototype.Schema =
 	"<element name='Bribable'>" +

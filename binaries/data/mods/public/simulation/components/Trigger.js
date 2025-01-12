@@ -1,4 +1,31 @@
-function Trigger() {}
+/**
+ * @typedef {Object} TriggerData
+ * @property {boolean} triggerData.enabled - Whether the trigger is enabled by default.
+ * @property {string} triggerData.action - The function (on Trigger) to call. Defaults to the trigger name.
+ * @property {number=} triggerData.interval - Interval in milliseconds between consecutive calls.
+ * @property {number=} triggerData.delay - Optional initial delay in milliseconds before starting the calls.
+ * @property {number=} triggerData.minRange - Minimum range for the query.
+ * @property {number=} triggerData.maxRange - Maximum range for the query (-1 = no maximum).
+ * @property {number[]=} triggerData.players - List of player ids.
+ * @property {IID=} triggerData.requiredComponent - Required component id the entities will have.
+ * @property {EntityId[]=} triggerData.entities - Ids of the source.
+ * @property {number[]=} triggerData.queries
+ * @property {number | null | undefined} triggerData.timer
+ */
+
+function Trigger() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {number | undefined} */
+	this.difficulty;
+
+	/** @type {{ [key in Trigger["eventNames"][number]]?: Record<string, { triggerData: TriggerData, customData: any }> }} */
+	this.triggers;
+
+	/** @type {Record<string, EntityId[]>} */
+	this.triggerPoints;
+}
 
 Trigger.prototype.Schema =
 	"<a:component type='system'/><empty/>";

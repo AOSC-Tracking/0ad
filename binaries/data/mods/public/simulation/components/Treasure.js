@@ -1,4 +1,12 @@
-function Treasure() {}
+function Treasure() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{CollectTime: string, Resources: Record<string, string>}} */
+	this.template;
+
+	/** @type {Record<string, number>} */
+	this.resources;
+}
 
 Treasure.prototype.Schema =
 	"<a:help>Provides a bonus when taken. E.g. a supply of resources.</a:help>" +

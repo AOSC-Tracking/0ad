@@ -1,4 +1,22 @@
-function RallyPoint() {}
+/**
+ * @typedef {{
+ *  command?: unknown,
+ *  source?: EntityId,
+ *  target?: EntityId,
+ *  resourceType?: string,
+ *  resourceTemplate?: string,
+ *  targetClasses?: string[],
+ *  allowCapture?: boolean
+ * }} RallyPointData
+ */
+function RallyPoint() {
+	/** @type {number} */
+	this.entity;
+	/** @type {{ x: number, z: number }[]} */
+	this.pos;
+	/** @type {RallyPointData[]} */
+	this.data;
+}
 
 RallyPoint.prototype.Schema =
 	"<a:component/><empty/>";

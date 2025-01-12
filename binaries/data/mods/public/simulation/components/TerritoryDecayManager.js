@@ -1,4 +1,6 @@
-function TerritoryDecayManager() {}
+function TerritoryDecayManager() {
+	this.list = new Set();
+}
 
 TerritoryDecayManager.prototype.Schema =
         "<a:component type='system'/><empty/>";

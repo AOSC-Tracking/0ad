@@ -1,4 +1,18 @@
-function Trainer() {}
+function Trainer()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ BatchTimeModifier: string, Entities: { _string: string } }} */
+	this.template;
+
+	this.entitiesMap = new Map();
+
+	this.nextID = 1;
+	this.queue = new Map();
+	/** @type {Record<string, number>} */
+	this.trainCostMultiplier = {};
+};
 
 Trainer.prototype.Schema =
 	"<a:help>Allows the entity to train new units.</a:help>" +

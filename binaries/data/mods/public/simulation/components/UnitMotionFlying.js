@@ -1,7 +1,29 @@
 // (A serious implementation of this might want to use C++ instead of JS
 // for performance; this is just for fun.)
 const SHORT_FINAL = 2.5;
-function UnitMotionFlying() {}
+function UnitMotionFlying() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Template} */
+	this.template;
+
+	this.hasTarget = false;
+	this.reachedTarget = false;
+	this.targetX = 0;
+	this.targetZ = 0;
+	this.targetMinRange = 0;
+	this.targetMaxRange = 0;
+	this.speed = 0;
+	this.landing = false;
+	this.onGround = true;
+	this.pitch = 0;
+	this.roll = 0;
+	this.waterDeath = false;
+
+	/**	@type {number} */
+	this.passabilityClass;	
+}
 
 UnitMotionFlying.prototype.Schema =
 	"<element name='MaxSpeed'>" +

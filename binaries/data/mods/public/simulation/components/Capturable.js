@@ -1,4 +1,18 @@
-function Capturable() {}
+function Capturable() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {Template} */
+	this.template;
+
+	/** @type {number} */
+	this.maxCapturePoints;
+	/** @type {number} */
+	this.garrisonRegenRate;
+	/** @type {number} */
+	this.regenRate;
+	/** @type {number[]} */
+	this.capturePoints;
+}
 
 Capturable.prototype.Schema =
 	"<element name='CapturePoints' a:help='Maximum capture points.'>" +
@@ -389,7 +403,13 @@ Capturable.prototype.OnGlobalPlayerDefeated = function(msg)
 	this.CheckTimer();
 };
 
-function CapturableMirage() {}
+function CapturableMirage() {
+	/** @type {number[]} */
+	this.capturePoints;
+	/** @type {number} */
+	this.maxCapturePoints;
+}
+/** @param {Capturable} cmpCapturable */
 CapturableMirage.prototype.Init = function(cmpCapturable)
 {
 	this.capturePoints = clone(cmpCapturable.GetCapturePoints());

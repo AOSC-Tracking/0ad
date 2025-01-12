@@ -1,4 +1,27 @@
-function Foundation() {}
+function Foundation() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ BuildTimeModifier: string }} */
+	this.template;
+
+	this.previewEntity = INVALID_ENTITY;
+
+	// Foundations are initially 'uncommitted' and do not block unit movement at all
+	// (to prevent players exploiting free foundations to confuse enemy units).
+	// The first builder to reach the uncommitted foundation will tell friendly units
+	// and animals to move out of the way, then will commit the foundation and enable
+	// its obstruction once there's nothing in the way.
+	this.committed = false;
+
+	/** @type {Map<EntityId, number>} */
+	this.builders = new Map(); // Map of builder entities to their work per second
+	this.totalBuilderRate = 0; // Total amount of work the builders do each second
+	this.buildMultiplier = 1; // Multiplier for the amount of work builders do
+
+	/** @type {number} */
+	this.buildTimeModifier;
+}
 
 Foundation.prototype.Schema =
 	"<element name='BuildTimeModifier' a:help='Effect for having multiple builders.'>" +
@@ -418,7 +441,13 @@ Foundation.prototype.OnEntityRenamed = function(msg)
 		cmpFoundationNew.AddBuilders(this.GetBuilders());
 };
 
-function FoundationMirage() {}
+function FoundationMirage() {
+	/** @type {ReturnType<Foundation["GetNumBuilders"]>} */
+	this.numBuilders;
+	/** @type {ReturnType<Foundation["GetBuildTime"]>} */
+	this.buildTime;
+}
+/** @param {Foundation} cmpFoundation */
 FoundationMirage.prototype.Init = function(cmpFoundation)
 {
 	this.numBuilders = cmpFoundation.GetNumBuilders();

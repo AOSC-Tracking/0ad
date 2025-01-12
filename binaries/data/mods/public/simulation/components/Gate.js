@@ -1,4 +1,16 @@
-function Gate() {}
+function Gate() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ PassRange: string }} */
+	this.template;
+
+	/** @type {unknown[]} */
+	this.allies = [];
+	/** @type {unknown[]} */
+	this.ignoreList = [];
+	this.opened = false;
+	this.locked = false;
+}
 
 Gate.prototype.Schema =
 	"<a:help>Controls behavior of wall gates</a:help>" +

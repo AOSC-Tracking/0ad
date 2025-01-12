@@ -1,4 +1,38 @@
-function EntityLimits() {}
+function EntityLimits() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Record<string, any>} */
+	this.template;
+
+	
+	/** @type {Record<string, number | undefined>} */
+	this.limit = {};
+
+	/**
+	 * Counts entities which change the limit of the given category.
+	 * @type {Record<string, number>}
+	 */
+	this.count = {};
+
+	/** @type {Record<string, Record<string, number>>} */
+	this.changers = {};
+	
+	/** @type {Record<string, Record<string, string[]>>} */
+	this.removers = {};
+	
+	/**
+	 * Counts entities with the given class, used in the limit removal.
+	 * @type {Record<string, number>}
+	 */
+	this.classCount = {};
+	
+	/** @type {Record<string, number | undefined>} */
+	this.removedLimit = {};
+	
+	/** @type {Record<string, number>} */
+	this.matchTemplateCount = {};
+}
 
 EntityLimits.prototype.Schema =
 	"<a:help>Specifies per category limits on number of entities (buildings or units) that can be created for each player</a:help>" +

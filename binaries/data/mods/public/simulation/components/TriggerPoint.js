@@ -1,4 +1,14 @@
-function TriggerPoint() {}
+function TriggerPoint() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{Reference?: string}} */
+	this.template;
+
+	/** @type {Record<string, EntityId[]>} */
+	this.currentCollections;
+	/** @type {Record<number, string>} */
+	this.triggers;
+}
 
 TriggerPoint.prototype.Schema =
 	"<optional>" +

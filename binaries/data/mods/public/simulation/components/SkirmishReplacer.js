@@ -1,4 +1,10 @@
-function SkirmishReplacer() {}
+function SkirmishReplacer() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{general?: string}} */
+	this.template;
+}
 
 SkirmishReplacer.prototype.Schema =
 		"<optional>" +

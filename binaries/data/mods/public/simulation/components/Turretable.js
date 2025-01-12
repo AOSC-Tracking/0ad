@@ -1,4 +1,9 @@
-function Turretable() {}
+function Turretable() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {EntityId | undefined} */
+	this.holder;
+}
 
 Turretable.prototype.Schema =
 	"<empty/>";

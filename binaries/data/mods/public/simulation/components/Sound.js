@@ -1,4 +1,9 @@
-function Sound() {}
+function Sound() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {Template} */
+	this.template;
+}
 
 Sound.prototype.Schema =
 	"<a:help>Lists the sound groups associated with this unit.</a:help>" +

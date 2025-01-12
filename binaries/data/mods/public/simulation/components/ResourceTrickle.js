@@ -1,4 +1,14 @@
-function ResourceTrickle() {}
+function ResourceTrickle()
+{
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {{ Rates: { [key: string]: string }, Interval: string }} */
+	this.template;
+	/** @type {number} */
+	this.trickleInterval;
+	/** @type {{ [key: string]: number }} */
+	this.rates;
+};
 
 ResourceTrickle.prototype.Schema =
 	"<a:help>Controls the resource trickle ability of the unit.</a:help>" +

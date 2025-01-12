@@ -1,4 +1,11 @@
-function ResourceDropsite() {}
+function ResourceDropsite()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Types: string, Sharable: string }} */
+	this.template;
+}
 
 ResourceDropsite.prototype.Schema =
 	"<element name='Types'>" +

@@ -1,4 +1,24 @@
-function RangeOverlayManager() {}
+/**
+ * @typedef {{
+ *   radius: number,
+ *   texture: string,
+ *   textureMask: string,
+ *   thickness: number,
+ * }} RangeOverlayData
+ */
+function RangeOverlayManager() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Map<"Attack" | "Auras" | "Heal", RangeOverlayData[]>} */
+	this.rangeVisualizations;
+
+	/** @type {{Attack: boolean, Auras: boolean, Heal: boolean}} */
+	this.enabledRangeTypes;
+
+	/** @type {boolean} */
+	this.enabled;
+}
 
 RangeOverlayManager.prototype.Schema = "<empty/>";
 

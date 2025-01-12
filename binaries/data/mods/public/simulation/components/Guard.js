@@ -1,4 +1,9 @@
-function Guard() {}
+function Guard() {
+	/** @type {EntityId} */
+	this.entity;
+	/** @type {EntityId[]} */
+	this.entities = [];
+}
 
 Guard.prototype.Schema =
 	"<empty/>";

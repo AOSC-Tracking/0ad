@@ -1,4 +1,25 @@
-function Repairable() {}
+function Repairable() {
+	/** @type {number} */
+	this.entity;
+
+	/** @type { { RepairTimeRatio: string } } */
+	this.template;
+
+	/** @type {Map<number, number>} */
+	this.builders;
+
+	/** @type {number} */
+	this.totalBuilderRate;
+
+	/** @type {number} */
+	this.buildMultiplier;
+
+	/** @type {number} */
+	this.buildTimePenalty;
+
+	/** @type {number} */
+	this.repairTimeRatio;
+}
 
 Repairable.prototype.Schema =
 	"<a:help>Deals with repairable structures and units.</a:help>" +
@@ -180,7 +201,16 @@ Repairable.prototype.OnEntityRenamed = function(msg)
 		cmpRepairableNew.AddBuilders(this.GetBuilders());
 };
 
-function RepairableMirage() {}
+function RepairableMirage() {
+	/** @type {ReturnType<Repairable["GetNumBuilders"]>} */
+	this.numBuilders;
+	/** @type {ReturnType<Repairable["GetBuildTime"]>} */
+	this.buildTime;
+	/** @type {boolean} */
+	this.unrepairable;
+}
+
+/** @param {Repairable} cmpRepairable */
 RepairableMirage.prototype.Init = function(cmpRepairable)
 {
 	this.numBuilders = cmpRepairable.GetNumBuilders();

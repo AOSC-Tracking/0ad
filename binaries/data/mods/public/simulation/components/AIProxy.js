@@ -1,4 +1,13 @@
-function AIProxy() {}
+function AIProxy() {
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {Record<string, unknown>} */
+	this.changes;
+
+	/** @type {AIInterface} */
+	this.cmpAIInterface;
+}
 
 AIProxy.prototype.Schema =
 	"<empty/>";

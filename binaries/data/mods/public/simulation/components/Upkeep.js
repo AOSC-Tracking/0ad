@@ -1,4 +1,17 @@
-function Upkeep() {}
+function Upkeep()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/** @type {{ Rates: Record<string, string>, Interval: string }} */
+	this.template;
+
+	/** @type {number} */
+	this.upkeepInterval;
+
+	/** @type {Record<string, number>} */
+	this.rates = {};
+};
 
 Upkeep.prototype.Schema =
 	"<a:help>Controls the resource upkeep of an entity.</a:help>" +

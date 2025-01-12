@@ -1,4 +1,22 @@
-function StatusEffectsReceiver() {}
+function StatusEffectsReceiver() {
+	/** @type {EntityId} */
+	this.entity;
+	/**
+	 * @typedef {{
+	 *    baseCode: string,
+	 *    Damage?: any,
+	 *    Capture?: any,
+	 *    Duration?: number,
+	 *    Interval?: number,
+	 *    Stackability: "Ignore" | "Extend" | "Replace" | "Stack",
+	 *    Modifiers: unknown[],
+	 *    StatusEffect: boolean,
+	 * }} StatusEffect
+	 * @typedef { StatusEffect & { _interval: number, _timeElapsed: number, _firstTime: boolean, source: { entity: number, owner: number }, _timer: number }} ActiveStatusEffect
+	 * @type {Record<string, ActiveStatusEffect>}
+	 */
+	this.activeStatusEffects;
+}
 
 StatusEffectsReceiver.prototype.DefaultInterval = 1000;
 

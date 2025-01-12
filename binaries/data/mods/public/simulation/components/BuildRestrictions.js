@@ -1,4 +1,19 @@
-function BuildRestrictions() {}
+function BuildRestrictions()
+{
+	/** @type {EntityId} */
+	this.entity;
+
+	/**
+	 * @type {{
+	 *   PlacementType: "land" | "shore" | "land-shore",
+	 *   Distance?: { FromClass: string, MinDistance?: string, MaxDistance?: string },
+	 *   Territory: "own" | "ally" | "neutral" | "enemy",
+	 * 	 Category: string,
+	 * 	 MatchLimit?: string
+	 * }}
+	 */
+	this.template;
+};
 
 BuildRestrictions.prototype.Schema =
 	"<a:help>Specifies building placement restrictions as they relate to terrain, territories, and distance.</a:help>" +

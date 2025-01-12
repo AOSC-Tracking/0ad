@@ -1,4 +1,9 @@
-function CeasefireManager() {}
+function CeasefireManager() {
+	/** @type {number} */
+	this.countdownMessageDuration;
+	/** @type {number[][]} */
+	this.diplomacyBeforeCeasefire;
+}
 
 CeasefireManager.prototype.Schema = "<a:component type='system'/><empty/>";
 

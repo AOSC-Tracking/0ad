@@ -1,4 +1,65 @@
-function Formation() {}
+function Formation() {
+	/** @type {number} */
+	this.entity;
+
+	/** @type {Template} */
+	this.template;
+
+	/**
+	 * @type {{
+	 *   minRow: number,
+	 *   maxRow: number,
+	 *   minColumn: number,
+	 *   maxColumn: number,
+	 *   name: string
+	 * }[]}
+	 */
+	this.animationvariants;
+
+	/** @type {number} */
+	this.width;
+	/** @type {number} */
+	this.depth;
+
+	/** @type {{width: number, depth: number}} */
+	this.separationMultiplier;
+
+	/** @type {EntityId[]} */
+	this.members;
+	/** @type {Record<EntityId, {row: number, column: number}>}*/
+	this.memberPositions;
+
+	/** @type {Set<EntityId>} */
+	this.finishedEntities;
+	/** @type {Set<EntityId>} */
+	this.idleEntities;
+
+	/** @type {number} */
+	this.minColumns;
+	/** @type {number} */
+	this.maxRowsUsed;
+	/** @type {number[]} */
+	this.maxColumnsUsed;
+	/** @type {boolean} */
+	this.columnar;
+	/** @type {boolean} */
+	this.rearrange;
+	/** @type {EntityId[]} */
+	this.formationMembersWithAura;
+	/** @type {EntityId[]} */
+	this.twinFormations;
+	/** @type {number} */
+	this.formationSeparation;
+
+	/** @type {number} */
+	this.maxTurningAngle;
+
+	/** @type {number} */
+	this.widthDepthRatio;
+
+	/** @type {number} */
+	this.sloppiness;
+}
 
 Formation.prototype.Schema =
 	"<element name='RequiredMemberCount' a:help='Minimum number of entities the formation should contain (at least 2).'>" +

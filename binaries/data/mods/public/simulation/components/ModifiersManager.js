@@ -1,4 +1,14 @@
-function ModifiersManager() {}
+function ModifiersManager() {
+	/** @type {number} */
+	this.entity;
+
+	/** @type { Map<string, any> } */
+	this.cachedValues;
+	/** @type { Map<EntityId, Map<string, Set<EntityId>>> } */
+	this.playerEntitiesCached;
+	/** @type { MultiKeyMap<Modification[]> } */
+	this.modifiersStorage;
+}
 
 ModifiersManager.prototype.Schema =
 	"<a:component type='system'/><empty/>";
