@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es2023",
+        "allowJs": true,
+        "checkJs": true,
+        "noEmit": true,
+        "declarationMap": true,
+        "declaration": true,
+        "strict": true,
+        "noImplicitThis": true,
+        "lib": [
+            "ESNext"
+        ]
+    },
+    "include": [
+        "sim.d.ts",
+        "../pyrogenesis.d.ts",
+        "components/types/*.d.ts",
+        "../globalscripts/*.js",
+        "../globalscripts/types/*d.ts",
+        "../../mod/globalscripts/*.js",
+        "helpers/*.js",
+        "components/*.js",
+    ]
+}

@@ -1,0 +1,610 @@
+// Use record as the default type to mean "some object with unknown properties".
+declare type Component = Record<string, unknown>;
+declare type Interface = IIDs[keyof IIDs];
+
+// Allows suppressing errors, but should be used sparingly.
+declare type Template = Record<string, any>;
+
+declare type EntityId = number;
+
+declare const SYSTEM_ENTITY = 1;
+declare const INVALID_PLAYER = -1;
+declare const INVALID_ENTITY = -1;
+
+declare const AttackHelper: AttackHelperClass;
+declare const g_AttackEffects: AttackEffects;
+declare const PositionHelper: PositionHelperClass;
+declare const RequirementsHelper: RequirementsHelperClass;
+declare const g_Resources: Resources & { BuildChoicesSchema: any, BuildSchema: any };
+
+// Random helpers for typing other components.
+declare class FsmSpec {
+    readonly [prop: string]: ((this: UnitAI, msg: { type: string, data: any, [prop: string]: any }) => void | boolean) | FsmSpec | string;
+}
+
+declare type AIManager = ICmpAIManager;
+declare type CinemaManager = Component;
+declare type CommandQueue = Component;
+declare type Decay = Component;
+declare type Footprint = ICmpFootprint;
+declare type Minimap = Component;
+declare type Motion = Component;
+declare type Obstruction = ICmpObstruction;
+declare type ObstructionManager = ICmpObstructionManager;
+declare type OverlayRenderer = ICmpOverlayRenderer;
+declare type Ownership = ICmpOwnership;
+declare type ParticleManager = Component;
+declare type Pathfinder = ICmpPathfinder;
+declare type Position = ICmpPosition;
+declare type ProjectileManager = ICmpProjectileManager;
+declare type RallyPointRenderer = ICmpRallyPointRenderer;
+declare type RangeManager = ICmpRangeManager;
+declare type RangeOverlayRenderer = ICmpRangeOverlayRenderer;
+declare type Selectable = Component;
+declare type SoundManager = ICmpSoundManager;
+declare type TemplateManager = ICmpTemplateManager;
+declare type Terrain = ICmpTerrain;
+declare type TerritoryInfluence = Component;
+declare type TerritoryManager = ICmpTerritoryManager;
+declare type Test1 = Component;
+declare type Test2 = Component;
+declare type UnitMotion = ICmpUnitMotion;
+declare type UnitMotionManager = Component;
+declare type UnitRenderer = Component;
+declare type UnknownScript = Component;
+declare type Vision = ICmpVision;
+declare type Visual = ICmpVisual;
+declare type WaterManager = ICmpWaterManager;
+
+declare class Engine {
+    static RegisterComponentType(iid: number, name: string, component: new () => Interface): void;
+    static RegisterSystemComponentType(iid:number, name: string, component: new () => Interface): void;
+    static RegisterInterface(name: string): void;
+    static RegisterMessageType(name: string): void;
+    static RegisterGlobal<T>(name: string, value: NonNullable<T>): void;
+
+    static FlushDestroyedEntities(): void;
+    static GetEntitiesWithInterface(iid: IID | 0): EntityId[];
+
+    static PostMessage<T extends keyof MessageMap>(entity: EntityId, mid: T, data?: MessageMap[T]): void;
+    static BroadcastMessage<T extends keyof MessageMap>(mid: T, data?: MessageMap[T]): void;
+    
+    static AddEntity(templateName: string): EntityId;
+    static AddLocalEntity(templateName: string): EntityId;
+    static DestroyEntity(entity: EntityId): void;
+    
+    static GetTemplate(templateName: string): Template;
+
+    // System components are assumed to never be undefined.
+    static QueryInterface<T extends keyof SystemInterface>(entity: EntityId, iid: T): IIDs[T];
+    static QueryInterface<T extends keyof IIDs>(entity: EntityId, iid: T): IIDs[T] | undefined;
+    static QueryInterface(entity: EntityId, iid: number): unknown | undefined;
+}
+
+type IID = keyof IIDs;
+interface IIDs {
+    [IID_AIInterface]: AIInterface,
+    [IID_AIManager]: AIManager,
+    [IID_AIProxy]: AIProxy,
+    [IID_AlertRaiser]: AlertRaiser,
+    [IID_Attack]: Attack,
+    [IID_AttackDetection]: AttackDetection,
+    [IID_Auras]: Auras,
+    [IID_AutoBuildable]: AutoBuildable,
+    [IID_Barter]: Barter,
+    [IID_BattleDetection]: BattleDetection,
+    [IID_BuildRestrictions]: BuildRestrictions,
+    [IID_Builder]: Builder,
+    [IID_BuildingAI]: BuildingAI,
+    [IID_Capturable]: Capturable,
+    [IID_CeasefireManager]: CeasefireManager,
+    [IID_CinemaManager]: CinemaManager,
+    [IID_CommandQueue]: CommandQueue,
+    [IID_Cost]: Cost,
+    [IID_DeathDamage]: DeathDamage,
+    [IID_Decay]: Decay,
+    [IID_DelayedDamage]: DelayedDamage,
+    [IID_Diplomacy]: Diplomacy,
+    [IID_EndGameManager]: EndGameManager,
+    [IID_EntityLimits]: EntityLimits,
+    [IID_Fogging]: Fogging,
+    [IID_Footprint]: Footprint,
+    [IID_Formation]: Formation,
+    [IID_Foundation]: Foundation,
+    [IID_GarrisonHolder]: GarrisonHolder,
+    [IID_Garrisonable]: Garrisonable,
+    [IID_Gate]: Gate,
+    [IID_Guard]: Guard,
+    [IID_GuiInterface]: GuiInterface,
+    [IID_Heal]: Heal,
+    [IID_Health]: Health,
+    [IID_Identity]: Identity,
+    [IID_Loot]: Loot,
+    [IID_Looter]: Looter,
+    [IID_Market]: Market,
+    [IID_Minimap]: Minimap,
+    [IID_Mirage]: Mirage,
+    [IID_ModifiersManager]: ModifiersManager,
+    [IID_Motion]: Motion,
+    [IID_Obstruction]: Obstruction,
+    [IID_ObstructionManager]: ObstructionManager,
+    [IID_OverlayRenderer]: OverlayRenderer,
+    [IID_Ownership]: Ownership,
+    [IID_Pack]: Pack,
+    [IID_ParticleManager]: ParticleManager,
+    [IID_Pathfinder]: Pathfinder,
+    [IID_Player]: Player,
+    [IID_PlayerManager]: PlayerManager,
+    [IID_Population]: Population,
+    [IID_Position]: Position,
+    [IID_ProductionQueue]: ProductionQueue,
+    [IID_ProjectileManager]: ProjectileManager,
+    [IID_Promotion]: Promotion,
+    [IID_RallyPoint]: RallyPoint,
+    [IID_RallyPointRenderer]: RallyPointRenderer,
+    [IID_RangeManager]: RangeManager,
+    [IID_RangeOverlayManager]: RangeOverlayManager,
+    [IID_RangeOverlayRenderer]: RangeOverlayRenderer,
+    [IID_Repairable]: Repairable,
+    [IID_Researcher]: Researcher,
+    [IID_Resistance]: Resistance,
+    [IID_ResourceDropsite]: ResourceDropsite,
+    [IID_ResourceGatherer]: ResourceGatherer,
+    [IID_ResourceSupply]: ResourceSupply,
+    [IID_ResourceTrickle]: ResourceTrickle,
+    [IID_Selectable]: Selectable,
+    [IID_Settlement]: Settlement,
+    [IID_SkirmishReplacer]: SkirmishReplacer,
+    [IID_Sound]: Sound,
+    [IID_SoundManager]: SoundManager,
+    [IID_StatisticsTracker]: StatisticsTracker,
+    [IID_StatusBars]: StatusBars,
+    [IID_StatusEffectsReceiver]: StatusEffectsReceiver,
+    [IID_TechnologyManager]: TechnologyManager,
+    [IID_TemplateManager]: TemplateManager,
+    [IID_Terrain]: Terrain,
+    [IID_TerritoryDecay]: TerritoryDecay,
+    [IID_TerritoryDecayManager]: TerritoryDecayManager,
+    [IID_TerritoryInfluence]: TerritoryInfluence,
+    [IID_TerritoryManager]: TerritoryManager,
+    [IID_Test1]: Test1,
+    [IID_Test2]: Test2,
+    [IID_Timer]: Timer,
+    [IID_Trader]: Trader,
+    [IID_Trainer]: Trainer,
+    [IID_TrainingRestrictions]: TrainingRestrictions,
+    [IID_Treasure]: Treasure,
+    [IID_TreasureCollector]: TreasureCollector,
+    [IID_Trigger]: Trigger,
+    [IID_TriggerPoint]: TriggerPoint,
+    [IID_TurretHolder]: TurretHolder,
+    [IID_Turretable]: Turretable,
+    [IID_UnitAI]: UnitAI,
+    [IID_UnitMotion]: UnitMotion,
+    [IID_UnitMotionManager]: UnitMotionManager,
+    [IID_UnitRenderer]: UnitRenderer,
+    [IID_UnknownScript]: UnknownScript,
+    [IID_Upgrade]: Upgrade,
+    [IID_Upkeep]: Upkeep,
+    [IID_ValueModificationManager]: ValueModificationManager,
+    [IID_Visibility]: Visibility,
+    [IID_Vision]: Vision,
+    [IID_VisionSharing]: VisionSharing,
+    [IID_Visual]: Visual,
+    [IID_WallPiece]: WallPiece,
+    [IID_WallSet]: WallSet,
+    [IID_WaterManager]: WaterManager,
+    [IID_Wonder]: Wonder,
+}
+
+interface SystemInterface {
+    [IID_AIInterface]: AIInterface,
+    [IID_AIManager]: AIManager,
+    [IID_CeasefireManager]: CeasefireManager,
+    [IID_CinemaManager]: CinemaManager,
+    [IID_CommandQueue]: CommandQueue,
+    [IID_DelayedDamage]: DelayedDamage,
+    [IID_EndGameManager]: EndGameManager,
+    [IID_GuiInterface]: GuiInterface,
+    [IID_ModifiersManager]: ModifiersManager,
+    [IID_ObstructionManager]: ObstructionManager,
+    [IID_Pathfinder]: Pathfinder,
+    [IID_PlayerManager]: PlayerManager,
+    [IID_ProjectileManager]: ProjectileManager,
+    [IID_RallyPointRenderer]: RallyPointRenderer,
+    [IID_RangeManager]: RangeManager,
+    [IID_SoundManager]: SoundManager,
+    [IID_TemplateManager]: TemplateManager,
+    [IID_Terrain]: Terrain,
+    [IID_TerritoryDecayManager]: TerritoryDecayManager,
+    [IID_TerritoryManager]: TerritoryManager,
+    [IID_Timer]: Timer,
+    [IID_Trigger]: Trigger,
+    [IID_UnitMotionManager]: UnitMotionManager,
+    [IID_UnitRenderer]: UnitRenderer,
+    [IID_WaterManager]: WaterManager,
+}
+
+// Interfaces
+declare const IID_AIInterface = 5;
+declare const IID_AIManager = 6;
+declare const IID_AIProxy = 50;
+declare const IID_AlertRaiser = 51;
+declare const IID_Attack = 7;
+declare const IID_AttackDetection = 52;
+declare const IID_Auras = 53;
+declare const IID_AutoBuildable = 54;
+declare const IID_Barter = 55;
+declare const IID_BattleDetection = 56;
+declare const IID_BuildRestrictions = 57;
+declare const IID_Builder = 58;
+declare const IID_BuildingAI = 59;
+declare const IID_Capturable = 60;
+declare const IID_CeasefireManager = 61;
+declare const IID_CinemaManager = 8;
+declare const IID_CommandQueue = 9;
+declare const IID_Cost = 62;
+declare const IID_DeathDamage = 63;
+declare const IID_Decay = 10;
+declare const IID_DelayedDamage = 64;
+declare const IID_Diplomacy = 65;
+declare const IID_EndGameManager = 66;
+declare const IID_EntityLimits = 67;
+declare const IID_Fogging = 11;
+declare const IID_Footprint = 12;
+declare const IID_Formation = 68;
+declare const IID_Foundation = 69;
+declare const IID_GarrisonHolder = 13;
+declare const IID_Garrisonable = 70;
+declare const IID_Gate = 71;
+declare const IID_Guard = 72;
+declare const IID_GuiInterface = 14;
+declare const IID_Heal = 73;
+declare const IID_Health = 74;
+declare const IID_Identity = 15;
+declare const IID_Loot = 75;
+declare const IID_Looter = 76;
+declare const IID_Market = 77;
+declare const IID_Minimap = 16;
+declare const IID_Mirage = 17;
+declare const IID_ModifiersManager = 78;
+declare const IID_Motion = 18;
+declare const IID_Obstruction = 19;
+declare const IID_ObstructionManager = 20;
+declare const IID_OverlayRenderer = 21;
+declare const IID_Ownership = 22;
+declare const IID_Pack = 79;
+declare const IID_ParticleManager = 23;
+declare const IID_Pathfinder = 24;
+declare const IID_Player = 25;
+declare const IID_PlayerManager = 26;
+declare const IID_Population = 80;
+declare const IID_Position = 27;
+declare const IID_ProductionQueue = 81;
+declare const IID_ProjectileManager = 28;
+declare const IID_Promotion = 82;
+declare const IID_RallyPoint = 29;
+declare const IID_RallyPointRenderer = 30;
+declare const IID_RangeManager = 31;
+declare const IID_RangeOverlayManager = 83;
+declare const IID_RangeOverlayRenderer = 32;
+declare const IID_Repairable = 84;
+declare const IID_Researcher = 85;
+declare const IID_Resistance = 86;
+declare const IID_ResourceDropsite = 87;
+declare const IID_ResourceGatherer = 88;
+declare const IID_ResourceSupply = 89;
+declare const IID_ResourceTrickle = 90;
+declare const IID_Selectable = 33;
+declare const IID_Settlement = 34;
+declare const IID_SkirmishReplacer = 91;
+declare const IID_Sound = 35;
+declare const IID_SoundManager = 36;
+declare const IID_StatisticsTracker = 92;
+declare const IID_StatusBars = 93;
+declare const IID_StatusEffectsReceiver = 94;
+declare const IID_TechnologyManager = 95;
+declare const IID_TemplateManager = 3;
+declare const IID_Terrain = 38;
+declare const IID_TerritoryDecay = 96;
+declare const IID_TerritoryDecayManager = 39;
+declare const IID_TerritoryInfluence = 40;
+declare const IID_TerritoryManager = 41;
+declare const IID_Test1 = 1;
+declare const IID_Test2 = 2;
+declare const IID_Timer = 97;
+declare const IID_Trader = 98;
+declare const IID_Trainer = 99;
+declare const IID_TrainingRestrictions = 100;
+declare const IID_Treasure = 101;
+declare const IID_TreasureCollector = 102;
+declare const IID_Trigger = 103;
+declare const IID_TriggerPoint = 104;
+declare const IID_TurretHolder = 42;
+declare const IID_Turretable = 105;
+declare const IID_UnitAI = 106;
+declare const IID_UnitMotion = 43;
+declare const IID_UnitMotionManager = 44;
+declare const IID_UnitRenderer = 45;
+declare const IID_UnknownScript = 4;
+declare const IID_Upgrade = 107;
+declare const IID_Upkeep = 108;
+declare const IID_ValueModificationManager = 37;
+declare const IID_Visibility = 46;
+declare const IID_Vision = 47;
+declare const IID_VisionSharing = 109;
+declare const IID_Visual = 48;
+declare const IID_WallPiece = 110;
+declare const IID_WallSet = 111;
+declare const IID_WaterManager = 49;
+declare const IID_Wonder = 112;
+
+// Messages
+
+interface MessageMap {
+    [MT_AIMetadata]: MessageAIMetadata,
+    [MT_AttackDetected]: MessageAttackDetected,
+    [MT_Attacked]: MessageAttacked,
+    [MT_BattleStateChanged]: MessageBattleStateChanged,
+    [MT_CapturePointsChanged]: MessageCapturePointsChanged,
+    [MT_CaptureRegenStateChanged]: MessageCaptureRegenStateChanged,
+    [MT_CeasefireEnded]: MessageCeasefireEnded,
+    [MT_CeasefireStarted]: MessageCeasefireStarted,
+    [MT_CinemaPathEnded]: MessageCinemaPathEnded,
+    [MT_CinemaQueueEnded]: MessageCinemaQueueEnded,
+    [MT_ConstructionFinished]: MessageConstructionFinished,
+    [MT_Create]: MessageCreate,
+    [MT_Deserialized]: MessageDeserialized,
+    [MT_Destroy]: MessageDestroy,
+    [MT_DiplomacyChanged]: MessageDiplomacyChanged,
+    [MT_DisabledTechnologiesChanged]: MessageDisabledTechnologiesChanged,
+    [MT_DisabledTemplatesChanged]: MessageDisabledTemplatesChanged,
+    [MT_DropsiteSharingChanged]: MessageDropsiteSharingChanged,
+    [MT_EntityRenamed]: MessageEntityRenamed,
+    [MT_ExperienceChanged]: MessageExperienceChanged,
+    [MT_FoundationBuildersChanged]: MessageFoundationBuildersChanged,
+    [MT_FoundationProgressChanged]: MessageFoundationProgressChanged,
+    [MT_GarrisonedStateChanged]: MessageGarrisonedStateChanged,
+    [MT_GarrisonedUnitsChanged]: MessageGarrisonedUnitsChanged,
+    [MT_GuardedAttacked]: MessageGuardedAttacked,
+    [MT_HealthChanged]: MessageHealthChanged,
+    [MT_InitGame]: MessageInitGame,
+    [MT_Interpolate]: MessageInterpolate,
+    [MT_InterpolatedPositionChanged]: MessageInterpolatedPositionChanged,
+    [MT_InvulnerabilityChanged]: MessageInvulnerabilityChanged,
+    [MT_MinimapPing]: MessageMinimapPing,
+    [MT_MotionUpdate]: MessageMotionUpdate,
+    [MT_MovementObstructionChanged]: MessageMovementObstructionChanged,
+    [MT_MultiplierChanged]: MessageMultiplierChanged,
+    [MT_ObstructionMapShapeChanged]: MessageObstructionMapShapeChanged,
+    [MT_OwnershipChanged]: MessageOwnershipChanged,
+    [MT_PackFinished]: MessagePackFinished,
+    [MT_PackProgressUpdate]: MessagePackProgressUpdate,
+    [MT_PathResult]: MessagePathResult,
+    [MT_PickupCanceled]: MessagePickupCanceled,
+    [MT_PickupRequested]: MessagePickupRequested,
+    [MT_PlayerColorChanged]: MessagePlayerColorChanged,
+    [MT_PlayerDefeated]: MessagePlayerDefeated,
+    [MT_PlayerEntityChanged]: MessagePlayerEntityChanged,
+    [MT_PlayerWon]: MessagePlayerWon,
+    [MT_PositionChanged]: MessagePositionChanged,
+    [MT_ProductionQueueChanged]: MessageProductionQueueChanged,
+    [MT_ProgressiveLoad]: MessageProgressiveLoad,
+    [MT_RangeUpdate]: MessageRangeUpdate,
+    [MT_RenderSubmit]: MessageRenderSubmit,
+    [MT_ResearchFinished]: MessageResearchFinished,
+    [MT_ResourceSupplyChanged]: MessageResourceSupplyChanged,
+    [MT_SkirmishReplace]: MessageSkirmishReplace,
+    [MT_SkirmishReplacerReplaced]: MessageSkirmishReplacerReplaced,
+    [MT_TemplateModification]: MessageTemplateModification,
+    [MT_TerrainChanged]: MessageTerrainChanged,
+    [MT_TerritoriesChanged]: MessageTerritoriesChanged,
+    [MT_TerritoryDecayChanged]: MessageTerritoryDecayChanged,
+    [MT_TrainingFinished]: MessageTrainingFinished,
+    [MT_TrainingStarted]: MessageTrainingStarted,
+    [MT_TributeExchanged]: MessageTributeExchanged,
+    [MT_TurnStart]: MessageTurnStart,
+    [MT_TurretedStateChanged]: MessageTurretedStateChanged,
+    [MT_TurretsChanged]: MessageTurretsChanged,
+    [MT_UnitAIOrderDataChanged]: MessageUnitAIOrderDataChanged,
+    [MT_UnitAIStateChanged]: MessageUnitAIStateChanged,
+    [MT_UnitAbleToMoveChanged]: MessageUnitAbleToMoveChanged,
+    [MT_UnitIdleChanged]: MessageUnitIdleChanged,
+    [MT_UnitStanceChanged]: MessageUnitStanceChanged,
+    [MT_Update]: MessageUpdate,
+    [MT_Update_Final]: MessageUpdate_Final,
+    [MT_Update_MotionFormation]: MessageUpdate_MotionFormation,
+    [MT_Update_MotionUnit]: MessageUpdate_MotionUnit,
+    [MT_UpgradeProgressUpdate]: MessageUpgradeProgressUpdate,
+    [MT_ValueModification]: MessageValueModification,
+    [MT_VictoryConditionsChanged]: MessageVictoryConditionsChanged,
+    [MT_VisibilityChanged]: MessageVisibilityChanged,
+    [MT_VisionRangeChanged]: MessageVisionRangeChanged,
+    [MT_VisionSharingChanged]: MessageVisionSharingChanged,
+    [MT_WaterChanged]: MessageWaterChanged,
+}
+
+declare const MT_AIMetadata = 32;
+declare const MT_AttackDetected = 33;
+declare const MT_Attacked = 62;
+declare const MT_BattleStateChanged = 34;
+declare const MT_CapturePointsChanged = 35;
+declare const MT_CaptureRegenStateChanged = 36;
+declare const MT_CeasefireEnded = 38;
+declare const MT_CeasefireStarted = 37;
+declare const MT_CinemaPathEnded = 29;
+declare const MT_CinemaQueueEnded = 30;
+declare const MT_ConstructionFinished = 41;
+declare const MT_Create = 10;
+declare const MT_Deserialized = 9;
+declare const MT_Destroy = 11;
+declare const MT_DiplomacyChanged = 39;
+declare const MT_DisabledTechnologiesChanged = 52;
+declare const MT_DisabledTemplatesChanged = 53;
+declare const MT_DropsiteSharingChanged = 63;
+declare const MT_EntityRenamed = 48;
+declare const MT_ExperienceChanged = 60;
+declare const MT_FoundationBuildersChanged = 43;
+declare const MT_FoundationProgressChanged = 42;
+declare const MT_GarrisonedStateChanged = 45;
+declare const MT_GarrisonedUnitsChanged = 44;
+declare const MT_GuardedAttacked = 46;
+declare const MT_HealthChanged = 47;
+declare const MT_InitGame = 49;
+declare const MT_Interpolate = 6;
+declare const MT_InterpolatedPositionChanged = 14;
+declare const MT_InvulnerabilityChanged = 61;
+declare const MT_MinimapPing = 28;
+declare const MT_MotionUpdate = 15;
+declare const MT_MovementObstructionChanged = 20;
+declare const MT_MultiplierChanged = 57;
+declare const MT_ObstructionMapShapeChanged = 21;
+declare const MT_OwnershipChanged = 12;
+declare const MT_PackFinished = 51;
+declare const MT_PackProgressUpdate = 50;
+declare const MT_PathResult = 23;
+declare const MT_PickupCanceled = 79;
+declare const MT_PickupRequested = 78;
+declare const MT_PlayerColorChanged = 31;
+declare const MT_PlayerDefeated = 54;
+declare const MT_PlayerEntityChanged = 58;
+declare const MT_PlayerWon = 55;
+declare const MT_PositionChanged = 13;
+declare const MT_ProductionQueueChanged = 59;
+declare const MT_ProgressiveLoad = 8;
+declare const MT_RangeUpdate = 16;
+declare const MT_RenderSubmit = 7;
+declare const MT_ResearchFinished = 67;
+declare const MT_ResourceSupplyChanged = 64;
+declare const MT_SkirmishReplace = 65;
+declare const MT_SkirmishReplacerReplaced = 66;
+declare const MT_TemplateModification = 25;
+declare const MT_TerrainChanged = 17;
+declare const MT_TerritoriesChanged = 22;
+declare const MT_TerritoryDecayChanged = 68;
+declare const MT_TrainingFinished = 70;
+declare const MT_TrainingStarted = 69;
+declare const MT_TributeExchanged = 56;
+declare const MT_TurnStart = 1;
+declare const MT_TurretedStateChanged = 72;
+declare const MT_TurretsChanged = 71;
+declare const MT_UnitAIOrderDataChanged = 77;
+declare const MT_UnitAIStateChanged = 76;
+declare const MT_UnitAbleToMoveChanged = 74;
+declare const MT_UnitIdleChanged = 73;
+declare const MT_UnitStanceChanged = 75;
+declare const MT_Update = 2;
+declare const MT_Update_Final = 5;
+declare const MT_Update_MotionFormation = 3;
+declare const MT_Update_MotionUnit = 4;
+declare const MT_UpgradeProgressUpdate = 80;
+declare const MT_ValueModification = 24;
+declare const MT_VictoryConditionsChanged = 40;
+declare const MT_VisibilityChanged = 18;
+declare const MT_VisionRangeChanged = 26;
+declare const MT_VisionSharingChanged = 27;
+declare const MT_WaterChanged = 19;
+
+declare type MessageEntityRenamed = { entity: EntityId; newentity: EntityId };
+declare type MessageSkirmishReplacerReplaced = { entity: EntityId; newentity: EntityId };
+declare type MessageTerritoriesChanged = { player: number; territories: number[] };
+declare type MessageDiplomacyChanged =
+    | { player: number; otherPlayer: null }
+    | { player: number; otherPlayer: number; value: number };
+declare type MessagePlayerDefeated = { playerId: number };
+declare type MessageTributeExchanged = { from: number; to: number; amounts: Record<GenericResName, number> };
+declare type MessageCeasefireEnded = { player: number; otherPlayer: number };
+declare type MessagePositionChanged = { x: number; z: number; a: number; inWorld: boolean };
+declare type MessageOwnershipChanged = { entity: EntityId; to: number; from: number };
+declare type MessageHealthChanged = { from: number; to: number };
+declare type MessageCapturePointsChanged = { capturePoints: number[] };
+declare type MessageInvulnerabilityChanged = { entity: EntityId; invulnerability: boolean };
+declare type MessageUnitIdleChanged = { idle: boolean };
+declare type MessageUnitStanceChanged = { to: string };
+declare type MessageUnitAIStateChanged = { to: string };
+declare type MessageUnitAIOrderDataChanged = { to: any };
+declare type MessageProductionQueueChanged = { queue: any[] };
+declare type MessageGarrisonedStateChanged = { oldHolder: EntityId; holderID: EntityId };
+declare type MessageGarrisonedUnitsChanged = { added: EntityId[]; removed: EntityId[] };
+declare type MessageFoundationProgressChanged = { to: number };
+declare type MessageFoundationBuildersChanged = { to: EntityId[] };
+declare type MessageDropsiteSharingChanged = { shared: boolean };
+declare type MessageTerritoryDecayChanged = { entity: EntityId; to: boolean, rate: number };
+declare type MessageMultiplierChanged = { player: number };
+declare type MessageDeserialized = {};
+declare type MessageUnitAbleToMoveChanged = { entity: EntityId; ableToMove: boolean };
+declare type MessageAttacked = {
+    target: EntityId;
+    attacker: EntityId;
+    type: string;
+    attackerOwner: number;
+    damage?: number;
+    capture?: number;
+    statusEffects?: string[];
+    fromStatusEffect?: boolean;
+};
+declare type MessageGuardedAttacked = {
+    guarded: EntityId;
+    data: MessageAttacked;
+};
+declare type MessagePickupRequested = { entity: EntityId; iid: IID };
+declare type MessagePickupCanceled = { entity: EntityId };
+declare type MessageMotionUpdate = {
+    likelySuccess?: true;
+    likelyFailure?: true;
+    obstructed?: true;
+    veryObstructed?: true;
+};
+
+declare type MessageVisibilityChanged = {
+    player: number;
+    newVisibility: typeof VIS_HIDDEN | typeof VIS_FOGGED | typeof VIS_VISIBLE;
+};
+declare type MessageRangeUpdate = { tag: number; added: EntityId[]; removed: EntityId[] };
+declare type MessagePackFinished = { packed: boolean };
+declare type MessageVisionRangeChanged = { entity: EntityId };
+declare type MessageConstructionFinished = { newentity: EntityId; entity: EntityId };
+declare type MessageTrainingStarted = {};
+declare type MessageTrainingFinished = {};
+declare type MessageAIMetadata = {};
+declare type MessageInitGame = {};
+declare type MessageSkirmishReplace = {};
+declare type MessageUpdate = { turnLength: number };
+declare type MessageTemplateModification = any;
+declare type MessageValueModification = { component: string; valueNames: string[]; entities: EntityId[] };
+declare type MessageResearchFinished = { player: number; tech: string };
+declare type MessageResourceSupplyChanged = {};
+declare type MessagePackProgressUpdate = {};
+declare type MessageUpgradeProgressUpdate = {};
+declare type MessagePlayerColorChanged = {};
+declare type MessageDisabledTemplatesChanged = {};
+declare type MessageCinemaPathEnded = {};
+declare type MessageCinemaQueueEnded = {};
+declare type MessagePlayerWon = {};
+declare type MessagePlayerEntityChanged = { player: number; from: EntityId; to: EntityId };
+declare type MessageAttackDetected = {};
+declare type MessageBattleStateChanged = {};
+declare type MessageCaptureRegenStateChanged = {};
+declare type MessageCeasefireStarted = {};
+declare type MessageCreate = {};
+declare type MessageDestroy = {};
+declare type MessageDisabledTechnologiesChanged = {};
+declare type MessageExperienceChanged = {};
+declare type MessageInterpolate = {};
+declare type MessageInterpolatedPositionChanged = {};
+declare type MessageMinimapPing = {};
+declare type MessageMovementObstructionChanged = {};
+declare type MessageObstructionMapShapeChanged = {};
+declare type MessagePathResult = {};
+declare type MessageProgressiveLoad = {};
+declare type MessageRenderSubmit = {};
+declare type MessageTerrainChanged = {};
+declare type MessageTurnStart = {};
+declare type MessageTurretedStateChanged = {};
+declare type MessageTurretsChanged = {};
+declare type MessageUpdate_Final = {};
+declare type MessageUpdate_MotionFormation = {};
+declare type MessageUpdate_MotionUnit = {};
+declare type MessageVictoryConditionsChanged = {};
+declare type MessageVisionSharingChanged = {};
+declare type MessageWaterChanged = {};
