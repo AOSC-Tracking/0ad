@@ -13,10 +13,6 @@ Mirage.prototype.Schema =
 
 Mirage.prototype.Init = function()
 {
-	this.parent = INVALID_ENTITY;
-	this.player = null;
-
-	this.miragedIids = new Map();
 };
 
 /**
@@ -85,7 +81,7 @@ Mirage.prototype.OnVisibilityChanged = function(msg)
 		return;
 
 	if (this.miragedIids.has(IID_Market))
-		this.miragedIids.get(IID_Market).UpdateTraders(msg);
+		/** @type {MarketMirage} */(this.miragedIids.get(IID_Market)).UpdateTraders();
 
 	if (this.parent == INVALID_ENTITY)
 		Engine.DestroyEntity(this.entity);

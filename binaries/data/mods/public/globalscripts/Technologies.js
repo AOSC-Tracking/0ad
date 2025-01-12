@@ -26,7 +26,7 @@ function GetTechModifiedProperty(modifications, classes, originalValue)
 	if (typeof originalValue === "string")
 		return /** @type {T} */(GetTechModifiedProperty_string(modifications, classes, originalValue));
 	if (typeof originalValue === "number")
-		return GetTechModifiedProperty_numeric(modifications, classes, originalValue);
+		return /** @type {T} */(GetTechModifiedProperty_numeric(modifications, classes, originalValue));
 	return GetTechModifiedProperty_generic(modifications, classes, originalValue);
 }
 
@@ -412,7 +412,7 @@ function UnravelPhases(phases)
 
 		phaseMap[myPhase] = reqPhase;
 		if (!phaseMap[reqPhase])
-			phaseMap[reqPhase] = undefined;
+			delete phaseMap[reqPhase];
 	}
 
 	let phaseList = Object.keys(phaseMap);

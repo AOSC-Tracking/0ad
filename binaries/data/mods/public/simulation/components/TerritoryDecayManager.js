@@ -5,7 +5,6 @@ TerritoryDecayManager.prototype.Schema =
 
 TerritoryDecayManager.prototype.Init = function()
 {
-	this.list = new Set();
 };
 
 /**
@@ -27,7 +26,7 @@ TerritoryDecayManager.prototype.Remove = function(ent)
 TerritoryDecayManager.prototype.SetBlinkingEntities = function()
 {
 	for (let ent of this.list.values())
-		Engine.QueryInterface(ent, IID_TerritoryDecay).IsConnected();
+		Engine.QueryInterface(ent, IID_TerritoryDecay)?.IsConnected();
 };
 
 Engine.RegisterSystemComponentType(IID_TerritoryDecayManager, "TerritoryDecayManager", TerritoryDecayManager);

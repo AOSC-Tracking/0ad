@@ -404,14 +404,14 @@ Health.prototype.CreateDeathSpawnedEntity = function()
 	// If the unit died while not in the world, don't spawn a death entity for it
 	// since there's nowhere for it to be placed
 	let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
-	if (!cmpPosition.IsInWorld())
+	if (!cmpPosition?.IsInWorld())
 		return INVALID_ENTITY;
 
 	// Create SpawnEntityOnDeath entity
-	let spawnedEntity = Engine.AddLocalEntity(this.template.SpawnEntityOnDeath);
+	let spawnedEntity = Engine.AddLocalEntity(/** @type {string} */(this.template.SpawnEntityOnDeath));
 
 	// Move to same position
-	let cmpSpawnedPosition = Engine.QueryInterface(spawnedEntity, IID_Position);
+	let cmpSpawnedPosition = /** @type {Position} */(Engine.QueryInterface(spawnedEntity, IID_Position));
 	let pos = cmpPosition.GetPosition();
 	cmpSpawnedPosition.JumpTo(pos.x, pos.z);
 	let rot = cmpPosition.GetRotation();

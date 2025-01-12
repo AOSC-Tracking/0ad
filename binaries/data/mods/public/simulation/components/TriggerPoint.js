@@ -20,7 +20,7 @@ TriggerPoint.prototype.Init = function()
 
 TriggerPoint.prototype.OnDestroy = function()
 {
-	if (this.template && this.template.EntityReference)
+	if (this.template && this.template.Reference)
 	{
 		var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 		cmpTrigger.RemoveRegisteredTriggerPoint(this.template.Reference, this.entity);
@@ -70,9 +70,11 @@ TriggerPoint.prototype.OnRangeUpdate = function(msg)
 	for (var entity of msg.added)
 		collection.push(entity);
 
-	var r = { "currentCollection": collection.slice() };
-	r.added = msg.added;
-	r.removed = msg.removed;
+	var r = {
+		currentCollection: collection.slice(),
+		added: msg.added,
+		removed: msg.removed
+	};
 	var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 	cmpTrigger.CallTrigger("OnRange", this.triggers[msg.tag], r);
 };

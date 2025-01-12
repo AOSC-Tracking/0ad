@@ -170,7 +170,7 @@ VisionSharing.prototype.AddSpy = function(player, timeLength)
  */
 VisionSharing.prototype.RemoveSpy = function(data)
 {
-	this.spies.delete(data.id);
+	this.spies?.delete(data.id);
 	this.CheckVisionSharings();
 };
 
@@ -181,7 +181,7 @@ VisionSharing.prototype.RemoveSpy = function(data)
 VisionSharing.prototype.ShareVisionWith = function(player)
 {
 	if (this.activated)
-		return this.shared.has(player);
+		return this.shared?.has(player);
 
 	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	return cmpOwnership && cmpOwnership.GetOwner() == player;

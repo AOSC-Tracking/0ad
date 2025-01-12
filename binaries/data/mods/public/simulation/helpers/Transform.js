@@ -65,7 +65,7 @@ function ChangeEntityTemplate(oldEnt, newTemplate)
 			owner = cmpOwnership.GetOwner();
 	}
 	let cmpNewOwnership = Engine.QueryInterface(newEnt, IID_Ownership);
-	if (cmpNewOwnership)
+	if (cmpNewOwnership && owner)
 		cmpNewOwnership.SetOwner(owner);
 
 	CopyControlGroups(oldEnt, newEnt);
@@ -215,7 +215,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 
 	// Return false if no ownership as BuildRestrictions.CheckPlacement needs an owner and I have no idea if false or true is better
 	// Plus there are no real entities without owners currently.
-	if (!cmpBuildRestrictions || !cmpPosition || !cmpOwnership)
+	if (!cmpBuildRestrictions || !cmpPosition || !cmpOwnership || !cmpNewPosition)
 		return DeleteEntityAndReturn(previewEntity, cmpPosition, null, null, cmpNewPosition, false);
 
 	var pos = cmpPosition.GetPosition2D();
@@ -259,7 +259,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 				 newTemplate.Obstruction.Unit["@radius"] > template.Obstruction.Static["@depth"]))
 		{
 			var cmpNewObstruction = Engine.QueryInterface(previewEntity, IID_Obstruction);
-			if (cmpNewObstruction && cmpNewObstruction.GetBlockMovementFlag())
+			if (cmpNewObstruction && cmpNewObstruction.GetBlockMovementFlag(false))
 			{
 				// Remove all obstructions at the new entity, especially animal corpses
 				for (let ent of cmpNewObstruction.GetEntitiesDeletedUponConstruction())
@@ -286,11 +286,12 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 function DeleteEntityAndReturn(ent, cmpPosition, position, angle, cmpNewPosition, ret)
 {
 	// prevent preview from interfering in the world
-	cmpNewPosition.MoveOutOfWorld();
+	cmpNewPosition?.MoveOutOfWorld();
 	if (position !== null)
 	{
-		cmpPosition.JumpTo(position.x, position.y);
-		cmpPosition.SetYRotation(angle.y);
+		cmpPosition?.JumpTo(position.x, position.y);
+		// @ts-expect-error (we know in this case that angle is not null)
+		cmpPosition?.SetYRotation(angle.y);
 	}
 
 	Engine.DestroyEntity(ent);

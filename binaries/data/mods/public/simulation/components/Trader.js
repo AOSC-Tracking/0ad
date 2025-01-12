@@ -186,7 +186,7 @@ Trader.prototype.CanTrade = function(target)
 	if (cmpTargetFoundation)
 		return false;
 
-	const cmpTraderIdentity = Engine.QueryInterface(this.entity, IID_Identity);
+	const cmpTraderIdentity = /** @type {Identity} */(Engine.QueryInterface(this.entity, IID_Identity));
 	if (!(cmpTraderIdentity.HasClass("Organic") && cmpTargetMarket.HasType("land")) &&
 		!(cmpTraderIdentity.HasClass("Ship") && cmpTargetMarket.HasType("naval")))
 		return false;
@@ -203,9 +203,9 @@ Trader.prototype.CanTrade = function(target)
  */
 Trader.prototype.AddResources = function(ent, gain)
 {
-	let cmpPlayer = QueryOwnerInterface(ent);
+	let cmpPlayer = QueryOwnerInterface(ent, IID_Player);
 	if (cmpPlayer)
-		cmpPlayer.AddResource(this.goods.type, gain);
+		cmpPlayer.AddResource(/** @type {string} */(this.goods.type), gain);
 
 	let cmpStatisticsTracker = QueryOwnerInterface(ent, IID_StatisticsTracker);
 	if (cmpStatisticsTracker)
@@ -218,6 +218,9 @@ Trader.prototype.AddResources = function(ent, gain)
  */
 Trader.prototype.GenerateResources = function(currentMarket, nextMarket)
 {
+	if (!this.goods.amount)
+		return;
+
 	this.AddResources(this.entity, this.goods.amount.traderGain);
 
 	if (this.goods.amount.market1Gain)
@@ -243,7 +246,7 @@ Trader.prototype.PerformTrade = function(currentMarket)
 	if (this.goods.amount && this.goods.amount.traderGain)
 		this.GenerateResources(previousMarket, nextMarket);
 
-	let cmpPlayer = QueryOwnerInterface(this.entity);
+	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
 		return INVALID_ENTITY;
 

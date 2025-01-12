@@ -15,7 +15,7 @@ class DamageTypesMetadata
 		let files = Engine.ListDirectoryFiles("simulation/data/damage_types", "*.json", false);
 		for (let filename of files)
 		{
-			let data = Engine.ReadJSONFile(filename);
+			let data = /** @type {any} */(Engine.ReadJSONFile(filename));
 			if (!data)
 				continue;
 

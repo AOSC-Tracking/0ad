@@ -5,7 +5,6 @@ Guard.prototype.Schema =
 
 Guard.prototype.Init = function()
 {
-	this.entities = [];
 };
 
 /** @param {EntityId} entity */

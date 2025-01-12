@@ -27,7 +27,7 @@ class AttackEffects
 
 		for (let filename of Engine.ListDirectoryFiles("simulation/data/attack_effects", "*.json", false))
 		{
-			let data = Engine.ReadJSONFile(filename);
+			let data = /** @type {AttackEffectMetadata} */(Engine.ReadJSONFile(filename));
 			if (!data)
 				continue;
 
@@ -41,7 +41,8 @@ class AttackEffects
 
 			this.effectReceivers.push({
 				"type": data.code,
-				"IID": data.IID,
+				// @ts-expect-error
+				"IID": global[data.IID],
 				"method": data.method
 			});
 		}

@@ -140,7 +140,8 @@ Timer.prototype.OnUpdate = function(msg)
 
 		try
 		{
-			timerTargetComponent[timer.functionName](timer.data, this.time - timer.time);
+			//@ts-expect-error
+			(timerTargetComponent[timer.functionName])(timer.data, this.time - timer.time);
 		}
 		catch (e)
 		{

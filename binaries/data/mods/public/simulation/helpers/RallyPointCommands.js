@@ -19,7 +19,7 @@ function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 		// has a valid position, then just walk to the rally point.
 		if (data[i] && data[i].target)
 		{
-			let cmpPosition = Engine.QueryInterface(data[i].target, IID_Position);
+			let cmpPosition = Engine.QueryInterface(/** @type {EntityId} */(data[i].target), IID_Position);
 			if (!cmpPosition || !cmpPosition.IsInWorld())
 			{
 				if (command == "gather")

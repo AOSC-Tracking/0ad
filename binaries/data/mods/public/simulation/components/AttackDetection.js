@@ -53,7 +53,7 @@ AttackDetection.prototype.OnGlobalAttacked = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 	var cmpOwnership = Engine.QueryInterface(msg.target, IID_Ownership);
-	if (cmpOwnership.GetOwner() != cmpPlayer.GetPlayerID())
+	if (cmpOwnership?.GetOwner() != cmpPlayer?.GetPlayerID())
 		return;
 
 	Engine.PostMessage(msg.target, MT_MinimapPing);
@@ -74,7 +74,7 @@ AttackDetection.prototype.AttackAlert = function(target, attacker, type, attacke
 	let playerID = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID();
 
 	// Don't register attacks dealt against other players
-	if (Engine.QueryInterface(target, IID_Ownership).GetOwner() != playerID)
+	if (Engine.QueryInterface(target, IID_Ownership)?.GetOwner() != playerID)
 		return;
 
 	let cmpAttackerOwnership = Engine.QueryInterface(attacker, IID_Ownership);
@@ -88,14 +88,14 @@ AttackDetection.prototype.AttackAlert = function(target, attacker, type, attacke
 	// we have a lower priority notification for it, which can be
 	// overriden by a regular one.
 	var cmpTargetIdentity = Engine.QueryInterface(target, IID_Identity);
-	var targetIsDomesticAnimal = cmpTargetIdentity && cmpTargetIdentity.HasClass("Animal") && cmpTargetIdentity.HasClass("Domestic");
+	var targetIsDomesticAnimal = cmpTargetIdentity && cmpTargetIdentity.HasClass("Animal") && cmpTargetIdentity.HasClass("Domestic") || false;
 
 	var cmpPosition = Engine.QueryInterface(target, IID_Position);
 	if (!cmpPosition || !cmpPosition.IsInWorld())
 		return;
 	var event = {
 		"target": target,
-		"position": cmpPosition.GetPosition(),
+		"position": cmpPosition.GetPosition2D(),
 		"time": Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).GetTime(),
 		"targetIsDomesticAnimal": targetIsDomesticAnimal
 	};
@@ -110,7 +110,7 @@ AttackDetection.prototype.AttackAlert = function(target, attacker, type, attacke
 
 		// If the new attack is within suppression distance of this element,
 		// then check if the element should be updated and return
-		var dist = event.position.horizDistanceToSquared(element.position);
+		var dist = event.position.distanceToSquared(element.position);
 		if (dist >= this.suppressionRangeSquared)
 			continue;
 

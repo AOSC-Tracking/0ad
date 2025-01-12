@@ -10,6 +10,11 @@
 
 function Vector2D(x = 0, y = 0)
 {
+	/** @type {number} */
+	this.x;
+	/** @type {number} */
+	this.y;
+
 	this.set(x, y);
 }
 
@@ -123,7 +128,7 @@ Vector2D.prototype.floor = function()
 /** @param {number} digits */
 Vector2D.prototype.toFixed = function(digits)
 {
-	return this.set(this.x.toFixed(digits), this.y.toFixed(digits));
+	return this.set(+this.x.toFixed(digits), +this.y.toFixed(digits));
 };
 
 // Numeric 2D info functions (non-mutating)
@@ -315,6 +320,13 @@ Vector2D.dot = function(v1, v2)
 
 function Vector3D(x = 0, y = 0, z = 0)
 {
+	/** @type {number} */
+	this.x;
+	/** @type {number} */
+	this.y;
+	/** @type {number} */
+	this.z;
+
 	this.set(x, y, z);
 }
 
@@ -402,7 +414,7 @@ Vector3D.prototype.floor = function()
 /** @param {number} digits */
 Vector3D.prototype.toFixed = function(digits)
 {
-	return this.set(this.x.toFixed(digits), this.y.toFixed(digits), this.z.toFixed(digits));
+	return this.set(+this.x.toFixed(digits), +this.y.toFixed(digits), +this.z.toFixed(digits));
 };
 
 // Numeric 3D info functions (non-mutating)

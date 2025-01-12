@@ -27,7 +27,7 @@ Trigger.prototype.eventNames = /** @type {const} */(
 	"OnTrainingFinished",
 	"OnTrainingQueued",
 	"OnTreasureCollected"
-];
+]);
 
 Trigger.prototype.Init = function()
 {
@@ -156,7 +156,7 @@ Trigger.prototype.RegisterTrigger = function(event, name, triggerData, customDat
  */
 Trigger.prototype.DisableTrigger = function(event, name)
 {
-	if (!this.triggers[event][name])
+	if (!this.triggers[event]?.[name])
 	{
 		warn("Trigger.js: Disabling unknown trigger " + name);
 		return;
@@ -193,7 +193,7 @@ Trigger.prototype.DisableTrigger = function(event, name)
  */
 Trigger.prototype.EnableTrigger = function(event, name)
 {
-	if (!this.triggers[event][name])
+	if (!this.triggers[event]?.[name])
 	{
 		warn("Trigger.js: Enabling unknown trigger " + name);
 		return;

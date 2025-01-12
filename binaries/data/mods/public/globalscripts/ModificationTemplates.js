@@ -24,7 +24,7 @@ function ModificationTemplates(path)
 	this.templates = {};
 
 	for (let name of this.names)
-		this.templates[name] = Engine.ReadJSONFile(path + name + suffix);
+		this.templates[name] = /** @type {Template} */(Engine.ReadJSONFile(path + name + suffix));
 
 	deepfreeze(this.templates);
 }
@@ -55,7 +55,9 @@ ModificationTemplates.prototype.GetAll = function()
 
 function LoadModificationTemplates()
 {
+	// @ts-expect-error
 	global.AuraTemplates = new ModificationTemplates("simulation/data/auras/");
+	// @ts-expect-error
 	global.TechnologyTemplates = new ModificationTemplates("simulation/data/technologies/");
 }
 

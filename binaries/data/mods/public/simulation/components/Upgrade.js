@@ -34,7 +34,7 @@ Upgrade.prototype.Schema =
 					"<element name='Cost' a:help='Resource cost to upgrade this unit'>" +
 						"<oneOrMore>" +
 							"<choice>" +
-								Resources.BuildSchema("nonNegativeInteger") +
+								g_Resources.BuildSchema("nonNegativeInteger") +
 							"</choice>" +
 						"</oneOrMore>" +
 					"</element>" +
@@ -75,8 +75,8 @@ Upgrade.prototype.DetermineUpgrades = function()
 
 	for (const choice in this.template)
 	{
-		const nativeCiv = Engine.QueryInterface(this.entity, IID_Identity).GetCiv();
-		const playerCiv = QueryPlayerIDInterface(this.owner, IID_Identity).GetCiv();
+		const nativeCiv = Engine.QueryInterface(this.entity, IID_Identity)?.GetCiv();
+		const playerCiv = QueryPlayerIDInterface(this.owner, IID_Identity)?.GetCiv();
 		const name = this.template[choice].Entity.
 			replace(/\{native\}/g, nativeCiv).
 			replace(/\{civ\}/g, playerCiv);
@@ -98,7 +98,7 @@ Upgrade.prototype.ChangeUpgradedEntityCount = function(amount)
 		return;
 
 	let cmpTempMan = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	let template = cmpTempMan.GetTemplate(this.upgrading);
+	let template = cmpTempMan.GetTemplate(/** @type {string} */(this.upgrading));
 
 	let categoryTo;
 	if (template.TrainingRestrictions)
@@ -144,7 +144,7 @@ Upgrade.prototype.GetUpgrades = function()
 		if (choice.Cost)
 			cost = /** @type {Record<string, number>} */(this.GetResourceCosts(option));
 		if (choice.Time)
-			cost.time = this.GetUpgradeTime(option);
+			cost.time = /** @type {number} */(this.GetUpgradeTime(option));
 
 		let hasCost = choice.Cost || choice.Time;
 		ret.push({
@@ -254,7 +254,7 @@ Upgrade.prototype.Upgrade = function(template)
 		return false;
 	}
 
-	this.expendedResources = this.GetResourceCosts(template);
+	this.expendedResources = /** @type {Record<string, number>} */(this.GetResourceCosts(template));
 	if (!cmpPlayer || !cmpPlayer.TrySubtractResources(this.expendedResources))
 	{
 		this.expendedResources = {};
@@ -292,7 +292,7 @@ Upgrade.prototype.CancelUpgrade = function(owner)
 	this.ChangeUpgradedEntityCount(-1);
 
 	// Do not update visual actor if the animation didn't change.
-	let choice = this.upgradeTemplates[this.upgrading];
+	let choice = this.upgradeTemplates[/** @type {string} */ (this.upgrading)];
 	if (choice && this.template[choice].Variant)
 	{
 		let cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -308,16 +308,18 @@ Upgrade.prototype.CancelUpgrade = function(owner)
 /** @param {string=} templateArg */
 Upgrade.prototype.GetUpgradeTime = function(templateArg)
 {
-	let template = this.upgrading || templateArg;
+	let template = templateArg || /** @type {String} */ (this.upgrading);
 	let choice = this.upgradeTemplates[template];
 
-	if (!choice)
-		return undefined;
+	if (!choice) return undefined;
 
-	if (!this.template[choice].Time)
-		return 0;
+	if (!this.template[choice].Time) return 0;
 
-	return ApplyValueModificationsToEntity("Upgrade/Time", +this.template[choice].Time, this.entity);
+	return ApplyValueModificationsToEntity(
+		"Upgrade/Time",
+		+this.template[choice].Time,
+		this.entity
+	);
 };
 
 Upgrade.prototype.GetElapsedTime = function()
@@ -329,18 +331,22 @@ Upgrade.prototype.GetProgress = function()
 {
 	if (!this.IsUpgrading())
 		return undefined;
-	return this.GetUpgradeTime() == 0 ? 1 : Math.min(this.elapsedTime / 1000.0 / this.GetUpgradeTime(), 1.0);
+	let upgradeTime = /** @type {number} */ (this.GetUpgradeTime());
+	return upgradeTime == 0 ? 1 : Math.min(/** @type {number} */ (this.elapsedTime) / 1000.0 / upgradeTime, 1.0);
 };
 
 /** @param {number} time */
 Upgrade.prototype.SetElapsedTime = function(time)
 {
 	this.elapsedTime = time;
-	Engine.PostMessage(this.entity, MT_UpgradeProgressUpdate, null);
+	Engine.PostMessage(this.entity, MT_UpgradeProgressUpdate);
 };
 
 Upgrade.prototype.SetUpgradeAnimationVariant = function()
 {
+	if (!this.upgrading)
+		return;
+
 	let choice = this.upgradeTemplates[this.upgrading];
 
 	if (!choice || !this.template[choice].Variant)
@@ -353,7 +359,7 @@ Upgrade.prototype.SetUpgradeAnimationVariant = function()
 	cmpVisual.SelectAnimation(this.template[choice].Variant, false, 1.0);
 };
 
-Upgrade.prototype.UpgradeProgress = function(data, lateness)
+Upgrade.prototype.UpgradeProgress = function(data = undefined, lateness = 0)
 {
 	if (/** @type {number} */(this.elapsedTime)/1000.0 < /** @type {number} */(this.GetUpgradeTime()))
 	{

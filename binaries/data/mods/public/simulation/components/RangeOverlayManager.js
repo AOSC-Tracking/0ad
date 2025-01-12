@@ -96,7 +96,7 @@ RangeOverlayManager.prototype.OnValueModification = function(msg)
 /**
  * RangeOverlayManager component is deserialized before the TechnologyManager, so need to update the ranges here
  */
-RangeOverlayManager.prototype.OnDeserialized = function(msg)
+RangeOverlayManager.prototype.OnDeserialized = function()
 {
 	for (let type in this.enabledRangeTypes)
 		// @ts-expect-error

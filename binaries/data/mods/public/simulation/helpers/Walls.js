@@ -21,7 +21,7 @@
  */
 function GetWallPlacement(placementData, wallSet, start, end)
 {
-	let candidateSegments = ["long", "medium", "short"].map(size => ({
+	let candidateSegments = /** @type {const} */(["long", "medium", "short"]).map(size => ({
 		"template": wallSet.templates[size],
 		"len": placementData[wallSet.templates[size]].templateData.wallPiece.length
 	}));

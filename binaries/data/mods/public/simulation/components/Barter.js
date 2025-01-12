@@ -43,7 +43,7 @@ Barter.prototype.RESTORE_TIMER_INTERVAL = 5000;
 Barter.prototype.Init = function()
 {
 	this.priceDifferences = {};
-	for (const resource of Resources.GetBarterableCodes())
+	for (const resource of g_Resources.GetBarterableCodes())
 		this.priceDifferences[resource] = 0;
 };
 
@@ -55,7 +55,7 @@ Barter.prototype.GetPrices = function(cmpPlayer)
 	const multiplier = cmpPlayer.GetBarterMultiplier();
 	for (const resource in this.priceDifferences)
 	{
-		const truePrice = Resources.GetResource(resource).truePrice;
+		const truePrice = g_Resources.GetResource(resource).truePrice;
 		prices.buy[resource] = truePrice * (this.DEAL_AMOUNT + this.CONSTANT_DIFFERENCE + this.priceDifferences[resource]) * multiplier.buy[resource] / this.DEAL_AMOUNT;
 		prices.sell[resource] = truePrice * (this.DEAL_AMOUNT - this.CONSTANT_DIFFERENCE + this.priceDifferences[resource]) * multiplier.sell[resource] / this.DEAL_AMOUNT;
 	}
@@ -91,7 +91,7 @@ Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resource
 	if (amount !== this.DEAL_AMOUNT && amount !== (this.BATCH_SIZE * this.DEAL_AMOUNT))
 		return;
 
-	const cmpPlayer = QueryPlayerIDInterface(playerID);
+	const cmpPlayer = QueryPlayerIDInterface(playerID, IID_Player);
 	if (!cmpPlayer?.CanBarter())
 		return;
 

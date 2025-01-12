@@ -159,7 +159,7 @@ MultiKeyMap.prototype.GetAllItems = function(secondaryKey)
 	// Map doesn't implement filter so use a for loop.
 	for (let primaryKey of this.items.keys())
 	{
-		if (!this.items.get(primaryKey).has(secondaryKey))
+		if (!this.items.get(primaryKey)?.has(secondaryKey))
 			continue;
 		items[primaryKey] = this.GetItems(primaryKey, secondaryKey);
 	}
@@ -176,8 +176,8 @@ MultiKeyMap.prototype._getItems = function(primaryKey, secondaryKey)
 {
 	let cache = this.items.get(primaryKey);
 	if (cache)
-		cache = cache.get(secondaryKey);
-	return cache ? cache : [];
+		return cache.get(secondaryKey) || [];
+	return [];
 };
 
 /**

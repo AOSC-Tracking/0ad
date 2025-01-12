@@ -33,7 +33,7 @@ Builder.prototype.GetEntitiesList = function()
 	if (!string)
 		return [];
 
-	let cmpPlayer = QueryOwnerInterface(this.entity);
+	let cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
 		return [];
 
@@ -43,7 +43,7 @@ Builder.prototype.GetEntitiesList = function()
 	if (cmpIdentity)
 		string = string.replace(/\{native\}/g, cmpIdentity.GetCiv());
 
-	const entities = string.replace(/\{civ\}/g, QueryOwnerInterface(this.entity, IID_Identity).GetCiv()).split(/\s+/);
+	const entities = string.replace(/\{civ\}/g, /** @type {Identity} */(QueryOwnerInterface(this.entity, IID_Identity)).GetCiv()).split(/\s+/);
 
 	let disabledTemplates = cmpPlayer.GetDisabledTemplates();
 
@@ -121,7 +121,8 @@ Builder.prototype.StopRepairing = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	let cmpBuilderList = QueryBuilderListInterface(this.target);
@@ -143,7 +144,7 @@ Builder.prototype.StopRepairing = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason);
 	}
 };
 
@@ -154,29 +155,30 @@ Builder.prototype.StopRepairing = function(reason)
  */
 Builder.prototype.PerformBuilding = function(data, lateness)
 {
-	if (!this.CanRepair(this.target))
+	let target = /** @type {number} */(this.target);
+	if (!this.CanRepair(target))
 	{
 		this.StopRepairing("TargetInvalidated");
 		return;
 	}
 
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(target))
 	{
 		this.StopRepairing("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
 
-	let cmpFoundation = Engine.QueryInterface(this.target, IID_Foundation);
+	let cmpFoundation = Engine.QueryInterface(target, IID_Foundation);
 	if (cmpFoundation)
 	{
 		cmpFoundation.Build(this.entity, this.GetRate());
 		return;
 	}
 
-	let cmpRepairable = Engine.QueryInterface(this.target, IID_Repairable);
+	let cmpRepairable = Engine.QueryInterface(target, IID_Repairable);
 	if (cmpRepairable)
 	{
 		cmpRepairable.Repair(this.entity, this.GetRate());

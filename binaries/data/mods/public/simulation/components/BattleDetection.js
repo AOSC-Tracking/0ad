@@ -46,7 +46,7 @@ BattleDetection.prototype.SetState = function(state)
 		return;
 
 	this.state = state;
-	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
+	var cmpPlayer = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player));
 	Engine.PostMessage(this.entity, MT_BattleStateChanged, { "player": cmpPlayer.GetPlayerID(), "to": this.state });
 };
 
@@ -55,7 +55,8 @@ BattleDetection.prototype.GetState = function()
 	return this.state;
 };
 
-BattleDetection.prototype.TimerHandler = function(data, lateness)
+/** @param {{ timerRepeat: number | undefined }} data */
+BattleDetection.prototype.TimerHandler = function(data)
 {
 	// Reset the timer
 	if (data.timerRepeat === undefined)

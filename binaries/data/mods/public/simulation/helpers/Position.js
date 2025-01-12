@@ -1,4 +1,4 @@
-function PositionHelper() {}
+function PositionHelperClass() {}
 
 /**
  * @param {number} firstEntity - The entityID of an entity.
@@ -7,7 +7,7 @@ function PositionHelper() {}
  * @return {number} - The horizontal distance between the two given entities. Returns
  *			infinity when the distance cannot be calculated.
  */
-PositionHelper.prototype.DistanceBetweenEntities = function(firstEntity, secondEntity)
+PositionHelperClass.prototype.DistanceBetweenEntities = function(firstEntity, secondEntity)
 {
 	let cmpFirstPosition = Engine.QueryInterface(firstEntity, IID_Position);
 	if (!cmpFirstPosition || !cmpFirstPosition.IsInWorld())
@@ -28,7 +28,7 @@ PositionHelper.prototype.DistanceBetweenEntities = function(firstEntity, secondE
  *
  * @return {number[]} The id's of the entities in range of the given point.
  */
-PositionHelper.prototype.EntitiesNearPoint = function(origin, radius, players, iid = 0)
+PositionHelperClass.prototype.EntitiesNearPoint = function(origin, radius, players, iid = 0)
 {
 	if (!origin || !radius || !players || !players.length)
 		return [];
@@ -46,7 +46,7 @@ PositionHelper.prototype.EntitiesNearPoint = function(origin, radius, players, i
  *
  * @return {Vector3D | undefined} The interpolated location of the entity.
  */
-PositionHelper.prototype.InterpolatedLocation = function(ent, lateness)
+PositionHelperClass.prototype.InterpolatedLocation = function(ent, lateness)
 {
 	let cmpTargetPosition = Engine.QueryInterface(ent, IID_Position);
 	if (!cmpTargetPosition || !cmpTargetPosition.IsInWorld()) // TODO: handle dead target properly
@@ -72,7 +72,7 @@ PositionHelper.prototype.InterpolatedLocation = function(ent, lateness)
  *
  * @return {boolean} True if the point is inside of the entity's footprint.
  */
-PositionHelper.prototype.TestCollision = function(ent, point, lateness)
+PositionHelperClass.prototype.TestCollision = function(ent, point, lateness)
 {
 	let targetPosition = this.InterpolatedLocation(ent, lateness);
 	if (!targetPosition)
@@ -91,7 +91,7 @@ PositionHelper.prototype.TestCollision = function(ent, point, lateness)
 
 	if (targetShape.type == "square")
 	{
-		let angle = Engine.QueryInterface(ent, IID_Position).GetRotation().y;
+		let angle = Engine.QueryInterface(ent, IID_Position)?.GetRotation().y || 0;
 		let distance = Vector2D.from3D(Vector3D.sub(point, targetPosition)).rotate(-angle);
 		return Math.abs(distance.x) < targetShape.width / 2 && Math.abs(distance.y) < targetShape.depth / 2;
 	}
@@ -113,9 +113,9 @@ PositionHelper.prototype.TestCollision = function(ent, point, lateness)
  *
  * @return {number|false} - The time to collision or false if the collision will not happen.
  */
-PositionHelper.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed, targetPosition, targetVelocity)
+PositionHelperClass.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed, targetPosition, targetVelocity)
 {
-	let relativePosition = new Vector3D.sub(targetPosition, firstPosition);
+	let relativePosition = Vector3D.sub(targetPosition, firstPosition);
 	let a = targetVelocity.x * targetVelocity.x + targetVelocity.z * targetVelocity.z - selfSpeed * selfSpeed;
 	let b = relativePosition.x * targetVelocity.x + relativePosition.z * targetVelocity.z;
 	let c = relativePosition.x * relativePosition.x + relativePosition.z * relativePosition.z;
@@ -140,7 +140,7 @@ PositionHelper.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed
  * @param {boolean} forced - Optionally whether the spawning is forced.
  * @return {Vector3D | null} - An appropriate spawning position.
  */
-PositionHelper.prototype.GetSpawnPosition = function(target, entity, forced)
+PositionHelperClass.prototype.GetSpawnPosition = function(target, entity, forced)
 {
 	let cmpFootprint = Engine.QueryInterface(target, IID_Footprint);
 	let cmpHealth = Engine.QueryInterface(target, IID_Health);
@@ -164,9 +164,10 @@ PositionHelper.prototype.GetSpawnPosition = function(target, entity, forced)
 
 		// If ejection is forced, we need to continue, so use center of the entity.
 		let cmpPosition = Engine.QueryInterface(target, IID_Position);
-		pos = cmpPosition.GetPosition();
+		if (cmpPosition)
+			pos = cmpPosition.GetPosition();
 	}
 	return pos;
 };
 
-Engine.RegisterGlobal("PositionHelper", new PositionHelper());
+Engine.RegisterGlobal("PositionHelper", new PositionHelperClass());

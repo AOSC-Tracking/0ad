@@ -171,7 +171,7 @@ AIProxy.prototype.OnProductionQueueChanged = function(msg)
 {
 	if (!this.NotifyChange())
 		return;
-	let cmpProductionQueue = Engine.QueryInterface(this.entity, IID_ProductionQueue);
+	let cmpProductionQueue = /** @type {ProductionQueue} */(Engine.QueryInterface(this.entity, IID_ProductionQueue));
 	this.changes.trainingQueue = cmpProductionQueue.GetQueue();
 };
 
@@ -181,7 +181,7 @@ AIProxy.prototype.OnGarrisonedUnitsChanged = function(msg)
 	if (!this.NotifyChange())
 		return;
 
-	let cmpGarrisonHolder = Engine.QueryInterface(this.entity, IID_GarrisonHolder);
+	let cmpGarrisonHolder = /** @type {GarrisonHolder} */(Engine.QueryInterface(this.entity, IID_GarrisonHolder));
 	this.changes.garrisoned = cmpGarrisonHolder.GetEntities();
 
 	// Send a message telling a unit garrisoned or ungarrisoned.

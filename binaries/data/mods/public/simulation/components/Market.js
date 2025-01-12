@@ -89,8 +89,8 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	if (!cmpMarket2)
 		return null;
 
-	let cmpMarket1Player = QueryOwnerInterface(this.entity);
-	let cmpMarket2Player = QueryOwnerInterface(secondMarket);
+	let cmpMarket1Player = QueryOwnerInterface(this.entity, IID_Player);
+	let cmpMarket2Player = QueryOwnerInterface(secondMarket, IID_Player);
 	if (!cmpMarket1Player || !cmpMarket2Player)
 		return null;
 
@@ -116,7 +116,7 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	{
 		if (!traderTemplate || !traderTemplate.GainMultiplier)
 			return null;
-		gainMultiplier *= traderTemplate.GainMultiplier;
+		gainMultiplier *= +traderTemplate.GainMultiplier;
 	}
 
 	let gain = {};
@@ -131,7 +131,7 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	gain.market1Owner = cmpMarket1Player.GetPlayerID();
 	gain.market2Owner = cmpMarket2Player.GetPlayerID();
 	// If trader undefined, the trader owner is supposed to be the same as the first market.
-	let cmpPlayer = trader ? QueryOwnerInterface(trader) : cmpMarket1Player;
+	let cmpPlayer = trader ? QueryOwnerInterface(trader, IID_Player) : cmpMarket1Player;
 	if (!cmpPlayer)
 		return null;
 	gain.traderOwner = cmpPlayer.GetPlayerID();

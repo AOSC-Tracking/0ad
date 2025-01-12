@@ -73,7 +73,7 @@ Garrisonable.prototype.CanGarrison = function(target)
 		return false;
 
 	let cmpGarrisonHolder = Engine.QueryInterface(target, IID_GarrisonHolder);
-	return cmpGarrisonHolder && cmpGarrisonHolder.IsAllowedToGarrison(this.entity);
+	return !!cmpGarrisonHolder && cmpGarrisonHolder.IsAllowedToGarrison(this.entity);
 };
 
 /**
@@ -132,7 +132,7 @@ Garrisonable.prototype.UnGarrison = function(forced = false)
 	}
 
 	let cmpHolderPosition = Engine.QueryInterface(this.holder, IID_Position);
-	if (cmpHolderPosition)
+	if (cmpPosition && cmpHolderPosition)
 		cmpPosition.SetYRotation(cmpHolderPosition.GetPosition().horizAngleTo(pos));
 
 	let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
@@ -166,10 +166,10 @@ Garrisonable.prototype.OnEntityRenamed = function(msg)
 		return;
 
 	let holder = this.holder;
-	this.UnGarrison(true, true);
+	this.UnGarrison(true);
 	let cmpGarrisonable = Engine.QueryInterface(msg.newentity, IID_Garrisonable);
 	if (cmpGarrisonable)
-		cmpGarrisonable.Garrison(holder, true);
+		cmpGarrisonable.Garrison(holder);
 };
 
 Engine.RegisterComponentType(IID_Garrisonable, "Garrisonable", Garrisonable);

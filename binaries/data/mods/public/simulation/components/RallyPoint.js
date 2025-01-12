@@ -53,11 +53,11 @@ RallyPoint.prototype.GetPositions = function()
 
 		// and visible
 		if (cmpRangeManager && cmpOwnership &&
-				cmpRangeManager.GetLosVisibility(this.data[i].target, cmpOwnership.GetOwner()) != "visible")
+				cmpRangeManager.GetLosVisibility(target, cmpOwnership.GetOwner()) != "visible")
 			continue;
 
 		// Get the actual position of the target entity
-		var cmpPosition = Engine.QueryInterface(this.data[i].target, IID_Position);
+		var cmpPosition = Engine.QueryInterface(target, IID_Position);
 		if (!cmpPosition || !cmpPosition.IsInWorld())
 			continue;
 

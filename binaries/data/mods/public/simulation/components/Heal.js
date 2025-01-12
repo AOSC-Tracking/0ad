@@ -107,7 +107,7 @@ Heal.prototype.CanHeal = function(target)
 
 	let targetClasses = cmpIdentity.GetClassesList();
 	return !MatchesClassList(targetClasses, this.GetUnhealableClasses()) &&
-		MatchesClassList(targetClasses, this.GetHealableClasses());
+		MatchesClassList(targetClasses, this.GetHealableClasses()) || false;
 };
 
 Heal.prototype.GetRangeOverlays = function()
@@ -174,7 +174,8 @@ Heal.prototype.StopHealing = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	delete this.target;
@@ -192,7 +193,7 @@ Heal.prototype.StopHealing = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason, undefined);
 	}
 };
 
@@ -203,28 +204,29 @@ Heal.prototype.StopHealing = function(reason)
  */
 Heal.prototype.PerformHeal = function(data, lateness)
 {
-	if (!this.CanHeal(this.target))
+	let target = /** @type {number} */ (this.target);
+	if (!this.CanHeal(target))
 	{
 		this.StopHealing("TargetInvalidated");
 		return;
 	}
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(target))
 	{
 		this.StopHealing("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
 	this.lastHealed = cmpTimer.GetTime() - lateness;
 
-	let cmpHealth = Engine.QueryInterface(this.target, IID_Health);
+	let cmpHealth = /** @type {Health} */(Engine.QueryInterface(target, IID_Health));
 	let targetState = cmpHealth.Increase(this.GetHealth());
 
 	// Add experience.
-	let cmpLoot = Engine.QueryInterface(this.target, IID_Loot);
+	let cmpLoot = Engine.QueryInterface(target, IID_Loot);
 	let cmpPromotion = Engine.QueryInterface(this.entity, IID_Promotion);
 	if (targetState !== undefined && cmpLoot && cmpPromotion)
 		// Health healed times experience per health.

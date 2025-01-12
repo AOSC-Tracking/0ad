@@ -48,18 +48,6 @@ UnitMotionFlying.prototype.Schema =
 
 UnitMotionFlying.prototype.Init = function()
 {
-	this.hasTarget = false;
-	this.reachedTarget = false;
-	this.targetX = 0;
-	this.targetZ = 0;
-	this.targetMinRange = 0;
-	this.targetMaxRange = 0;
-	this.speed = 0;
-	this.landing = false;
-	this.onGround = true;
-	this.pitch = 0;
-	this.roll = 0;
-	this.waterDeath = false;
 	this.passabilityClass = Engine.QueryInterface(SYSTEM_ENTITY, IID_Pathfinder).GetPassabilityClass(this.template.PassabilityClass);
 };
 
@@ -70,7 +58,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 	if (!this.hasTarget)
 		return;
 	let cmpGarrisonHolder = Engine.QueryInterface(this.entity, IID_GarrisonHolder);
-	let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
+	let cmpPosition = /** @type {Position} */(Engine.QueryInterface(this.entity, IID_Position));
 	let pos = cmpPosition.GetPosition();
 	let angle = cmpPosition.GetRotation().y;
 	let cmpTerrain = Engine.QueryInterface(SYSTEM_ENTITY, IID_Terrain);
@@ -108,7 +96,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 				this.pitch = 0;
 				// We've stopped.
 				if (cmpGarrisonHolder)
-					cmpGarrisonHolder.AllowGarrisoning(true, "UnitMotionFlying");
+					cmpGarrisonHolder.AllowGarrisoning(true, IID_UnitMotion);
 				canTurn = false;
 				this.hasTarget = false;
 				this.landing = false;
@@ -183,7 +171,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 		if (this.speed < this.template.TakeoffSpeed && this.onGround)
 		{
 			if (cmpGarrisonHolder)
-				cmpGarrisonHolder.AllowGarrisoning(false, "UnitMotionFlying");
+				cmpGarrisonHolder.AllowGarrisoning(false, IID_UnitMotion);
 			this.pitch = 0;
 			// Accelerate forwards.
 			this.speed = Math.min(this.template.MaxSpeed, this.speed + turnLength * this.template.AccelRate);
@@ -336,7 +324,7 @@ UnitMotionFlying.prototype.EstimateFuturePosition = function(dt)
 {
 	let cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
 	if (!cmpPosition || !cmpPosition.IsInWorld())
-		return Vector2D();
+		return new Vector2D();
 	let position = cmpPosition.GetPosition2D();
 
 	return Vector2D.add(position, Vector2D.sub(position, cmpPosition.GetPreviousPosition2D()).mult(dt/Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).GetLatestTurnLength()));

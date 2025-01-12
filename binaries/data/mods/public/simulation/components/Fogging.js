@@ -15,7 +15,7 @@ Fogging.prototype.Schema =
  * The components that we want to mirage when present.
  * Assumes that a function "Mirage()" is present.
  */
-Fogging.prototype.componentsToMirage = [
+Fogging.prototype.componentsToMirage = /** @type {const} */([
 	IID_Capturable,
 	IID_Foundation,
 	IID_Health,
@@ -24,7 +24,7 @@ Fogging.prototype.componentsToMirage = [
 	IID_Repairable,
 	IID_Resistance,
 	IID_ResourceSupply
-];
+]);
 
 Fogging.prototype.Init = function()
 {

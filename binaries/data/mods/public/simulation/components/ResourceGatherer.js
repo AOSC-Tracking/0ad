@@ -25,10 +25,10 @@ ResourceGatherer.prototype.Schema =
 		"<ref name='positiveDecimal'/>" +
 	"</element>" +
 	"<element name='Rates' a:help='Per-resource-type gather rate multipliers. If a resource type is not specified then it cannot be gathered by this unit'>" +
-		Resources.BuildSchema("positiveDecimal", [], true) +
+		g_Resources.BuildSchema("positiveDecimal", [], true) +
 	"</element>" +
 	"<element name='Capacities' a:help='Per-resource-type maximum carrying capacity'>" +
-		Resources.BuildSchema("positiveDecimal") +
+		g_Resources.BuildSchema("positiveDecimal") +
 	"</element>";
 
 /*
@@ -37,20 +37,7 @@ ResourceGatherer.prototype.Schema =
  */
 ResourceGatherer.prototype.GATHER_AMOUNT = 1;
 
-ResourceGatherer.prototype.Init = function()
-{
-	// Cached. Currently not a target of modifiers.
-	this.range = { "max": +this.template.MaxDistance, "min": 0 };
-
-	this.capacities = {};
-	this.carrying = {}; // { generic type: integer amount currently carried }
-	// (Note that this component supports carrying multiple types of resources,
-	// each with an independent capacity, but the rest of the game currently
-	// ensures and assumes we'll only be carrying one type at once)
-
-	// The last exact type gathered, so we can render appropriate props
-	this.lastCarriedType = undefined; // { generic, specific }
-};
+ResourceGatherer.prototype.Init = function() {};
 
 /**
  * Returns data about what resources the unit is currently carrying,
@@ -122,7 +109,7 @@ ResourceGatherer.prototype.RecalculateGatherRates = function()
 	{
 		let type = r.split(".");
 
-		if (!Resources.GetResource(type[0]).subtypes[type[1]])
+		if (!g_Resources.GetResource(type[0]).subtypes[type[1]])
 		{
 			error("Resource subtype not found: " + type[0] + "." + type[1]);
 			continue;
@@ -225,7 +212,8 @@ ResourceGatherer.prototype.StopGathering = function(reason)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 
 	let cmpResourceSupply = Engine.QueryInterface(this.target, IID_ResourceSupply);
@@ -248,7 +236,7 @@ ResourceGatherer.prototype.StopGathering = function(reason)
 	{
 		let component = Engine.QueryInterface(this.entity, callerIID);
 		if (component)
-			component.ProcessMessage(reason, null);
+			component.ProcessMessage(reason);
 	}
 };
 
@@ -259,21 +247,22 @@ ResourceGatherer.prototype.StopGathering = function(reason)
  */
 ResourceGatherer.prototype.PerformGather = function(data, lateness)
 {
-	let cmpResourceSupply = Engine.QueryInterface(this.target, IID_ResourceSupply);
+	let target = /** @type {number} */ (this.target);
+	let cmpResourceSupply = Engine.QueryInterface(target, IID_ResourceSupply);
 	if (!cmpResourceSupply || cmpResourceSupply.GetCurrentAmount() <= 0)
 	{
 		this.StopGathering("TargetInvalidated");
 		return;
 	}
 
-	if (!this.IsTargetInRange(this.target))
+	if (!this.IsTargetInRange(target))
 	{
 		this.StopGathering("OutOfRange");
 		return;
 	}
 
 	// ToDo: Enable entities to keep facing a target.
-	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(this.target);
+	Engine.QueryInterface(this.entity, IID_UnitAI)?.FaceTowardsTarget(target);
 
 	let type = cmpResourceSupply.GetType();
 	if (!this.carrying[type.generic])
@@ -463,7 +452,7 @@ ResourceGatherer.prototype.RemoveFromPlayerCounter = function(playerid)
 		return;
 
 	let cmpPlayer = playerid != undefined ?
-		QueryPlayerIDInterface(playerid) :
+		QueryPlayerIDInterface(playerid, IID_Player) :
 		QueryOwnerInterface(this.entity, IID_Player);
 
 	if (cmpPlayer)
@@ -513,7 +502,8 @@ ResourceGatherer.prototype.OnOwnershipChanged = function(msg)
 		this.RemoveFromPlayerCounter(msg.from);
 		return;
 	}
-	if (this.lastGathered && msg.from !== INVALID_PLAYER)
+	// TODO investigate
+	if (this.taskedResourceType && msg.from !== INVALID_PLAYER)
 	{
 		const resource = this.taskedResourceType;
 		this.RemoveFromPlayerCounter(msg.from);

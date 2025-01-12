@@ -39,7 +39,7 @@ Turretable.prototype.IsTurreted = function()
  */
 Turretable.prototype.IsEjectable = function()
 {
-	return this.ejectable;
+	return this.ejectable || false;
 };
 
 /**
@@ -52,7 +52,7 @@ Turretable.prototype.CanOccupy = function(target)
 		return false;
 
 	let cmpTurretHolder = Engine.QueryInterface(target, IID_TurretHolder);
-	return cmpTurretHolder && cmpTurretHolder.CanOccupy(this.entity);
+	return cmpTurretHolder && cmpTurretHolder.CanOccupy(this.entity) || false;
 };
 
 /**

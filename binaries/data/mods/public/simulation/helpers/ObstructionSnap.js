@@ -77,8 +77,8 @@ class ObstructionSnap
 	 */
 	compareEdges(a, b)
 	{
-		const behindA = a.signedDistance < -this.EPS;
-		const behindB = b.signedDistance < -this.EPS;
+		const behindA = +(a.signedDistance < -this.EPS);
+		const behindB = +(b.signedDistance < -this.EPS);
 		const scoreA = Math.abs(a.signedDistance) + a.offsetDistance;
 		const scoreB = Math.abs(b.signedDistance) + b.offsetDistance;
 		if (Math.abs(scoreA - scoreB) < this.EPS)
@@ -162,13 +162,13 @@ class ObstructionSnap
 				// edges should be 90 degrees.
 				if (Math.abs(Vector2D.dot(baseEdge.normal, edge.normal)) > this.EPS)
 					continue;
-				let newEdge = {
+				const newEdge = {
 					"begin": edge.end,
 					"end": edge.begin,
 					"normal": Vector2D.mult(edge.normal, -1),
 					"signedDistance": -edge.signedDistance,
 					"offsetDistance": edge.offsetDistance,
-					"order": "ccw",
+					"order": /** @type {"ccw"} */("ccw"),
 				};
 				pairedEdges.push(edge);
 				pairedEdges.push(newEdge);

@@ -66,15 +66,6 @@ const BUILD = "build";
 
 EntityLimits.prototype.Init = function()
 {
-	this.limit = {};
-	// Counts entities which change the limit of the given category.
-	this.count = {};
-	this.changers = {};
-	this.removers = {};
-	// Counts entities with the given class, used in the limit removal.
-	this.classCount = {};
-	this.removedLimit = {};
-	this.matchTemplateCount = {};
 	for (var category in this.template.Limits)
 	{
 		this.limit[category] = +this.template.Limits[category];
@@ -187,7 +178,7 @@ EntityLimits.prototype.AllowedToCreate = function(limitType, category, count, te
 		return false;
 	}
 
-	if (this.matchTemplateCount[templateName] !== undefined && matchLimit !== undefined &&
+	if (templateName && this.matchTemplateCount[templateName] !== undefined && matchLimit !== undefined &&
 		this.matchTemplateCount[templateName] + count > matchLimit)
 	{
 		this.NotifyLimit(limitType, category, matchLimit);
@@ -204,12 +195,13 @@ EntityLimits.prototype.AllowedToCreate = function(limitType, category, count, te
  */
 EntityLimits.prototype.NotifyLimit = function(limitType, category, limit)
 {
-	let cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
+	let cmpPlayer = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player));
 	let notification = {
 		"players": [cmpPlayer.GetPlayerID()],
 		"translateMessage": true,
 		"translateParameters": ["category"],
 		"parameters": { "category": category, "limit": limit },
+		"message": ""
 	};
 
 	if (limitType == BUILD)
@@ -288,7 +280,7 @@ EntityLimits.prototype.OnGlobalOwnershipChanged = function(msg)
 		return;
 
 	// Update entity counts
-	var category = null;
+	let category = null;
 	var cmpBuildRestrictions = Engine.QueryInterface(msg.entity, IID_BuildRestrictions);
 	if (cmpBuildRestrictions)
 		category = cmpBuildRestrictions.GetCategory();
@@ -308,7 +300,7 @@ EntityLimits.prototype.OnGlobalOwnershipChanged = function(msg)
 	if (cmpFoundation)
 		return;
 	var classes = cmpIdentity.GetClassesList();
-	for (var category in this.changers)
+	for (let category in this.changers)
 		for (var c in this.changers[category])
 			if (classes.indexOf(c) >= 0)
 			{
@@ -318,7 +310,7 @@ EntityLimits.prototype.OnGlobalOwnershipChanged = function(msg)
 					this.removedLimit[category] += modifier * this.changers[category][c];
 			}
 
-	for (var category in this.removers)
+	for (let category in this.removers)
 		if ("RequiredClasses" in this.removers[category])
 			for (var cls of this.removers[category].RequiredClasses)
 				if (classes.indexOf(cls) !== -1)

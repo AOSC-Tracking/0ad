@@ -1,5 +1,17 @@
 class AutoBuildable
 {
+	/** @ts-expect-error; @type {EntityId} */
+	entity;
+
+	/** @ts-expect-error; @type {{ Rate: string }} */
+	template;
+
+	/** @ts-expect-error; @type {number} */
+	rate;
+
+	/** @type {number | undefined} */
+	timer;
+
 	Init()
 	{
 		this.UpdateRate();

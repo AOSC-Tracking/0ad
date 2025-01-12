@@ -12,10 +12,17 @@
  */
 class TurretHolder
 {
+	/** @type {TurretPoint[]} */
+	turretPoints = [];
+
+	/** @ts-expect-error; @type {EntityId} */
+	entity;
+
+	/** @ts-expect-error; @type {Template} */
+	template;
+
 	Init()
 	{
-		this.turretPoints = [];
-
 		let points = this.template.TurretPoints;
 		for (let point in points)
 			this.turretPoints.push({
@@ -26,8 +33,8 @@ class TurretHolder
 					"z": +points[point].Z
 				},
 				"allowedClasses": points[point].AllowedClasses?._string,
-				"angle": points[point].Angle ? +points[point].Angle * Math.PI / 180 : null,
-				"entity": null,
+				"angle": points[point].Angle ? +points[point].Angle * Math.PI / 180 : undefined,
+				"entity": undefined,
 				"template": points[point].Template,
 				"ejectable": "Ejectable" in points[point] ? points[point].Ejectable == "true" : true
 			});
@@ -49,16 +56,16 @@ class TurretHolder
 			this.reservedTurrets?.has(turretPointName))
 			return false;
 
-		const cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
+		const cmpOwnership = /** @type {Ownership} */(Engine.QueryInterface(this.entity, IID_Ownership));
 
-		const upgradedTemplate = GetUpgradedTemplate(cmpOwnership.GetOwner(), turretPoint.template);
+		const upgradedTemplate = GetUpgradedTemplate(cmpOwnership.GetOwner(), /** @type {string} */(turretPoint.template));
 		const ent = Engine.AddEntity(upgradedTemplate);
 
 		const cmpEntOwnership = Engine.QueryInterface(ent, IID_Ownership);
 		cmpEntOwnership?.SetOwner(cmpOwnership.GetOwner());
 
 		const cmpTurretable = Engine.QueryInterface(ent, IID_Turretable);
-		return cmpTurretable?.OccupyTurret(this.entity, turretPoint.name, turretPoint.ejectable) || Engine.DestroyEntity(ent);
+		return cmpTurretable?.OccupyTurret(this.entity, turretPoint.name, turretPoint.ejectable) || Engine.DestroyEntity(ent) || false;
 	}
 
 	/**
@@ -97,7 +104,7 @@ class TurretHolder
 			return true;
 
 		let cmpIdentity = Engine.QueryInterface(entity, IID_Identity);
-		return cmpIdentity && MatchesClassList(cmpIdentity.GetClassesList(), turretPoint.allowedClasses);
+		return cmpIdentity && MatchesClassList(cmpIdentity.GetClassesList(), turretPoint.allowedClasses) || false;
 	}
 
 	/**
@@ -149,9 +156,9 @@ class TurretHolder
 		// If no such angle given (usually walls for which outside/inside not well defined), we keep
 		// the current angle as it was used for garrisoning and thus quite often was from inside to
 		// outside, except when garrisoning from outWorld where we take as default PI.
-		if (!turretPoint && turretPoint.angle != null)
+		if (turretPoint && turretPoint.angle != null)
 			cmpPositionOccupant.SetYRotation(cmpPositionSelf.GetRotation().y + turretPoint.angle);
-		else if (!turretPoint && !cmpPosition.IsInWorld())
+		else if (turretPoint && cmpPositionOccupant.IsInWorld())
 			cmpPositionOccupant.SetYRotation(cmpPositionSelf.GetRotation().y + Math.PI);
 
 		cmpPositionOccupant.SetTurretParent(this.entity, turretPoint.offset);
@@ -205,7 +212,7 @@ class TurretHolder
 		if (!turretPoint || (!turretPoint.ejectable && !forced))
 			return false;
 
-		turretPoint.entity = null;
+		turretPoint.entity = undefined;
 
 		Engine.PostMessage(this.entity, MT_TurretsChanged, {
 			"added": [],
@@ -346,9 +353,10 @@ class TurretHolder
 		}
 		else
 		{
-			let entityIndex = this.initTurrets.indexOf(msg.entity);
-			if (entityIndex != -1)
-				this.initTurrets[entityIndex] = msg.newentity;
+			// TODO investigate
+			let idx = this.initTurrets.get(msg.entity);
+			if (idx)
+				this.initTurrets.set(idx, msg.newentity);
 		}
 	}
 
@@ -364,7 +372,7 @@ class TurretHolder
 		for (let [turretPointName, entity] of this.initTurrets)
 		{
 			let cmpTurretable = Engine.QueryInterface(entity, IID_Turretable);
-			if (!cmpTurretable || !cmpTurretable.OccupyTurret(this.entity, turretPointName, this.TurretPointByName(turretPointName).ejectable))
+			if (!cmpTurretable || !cmpTurretable.OccupyTurret(this.entity, turretPointName, /** @type {TurretPoint} */(this.TurretPointByName(turretPointName)).ejectable))
 				warn("Entity " + entity + " could not occupy the turret point " +
 					turretPointName + " of turret holder " + this.entity + ".");
 		}

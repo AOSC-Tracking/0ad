@@ -17,6 +17,13 @@ function ProductionQueueItem(producer, metadata)
 {
 	this.producer = producer;
 	this.metadata = metadata;
+
+	/** @type {number} */
+	this.id;
+	/** @type {EntityId | -1 | undefined} */
+	this.entity;
+	/** @type {number | -1 | undefined} */
+	this.technology;
 };
 
 /**
@@ -29,7 +36,7 @@ function ProductionQueueItem(producer, metadata)
 ProductionQueueItem.prototype.Queue = function(type, templateName, count)
 {
 	if (type == "unit")
-		return this.QueueEntity(templateName, count);
+		return this.QueueEntity(templateName, /** @type {number} */(count));
 
 	if (type == "technology")
 		return this.QueueTechnology(templateName);
@@ -83,10 +90,10 @@ ProductionQueueItem.prototype.SetID = function(id)
 
 ProductionQueueItem.prototype.Stop = function()
 {
-	if (this.entity > 0)
+	if (this.entity !== undefined && this.entity > 0)
 		Engine.QueryInterface(this.producer, IID_Trainer)?.StopBatch(this.entity);
 
-	if (this.technology > 0)
+	if (this.technology !== undefined && this.technology > 0)
 		Engine.QueryInterface(this.producer, IID_Researcher)?.StopResearching(this.technology);
 };
 
@@ -124,7 +131,7 @@ ProductionQueueItem.prototype.Progress = function(allocatedTime)
 		this.Unpause();
 	if (this.entity)
 	{
-		const cmpTrainer = Engine.QueryInterface(this.producer, IID_Trainer);
+		const cmpTrainer = /** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer));
 		allocatedTime -= cmpTrainer.Progress(this.entity, allocatedTime);
 		if (!cmpTrainer.HasBatch(this.entity))
 			delete this.entity;
@@ -148,7 +155,7 @@ ProductionQueueItem.prototype.Pause = function()
 	if (this.entity)
 		/** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer)).PauseBatch(this.entity);
 	if (this.technology)
-		Engine.QueryInterface(this.producer, IID_Researcher).PauseTechnology(this.technology);
+		/** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher)).PauseTechnology(this.technology);
 };
 
 ProductionQueueItem.prototype.Unpause = function()
@@ -172,9 +179,9 @@ ProductionQueueItem.prototype.GetBasicInfo = function()
 	/** @type {any} */
 	let result;
 	if (this.technology)
-		result = Engine.QueryInterface(this.producer, IID_Researcher).GetResearchingTechnology(this.technology);
+		result = /** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher)).GetResearchingTechnology(this.technology);
 	else if (this.entity)
-		result = Engine.QueryInterface(this.producer, IID_Trainer).GetBatch(this.entity);
+		result = /** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer)).GetBatch(this.entity);
 	result.id = this.id;
 	result.paused = this.paused;
 	return result;
@@ -210,6 +217,7 @@ ProductionQueueItem.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 ProductionQueueItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -260,6 +268,7 @@ ProductionQueue.prototype.Deserialize = function(data)
 
 	for (const item of data.queue)
 	{
+		// @ts-expect-error
 		const newItem = new ProductionQueueItem();
 		newItem.Deserialize(item);
 		this.queue.push(newItem);
@@ -307,7 +316,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 
 	if (!this.queue.length)
 	{
-		const cmpPlayer = QueryOwnerInterface(this.entity);
+		const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
 			return false;
 		const player = cmpPlayer.GetPlayerID();
@@ -325,7 +334,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	}
 	else if (this.queue.length >= this.MaxQueueSize)
 	{
-		const cmpPlayer = QueryOwnerInterface(this.entity);
+		const cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 		if (!cmpPlayer)
 			return false;
 		const player = cmpPlayer.GetPlayerID();
@@ -351,7 +360,7 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	else
 		this.queue.push(item);
 
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+	Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 	if (!this.timer)
 		this.StartTimer();
@@ -369,7 +378,7 @@ ProductionQueue.prototype.RemoveItem = function(id)
 
 	this.queue.splice(itemIndex, 1)[0].Stop();
 
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+	Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 	if (!this.queue.length)
 		this.StopTimer();
@@ -432,12 +441,12 @@ ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
 		time -= item.Progress(time);
 		if (!item.IsFinished())
 		{
-			Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+			Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 			return;
 		}
 
 		this.queue.shift();
-		Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
+		Engine.PostMessage(this.entity, MT_ProductionQueueChanged);
 
 		// If autoqueuing, push a new unit on the queue immediately,
 		// but don't start right away. This 'wastes' some time, making

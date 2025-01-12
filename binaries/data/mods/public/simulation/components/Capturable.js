@@ -105,7 +105,7 @@ Capturable.prototype.Reduce = function(amount, playerID)
 		numberOfEnemies = 0;
 		for (let i in this.capturePoints)
 		{
-			if (!this.capturePoints[i] || !cmpDiplomacySource.IsEnemy(i))
+			if (!this.capturePoints[i] || !cmpDiplomacySource.IsEnemy(+i))
 				continue;
 			if (this.capturePoints[i] > distributedAmount)
 			{
@@ -140,12 +140,14 @@ Capturable.prototype.CanCapture = function(playerID)
 {
 	const cmpDiplomacySource = QueryPlayerIDInterface(playerID, IID_Diplomacy);
 
-	if (!cmpDiplomacySource)
+	if (!cmpDiplomacySource) {
 		warn(playerID + " has no diplomacy component defined on its id.");
+		return false;
+	}
 	let capturePoints = this.GetCapturePoints();
 	let sourceEnemyCapturePoints = 0;
 	for (let i in this.GetCapturePoints())
-		if (cmpDiplomacySource.IsEnemy(i))
+		if (cmpDiplomacySource.IsEnemy(+i))
 			sourceEnemyCapturePoints += capturePoints[i];
 	return sourceEnemyCapturePoints > 0;
 };
@@ -221,7 +223,7 @@ Capturable.prototype.TimerTick = function()
 
 		if (totalNeighbours)
 			for (let p in neighbours)
-				this.capturePoints[p] += decay * neighbours[p] / totalNeighbours;
+				this.capturePoints[+p] += decay * neighbours[p] / totalNeighbours;
 		// Decay to gaia as default.
 		else
 			this.capturePoints[0] += decay;
@@ -241,7 +243,8 @@ Capturable.prototype.TimerTick = function()
 
 	// Nothing changed, stop the timer.
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	cmpTimer.CancelTimer(this.timer);
+	if (this.timer)
+		cmpTimer.CancelTimer(this.timer);
 	delete this.timer;
 	Engine.PostMessage(this.entity, MT_CaptureRegenStateChanged, { "regenerating": false, "regenRate": 0, "territoryDecay": 0 });
 };

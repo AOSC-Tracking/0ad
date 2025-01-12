@@ -5,8 +5,6 @@ PlayerManager.prototype.Schema =
 
 PlayerManager.prototype.Init = function()
 {
-	// List of player entity IDs.
-	this.playerEntities = [];
 };
 
 /**
@@ -23,7 +21,7 @@ PlayerManager.prototype.AddPlayer = function(templateName)
 	const newDiplo = [];
 	for (let i = 0; i < id; i++)
 	{
-		Engine.QueryInterface(this.GetPlayerByID(i), IID_Diplomacy).diplomacy[id] = -1;
+		/** @type {Diplomacy} */(Engine.QueryInterface(this.GetPlayerByID(i), IID_Diplomacy)).diplomacy[id] = -1;
 		newDiplo[i] = -1;
 	}
 	newDiplo[id] = 1;
@@ -53,14 +51,18 @@ PlayerManager.prototype.ReplacePlayerTemplate = function(id, newTemplateName)
 		Engine.QueryInterface(e, IID_Ownership)?.SetOwner(INVALID_PLAYER);
 
 	const oldent = this.playerEntities[id];
-	const oldCmpPlayer = Engine.QueryInterface(oldent, IID_Player);
-	const newCmpPlayer = Engine.QueryInterface(ent, IID_Player);
+	const oldCmpPlayer = /** @type {Player} */(Engine.QueryInterface(oldent, IID_Player));
+	const newCmpPlayer = /** @type {Player} */(Engine.QueryInterface(ent, IID_Player));
 
 	newCmpPlayer.SetPlayerID(id);
 	this.playerEntities[id] = ent;
 
-	newCmpPlayer.SetColor(oldCmpPlayer.GetColor());
-	Engine.QueryInterface(ent, IID_Diplomacy).SetDiplomacy(Engine.QueryInterface(oldent, IID_Diplomacy).GetDiplomacy());
+	let oldColor = oldCmpPlayer.GetColor();
+	newCmpPlayer.SetColor(oldColor.r, oldColor.g, oldColor.b);
+	const oldCmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(oldent, IID_Diplomacy));
+	const newCmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(ent, IID_Diplomacy));
+
+	newCmpDiplomacy.SetDiplomacy(oldCmpDiplomacy.GetDiplomacy());
 
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": id,
@@ -89,7 +91,7 @@ PlayerManager.prototype.GetPlayerByID = function(id)
 	if (id == INVALID_PLAYER)
 		return INVALID_ENTITY;
 
-	const stack = new Error().stack.trimRight().replace(/^/mg, '  '); // indent each line
+	const stack = new Error().stack?.trimRight().replace(/^/mg, '  '); // indent each line
 	warn("GetPlayerByID: no player defined for id '"+id+"'\n"+stack);
 
 	return INVALID_ENTITY;

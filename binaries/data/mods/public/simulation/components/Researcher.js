@@ -24,7 +24,7 @@ Researcher.prototype.Schema =
 	"</optional>" +
 	"<optional>" +
 		"<element name='TechCostMultiplier' a:help='Multiplier to modify resources cost and research time of technologies researched in this building.'>" +
-			Resources.BuildSchema("nonNegativeDecimal", ["time"]) +
+			g_Resources.BuildSchema("nonNegativeDecimal", ["time"]) +
 		"</element>" +
 	"</optional>";
 
@@ -39,6 +39,8 @@ function ResearcherQueueItem(templateName, researcher, metadata)
 	this.templateName = templateName;
 	this.researcher = researcher;
 	this.metadata = metadata;
+	/** @type {number} */
+	this.player;
 };
 
 /**
@@ -48,8 +50,8 @@ function ResearcherQueueItem(templateName, researcher, metadata)
  */
 ResearcherQueueItem.prototype.Queue = function(techCostMultiplier)
 {
-	this.player = QueryOwnerInterface(this.researcher).GetPlayerID();
-	const cmpTechnologyManager = QueryPlayerIDInterface(this.player, IID_TechnologyManager);
+	this.player = /** @type {Player} */ (QueryOwnerInterface(this.researcher, IID_Player)).GetPlayerID();
+	const cmpTechnologyManager = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager));
 	if (!cmpTechnologyManager.QueuedResearch(this.templateName, this.researcher, techCostMultiplier))
 		return false;
 
@@ -58,7 +60,7 @@ ResearcherQueueItem.prototype.Queue = function(techCostMultiplier)
 
 ResearcherQueueItem.prototype.Stop = function()
 {
-	QueryPlayerIDInterface(this.player, IID_TechnologyManager).StoppedResearch(this.templateName);
+	/** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).StoppedResearch(this.templateName);
 	delete this.started;
 };
 
@@ -85,7 +87,7 @@ ResearcherQueueItem.prototype.Progress = function(allocatedTime)
 		this.Start();
 	if (this.paused)
 		this.Unpause();
-	const cmpTechnologyManager = QueryPlayerIDInterface(this.player, IID_TechnologyManager);
+	const cmpTechnologyManager = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager));
 	const usedTime = cmpTechnologyManager.Progress(this.templateName, allocatedTime);
 	if (!cmpTechnologyManager.IsTechnologyQueued(this.templateName))
 		this.Finish();
@@ -94,7 +96,7 @@ ResearcherQueueItem.prototype.Progress = function(allocatedTime)
 
 ResearcherQueueItem.prototype.Pause = function()
 {
-	QueryPlayerIDInterface(this.player, IID_TechnologyManager).Pause(this.templateName);
+	/** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).Pause(this.templateName);
 	this.paused = true;
 };
 
@@ -108,7 +110,8 @@ ResearcherQueueItem.prototype.Unpause = function()
  */
 ResearcherQueueItem.prototype.GetBasicInfo = function()
 {
-	const result = QueryPlayerIDInterface(this.player, IID_TechnologyManager).GetBasicInfo(this.templateName);
+	/** @type {Record<string, any>} */
+	const result = /** @type {TechnologyManager} */ (QueryPlayerIDInterface(this.player, IID_TechnologyManager)).GetBasicInfo(this.templateName);
 	result.technologyTemplate = this.templateName;
 	result.metadata = this.metadata;
 	return result;
@@ -123,6 +126,7 @@ ResearcherQueueItem.prototype.SerializableAttributes = [
 	"templateName"
 ];
 
+/** @param {any} id */
 ResearcherQueueItem.prototype.Serialize = function(id)
 {
 	const result = {
@@ -135,6 +139,7 @@ ResearcherQueueItem.prototype.Serialize = function(id)
 	return result;
 };
 
+/** @param {any} data */
 ResearcherQueueItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -143,11 +148,7 @@ ResearcherQueueItem.prototype.Deserialize = function(data)
 			this[att] = data[att];
 };
 
-Researcher.prototype.Init = function()
-{
-	this.nextID = 1;
-	this.queue = new Map();
-};
+Researcher.prototype.Init = function() {};
 
 Researcher.prototype.Serialize = function()
 {
@@ -167,7 +168,8 @@ Researcher.prototype.Deserialize = function(data)
 	this.Init();
 	this.nextID = data.nextID;
 	for (const item of data.queue)
-	{
+{
+		// @ts-expect-error
 		const newItem = new ResearcherQueueItem();
 		newItem.Deserialize(item);
 		this.queue.set(item.id, newItem);
@@ -277,7 +279,7 @@ Researcher.prototype.GetTechCostMultiplier = function()
 {
 	/** @type {Record<string, number>} */
 	const techCostMultiplier = {};
-	for (const res of Resources.GetCodes().concat(["time"]))
+	for (const res of g_Resources.GetCodes().concat(["time"]))
 		techCostMultiplier[res] = ApplyValueModificationsToEntity(
 		    "Researcher/TechCostMultiplier/" + res,
 		    +(this.template?.TechCostMultiplier?.[res] || 1),
@@ -318,7 +320,7 @@ Researcher.prototype.QueueTechnology = function(templateName, metadata)
 {
 	if (!this.GetTechnologiesList().some(tech =>
 		tech && (tech == templateName ||
-			tech.pair && (tech.top == templateName || tech.bottom == templateName))))
+			tech instanceof Object && (tech.top == templateName || tech.bottom == templateName))))
 	{
 		error("This entity cannot research " + templateName + ".");
 		return -1;

@@ -8,19 +8,19 @@ Diplomacy.prototype.Schema =
 		"<text/>" +
 	"</element>";
 
-Diplomacy.prototype.SerializableAttributes = [
+Diplomacy.prototype.SerializableAttributes = /** @type {const} */([
 	"team",
 	"teamLocked",
 	"diplomacy",
 	"sharedDropsites",
-];
+]);
 
 Diplomacy.prototype.Serialize = function()
 {
 	/** @type {any} */
 	const state = {};
 	for (const key of this.SerializableAttributes)
-		if (this.hasOwnProperty(key))
+		if (key in this)
 			state[key] = this[key];
 
 	return state;
@@ -29,18 +29,13 @@ Diplomacy.prototype.Serialize = function()
 /** @param {any} state */
 Diplomacy.prototype.Deserialize = function(state)
 {
-	for (const att of this.SerializableAttributes)
-		if (att in state)
-			this[att] = state[att];
+	for (const att in state)
+		// @ts-expect-error
+		this[att] = state[att];
 };
 
 Diplomacy.prototype.Init = function()
 {
-	// Team number of the player, players on the same team will always have ally diplomatic status. Also this is useful for team emblems, scoring, etc.
-	this.team = -1;
-
-	// Array of diplomatic stances for this player with respect to other players (including gaia and self).
-	this.diplomacy = [];
 };
 
 /**
@@ -87,7 +82,7 @@ Diplomacy.prototype.ChangeTeam = function(team)
 		const numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 		for (let i = 0; i < numPlayers; ++i)
 		{
-			const cmpDiplomacy = QueryPlayerIDInterface(i, IID_Diplomacy);
+			const cmpDiplomacy = /** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy));
 			if (this.team !== cmpDiplomacy.GetTeam())
 				continue;
 
@@ -152,7 +147,7 @@ Diplomacy.prototype.SetDiplomacy = function(dipl)
  */
 Diplomacy.prototype.SetDiplomacyIndex = function(idx, value)
 {
-	if (!QueryPlayerIDInterface(idx)?.IsActive())
+	if (!QueryPlayerIDInterface(idx, IID_Player)?.IsActive())
 		return;
 
 	const cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);

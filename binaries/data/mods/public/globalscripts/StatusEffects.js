@@ -23,7 +23,7 @@ class StatusEffectsMetadata
 		let files = Engine.ListDirectoryFiles("simulation/data/status_effects", "*.json", false);
 		for (let filename of files)
 		{
-			let data = Engine.ReadJSONFile(filename);
+			let data = /** @type {StatusEffectJSONData} */(Engine.ReadJSONFile(filename));
 			if (!data)
 				continue;
 
@@ -55,30 +55,29 @@ class StatusEffectsMetadata
 			return this.statusEffectData[code];
 
 		warn("No status effects data found for: " + code + ".");
-		return {};
 	}
 
 	/** @param {string} code */
 	getApplierTooltip(code)
 	{
-		return this.getData(code).applierTooltip;
+		return this.getData(code)?.applierTooltip || "";
 	}
 
 	/** @param {string} code */
 	getIcon(code)
 	{
-		return this.getData(code).icon;
+		return this.getData(code)?.icon || "default";
 	}
 
 	/** @param {string} code */
 	getName(code)
 	{
-		return this.getData(code).statusName;
+		return this.getData(code)?.statusName || code;
 	}
 
 	/** @param {string} code */
 	getReceiverTooltip(code)
 	{
-		return this.getData(code).receiverTooltip;
+		return this.getData(code)?.receiverTooltip || "";
 	}
 }

@@ -2,15 +2,13 @@
  * System component to store the victory conditions and their settings and
  * check for allied victory / last-man-standing.
  */
-function EndGameManager() {}
-
-EndGameManager.prototype.Schema =
-	"<a:component type='system'/><empty/>";
-
-EndGameManager.prototype.Init = function()
-{
-	// Contains settings specific to the victory condition,
-	// for example wonder victory duration.
+function EndGameManager() {
+	/**
+	 * Contains settings specific to the victory condition,
+	 * for example wonder victory duration.
+	 * @type {VictorySettings}
+	 */
+	//@ts-expect-error
 	this.gameSettings = {};
 
 	// Allied victory means allied players can win if victory conditions are met for each of them
@@ -24,6 +22,13 @@ EndGameManager.prototype.Init = function()
 	this.lastManStandingMessage = undefined;
 
 	this.endlessGame = false;
+}
+
+EndGameManager.prototype.Schema =
+	"<a:component type='system'/><empty/>";
+
+EndGameManager.prototype.Init = function()
+{
 };
 
 EndGameManager.prototype.GetGameSettings = function()
@@ -36,7 +41,11 @@ EndGameManager.prototype.GetVictoryConditions = function()
 	return this.gameSettings.victoryConditions;
 };
 
-EndGameManager.prototype.SetGameSettings = function(newSettings = {})
+/**
+ * @typedef {{ victoryConditions: string[], relicCount?: number, relicDuration?: number, wonderDuration?: number, regicideGarrison?: boolean }} VictorySettings
+ * @param {VictorySettings} newSettings
+ */
+EndGameManager.prototype.SetGameSettings = function(newSettings = { victoryConditions: [] })
 {
 	this.gameSettings = newSettings;
 	this.skipAlliedVictoryCheck = false;
@@ -67,8 +76,8 @@ EndGameManager.prototype.MarkPlayerAndAlliesAsWon = function(playerID, victorySt
 
 	let winningPlayers = [playerID];
 	if (this.alliedVictory)
-		winningPlayers = QueryPlayerIDInterface(playerID, IID_Diplomacy).GetMutualAllies(playerID).filter(
-			player => QueryPlayerIDInterface(player).IsActive());
+		winningPlayers = /** @type {Diplomacy} */(QueryPlayerIDInterface(playerID, IID_Diplomacy)).GetMutualAllies().filter(
+			player => /** @type {Player} */(QueryPlayerIDInterface(player, IID_Player)).IsActive());
 
 	this.MarkPlayersAsWon(winningPlayers, victoryString, defeatString);
 };
@@ -102,7 +111,7 @@ EndGameManager.prototype.MarkPlayersAsWon = function(winningPlayers, victoryStri
 		playerID => winningPlayers.indexOf(playerID) == -1);
 
 	for (let playerID of defeatedPlayers)
-		QueryPlayerIDInterface(playerID).Defeat(undefined);
+		/** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player)).Defeat(undefined);
 
 	let cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 	cmpGUIInterface.PushNotification({
@@ -140,18 +149,19 @@ EndGameManager.prototype.AlliedVictoryCheck = function()
 		return;
 
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
-	cmpGuiInterface.DeleteTimeNotification(this.lastManStandingMessage);
+	if (this.lastManStandingMessage)
+		cmpGuiInterface.DeleteTimeNotification(this.lastManStandingMessage);
 
 	// Proceed if only allies are remaining
 	let allies = [];
 	let numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 	for (let playerID = 1; playerID < numPlayers; ++playerID)
 	{
-		let cmpPlayer = QueryPlayerIDInterface(playerID);
+		let cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player));
 		if (!cmpPlayer.IsActive())
 			continue;
 
-		if (allies.length && !QueryPlayerIDInterface(playerID, IID_Diplomacy).IsMutualAlly(allies[0]))
+		if (allies.length && !/** @type {Diplomacy} */(QueryPlayerIDInterface(playerID, IID_Diplomacy)).IsMutualAlly(allies[0]))
 			return;
 
 		allies.push(playerID);
@@ -163,7 +173,7 @@ EndGameManager.prototype.AlliedVictoryCheck = function()
 	if (this.alliedVictory || allies.length == 1)
 	{
 		for (const playerID of allies)
-			QueryPlayerIDInterface(playerID)?.Win(undefined);
+			QueryPlayerIDInterface(playerID, IID_Player)?.Win(undefined);
 
 		cmpGuiInterface.PushNotification({
 			"type": "won",

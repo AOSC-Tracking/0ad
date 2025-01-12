@@ -366,7 +366,7 @@ Formation.prototype.SetMembers = function(ents)
 
 	for (let ent of this.members)
 	{
-		let cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
+		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(ent, IID_UnitAI));
 		cmpUnitAI.SetFormationController(this.entity);
 
 		let cmpAuras = Engine.QueryInterface(ent, IID_Auras);
@@ -403,8 +403,8 @@ Formation.prototype.RemoveMembers = function(ents, renamed = false)
 	for (const ent of ents)
 	{
 		this.finishedEntities.delete(ent);
-		const cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
-		cmpUnitAI.UpdateWorkOrders();
+		const cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(ent, IID_UnitAI));
+		cmpUnitAI.UpdateWorkOrders("");
 		cmpUnitAI.UnsetFormationController();
 	}
 
@@ -446,7 +446,7 @@ Formation.prototype.AddMembers = function(ents)
 
 	for (let ent of this.formationMembersWithAura)
 	{
-		let cmpAuras = Engine.QueryInterface(ent, IID_Auras);
+		let cmpAuras = /** @type {Auras} */(Engine.QueryInterface(ent, IID_Auras));
 		cmpAuras.ApplyFormationAura(ents);
 	}
 
@@ -483,9 +483,9 @@ Formation.prototype.Disband = function()
 	this.RemoveMembers(this.members);
 
 	// Hack: switch to a clean state to stop timers.
-	const cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
+	const cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(this.entity, IID_UnitAI));
 	cmpUnitAI.UnitFsm.SwitchToNextState(cmpUnitAI, "");
-	Engine.QueryInterface(this.entity, IID_Position).MoveOutOfWorld();
+	Engine.QueryInterface(this.entity, IID_Position)?.MoveOutOfWorld();
 	this.DeleteTwinFormations();
 	Engine.DestroyEntity(this.entity);
 };
@@ -498,7 +498,7 @@ Formation.prototype.Disband = function()
  * otherwise the order to walk into formation is just pushed to the front.
  * @param {string | undefined} variant - Variant to be passed as order parameter.
  */
-Formation.prototype.MoveMembersIntoFormation = function(moveCenter, force, variant)
+Formation.prototype.MoveMembersIntoFormation = function(moveCenter, force = false, variant = undefined)
 {
 	if (!this.members.length)
 		return;
@@ -518,7 +518,7 @@ Formation.prototype.MoveMembersIntoFormation = function(moveCenter, force, varia
 		positions.push(cmpPosition.GetPosition2D());
 	}
 
-	const cmpFormationUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
+	const cmpFormationUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(this.entity, IID_UnitAI));
 	const cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
 	// Reposition the formation if we're told to or if we don't already have a position.
 	if (cmpPosition && (moveCenter || !cmpPosition.IsInWorld()))
@@ -697,7 +697,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 	for (let i in active)
 	{
 		let cmpIdentity = Engine.QueryInterface(active[i], IID_Identity);
-		let classes = cmpIdentity.GetClassesList();
+		let classes = cmpIdentity?.GetClassesList() || [];
 		let done = false;
 		for (let c = 0; c < sortingClasses.length; ++c)
 		{
@@ -745,7 +745,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 	}
 
 	// Define special formations here.
-	if (this.template.FormationShape == "special" && Engine.QueryInterface(this.entity, IID_Identity).GetGenericName() == "Scatter")
+	if (this.template.FormationShape == "special" && Engine.QueryInterface(this.entity, IID_Identity)?.GetGenericName() == "Scatter")
 	{
 		let width = Math.sqrt(count) * (separation.width + separation.depth) * 2.5;
 
@@ -776,7 +776,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 			let z = -r * separation.depth;
 			// Alternate between the left and right side of the center to have a symmetrical distribution.
 			let side = 1;
-			let n;
+			let n = 0;
 			// Determine the number of entities in this row of the formation.
 			if (shape == "square")
 			{
@@ -835,10 +835,10 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 	// The places first in the list will contain the heaviest units as defined by the order
 	// of the types list.
 	if (sortingOrder == "fillFromTheSides")
-		offsets.sort(function(o1, o2) { return Math.abs(o1.x) < Math.abs(o2.x);});
+		offsets.sort(function(o1, o2) { return Math.abs(o1.x) - Math.abs(o2.x);});
 	else if (sortingOrder == "fillToTheCenter")
 		offsets.sort(function(o1, o2) {
-			return Math.max(Math.abs(o1.x), Math.abs(o1.y)) < Math.max(Math.abs(o2.x), Math.abs(o2.y));
+			return Math.max(Math.abs(o1.x), Math.abs(o1.y)) - Math.max(Math.abs(o2.x), Math.abs(o2.y));
 		});
 
 	// Query the 2D position of the formation.
@@ -899,7 +899,7 @@ Formation.prototype.TakeClosestOffset = function(entPos, realPositions, offsets)
  */
 Formation.prototype.GetRealOffsetPositions = function(offsets)
 {
-	const cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
+	const cmpPosition = /** @type {Position} */(Engine.QueryInterface(this.entity, IID_Position));
 	const pos = cmpPosition.GetPosition2D();
 	const rot = cmpPosition.GetRotation().y;
 	const sin = Math.sin(rot);
@@ -957,7 +957,7 @@ Formation.prototype.ComputeMotionParameters = function()
 	}
 	minSpeed *= this.GetSpeedMultiplier();
 
-	const cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
+	const cmpUnitMotion = /** @type {UnitMotion} */(Engine.QueryInterface(this.entity, IID_UnitMotion));
 	cmpUnitMotion.SetSpeedMultiplier(minSpeed / cmpUnitMotion.GetWalkSpeed());
 	cmpUnitMotion.SetAcceleration(minAcceleration);
 	cmpUnitMotion.SetPassabilityClassName(maxPassClass);
@@ -1005,7 +1005,7 @@ Formation.prototype.ShapeUpdate = function()
 		this.AddMembers(otherMembers);
 	}
 	// Switch between column and box if necessary.
-	let cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
+	let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(this.entity, IID_UnitAI));
 	let walkingDistance = cmpUnitAI.ComputeWalkingDistance();
 	let columnar = walkingDistance > g_ColumnDistanceThreshold;
 	if (columnar != this.columnar)
@@ -1030,8 +1030,11 @@ Formation.prototype.OnGlobalOwnershipChanged = function(msg)
 	// controlled by this formation.
 	if (this.members.indexOf(msg.entity) != -1)
 		this.RemoveMembers([msg.entity]);
-	if (msg.entity === this.entity && msg.to !== INVALID_PLAYER)
-		Engine.QueryInterface(this.entity, IID_Visual)?.SetVariant("animationVariant", QueryPlayerIDInterface(msg.to, IID_Identity).GetCiv());
+	if (msg.entity === this.entity && msg.to !== INVALID_PLAYER) {
+		let civ = QueryPlayerIDInterface(msg.to, IID_Identity)?.GetCiv();
+		if (civ)
+			Engine.QueryInterface(this.entity, IID_Visual)?.SetVariant("animationVariant", civ);
+	}
 };
 
 /** @param {MessageEntityRenamed} msg */
@@ -1080,7 +1083,7 @@ Formation.prototype.DeleteTwinFormations = function()
 Formation.prototype.LoadFormation = function(newTemplate)
 {
 	const newFormation = ChangeEntityTemplate(this.entity, newTemplate);
-	return Engine.QueryInterface(newFormation, IID_UnitAI);
+	return /** @type {UnitAI} */(Engine.QueryInterface(newFormation, IID_UnitAI));
 };
 
 
@@ -1089,7 +1092,7 @@ Formation.prototype.OnEntityRenamed = function(msg)
 {
 	const members = clone(this.members);
 	this.Disband();
-	Engine.QueryInterface(msg.newentity, IID_Formation).SetMembers(members);
+	Engine.QueryInterface(msg.newentity, IID_Formation)?.SetMembers(members);
 };
 
 Engine.RegisterComponentType(IID_Formation, "Formation", Formation);

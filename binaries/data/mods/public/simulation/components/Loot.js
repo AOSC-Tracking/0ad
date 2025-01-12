@@ -3,12 +3,12 @@ function Loot() {}
 Loot.prototype.Schema =
 	"<a:help>Specifies the loot credited when this entity is killed.</a:help>" +
 	"<a:example>" +
-		"<xp>35</xp>" +
-		"<metal>10</metal>" +
+	"<xp>35</xp>" +
+	"<metal>10</metal>" +
 	"</a:example>" +
-	Resources.BuildSchema("nonNegativeInteger", ["xp"]);
+	g_Resources.BuildSchema("nonNegativeInteger", ["xp"]);
 
-// @ts-expect-error
+// @ts-ignore
 Loot.prototype.Serialize = null; // we have no dynamic state to save
 
 Loot.prototype.GetXp = function()
@@ -18,8 +18,9 @@ Loot.prototype.GetXp = function()
 
 Loot.prototype.GetResources = function()
 {
+	/** @type {Record<string, number>} */
 	let ret = {};
-	for (let res of Resources.GetCodes())
+	for (let res of g_Resources.GetCodes())
 		ret[res] = Math.floor(ApplyValueModificationsToEntity("Loot/" + res, +(this.template[res] || 0), this.entity));
 	return ret;
 };

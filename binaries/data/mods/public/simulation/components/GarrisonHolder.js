@@ -182,7 +182,7 @@ GarrisonHolder.prototype.IsAllowedToBeGarrisoned = function(entity)
 		return false;
 
 	let cmpIdentity = Engine.QueryInterface(entity, IID_Identity);
-	return cmpIdentity && MatchesClassList(cmpIdentity.GetClassesList(), this.allowedClasses);
+	return !!cmpIdentity && !!MatchesClassList(cmpIdentity.GetClassesList(), this.allowedClasses);
 };
 
 /**
@@ -244,7 +244,7 @@ GarrisonHolder.prototype.Eject = function(entity, forced)
 GarrisonHolder.prototype.Unload = function(entity)
 {
 	let cmpGarrisonable = Engine.QueryInterface(entity, IID_Garrisonable);
-	return cmpGarrisonable && cmpGarrisonable.UnGarrison();
+	return cmpGarrisonable && cmpGarrisonable.UnGarrison() || false;
 };
 
 /**
@@ -277,8 +277,8 @@ GarrisonHolder.prototype.UnloadTemplate = function(template, owner, all)
 		let cmpIdentity = Engine.QueryInterface(entity, IID_Identity);
 
 		// Units with multiple ranks are grouped together.
-		let name = cmpIdentity.GetSelectionGroupName() || cmpTemplateManager.GetCurrentTemplateName(entity);
-		if (name != template || owner != Engine.QueryInterface(entity, IID_Ownership).GetOwner())
+		let name = cmpIdentity?.GetSelectionGroupName() || cmpTemplateManager.GetCurrentTemplateName(entity);
+		if (name != template || owner != Engine.QueryInterface(entity, IID_Ownership)?.GetOwner())
 			continue;
 
 		entities.push(entity);
@@ -507,9 +507,9 @@ GarrisonHolder.prototype.IsEjectable = function(entity)
 		return false;
 
 	let ejectableClasses = this.template.EjectClassesOnDestroy._string;
-	let entityClasses = Engine.QueryInterface(entity, IID_Identity).GetClassesList();
+	let entityClasses = Engine.QueryInterface(entity, IID_Identity)?.GetClassesList();
 
-	return MatchesClassList(entityClasses, ejectableClasses);
+	return !!entityClasses && !!MatchesClassList(entityClasses, ejectableClasses);
 };
 
 /**

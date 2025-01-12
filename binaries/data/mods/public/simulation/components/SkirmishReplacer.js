@@ -50,7 +50,7 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
 	if (templateName in replacementEntities)
 		templateName = replacementEntities[templateName];
 	else if (this.template && "general" in this.template)
-		templateName = this.template.general;
+		templateName = /** @type {string} */(this.template.general);
 	else
 		templateName = "";
 
@@ -70,13 +70,17 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
 		return;
 	}
 	var cmpReplacementPosition = Engine.QueryInterface(replacement, IID_Position);
-	var pos = cmpCurPosition.GetPosition2D();
-	cmpReplacementPosition.JumpTo(pos.x, pos.y);
-	var rot = cmpCurPosition.GetRotation();
-	cmpReplacementPosition.SetYRotation(rot.y);
+	if (cmpCurPosition && cmpReplacementPosition)
+	{
+		var pos = cmpCurPosition.GetPosition2D();
+		cmpReplacementPosition.JumpTo(pos.x, pos.y);
+		var rot = cmpCurPosition.GetRotation();
+		cmpReplacementPosition.SetYRotation(rot.y);
+	}
 	var cmpCurOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	var cmpReplacementOwnership = Engine.QueryInterface(replacement, IID_Ownership);
-	cmpReplacementOwnership.SetOwner(cmpCurOwnership.GetOwner());
+	if (cmpCurOwnership && cmpReplacementOwnership)
+		cmpReplacementOwnership.SetOwner(cmpCurOwnership.GetOwner());
 
 	let msg = { "entity": this.entity, "newentity": replacement };
 	Engine.PostMessage(this.entity, MT_EntityRenamed, msg);

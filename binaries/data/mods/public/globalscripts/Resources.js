@@ -30,7 +30,7 @@ function Resources()
 
 	for (let filename of Engine.ListDirectoryFiles("simulation/data/resources/", "*.json", false))
 	{
-		let data = Engine.ReadJSONFile(filename);
+		let data = /** @type {ResourceData} */(Engine.ReadJSONFile(filename));
 		if (!data)
 			continue;
 
@@ -63,8 +63,8 @@ function Resources()
 	 * @param {GenericResName} b
 	 */
 	let resSort = (a, b) => resDataSort(
-		this.resourceData.find(resource => resource.code == a),
-		this.resourceData.find(resource => resource.code == b)
+		/** @type {ResourceData} */(this.resourceData.find(resource => resource.code == a)),
+		/** @type {ResourceData} */(this.resourceData.find(resource => resource.code == b))
 	);
 
 	this.resourceData.sort(resDataSort);

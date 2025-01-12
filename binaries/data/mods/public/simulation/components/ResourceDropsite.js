@@ -4,7 +4,7 @@ ResourceDropsite.prototype.Schema =
 	"<element name='Types'>" +
 		"<list>" +
 			"<zeroOrMore>" +
-				Resources.BuildChoicesSchema() +
+				g_Resources.BuildChoicesSchema() +
 			"</zeroOrMore>" +
 		"</list>" +
 	"</element>" +
@@ -45,7 +45,7 @@ ResourceDropsite.prototype.AcceptsType = function(type)
  */
 ResourceDropsite.prototype.ReceiveResources = function(resources, entity)
 {
-	let cmpPlayer = QueryOwnerInterface(entity);
+	let cmpPlayer = QueryOwnerInterface(entity, IID_Player);
 	if (!cmpPlayer)
 		return {};
 

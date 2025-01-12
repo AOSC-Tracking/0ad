@@ -25,14 +25,15 @@ function loadCivFiles(selectableOnly)
 {
 	let propertyNames = /** @type {const} */([
 		"Code", "Culture", "Music", "CivBonuses", "StartEntities",
-		"AINames", "SkirmishReplacements", "SelectableInGameSetup"];
+		"AINames", "SkirmishReplacements", "SelectableInGameSetup"]);
 
 	/** @type {Record<string, CivMetadata>} */
 	let civData = {};
 
 	for (let filename of Engine.ListDirectoryFiles("simulation/data/civs/", "*.json", false))
 	{
-		let data = Engine.ReadJSONFile(filename);
+		// These don't have Name/Emblem/History but we lie to TS to simplify the commments.
+		let data = /** @type {CivMetadata} */(Engine.ReadJSONFile(filename));
 
 		for (let prop of propertyNames)
 			if (data[prop] === undefined)
@@ -516,7 +517,7 @@ function GetTemplateDataHelper(template, player, auraTemplates, resources, modif
 	{
 		ret.techCostMultiplier = {};
 		for (const res of resources.GetCodes().concat(["time"]))
-			ret.techCostMultiplier[res] = getEntityValue("Researcher/TechCostMultiplier/" + res, null, 1);
+			ret.techCostMultiplier[res] = getEntityValue("Researcher/TechCostMultiplier/" + res, undefined, 1);
 	}
 
 	if (template.Trader)
@@ -661,7 +662,7 @@ function calculateCarriedResources(carriedResources, tradingGoods)
 		for (let resource of carriedResources)
 			resources[resource.type] = (resources[resource.type] || 0) + resource.amount;
 
-	if (tradingGoods && tradingGoods.amount)
+	if (tradingGoods && tradingGoods.amount && tradingGoods.type)
 		resources[tradingGoods.type] =
 			(resources[tradingGoods.type] || 0) +
 			(tradingGoods.amount.traderGain || 0) +

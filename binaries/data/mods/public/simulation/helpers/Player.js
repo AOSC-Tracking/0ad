@@ -67,7 +67,7 @@ function LoadPlayerSettings(settings, newPlayers)
 		/** @type {Identity} */(QueryPlayerIDInterface(i, IID_Identity)).SetName(getPlayerSetting(i, "Name"));
 
 		const color = getPlayerSetting(i, "Color");
-		const cmpPlayer = QueryPlayerIDInterface(i);
+		const cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(i));
 		cmpPlayer.SetColor(color.r, color.g, color.b);
 
 		// Special case for gaia
@@ -129,7 +129,7 @@ function LoadPlayerSettings(settings, newPlayers)
 	// otherwise we can't ally the players above.
 	if (settings.LockTeams)
 		for (let i = 0; i < numPlayers; ++i)
-			QueryPlayerIDInterface(i, IID_Diplomacy).LockTeam();
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).LockTeam();
 }
 
 /**
@@ -178,11 +178,11 @@ function QueryOwnerInterface(ent, iid = IID_Player)
 {
 	var cmpOwnership = Engine.QueryInterface(ent, IID_Ownership);
 	if (!cmpOwnership)
-		return null;
+		return undefined;
 
 	var owner = cmpOwnership.GetOwner();
 	if (owner == INVALID_PLAYER)
-		return null;
+		return undefined;
 
 	return QueryPlayerIDInterface(owner, iid);
 }
@@ -203,7 +203,7 @@ function QueryPlayerIDInterface(id, iid = IID_Player)
 
 	var playerEnt = cmpPlayerManager.GetPlayerByID(id);
 	if (!playerEnt)
-		return null;
+		return undefined;
 
 	return Engine.QueryInterface(playerEnt, iid);
 }
@@ -219,7 +219,7 @@ function QueryMiragedInterface(ent, iid)
 {
 	let cmpMirage = Engine.QueryInterface(ent, IID_Mirage);
 	if (cmpMirage && !cmpMirage.Mirages(iid))
-		return null;
+		return undefined;
 	else if (!cmpMirage)
 		return Engine.QueryInterface(ent, iid);
 
@@ -276,7 +276,7 @@ function IsOwnedByEntityHelper(entity, target, check)
 function IsOwnedByPlayer(player, target)
 {
 	var cmpOwnershipTarget = Engine.QueryInterface(target, IID_Ownership);
-	return cmpOwnershipTarget && player == cmpOwnershipTarget.GetOwner();
+	return !!cmpOwnershipTarget && player == cmpOwnershipTarget.GetOwner();
 }
 
 /**

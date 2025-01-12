@@ -20,7 +20,7 @@ ModifiersManager.prototype.Init = function()
 
 	this.modifiersStorage = new MultiKeyMap(); // Keyed by property name, entity.
 
-	this.modifiersStorage._OnItemModified = (prim, sec, itemID) => this.ModifiersChanged.apply(this, [prim, sec, itemID]);
+	this.modifiersStorage._OnItemModified = (prim, sec, itemID) => this.ModifiersChanged.apply(this, [prim, sec]);
 };
 
 ModifiersManager.prototype.Serialize = function()
@@ -89,12 +89,12 @@ ModifiersManager.prototype.SendPlayerModifierMessages = function(propertyName, p
  */
 ModifiersManager.prototype.InvalidatePlayerEntCache = function(valueCache, propertyName, entsMap)
 {
-	entsMap = entsMap.get(propertyName);
-	if (entsMap)
+	const ents = entsMap.get(propertyName);
+	if (ents)
 	{
 		// Invalidate all local caches directly (for simplicity in ApplyModifiers).
-		entsMap.forEach(ent => valueCache.set(ent, new Map()));
-		entsMap.clear();
+		ents.forEach(ent => valueCache.set(ent, new Map()));
+		ents.clear();
 	}
 };
 
@@ -198,7 +198,8 @@ ModifiersManager.prototype.ApplyModifiers = function(propertyName, originalValue
 		//@ts-expect-error this is never null but annoying to write
 		let pc = this.playerEntitiesCached.get(ownerEntity).get(propertyName);
 		if (!pc)
-			pc = this.playerEntitiesCached.get(ownerEntity).set(propertyName, new Set()).get(propertyName);
+			//@ts-expect-error this is never null but annoying to write
+			pc = /** @type {Set<EntityID>}*/(this.playerEntitiesCached.get(ownerEntity).set(propertyName, new Set()).get(propertyName));
 		pc.add(entity);
 		newValue = this.FetchModifiedProperty(classesList, propertyName, newValue, ownerEntity);
 	}
@@ -276,7 +277,7 @@ ModifiersManager.prototype.OnGlobalOwnershipChanged = function(msg)
 		let component = propertyName.split("/")[0];
 		// Only inform if the modifier actually applies to the entity as an optimisation.
 		// TODO: would it be better to call FetchModifiedProperty here and compare values?
-		playerModifs[propertyName].forEach(item => item.value.forEach(modif => {
+		playerModifs[propertyName].forEach(item => /** @type {Modification[]} */(item.value).forEach(modif => {
 			if (!DoesModificationApply(modif, classes))
 				return;
 			if (!modifiedComponents[component])
@@ -343,12 +344,19 @@ ModifiersManager.prototype.HasAnyModifier = function(ModifID, entity) {
 	return this.modifiersStorage.HasAnyItem(ModifID, entity);
 };
 
-ModifiersManager.prototype.GetModifiers = function(propName, entity, stackable = false) {
-	return this.modifiersStorage.GetItems(propName, entity, stackable);
+/**
+ * @param {string} propName
+ * @param {EntityId} entity
+ */
+ModifiersManager.prototype.GetModifiers = function(propName, entity) {
+	return this.modifiersStorage.GetItems(propName, entity);
 };
 
-ModifiersManager.prototype.GetAllModifiers = function(entity, stackable = false) {
-	return this.modifiersStorage.GetAllItems(entity, stackable);
+/**
+ * @param {EntityId} entity
+ */
+ModifiersManager.prototype.GetAllModifiers = function(entity) {
+	return this.modifiersStorage.GetAllItems(entity);
 };
 
 Engine.RegisterSystemComponentType(IID_ModifiersManager, "ModifiersManager", ModifiersManager);

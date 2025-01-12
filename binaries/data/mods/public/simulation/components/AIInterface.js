@@ -106,11 +106,14 @@ AIInterface.prototype.GetNonEntityRepresentation = function()
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 
 	// Return the same game state as the GUI uses
-	let state = cmpGuiInterface.GetSimulationState();
+	let state = {
+		...cmpGuiInterface.GetSimulationState(),
+		/** @type {Record<string, unknown[]>} */
+		events: {},
+	};
 
 	// Add some extra AI-specific data
 	// add custom events and reset them for the next turn
-	state.events = {};
 	for (let name of this.EventNames)
 	{
 		state.events[name] = this.events[name];
@@ -122,16 +125,21 @@ AIInterface.prototype.GetNonEntityRepresentation = function()
 
 AIInterface.prototype.GetRepresentation = function()
 {
-	let state = this.GetNonEntityRepresentation();
+	let state = {
+		...this.GetNonEntityRepresentation(),
+		/** @type {Record<EntityId, unknown>} */
+		entities: {},
+		changedTemplateInfo: {},
+		changedEntityTemplateInfo: {},
+	};
 
 	// Add entity representations
 	Engine.ProfileStart("proxy representations");
-	state.entities = {};
 	for (let id in this.changedEntities)
 	{
 		let cmpAIProxy = Engine.QueryInterface(+id, IID_AIProxy);
 		if (cmpAIProxy)
-			state.entities[id] = cmpAIProxy.GetRepresentation();
+			state.entities[+id] = cmpAIProxy.GetRepresentation();
 	}
 	this.changedEntities = {};
 	Engine.ProfileStop();
@@ -150,7 +158,13 @@ AIInterface.prototype.GetRepresentation = function()
  */
 AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 {
-	let state = this.GetNonEntityRepresentation();
+	let state = {
+		...this.GetNonEntityRepresentation(),
+		/** @type {Record<EntityId, unknown>} */
+		entities: {},
+		changedTemplateInfo: {},
+		changedEntityTemplateInfo: {},
+	};
 
 	if (flushEvents)
 		for (let name of this.EventNames)
@@ -281,12 +295,13 @@ AIInterface.prototype.OnTemplateModification = function(msg)
 			if (!ended)
 				continue;
 			// item now contains the template value for this.
-			let oldValue = +item == item ? +item : item;
+			// @ts-expect-error - TS doesn't like the "is this a number" check
+			let oldValue = /** @type {number | string} */(+item == item ? +item : item);
 			let newValue = ApplyValueModificationsToTemplate(valName, oldValue, msg.player, template);
 			// Apply the same roundings as in the components
 			if (valName === "Player/MaxPopulation" || valName === "Cost/Population" ||
 			    valName === "Population/Bonus")
-				newValue = Math.round(newValue);
+				newValue = Math.round(/** @type {number} */(newValue));
 			// TODO in some cases, we can have two opposite changes which bring us to the old value,
 			// and we should keep it. But how to distinguish it ?
 			if(newValue == oldValue)
@@ -331,12 +346,13 @@ AIInterface.prototype.OnGlobalValueModification = function(msg)
 			if (!ended)
 				continue;
 			// "item" now contains the unmodified template value for this.
-			let oldValue = +item == item ? +item : item;
+			// @ts-expect-error - TS doesn't like the "is this a number" check
+			let oldValue = /** @type {number | string} */(+item == item ? +item : item);
 			let newValue = ApplyValueModificationsToEntity(valName, oldValue, ent);
 			// Apply the same roundings as in the components
 			if (valName === "Player/MaxPopulation" || valName === "Cost/Population" ||
 			    valName === "Population/Bonus")
-				newValue = Math.round(newValue);
+				newValue = Math.round(/** @type {number} */(newValue));
 			// TODO in some cases, we can have two opposite changes which bring us to the old value,
 			// and we should keep it. But how to distinguish it ?
 			if (newValue == oldValue)

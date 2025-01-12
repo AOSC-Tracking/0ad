@@ -14,10 +14,6 @@ Gate.prototype.Schema =
  */
 Gate.prototype.Init = function()
 {
-	this.allies = [];
-	this.ignoreList = [];
-	this.opened = false;
-	this.locked = false;
 };
 
 /** @param {MessageOwnershipChanged} msg */
@@ -75,7 +71,8 @@ Gate.prototype.SetupRangeQuery = function(owner)
 		cmpRangeManager.DestroyActiveQuery(this.unitsQuery);
 
 	// Only allied units can make the gate open.
-	const players = QueryPlayerIDInterface(owner, IID_Diplomacy).GetAllies();
+	/** @type {number[]} */
+	const players = /** @type {Diplomacy} */(QueryPlayerIDInterface(owner, IID_Diplomacy)).GetAllies();
 
 	var range = this.GetPassRange();
 	if (range > 0)
@@ -202,7 +199,7 @@ Gate.prototype.LockGate = function()
  * If quiet is true, no sound will be played (used for initial setup).
  * @param {boolean} quiet
  */
-Gate.prototype.UnlockGate = function(quiet)
+Gate.prototype.UnlockGate = function(quiet = false)
 {
 	var cmpObstruction = Engine.QueryInterface(this.entity, IID_Obstruction);
 	if (!cmpObstruction)

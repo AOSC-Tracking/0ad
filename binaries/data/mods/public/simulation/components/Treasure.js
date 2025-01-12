@@ -3,29 +3,27 @@ function Treasure() {}
 Treasure.prototype.Schema =
 	"<a:help>Provides a bonus when taken. E.g. a supply of resources.</a:help>" +
 	"<a:example>" +
-		"<CollectTime>1000</CollectTime>" +
-		"<Resources>" +
-			"<Food>1000</Food>" +
-		"</Resources>" +
+	"<CollectTime>1000</CollectTime>" +
+	"<Resources>" +
+	"<Food>1000</Food>" +
+	"</Resources>" +
 	"</a:example>" +
 	"<element name='CollectTime' a:help='Amount of milliseconds that it takes to collect this treasure.'>" +
-		"<ref name='nonNegativeDecimal'/>" +
+	"<ref name='nonNegativeDecimal'/>" +
 	"</element>" +
 	"<optional>" +
-		"<element name='Resources' a:help='Amount of resources that are in this.'>" +
-			Resources.BuildSchema("positiveDecimal") +
-		"</element>" +
+	"<element name='Resources' a:help='Amount of resources that are in this.'>" +
+	g_Resources.BuildSchema("positiveDecimal") +
+	"</element>" +
 	"</optional>";
 
-Treasure.prototype.Init = function()
-{
-};
+Treasure.prototype.Init = function() {};
 
 Treasure.prototype.ComputeReward = function()
 {
 	for (let resource in this.template.Resources)
 	{
-		let amount = ApplyValueModificationsToEntity("Treasure/Resources/" + resource, this.template.Resources[resource], this.entity);
+		let amount = ApplyValueModificationsToEntity("Treasure/Resources/" + resource, +this.template.Resources[resource], this.entity);
 		if (!amount)
 			continue;
 		if (!this.resources)
@@ -35,7 +33,7 @@ Treasure.prototype.ComputeReward = function()
 };
 
 /**
- * @return {Object} - The resources given by this treasure.
+ * @return The resources given by this treasure.
  */
 Treasure.prototype.Resources = function()
 {
@@ -59,7 +57,7 @@ Treasure.prototype.Reward = function(entity)
 	if (this.isTaken)
 		return false;
 
-	let cmpPlayer = QueryOwnerInterface(entity);
+	let cmpPlayer = QueryOwnerInterface(entity, IID_Player);
 	if (!cmpPlayer)
 		return false;
 
@@ -77,7 +75,7 @@ Treasure.prototype.Reward = function(entity)
 	let cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 	cmpTrigger.CallEvent("OnTreasureCollected", {
 		"player": cmpPlayer.GetPlayerID(),
-		"treasure": this.entity
+		"treasure": this.entity,
 	});
 
 	this.isTaken = true;
@@ -95,16 +93,16 @@ Treasure.prototype.IsAvailable = function()
 	return !this.isTaken;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Treasure.prototype.OnOwnershipChanged = function(msg)
 {
-	if (msg.to != INVALID_PLAYER)
-		this.ComputeReward();
+	if (msg.to != INVALID_PLAYER) this.ComputeReward();
 };
 
+/** @param {MessageValueModification} msg */
 Treasure.prototype.OnValueModification = function(msg)
 {
-	if (msg.component != "Treasure")
-		return;
+	if (msg.component != "Treasure") return;
 	this.ComputeReward();
 };
 

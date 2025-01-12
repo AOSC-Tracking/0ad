@@ -1,8 +1,3 @@
-function TechnologyManager() {}
-
-TechnologyManager.prototype.Schema =
-	"<empty/>";
-
 /**
  * This object represents a technology under research.
  * @constructor
@@ -57,10 +52,12 @@ TechnologyManagerItem.prototype.Queue = function(techCostMultiplier)
 TechnologyManagerItem.prototype.Stop = function()
 {
 	const cmpPlayer = Engine.QueryInterface(this.player, IID_Player);
-	cmpPlayer?.RefundResources(this.resources);
-	delete this.resources;
+	if (this.resources) {
+		cmpPlayer?.RefundResources(this.resources);
+		delete this.resources;
+	}
 
-	if (this.started && this.templateName.startsWith("phase"))
+	if (this.started && this.templateName.startsWith("phase") && cmpPlayer)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).PushNotification({
 			"type": "phase",
 			"players": [cmpPlayer.GetPlayerID()],
@@ -79,12 +76,13 @@ TechnologyManagerItem.prototype.Start = function()
 		return;
 
 	const cmpPlayer = Engine.QueryInterface(this.player, IID_Player);
-	Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).PushNotification({
-		"type": "phase",
-		"players": [cmpPlayer.GetPlayerID()],
-		"phaseName": this.templateName,
-		"phaseState": "started"
-	});
+	if (cmpPlayer)
+		Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).PushNotification({
+			"type": "phase",
+			"players": [cmpPlayer.GetPlayerID()],
+			"phaseName": this.templateName,
+			"phaseState": "started"
+		});
 };
 
 TechnologyManagerItem.prototype.Finish = function()
@@ -104,8 +102,8 @@ TechnologyManagerItem.prototype.Finish = function()
 		cmpModifiersManager.AddModifiers("tech/" + this.templateName, DeriveModificationsFromTech(template), this.player);
 	}
 
-	const cmpEntityLimits = Engine.QueryInterface(this.player, IID_EntityLimits);
-	const cmpTechnologyManager = Engine.QueryInterface(this.player, IID_TechnologyManager);
+	const cmpEntityLimits = /** @type {EntityLimits} */(Engine.QueryInterface(this.player, IID_EntityLimits));
+	const cmpTechnologyManager = /** @type {TechnologyManager} */(Engine.QueryInterface(this.player, IID_TechnologyManager));
 	if (template.replaces && template.replaces.length > 0)
 		for (const i of template.replaces)
 		{
@@ -118,7 +116,7 @@ TechnologyManagerItem.prototype.Finish = function()
 	// ToDo: Move to EntityLimits.js.
 	cmpEntityLimits?.UpdateLimitsFromTech(this.templateName);
 
-	const playerID = Engine.QueryInterface(this.player, IID_Player).GetPlayerID();
+	const playerID = /** @type {Player} */(Engine.QueryInterface(this.player, IID_Player)).GetPlayerID();
 	Engine.PostMessage(this.player, MT_ResearchFinished, { "player": playerID, "tech": this.templateName });
 
 	if (this.templateName.startsWith("phase") && !template.autoResearch)
@@ -140,13 +138,14 @@ TechnologyManagerItem.prototype.Progress = function(allocatedTime)
 		this.Start();
 	if (this.paused)
 		this.Unpause();
-	if (this.timeRemaining > allocatedTime)
+	let timeRemaining = /** @type {number} */(this.timeRemaining);
+	if (timeRemaining > allocatedTime)
 	{
-		this.timeRemaining -= allocatedTime;
+		timeRemaining -= allocatedTime;
 		return allocatedTime;
 	}
 	this.Finish();
-	return this.timeRemaining;
+	return timeRemaining;
 };
 
 TechnologyManagerItem.prototype.Pause = function()
@@ -191,6 +190,7 @@ TechnologyManagerItem.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 TechnologyManagerItem.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -199,8 +199,10 @@ TechnologyManagerItem.prototype.Deserialize = function(data)
 			this[att] = data[att];
 };
 
-TechnologyManager.prototype.Init = function()
-{
+function TechnologyManager() {
+	/** @type {number} */
+	this.entity;
+
 	// Holds names of technologies that have been researched.
 	this.researchedTechs = new Set();
 
@@ -216,6 +218,14 @@ TechnologyManager.prototype.Init = function()
 	// Some technologies are automatically researched when their conditions are met.  They have no cost and are
 	// researched instantly.  This allows civ bonuses and more complicated technologies.
 	this.unresearchedAutoResearchTechs = new Set();
+}
+
+TechnologyManager.prototype.Schema =
+	"<empty/>";
+
+TechnologyManager.prototype.Init = function()
+{
+
 	let allTechs = TechnologyTemplates.GetAll();
 	for (let key in allTechs)
 		if (allTechs[key].autoResearch || allTechs[key].top)
@@ -257,7 +267,7 @@ TechnologyManager.prototype.Deserialize = function(data)
 	for (const tech of data.researchQueued)
 	{
 		// @ts-ignore
-		const newTech = new TechnologyManagerItem();
+		const newTech = new this.Technology();
 		newTech.Deserialize(tech);
 		this.researchQueued.set(tech.templateName, newTech);
 	}
@@ -294,7 +304,7 @@ TechnologyManager.prototype.CanProduce = function(templateName)
 	var template = cmpTempManager.GetTemplate(templateName);
 
 	if (template.Identity?.Requirements)
-		return RequirementsHelper.AreRequirementsMet(template.Identity.Requirements, Engine.QueryInterface(this.entity, IID_Player).GetPlayerID());
+		return RequirementsHelper.AreRequirementsMet(template.Identity.Requirements, /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID());
 	// If there is no required technology then this entity can be produced
 	return true;
 };
@@ -338,7 +348,12 @@ TechnologyManager.prototype.CanResearch = function(tech)
 	if (this.IsTechnologyResearched(tech))
 		return false;
 
-	return this.CheckTechnologyRequirements(DeriveTechnologyRequirements(template, Engine.QueryInterface(this.entity, IID_Identity).GetCiv()));
+	return this.CheckTechnologyRequirements(
+		DeriveTechnologyRequirements(
+			template,
+			/** @type {Identity} */(Engine.QueryInterface(this.entity, IID_Identity)).GetCiv()
+		)
+	);
 };
 
 /**

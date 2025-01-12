@@ -31,7 +31,7 @@ TerritoryDecay.prototype.IsConnected = function()
 	if (!cmpPosition || !cmpPosition.IsInWorld())
 		return false;
 
-	var cmpPlayer = QueryOwnerInterface(this.entity);
+	var cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
 		return true;// something without ownership can't decay
 

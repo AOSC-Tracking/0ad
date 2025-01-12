@@ -45,7 +45,7 @@ ResourceSupply.prototype.Schema =
 		"</element>" +
 	"</optional>" +
 	"<element name='Type' a:help='Type and Subtype of resource available from this entity'>" +
-		Resources.BuildChoicesSchema(true) +
+		g_Resources.BuildChoicesSchema(true) +
 	"</element>" +
 	"<element name='MaxGatherers' a:help='Amount of gatherers who can gather resources from this entity at the same time'>" +
 		"<data type='nonNegativeInteger'/>" +
@@ -175,7 +175,7 @@ ResourceSupply.prototype.IsAvailableTo = function(gathererID)
  */
 ResourceSupply.prototype.IsAvailable = function()
 {
-	return this.amount && this.gatherers.length < this.GetMaxGatherers();
+	return !!this.amount && this.gatherers.length < this.GetMaxGatherers();
 };
 
 /**
@@ -360,7 +360,7 @@ ResourceSupply.prototype.CheckTimers = function()
  */
 ResourceSupply.prototype.CheckState = function(changeKey)
 {
-	let template = this.template.Change[changeKey];
+	let template = this.template.Change?.[changeKey];
 	if (!template.State)
 		return true;
 
@@ -387,7 +387,7 @@ ResourceSupply.prototype.StartTimer = function(changeKey)
 		return;
 
 	let cmpTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer);
-	let interval = ApplyValueModificationsToEntity("ResourceSupply/Change/" + changeKey + "/Interval", +(this.template.Change[changeKey].Interval || 1000), this.entity);
+	let interval = ApplyValueModificationsToEntity("ResourceSupply/Change/" + changeKey + "/Interval", +(this.template.Change?.[changeKey].Interval || 1000), this.entity);
 	this.timers[changeKey] = cmpTimer.SetInterval(this.entity, IID_ResourceSupply, "TimerTick", interval, interval, changeKey);
 };
 
@@ -409,7 +409,7 @@ ResourceSupply.prototype.StopTimer = function(changeKey)
  */
 ResourceSupply.prototype.TimerTick = function(changeKey)
 {
-	let template = this.template.Change[changeKey];
+	let template = this.template.Change?.[changeKey];
 	if (!template || !this.Change(this.cachedChanges[changeKey]))
 		this.StopTimer(changeKey);
 };

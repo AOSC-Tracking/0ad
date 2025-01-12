@@ -74,7 +74,7 @@ AlertRaiser.prototype.RaiseAlert = function()
 			if (!cmpUnitAI.CheckTargetVisible(ent))
 				return false;
 
-			let cmpGarrisonHolder = Engine.QueryInterface(ent, IID_GarrisonHolder);
+			let cmpGarrisonHolder = /** @type{GarrisonHolder} */(Engine.QueryInterface(ent, IID_GarrisonHolder));
 			if (!reserved.has(ent))
 				reserved.set(ent, cmpGarrisonHolder.GetCapacity() - cmpGarrisonHolder.OccupiedSlots());
 
@@ -142,11 +142,11 @@ AlertRaiser.prototype.EndOfAlert = function()
 			if (cmpGarrisonHolder.Unload(unit))
 			{
 				let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
-				if (cmpUnitAI.HasWorkOrders())
+				if (cmpUnitAI?.HasWorkOrders())
 					cmpUnitAI.BackToWork();
 				else
 					// Stop rather than walk to the rally point
-					cmpUnitAI.ReplaceOrder("Stop", { "force": true });
+					cmpUnitAI?.ReplaceOrder("Stop", { "force": true });
 			}
 	}
 };

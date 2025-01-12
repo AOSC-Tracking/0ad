@@ -4,10 +4,10 @@ Player.prototype.Schema =
 	"<element name='BarterMultiplier' a:help='Multipliers for barter prices.'>" +
 		"<interleave>" +
 			"<element name='Buy' a:help='Multipliers for the buy prices.'>" +
-				Resources.BuildSchema("positiveDecimal") +
+				g_Resources.BuildSchema("positiveDecimal") +
 			"</element>" +
 			"<element name='Sell' a:help='Multipliers for the sell prices.'>" +
-				Resources.BuildSchema("positiveDecimal") +
+				g_Resources.BuildSchema("positiveDecimal") +
 			"</element>" +
 		"</interleave>" +
 	"</element>" +
@@ -54,49 +54,12 @@ var panelEntityClasses = "Hero Relic";
 
 Player.prototype.Init = function()
 {
-	this.playerID = undefined;
-	this.color = undefined;
-	this.popUsed = 0; // Population of units owned or trained by this player.
-	this.popBonuses = 0; // Sum of population bonuses of player's entities.
-	this.maxPop = 300; // Maximum population.
-	this.trainingBlocked = false; // Indicates whether any training queue is currently blocked.
-	this.resourceCount = {};
-	this.resourceGatherers = {};
-	this.tradingGoods = []; // Goods for next trade-route and its probabilities * 100.
-	this.state = this.STATE_ACTIVE;
 	this.formations = this.template.Formations._string.split(" ");
-	this.startCam = undefined;
-	this.controlAllUnits = false;
-	this.isAI = false;
-	this.cheatsEnabled = false;
-	this.panelEntities = [];
-	this.resourceNames = {};
-	this.disabledTemplates = {};
-	this.disabledTechnologies = {};
 	this.spyCostMultiplier = +this.template.SpyCostMultiplier;
-	this.barterEntities = [];
-	this.barterMultiplier = {
-		"buy": clone(this.template.BarterMultiplier.Buy),
-		"sell": clone(this.template.BarterMultiplier.Sell)
-	};
-
-	// Initial resources.
-	let resCodes = Resources.GetCodes();
-	for (let res of resCodes)
-	{
-		this.resourceCount[res] = 300;
-		this.resourceNames[res] = Resources.GetResource(res).name;
-		this.resourceGatherers[res] = 0;
-	}
-	// Trading goods probability in steps of 5.
-	let resTradeCodes = Resources.GetTradableCodes();
-	let quotient = Math.floor(20 / resTradeCodes.length);
-	let remainder = 20 % resTradeCodes.length;
-	for (let i in resTradeCodes)
-		this.tradingGoods.push({
-			"goods": resTradeCodes[i],
-			"proba": 5 * (quotient + (+i < remainder ? 1 : 0))
-		});
+	for (let res in this.template.BarterMultiplier.Buy)
+		this.barterMultiplier.buy[res] = +this.template.BarterMultiplier.Buy[res];
+	for (let res in this.template.BarterMultiplier.Sell)
+		this.barterMultiplier.sell[res] = +this.template.BarterMultiplier.Sell[res];
 };
 
 /** @param {number} id */
@@ -141,7 +104,7 @@ Player.prototype.GetColor = function()
 
 Player.prototype.GetDisplayedColor = function()
 {
-	return this.displayDiplomacyColor ? Engine.QueryInterface(this.entity, IID_Diplomacy).GetColor() : this.color;
+	return this.displayDiplomacyColor ? /** @type {Diplomacy} */ (Engine.QueryInterface(this.entity, IID_Diplomacy)).GetColor() : this.color;
 };
 
 /**
@@ -414,7 +377,7 @@ Player.prototype.GetTradingGoods = function()
 /** @param {Record<GenericResName, number>} tradingGoods */
 Player.prototype.SetTradingGoods = function(tradingGoods)
 {
-	let resTradeCodes = Resources.GetTradableCodes();
+	let resTradeCodes = g_Resources.GetTradableCodes();
 	let sumProba = 0;
 	for (let resource in tradingGoods)
 	{
@@ -528,7 +491,7 @@ Player.prototype.SetState = function(newState, message)
 		for (let entity of entities)
 		{
 			let cmpOwnership = Engine.QueryInterface(entity, IID_Ownership);
-			cmpOwnership.SetOwnerQuiet(0);
+			cmpOwnership?.SetOwnerQuiet(0);
 		}
 
 		// With the real ownership change complete, send OwnershipChanged messages.
@@ -567,12 +530,12 @@ Player.prototype.SetFormations = function(formations)
 
 Player.prototype.GetStartingCameraPos = function()
 {
-	return this.startCam.position;
+	return this.startCam?.position;
 };
 
 Player.prototype.GetStartingCameraRot = function()
 {
-	return this.startCam.rotation;
+	return this.startCam?.rotation;
 };
 
 /**
@@ -581,7 +544,7 @@ Player.prototype.GetStartingCameraRot = function()
  */
 Player.prototype.SetStartingCamera = function(pos, rot)
 {
-	this.startCam = { "position": pos, "rotation": rot };
+	this.startCam = { position: pos, rotation: rot };
 };
 
 Player.prototype.HasStartingCamera = function()
@@ -679,7 +642,7 @@ Player.prototype.OnValueModification = function(msg)
 
 	if (msg.valueNames.some(mod => mod.startsWith("Player/BarterMultiplier/")))
 		for (let res in this.template.BarterMultiplier.Buy)
-		{
+{
 			this.barterMultiplier.buy[res] = ApplyValueModificationsToEntity("Player/BarterMultiplier/Buy/"+res, +this.template.BarterMultiplier.Buy[res], this.entity);
 			this.barterMultiplier.sell[res] = ApplyValueModificationsToEntity("Player/BarterMultiplier/Sell/"+res, +this.template.BarterMultiplier.Sell[res], this.entity);
 		}
@@ -702,19 +665,19 @@ Player.prototype.GetCheatsEnabled = function()
  */
 Player.prototype.TributeResource = function(player, amounts)
 {
-	let cmpPlayer = QueryPlayerIDInterface(player);
+	let cmpPlayer = QueryPlayerIDInterface(player, IID_Player);
 	if (!cmpPlayer)
 		return;
 
 	if (!this.IsActive() || !cmpPlayer.IsActive())
 		return;
 
-	let resTribCodes = Resources.GetTributableCodes();
+	let resTribCodes = g_Resources.GetTributableCodes();
 	for (let resCode in amounts)
 		if (resTribCodes.indexOf(resCode) == -1 ||
-		    !Number.isInteger(amounts[resCode]) ||
+			!Number.isInteger(amounts[resCode]) ||
 		    amounts[resCode] < 0)
-		{
+{
 			warn("Invalid tribute amounts: " + uneval(resCode) + ": " + uneval(amounts));
 			return;
 		}
@@ -810,7 +773,8 @@ Player.prototype.OnGlobalPlayerDefeated = function(msg)
 	if (!cmpSound)
 		return;
 
-	const soundGroup = cmpSound.GetSoundGroup(this.playerID === msg.playerId ? "defeated" : Engine.QueryInterface(this.entity, IID_Diplomacy).IsAlly(msg.playerId) ? "defeated_ally" : this.HasWon() ? "won" : "defeated_enemy");
+	const cmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(this.entity, IID_Diplomacy));
+	const soundGroup = cmpSound.GetSoundGroup(this.playerID === msg.playerId ? "defeated" : cmpDiplomacy.IsAlly(msg.playerId) ? "defeated_ally" : this.HasWon() ? "won" : "defeated_enemy");
 	if (soundGroup)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_SoundManager).PlaySoundGroupForPlayer(soundGroup, this.playerID);
 };

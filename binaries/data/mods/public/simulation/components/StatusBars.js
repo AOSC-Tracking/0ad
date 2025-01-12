@@ -29,7 +29,7 @@ StatusBars.prototype.Sprites = /** @type {const} */([
 	"HealthBar",
 	"AuraIcons",
 	"RankIcon"
-];
+]);
 
 StatusBars.prototype.Init = function()
 {
@@ -97,7 +97,7 @@ StatusBars.prototype.AddAuraSource = function(source, auraName)
  */
 StatusBars.prototype.RemoveAuraSource = function(source, auraName)
 {
-	let names = this.auraSources.get(source);
+	let names = /** @type {string[]} */(this.auraSources.get(source));
 	names.splice(names.indexOf(auraName), 1);
 	this.RegenerateSprites();
 };
@@ -158,7 +158,7 @@ StatusBars.prototype.OnPlayerColorChanged = function(msg)
 
 StatusBars.prototype.RegenerateSprites = function()
 {
-	let cmpOverlayRenderer = Engine.QueryInterface(this.entity, IID_OverlayRenderer);
+	let cmpOverlayRenderer = /** @type {OverlayRenderer} */(Engine.QueryInterface(this.entity, IID_OverlayRenderer));
 	cmpOverlayRenderer.Reset();
 
 	let yoffset = 0;
@@ -250,7 +250,7 @@ StatusBars.prototype.AddUpgradeBar = function(cmpOverlayRenderer, yoffset)
 	if (!cmpUpgrade || !cmpUpgrade.IsUpgrading())
 		return 0;
 
-	return this.AddBar(cmpOverlayRenderer, yoffset, "upgrade", cmpUpgrade.GetProgress());
+	return this.AddBar(cmpOverlayRenderer, yoffset, "upgrade", cmpUpgrade.GetProgress() || 0);
 };
 
 /**
@@ -298,7 +298,7 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	if (!cmpCapturable)
 		return 0;
 
-	let cmpOwnership = QueryMiragedInterface(this.entity, IID_Ownership);
+	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	if (!cmpOwnership)
 		return 0;
 
@@ -340,8 +340,8 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	// First handle the owner's points, to keep those points on the left for clarity
 	let size = setCaptureBarPart(owner, -width / 2);
 	for (let i in capturePoints)
-		if (i != owner && capturePoints[i] > 0)
-			size = setCaptureBarPart(i, size);
+		if (+i != owner && capturePoints[i] > 0)
+			size = setCaptureBarPart(+i, size);
 
 	return height * 1.2;
 };
@@ -387,7 +387,7 @@ StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 		xoffset += iconSize * 1.2;
 	}
 
-	return iconSize + this.template.BarHeight / 2;
+	return iconSize + +this.template.BarHeight / 2;
 };
 
 /**
@@ -411,7 +411,7 @@ StatusBars.prototype.AddRankIcon = function(cmpOverlayRenderer, yoffset)
 		{ "x": 0, "y": +this.template.HeightOffset + 0.1, "z": 0 },
 		g_NaturalColor);
 
-	return iconSize + this.template.BarHeight / 2;
+	return iconSize + +this.template.BarHeight / 2;
 };
 
 Engine.RegisterComponentType(IID_StatusBars, "StatusBars", StatusBars);

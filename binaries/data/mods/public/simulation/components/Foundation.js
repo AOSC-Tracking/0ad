@@ -7,20 +7,7 @@ Foundation.prototype.Schema =
 
 Foundation.prototype.Init = function()
 {
-	// Foundations are initially 'uncommitted' and do not block unit movement at all
-	// (to prevent players exploiting free foundations to confuse enemy units).
-	// The first builder to reach the uncommitted foundation will tell friendly units
-	// and animals to move out of the way, then will commit the foundation and enable
-	// its obstruction once there's nothing in the way.
-	this.committed = false;
-
-	this.builders = new Map(); // Map of builder entities to their work per second
-	this.totalBuilderRate = 0; // Total amount of work the builders do each second
-	this.buildMultiplier = 1; // Multiplier for the amount of work builders do
-
 	this.buildTimeModifier = +this.template.BuildTimeModifier;
-
-	this.previewEntity = INVALID_ENTITY;
 };
 
 Foundation.prototype.Serialize = function()
@@ -50,8 +37,10 @@ Foundation.prototype.InitialiseConstruction = function(template)
 	// Remember the cost here, so if it changes after construction begins (from auras or technologies)
 	// we will use the correct values to refund partial construction costs.
 	let cmpCost = Engine.QueryInterface(this.entity, IID_Cost);
-	if (!cmpCost)
+	if (!cmpCost) {
 		error("A foundation, from " + template + ", must have a cost component to know the build time");
+		return;
+	}
 
 	this.costs = cmpCost.GetResourceCosts();
 
@@ -132,7 +121,7 @@ Foundation.prototype.OnOwnershipChanged = function(msg)
 	if (this.IsFinished())
 		return;
 
-	let cmpPlayer = QueryPlayerIDInterface(msg.from);
+	let cmpPlayer = QueryPlayerIDInterface(msg.from, IID_Player);
 	let cmpStatisticsTracker = QueryPlayerIDInterface(msg.from, IID_StatisticsTracker);
 
 	// Refund a portion of the construction cost, proportional
@@ -201,7 +190,7 @@ Foundation.prototype.RemoveBuilder = function(builderEnt)
 	if (!this.builders.has(builderEnt))
 		return;
 
-	this.totalBuilderRate -= this.builders.get(builderEnt);
+	this.totalBuilderRate -= /** @type {number} */(this.builders.get(builderEnt));
 	this.builders.delete(builderEnt);
 	this.HandleBuildersChanged();
 };
@@ -327,12 +316,14 @@ Foundation.prototype.Build = function(builderEnt, work)
 		error("Foundation " + this.entity + " does not have a health component.");
 		return;
 	}
+	if (!this.builders.has(builderEnt))
+		return;
 	let deltaHP = work * this.GetBuildRate() * this.buildMultiplier;
 	if (deltaHP > 0)
 		cmpHealth.Increase(deltaHP);
 
 	// Update the total builder rate.
-	this.totalBuilderRate += work - this.builders.get(builderEnt);
+	this.totalBuilderRate += work - /** @type {number} */(this.builders.get(builderEnt));
 	this.builders.set(builderEnt, work);
 
 	// Remember our max progress for partial refund in case of destruction.
@@ -363,8 +354,8 @@ Foundation.prototype.Build = function(builderEnt, work)
 
 Foundation.prototype.GetBuildRate = function()
 {
-	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
-	let cmpCost = Engine.QueryInterface(this.entity, IID_Cost);
+	let cmpHealth = /** @type {Health} */(Engine.QueryInterface(this.entity, IID_Health));
+	let cmpCost = /** @type {Cost} */(Engine.QueryInterface(this.entity, IID_Cost));
 	// Return infinity for instant structure conversion
 	return cmpHealth.GetMaxHitpoints() / cmpCost.GetBuildTime();
 };

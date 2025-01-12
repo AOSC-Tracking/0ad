@@ -48,7 +48,7 @@ function InitGame(settings)
 	const cmpAIManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIManager);
 	for (let i = 0; i < settings.PlayerData.length; ++i)
 	{
-		const cmpPlayer = QueryPlayerIDInterface(i);
+		const cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(i, IID_Player));
 		cmpPlayer.SetCheatsEnabled(!!settings.CheatsEnabled);
 
 		if (settings.PlayerData[i] && !!settings.PlayerData[i].AI)
@@ -60,8 +60,11 @@ function InitGame(settings)
 		if (settings.PopulationCap)
 			cmpPlayer.SetMaxPopulation(settings.PopulationCap);
 
-		if (settings.AllyView)
-			Engine.QueryInterface(cmpPlayer.entity, IID_TechnologyManager)?.ResearchTechnology(Engine.QueryInterface(cmpPlayer.entity, IID_Diplomacy).template.SharedLosTech);
+		if (settings.AllyView) {
+			let sharedLosTech = Engine.QueryInterface(cmpPlayer.entity, IID_Diplomacy)?.template.SharedLosTech;
+			if (sharedLosTech)
+				Engine.QueryInterface(cmpPlayer.entity, IID_TechnologyManager)?.ResearchTechnology(sharedLosTech);
+		}
 	}
 	if (settings.WorldPopulationCap)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).SetMaxWorldPopulation(settings.WorldPopulationCap);

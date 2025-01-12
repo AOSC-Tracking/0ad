@@ -72,13 +72,13 @@ CeasefireManager.prototype.StartCeasefire = function(ceasefireTime)
 		// Save diplomacy
 		let numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 		for (let i = 1; i < numPlayers; ++i)
-			this.diplomacyBeforeCeasefire.push(QueryPlayerIDInterface(i, IID_Diplomacy).GetDiplomacy());
+			this.diplomacyBeforeCeasefire.push(/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).GetDiplomacy());
 
 		// Set every enemy (except gaia) to neutral
 		for (let i = 1; i < numPlayers; ++i)
 			for (let j = 1; j < numPlayers; ++j)
 				if (this.diplomacyBeforeCeasefire[i-1][j] < 0)
-					QueryPlayerIDInterface(i, IID_Diplomacy).SetNeutral(j);
+					/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetNeutral(j);
 	}
 
 	this.ceasefireIsActive = true;

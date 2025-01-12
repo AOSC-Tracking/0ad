@@ -12,7 +12,7 @@ function LoadMapSettings(settings)
 	if (settings.DefaultStance)
 		for (const ent of Engine.GetEntitiesWithInterface(IID_UnitAI))
 		{
-			const cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
+			const cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(ent, IID_UnitAI));
 			cmpUnitAI.SwitchToStance(settings.DefaultStance);
 		}
 
@@ -43,10 +43,13 @@ function LoadMapSettings(settings)
 		let difficulties = Engine.ReadJSONFile("simulation/data/settings/trigger_difficulties.json").Data;
 		let defaultDiff;
 		if (settings.SupportedTriggerDifficulties.Default)
-			defaultDiff = difficulties.find(d => d.Name == settings.SupportedTriggerDifficulties.Default).Difficulty;
+			defaultDiff = difficulties.find(d => d.Name == settings.SupportedTriggerDifficulties.Default)?.Difficulty;
 		else
-			defaultDiff = difficulties.find(d => d.Default).Difficulty;
-		Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(defaultDiff);
+			defaultDiff = difficulties.find(d => d.Default)?.Difficulty;
+		if (defaultDiff === undefined)
+			warn("No default trigger difficulty found!");
+		else
+			Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(defaultDiff);
 	}
 
 	const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);

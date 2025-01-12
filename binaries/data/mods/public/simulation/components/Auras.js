@@ -106,7 +106,7 @@ Auras.prototype.GetRangeOverlays = function()
 		rangeOverlays.push(
 			rangeOverlay ?
 				{
-					"radius": this.GetRange(name),
+					"radius": /** @type {number} */(this.GetRange(name)),
 					"texture": rangeOverlay.lineTexture,
 					"textureMask": rangeOverlay.lineTextureMask,
 					"thickness": rangeOverlay.lineThickness
@@ -132,19 +132,19 @@ Auras.prototype.CalculateAffectedPlayers = function(name)
 
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
 	if (!cmpPlayer)
-		cmpPlayer = QueryOwnerInterface(this.entity);
+		cmpPlayer = QueryOwnerInterface(this.entity, IID_Player);
 
 	if (!cmpPlayer || cmpPlayer.IsDefeated())
 		return;
 
 	const playerID = cmpPlayer.GetPlayerID();
-	const cmpDiplomacy = Engine.QueryInterface(this.entity, IID_Diplomacy) ??
-		QueryPlayerIDInterface(playerID, IID_Diplomacy);
+	const cmpDiplomacy = /** @type {Diplomacy} */(Engine.QueryInterface(this.entity, IID_Diplomacy) ??
+		QueryPlayerIDInterface(playerID, IID_Diplomacy));
 
 	let cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
 	for (let i of cmpPlayerManager.GetAllPlayers())
 	{
-		let cmpAffectedPlayer = QueryPlayerIDInterface(i);
+		let cmpAffectedPlayer = QueryPlayerIDInterface(i, IID_Player);
 		if (!cmpAffectedPlayer || cmpAffectedPlayer.IsDefeated())
 			continue;
 
@@ -268,9 +268,10 @@ Auras.prototype.Clean = function()
 		// this makes sure the template bonuses are removed from the correct players
 		this.CalculateAffectedPlayers(name);
 		// initialise range query
-		this[name] = {};
-		this[name].targetUnits = [];
-		this[name].isApplied = this.CanApply(name);
+		this[name] = {
+			targetUnits: [],
+			isApplied: this.CanApply(name)
+		};
 		var affectedPlayers = this.GetAffectedPlayers(name);
 
 		if (!affectedPlayers.length)
@@ -309,7 +310,7 @@ Auras.prototype.Clean = function()
 			this[name].rangeQuery = cmpRangeManager.CreateActiveQuery(
 				this.entity,
 				0,
-				this.GetRange(name),
+				this.GetRange(name) || -1,
 				affectedPlayers,
 				IID_Identity,
 				cmpRangeManager.GetEntityFlagMask("normal"),
