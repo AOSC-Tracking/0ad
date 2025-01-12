@@ -13,7 +13,7 @@ function distributeButtonsHorizontally(buttons)
 
 	let y1 = "50%-" + (regularButtonHeight / 2);
 	let y2 = "50%+" + (regularButtonHeight / 2);
-	let buttonWidths = {};
+	const buttonWidths = [];
 
 	buttons.forEach((button, i) => {
 		let x1 = i === 0 ? (betweenButtonMargin / 2) : (i * 100 / numButtons + "%+" + (betweenButtonMargin / 2));
@@ -21,8 +21,8 @@ function distributeButtonsHorizontally(buttons)
 		buttonWidths[i] = {"x1": x1, "x2": x2}
 		button.size = x1 + " " + y1 + " " + x2 + " " + y2
 
-		let captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
-		let buttonWidth = button.getComputedSize().right - button.getComputedSize().left;
+		const captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
+		const buttonWidth = button.getComputedSize().right - button.getComputedSize().left;
 		if (captionWidth > (buttonWidth) && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
 			y1 = "50%-" + (multilineButtonHeight / 2);
 			y2 = "50%+" + (multilineButtonHeight / 2);

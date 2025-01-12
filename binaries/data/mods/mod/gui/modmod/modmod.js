@@ -149,7 +149,7 @@ function initGUIButtons(data)
 	Engine.GetGUIObjectByName("quitButton").hidden = hasPreviousPage;
 
 	distributeButtonsHorizontally([
-		hasPreviousPage ? Engine.GetGUIObjectByName("cancelButton") : Engine.GetGUIObjectByName("quitButton"),
+		Engine.GetGUIObjectByName(hasPreviousPage ? "cancelButton" : "quitButton"),
 		Engine.GetGUIObjectByName("helpButton"),
 		Engine.GetGUIObjectByName("downloadButton"),
 		Engine.GetGUIObjectByName("saveConfigurationButton"),
