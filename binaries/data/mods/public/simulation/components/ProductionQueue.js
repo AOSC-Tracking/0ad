@@ -205,6 +205,7 @@ ProductionQueue.prototype.Item.prototype.Serialize = function()
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-expect-error
 			result[att] = this[att];
 	return result;
 };
@@ -213,6 +214,7 @@ ProductionQueue.prototype.Item.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-expect-error
 			this[att] = data[att];
 };
 
@@ -240,6 +242,7 @@ ProductionQueue.prototype.Serialize = function()
 
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-expect-error
 			result[att] = this[att];
 
 	return result;
@@ -250,6 +253,7 @@ ProductionQueue.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-expect-error
 			this[att] = data[att];
 
 	this.queue = [];

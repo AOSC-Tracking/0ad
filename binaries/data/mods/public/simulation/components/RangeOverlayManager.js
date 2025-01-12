@@ -26,6 +26,7 @@ RangeOverlayManager.prototype.Deserialize = function(data)
 /** @param {"Attack" | "Auras" | "Heal"} componentName */
 RangeOverlayManager.prototype.UpdateRangeOverlays = function(componentName)
 {
+	/** @ts-expect-error; @type {Attack | Auras | Heal} */
 	let cmp = Engine.QueryInterface(this.entity, global["IID_" + componentName]);
 	if (cmp)
 		this.rangeVisualizations.set(componentName, cmp.GetRangeOverlays());
@@ -73,6 +74,7 @@ RangeOverlayManager.prototype.OnOwnershipChanged = function(msg)
 	if (msg.to == INVALID_PLAYER)
 		return;
 	for (let type in this.enabledRangeTypes)
+		// @ts-expect-error
 		this.UpdateRangeOverlays(type);
 
 	this.RegenerateRangeOverlays(false);
@@ -86,6 +88,7 @@ RangeOverlayManager.prototype.OnValueModification = function(msg)
 	    msg.valueNames.indexOf("Attack/Ranged/MaxRange") == -1)
 		return;
 
+	// @ts-expect-error - we know that the component is either "Heal" or "Attack"
 	this.UpdateRangeOverlays(msg.component);
 	this.RegenerateRangeOverlays(false);
 };
@@ -96,6 +99,7 @@ RangeOverlayManager.prototype.OnValueModification = function(msg)
 RangeOverlayManager.prototype.OnDeserialized = function(msg)
 {
 	for (let type in this.enabledRangeTypes)
+		// @ts-expect-error
 		this.UpdateRangeOverlays(type);
 };
 

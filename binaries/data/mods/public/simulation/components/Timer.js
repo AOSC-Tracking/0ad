@@ -150,6 +150,7 @@ Timer.prototype.OnUpdate = function(msg)
 				"function " + timer.functionName + ": " +
 				e + "\n" +
 				// Indent the stack trace
+				// @ts-expect-error
 				e.stack.trimRight().replace(/^/mg, '  ') + "\n");
 		}
 

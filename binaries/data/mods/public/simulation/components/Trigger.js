@@ -406,7 +406,9 @@ Trigger.prototype.CallTrigger = function(event, name, eventData, evenIfDisabled 
  */
 Trigger.prototype.DoAction = function(msg)
 {
+	// @ts-expect-error
 	if (this[msg.action])
+		// @ts-expect-error
 		this[msg.action](msg?.eventData, msg?.customData, msg?.triggerData);
 	else
 		warn("Trigger.js: called a trigger action '" + msg.action + "' that wasn't found");

@@ -1,3 +1,4 @@
+// @ts-nocheck
 function MotionBallScripted() {}
 
 MotionBallScripted.prototype.Schema =

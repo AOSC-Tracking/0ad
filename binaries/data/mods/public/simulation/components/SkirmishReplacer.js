@@ -13,6 +13,7 @@ SkirmishReplacer.prototype.Init = function()
 {
 };
 
+// @ts-expect-error
 SkirmishReplacer.prototype.Serialize = null; // We have no dynamic state to save
 
 /**
@@ -21,6 +22,7 @@ SkirmishReplacer.prototype.Serialize = null; // We have no dynamic state to save
 */
 function getReplacementEntities(civ)
 {
+	// @ts-expect-error
 	return Engine.ReadJSONFile("simulation/data/civs/" + civ + ".json").SkirmishReplacements;
 }
 

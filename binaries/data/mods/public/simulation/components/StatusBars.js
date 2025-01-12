@@ -84,6 +84,7 @@ StatusBars.prototype.SetEnabled = function(enabled, showRank, showExperience)
 StatusBars.prototype.AddAuraSource = function(source, auraName)
 {
 	if (this.auraSources.has(source))
+		// @ts-expect-error
 		this.auraSources.get(source).push(auraName);
 	else
 		this.auraSources.set(source, [auraName]);
@@ -162,6 +163,7 @@ StatusBars.prototype.RegenerateSprites = function()
 
 	let yoffset = 0;
 	for (let sprite of this.Sprites)
+		// @ts-expect-error
 		yoffset += this["Add" + sprite](cmpOverlayRenderer, yoffset);
 };
 
@@ -351,6 +353,7 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 {
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
+	// @ts-expect-error
 	let sources = cmpGuiInterface.GetEntitiesWithStatusBars().filter(e => this.auraSources.has(e) && this.auraSources.get(e).length);
 
 	if (!sources.length)
@@ -362,6 +365,7 @@ StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 		let cmpAuras = Engine.QueryInterface(ent, IID_Auras);
 		if (!cmpAuras) // probably the ent just died
 			continue;
+		// @ts-expect-error
 		for (let name of this.auraSources.get(ent))
 			iconSet.add(cmpAuras.GetOverlayIcon(name));
 	}

@@ -64,6 +64,7 @@ function ProcessCommand(player, cmd)
 	{
 		var cmpTrigger = Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger);
 		cmpTrigger.CallEvent("OnPlayerCommand", { "player": player, "cmd": cmd });
+		// @ts-expect-error (can't know if we have entities or not)
 		g_Commands[cmd.type](player, cmd, data);
 	}
 	else

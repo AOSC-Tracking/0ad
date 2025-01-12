@@ -163,6 +163,7 @@ Formation.prototype.Serialize = function()
 {
 	let result = {};
 	for (let key of this.variablesToSerialize)
+		// @ts-expect-error
 		result[key] = this[key];
 
 	return result;
@@ -173,6 +174,7 @@ Formation.prototype.Deserialize = function(data)
 {
 	this.Init(true);
 	for (let key in data)
+		// @ts-expect-error
 		this[key] = data[key];
 };
 
@@ -750,8 +752,11 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 		for (let i = 0; i < count; ++i)
 		{
 			let obj = new Vector2D(randFloat(0, width), randFloat(0, width));
+			// @ts-expect-error
 			obj.row = 1;
+			// @ts-expect-error
 			obj.column = i + 1;
+			// @ts-expect-error
 			offsets.push(obj);
 		}
 	}
@@ -808,6 +813,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 				let r1 = randFloat(-1, 1) * this.sloppiness;
 				let r2 = randFloat(-1, 1) * this.sloppiness;
 
+				// @ts-expect-error
 				offsets.push(new Vector2D(x + r1, z + r2));
 				offsets[offsets.length - 1].row = r + 1;
 				offsets[offsets.length - 1].column = column;
@@ -853,6 +859,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 		{
 			let closestOffsetId = this.TakeClosestOffset(entPos, usedRealPositions, usedOffsets);
 			usedRealPositions.splice(closestOffsetId, 1);
+			// @ts-expect-error
 			newOffsets.push(usedOffsets.splice(closestOffsetId, 1)[0]);
 			newOffsets[newOffsets.length - 1].ent = entPos.ent;
 		}

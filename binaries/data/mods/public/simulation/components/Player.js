@@ -43,6 +43,7 @@ Player.prototype.Serialize = function()
 Player.prototype.Deserialize = function(state)
 {
 	for (let prop in state)
+		// @ts-expect-error
 		this[prop] = state[prop];
 };
 

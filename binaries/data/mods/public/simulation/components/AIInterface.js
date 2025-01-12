@@ -70,6 +70,7 @@ AIInterface.prototype.Deserialize = function(data)
 	{
 		if (!data.hasOwnProperty(key))
 			continue;
+		// @ts-expect-error
 		this[key] = data[key];
 	}
 	if (!this.enabled)
@@ -84,12 +85,19 @@ AIInterface.prototype.Disable = function()
 {
 	this.enabled = false;
 	let nop = function(){};
+	/** @ts-ignore; @type {NonNullable<typeof this["ChangedEntity"]>} */
 	this.ChangedEntity = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["PushEvent"]>} */
 	this.PushEvent = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["OnDiplomacyChanged"]>} */
 	this.OnGlobalPlayerDefeated = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalEntityRenamed"]>} */
 	this.OnGlobalEntityRenamed = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalTributeExchanged"]>} */
 	this.OnGlobalTributeExchanged = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["OnTerritoriesChanged"]>} */
 	this.OnTemplateModification = nop;
+	/** @ts-ignore; @type {NonNullable<AIInterface["OnGlobalValueModification"]>} */
 	this.OnGlobalValueModification = nop;
 };
 
@@ -180,6 +188,7 @@ AIInterface.prototype.ChangedEntity = function(ent)
  * @param {string} type
  * @param {unknown} msg
  */
+// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.PushEvent = function(type, msg)
 {
 	if (this.events[type] === undefined)
@@ -193,17 +202,20 @@ AIInterface.prototype.OnDiplomacyChanged = function(msg)
 	this.events.DiplomacyChanged.push(msg);
 };
 
+/** @ts-expect-error (duplicate because we disable with nop), @param {MessagePlayerDefeated} msg */
 AIInterface.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.events.PlayerDefeated.push(msg);
 };
 
+/** @ts-expect-error (duplicate because we disable with nop), @param {MessageEntityRenamed} msg */
 AIInterface.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	if (!Engine.QueryInterface(msg.entity, IID_Mirage))
 		this.events.EntityRenamed.push(msg);
 };
 
+/** @ts-expect-error (duplicate because we disable with nop), @param {MessageTributeExchanged} msg */
 AIInterface.prototype.OnGlobalTributeExchanged = function(msg)
 {
 	this.events.TributeExchanged.push(msg);
@@ -228,6 +240,7 @@ AIInterface.prototype.OnCeasefireEnded = function(msg)
  * one template value, and that the naming is the same (with / in place of .)
  * @param {MessageTemplateModification} msg
  */
+// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.OnTemplateModification = function(msg)
 {
 	let cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
@@ -288,6 +301,7 @@ AIInterface.prototype.OnTemplateModification = function(msg)
 	}
 };
 
+/** @ts-expect-error (duplicate because we disable with nop) @param {MessageValueModification} msg */
 AIInterface.prototype.OnGlobalValueModification = function(msg)
 {
 	this.events.ValueModification.push(msg);

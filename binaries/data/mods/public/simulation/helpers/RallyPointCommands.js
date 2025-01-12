@@ -164,6 +164,7 @@ function GetRallyPointCommands(cmpRallyPoint, spawnedEnts)
 				route = undefined;
 				break;
 			}
+			// @ts-expect-error(we check above)
 			route.push({ "x": ret[i].x, "z": ret[i].z });
 		}
 

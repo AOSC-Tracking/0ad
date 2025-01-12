@@ -74,6 +74,7 @@ function DeriveModificationsFromTech(techTemplate)
 	let techMods = {};
 	let techAffects = [];
 	if (techTemplate.affects && techTemplate.affects.length)
+		// @ts-expect-error
 		techAffects = techTemplate.affects.map(affected => affected.split(/\s+/));
 	else
 		techAffects.push([]);

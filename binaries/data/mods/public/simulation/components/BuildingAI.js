@@ -368,6 +368,7 @@ BuildingAI.prototype.FireArrows = function()
         });
 	}
 	else
+		// @ts-expect-error
 		targets = this.focusTargets;
 
 	// The obstruction manager performs approximate range checks.

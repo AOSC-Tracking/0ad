@@ -83,9 +83,11 @@ VisionSharing.prototype.CheckVisionSharings = function()
 
 	// compare with previous vision sharing, and update if needed
 	for (let player of shared)
+		// @ts-expect-error (not undefined here)
 		if (!this.shared.has(player))
 			Engine.PostMessage(this.entity, MT_VisionSharingChanged,
 				{ "entity": this.entity, "player": player, "add": true });
+	// @ts-expect-error (not undefined here)
 	for (let player of this.shared)
 		if (!shared.has(player))
 			Engine.PostMessage(this.entity, MT_VisionSharingChanged,

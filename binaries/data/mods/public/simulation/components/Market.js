@@ -18,6 +18,7 @@ Market.prototype.Schema =
 Market.prototype.Init = function()
 {
 	this.traders = new Set();	// list of traders with a route on this market
+	// @ts-expect-error enforced by schema
 	this.tradeType = new Set(this.template.TradeType.split(/\s+/));
 };
 

@@ -39,6 +39,7 @@ function LoadMapSettings(settings)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger).SetDifficulty(settings.TriggerDifficulty);
 	else if (settings.SupportedTriggerDifficulties)	// used by Atlas and autostart games
 	{
+		/** @ts-expect-error; @type {Record<string, any>[]} */
 		let difficulties = Engine.ReadJSONFile("simulation/data/settings/trigger_difficulties.json").Data;
 		let defaultDiff;
 		if (settings.SupportedTriggerDifficulties.Default)

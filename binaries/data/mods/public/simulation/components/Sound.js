@@ -23,6 +23,7 @@ Sound.prototype.Init = function()
 {
 };
 
+// @ts-ignore
 Sound.prototype.Serialize = null; // we have no dynamic state to save
 
 /** @param {string} name */

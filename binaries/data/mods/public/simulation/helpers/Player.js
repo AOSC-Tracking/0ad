@@ -11,6 +11,7 @@
  */
 function LoadPlayerSettings(settings, newPlayers)
 {
+	/** @ts-expect-error; @type {Record<string, any>} */
 	const playerDefaults = Engine.ReadJSONFile("simulation/data/settings/player_defaults.json").PlayerData;
 	/** @type {(Record<string, any> | null)[]} */
 	const playerData = settings.PlayerData;
@@ -172,6 +173,7 @@ function QueryOwnerEntityID(ent)
  * @template {keyof IIDs} T
  * @param {T} iid
  */
+// @ts-expect-error (some weird annoying thing about default arguments, TS2322)
 function QueryOwnerInterface(ent, iid = IID_Player)
 {
 	var cmpOwnership = Engine.QueryInterface(ent, IID_Ownership);
@@ -194,6 +196,7 @@ function QueryOwnerInterface(ent, iid = IID_Player)
  * @param {T} iid
  * @returns {IIDs[T] | undefined}
  */
+// @ts-expect-error (some weird annoying thing about default arguments, TS2322)
 function QueryPlayerIDInterface(id, iid = IID_Player)
 {
 	var cmpPlayerManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager);
@@ -329,7 +332,9 @@ function IsOwnedByEnemyOfPlayer(player, target)
 function IsOwnedByHelper(player, target, check)
 {
 	const targetOwner = Engine.QueryInterface(target, IID_Ownership)?.GetOwner() || 0;
+	/** @ts-expect-error; @type {Diplomacy} */
 	const cmpDiplomacy = QueryPlayerIDInterface(player, IID_Diplomacy);
+	// @ts-expect-error
 	return cmpDiplomacy && cmpDiplomacy[check](targetOwner);
 }
 

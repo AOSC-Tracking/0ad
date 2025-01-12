@@ -1,5 +1,8 @@
+// @ts-expect-error (redeclared)
 const VIS_HIDDEN = 0;
+// @ts-expect-error (redeclared)
 const VIS_FOGGED = 1;
+// @ts-expect-error (redeclared)
 const VIS_VISIBLE = 2;
 
 function Mirage() {}

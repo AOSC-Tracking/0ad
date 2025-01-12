@@ -21,7 +21,9 @@ MultiKeyMap.prototype.Serialize = function()
 		// Keys of a Map can be arbitrary types whereas objects only support string, so use a list.
 		let vals = [primary, []];
 		ret.push(vals);
+		// @ts-expect-error never null
 		for (let secondary of this.items.get(primary).keys())
+			// @ts-expect-error never null
 			vals[1].push([secondary, this.items.get(primary).get(secondary)]);
 	}
 	return ret;
@@ -34,6 +36,7 @@ MultiKeyMap.prototype.Deserialize = function(data)
 	{
 		this.items.set(data[primary][0], new Map());
 		for (let secondary in data[primary][1])
+			// @ts-expect-error never null
 			this.items.get(data[primary][0]).set(data[primary][1][secondary][0], data[primary][1][secondary][1]);
 	}
 };
@@ -188,9 +191,12 @@ MultiKeyMap.prototype._getItemsOrInit = function(primaryKey, secondaryKey)
 	if (!cache)
 		cache = this.items.set(primaryKey, new Map()).get(primaryKey);
 
+	// @ts-expect-error never null
 	let cache2 = cache.get(secondaryKey);
 	if (!cache2)
+		// @ts-expect-error never null
 		cache2 = cache.set(secondaryKey, []).get(secondaryKey);
+	// @ts-expect-error never null
 	return cache2;
 };
 
@@ -238,7 +244,9 @@ MultiKeyMap.prototype._RemoveItem = function(primaryKey, itemID, secondaryKey, s
 	// Delete entries from the map if necessary to clean up.
 	if (!stilValidItems.length)
 	{
+		// @ts-expect-error never null
 		this.items.get(primaryKey).delete(secondaryKey);
+		// @ts-expect-error never null
 		if (!this.items.get(primaryKey).size)
 			this.items.delete(primaryKey);
 		return true;

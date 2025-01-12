@@ -186,6 +186,7 @@ TechnologyManager.prototype.Technology.prototype.Serialize = function()
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 	return result;
 };
@@ -194,6 +195,7 @@ TechnologyManager.prototype.Technology.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 };
 
@@ -233,6 +235,7 @@ TechnologyManager.prototype.Serialize = function()
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 
 	result.researchQueued = [];
@@ -247,11 +250,13 @@ TechnologyManager.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 
 	this.researchQueued = new Map();
 	for (const tech of data.researchQueued)
 	{
+		// @ts-ignore
 		const newTech = new this.Technology();
 		newTech.Deserialize(tech);
 		this.researchQueued.set(tech.templateName, newTech);

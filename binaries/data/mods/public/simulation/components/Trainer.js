@@ -411,6 +411,7 @@ Trainer.prototype.Item.prototype.Serialize = function(id)
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 	return result;
 };
@@ -419,6 +420,7 @@ Trainer.prototype.Item.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 };
 
@@ -446,6 +448,7 @@ Trainer.prototype.Serialize = function()
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 
 	return result;
@@ -456,6 +459,7 @@ Trainer.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 
 	this.queue = new Map();

@@ -195,6 +195,7 @@ ModifiersManager.prototype.ApplyModifiers = function(propertyName, originalValue
 	if (ownerPlayer !== undefined && ownerPlayer !== INVALID_PLAYER)
 	{
 		const ownerEntity = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetPlayerByID(ownerPlayer);
+		//@ts-expect-error this is never null but annoying to write
 		let pc = this.playerEntitiesCached.get(ownerEntity).get(propertyName);
 		if (!pc)
 			pc = this.playerEntitiesCached.get(ownerEntity).set(propertyName, new Set()).get(propertyName);
@@ -234,6 +235,7 @@ ModifiersManager.prototype.OnGlobalPlayerEntityChanged = function(msg)
 
 	if (msg.from != INVALID_PLAYER && this.playerEntitiesCached.has(msg.from))
 	{
+		// @ts-expect-error this is never null but annoying to write
 		this.playerEntitiesCached.get(msg.from).forEach(propName => this.InvalidateCache(propName, msg.from));
 		this.playerEntitiesCached.delete(msg.from);
 	}

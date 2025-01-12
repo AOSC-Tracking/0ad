@@ -96,6 +96,7 @@ PositionHelper.prototype.TestCollision = function(ent, point, lateness)
 		return Math.abs(distance.x) < targetShape.width / 2 && Math.abs(distance.y) < targetShape.depth / 2;
 	}
 
+	// @ts-expect-error TS detects this (correctly) as unreachable in correctly-formed code.
 	warn("TestCollision called with an invalid footprint shape: " + targetShape.type + ".");
 	return false;
 };

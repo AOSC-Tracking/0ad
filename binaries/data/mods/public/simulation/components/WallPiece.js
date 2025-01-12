@@ -28,6 +28,7 @@ WallPiece.prototype.Init = function()
 {
 };
 
+// @ts-ignore
 WallPiece.prototype.Serialize = null;
 
 Engine.RegisterComponentType(IID_WallPiece, "WallPiece", WallPiece);

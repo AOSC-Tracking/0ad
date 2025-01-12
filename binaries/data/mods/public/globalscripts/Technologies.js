@@ -165,6 +165,7 @@ function DeriveTechnologyRequirements(template, civ)
 	{
 		let op = Object.keys(template.requirements)[0];
 		let val = template.requirements[op];
+		// @ts-expect-error op should be OK
 		requirements = InterpretTechRequirements(civ, op, val);
 	}
 
@@ -259,6 +260,7 @@ function InterpretTechRequirements(civ, operator, value)
 		{
 			let newOper = Object.keys(subvalue)[0];
 			let newValue = subvalue[newOper];
+			// @ts-expect-error newOper should be OK
 			let result = InterpretTechRequirements(civ, newOper, newValue);
 
 			switch (newOper)
@@ -334,6 +336,7 @@ function InterpretTechRequirements(civ, operator, value)
 		{
 			let newOper = Object.keys(subvalue)[0];
 			let newValue = subvalue[newOper];
+			// @ts-expect-error newOper should be OK
 			let result = InterpretTechRequirements(civ, newOper, newValue);
 
 			switch (newOper)

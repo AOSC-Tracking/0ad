@@ -225,6 +225,7 @@ BuildRestrictions.prototype.CheckPlacement = function()
 		result.message = markForTranslation("%(name)s cannot be built in %(territoryType)s territory. Valid territories: %(validTerritories)s");
 		result.translateParameters.push("territoryType");
 		result.translateParameters.push("validTerritories");
+		// @ts-expect-error (not user-facing)
 		result.parameters.territoryType = { "context": "Territory type", "_string": invalidTerritory };
 		// @ts-expect-error, gui code will join this array to a string
 		result.parameters.validTerritories = { "context": "Territory type list", "list": this.GetTerritories() };

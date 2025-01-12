@@ -145,16 +145,19 @@ Math.atan2 = function(y,x)
 	}
 };
 
+// @ts-expect-error
 Math.acos = function()
 {
 	error("Math.acos() does not yet have a synchronization safe implementation");
 };
 
+// @ts-expect-error
 Math.asin = function()
 {
 	error("Math.asin() does not yet have a synchronization safe implementation");
 };
 
+// @ts-expect-error
 Math.tan = function()
 {
 	error("Math.tan() does not yet have a synchronization safe implementation");

@@ -263,6 +263,7 @@ AttackHelper.prototype.CauseDamageOverArea = function(data)
 		else if (data.shape == 'Linear') // linear effect with quadratic falloff in two directions (only used for certain missiles)
 		{
 			// The entity has a position here since it was returned by the range manager.
+			/** @ts-expect-error */
 			let entityPosition = Engine.QueryInterface(ent, IID_Position).GetPosition2D();
 			let relativePos = entityPosition.sub(data.origin).normalize().mult(distance);
 
@@ -333,6 +334,7 @@ AttackHelper.prototype.HandleAttackEffects = function(target, data, bonusMultipl
 		if (!cmpReceiver)
 			continue;
 
+		// @ts-expect-error method can be called on cmpReceiver but TS doesn't know.
 		Object.assign(targetState, cmpReceiver[receiver.method](this.GetTotalAttackEffects(target, data.attackData, receiver.type, bonusMultiplier, cmpResistance), data.attacker, data.attackerOwner));
 	}
 

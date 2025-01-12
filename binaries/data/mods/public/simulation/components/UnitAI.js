@@ -368,6 +368,7 @@ UnitAI.prototype.UnitFsmSpec = {
 	},
 
 	"Order.PickupUnit": function(msg) {
+		/** @ts-ignore; @type {GarrisonHolder | TurretHolder | undefined } */
 		let cmpHolder = Engine.QueryInterface(this.entity, msg.data.iid);
 		if (!cmpHolder || cmpHolder.IsFull())
 			return this.FinishOrder();
@@ -1114,8 +1115,11 @@ UnitAI.prototype.UnitFsmSpec = {
 				// Memorize the origin position in case that we want to go back.
 				if (!this.patrolStartPosOrder)
 				{
+					//@ts-expect-error
 					this.patrolStartPosOrder = cmpPosition.GetPosition();
+					//@ts-expect-error
 					this.patrolStartPosOrder.targetClasses = this.order.data.targetClasses;
+					//@ts-expect-error
 					this.patrolStartPosOrder.allowCapture = this.order.data.allowCapture;
 				}
 
@@ -1192,6 +1196,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					if (this.FindWalkAndFightTargets())
 						this.SetNextState("MEMBER");
 					else
+						// @ts-expect-error
 						++this.stopSurveying;
 				}
 			}
@@ -1211,10 +1216,12 @@ UnitAI.prototype.UnitFsmSpec = {
 					cmpFormation.MoveMembersIntoFormation(true, true);
 
 					// If the holder should pickup, warn it so it can take needed action.
+					/** @ts-ignore; @type {GarrisonHolder | TurretHolder | undefined } */
 					let cmpHolder = Engine.QueryInterface(this.order.data.target, this.order.data.garrison ? IID_GarrisonHolder : IID_TurretHolder);
 					if (cmpHolder && cmpHolder.CanPickup(this.entity))
 					{
 						this.pickup = this.order.data.target;       // temporary, deleted in "leave"
+						// @ts-expect-error
 						Engine.PostMessage(this.pickup, MT_PickupRequested, { "entity": this.entity, "iid": this.order.data.garrison ? IID_GarrisonHolder : IID_TurretHolder });
 					}
 					return false;
@@ -1275,6 +1282,7 @@ UnitAI.prototype.UnitFsmSpec = {
 		"COMBAT": {
 			"APPROACHING": {
 				"enter": function() {
+					/** @ts-ignore; @type {Formation } */
 					let cmpFormation = Engine.QueryInterface(this.entity, IID_Formation);
 					cmpFormation.SetRearrange(true);
 					cmpFormation.MoveMembersIntoFormation(true, true, "combat");
@@ -1320,6 +1328,7 @@ UnitAI.prototype.UnitFsmSpec = {
 						return true;
 					}
 
+					/** @ts-ignore; @type {Formation} */
 					let cmpFormation = Engine.QueryInterface(this.entity, IID_Formation);
 					// TODO fix the rearranging while attacking as formation
 					cmpFormation.SetRearrange(!this.IsAttackingAsFormation());
@@ -1847,8 +1856,11 @@ UnitAI.prototype.UnitFsmSpec = {
 				// Memorize the origin position in case that we want to go back.
 				if (!this.patrolStartPosOrder)
 				{
+					// @ts-expect-error
 					this.patrolStartPosOrder = cmpPosition.GetPosition();
+					// @ts-expect-error
 					this.patrolStartPosOrder.targetClasses = this.order.data.targetClasses;
+					// @ts-expect-error
 					this.patrolStartPosOrder.allowCapture = this.order.data.allowCapture;
 				}
 
@@ -1910,12 +1922,14 @@ UnitAI.prototype.UnitFsmSpec = {
 				},
 
 				"Timer": function(msg) {
+					// @ts-expect-error
 					if (this.stopSurveying >= +this.template.PatrolWaitTime)
 					{
 						this.FinishOrder();
 						return;
 					}
 					if (!this.FindWalkAndFightTargets())
+						// @ts-expect-error
 						++this.stopSurveying;
 				}
 			}
@@ -3051,6 +3065,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					{
 						this.waypoints = this.order.data.route.slice();
 						if (this.order.data.target == cmpTrader.GetSecondMarket())
+							// @ts-expect-error
 							this.waypoints.reverse();
 					}
 
@@ -3256,10 +3271,12 @@ UnitAI.prototype.UnitFsmSpec = {
 					if (this.pickup)
 						Engine.PostMessage(this.pickup, MT_PickupCanceled, { "entity": this.entity });
 
+					/** @ts-ignore; @type {GarrisonHolder | TurretHolder | undefined } */
 					let cmpHolder = Engine.QueryInterface(this.order.data.target, this.order.data.garrison ? IID_GarrisonHolder : IID_TurretHolder);
 					if (cmpHolder && cmpHolder.CanPickup(this.entity))
 					{
 						this.pickup = this.order.data.target;
+						// @ts-expect-error
 						Engine.PostMessage(this.pickup, MT_PickupRequested, { "entity": this.entity, "iid": this.order.data.garrison ? IID_GarrisonHolder : IID_TurretHolder });
 					}
 					return false;
@@ -3461,6 +3478,7 @@ UnitAI.prototype.UnitFsmSpec = {
 
 			"LOADING": {
 				"enter": function() {
+					/** @ts-ignore; @type {GarrisonHolder | TurretHolder | undefined } */
 					let cmpHolder = Engine.QueryInterface(this.entity, this.order.data.iid);
 					if (!cmpHolder || cmpHolder.IsFull())
 					{
@@ -4906,6 +4924,7 @@ UnitAI.prototype.MoveFormationToTargetAttackRange = function(target)
 	let cmpFormationAttack = Engine.QueryInterface(this.entity, IID_Attack);
 	if (!cmpFormationAttack)
 		return false;
+	// @ts-expect-error TODO: this actually doesn't respect the IID_Attack interface
 	let range = cmpFormationAttack.GetRange(target);
 
 	let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
@@ -5015,6 +5034,7 @@ UnitAI.prototype.CheckFormationTargetAttackRange = function(target)
 	let cmpFormationAttack = Engine.QueryInterface(this.entity, IID_Attack);
 	if (!cmpFormationAttack)
 		return false;
+	// @ts-expect-error TODO: this actually doesn't respect the IID_Attack interface
 	let range = cmpFormationAttack.GetRange(target);
 
 	let cmpObstructionManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ObstructionManager);
@@ -6491,6 +6511,7 @@ UnitAI.prototype.GetRange = function(iid, type, target)
 	if (!component)
 		return undefined;
 
+	// @ts-expect-error (TODO:TS cannot currently express the variety of parameters we must pass, and they are inconsistent)
 	return component.GetRange(type, target);
 };
 

@@ -130,6 +130,7 @@ Researcher.prototype.Item.prototype.Serialize = function(id)
 	};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
+			// @ts-ignore
 			result[att] = this[att];
 	return result;
 };
@@ -138,6 +139,7 @@ Researcher.prototype.Item.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
 		if (att in data)
+			// @ts-ignore
 			this[att] = data[att];
 };
 

@@ -148,6 +148,7 @@ Auras.prototype.CalculateAffectedPlayers = function(name)
 		if (!cmpAffectedPlayer || cmpAffectedPlayer.IsDefeated())
 			continue;
 
+		// @ts-expect-error
 		if (affectedPlayers.some(p => p == "Player" ? playerID == i : cmpDiplomacy["Is" + p](i)))
 			this.affectedPlayers[name].push(i);
 	}

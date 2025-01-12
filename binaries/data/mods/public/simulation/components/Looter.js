@@ -3,6 +3,7 @@ function Looter() {}
 Looter.prototype.Schema =
 	"<empty/>";
 
+// @ts-expect-error
 Looter.prototype.Serialize = null; // We have no dynamic state to save
 
 /**

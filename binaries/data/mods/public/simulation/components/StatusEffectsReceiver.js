@@ -56,6 +56,7 @@ StatusEffectsReceiver.prototype.AddStatus = function(baseCode, data, attacker = 
 			return;
 		if (data.Stackability == "Extend")
 		{
+			// @ts-expect-error
 			this.activeStatusEffects[statusCode].Duration += data.Duration;
 			return;
 		}
@@ -72,6 +73,7 @@ StatusEffectsReceiver.prototype.AddStatus = function(baseCode, data, attacker = 
 		}
 	}
 
+	// @ts-expect-error
 	this.activeStatusEffects[statusCode] = {
 		"baseCode": baseCode
 	};

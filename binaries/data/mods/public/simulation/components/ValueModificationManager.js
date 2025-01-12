@@ -7,6 +7,7 @@ function ValueModificationManager() {}
 ValueModificationManager.prototype.Schema =
 	"<a:component type='system'/><empty/>";
 
+// @ts-ignore
 ValueModificationManager.prototype.Serialize = null;
 
 /**

@@ -172,6 +172,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 			this.roll = 0;
 			this.reachedTarget = true;
 			cmpPosition.TurnTo(Math.atan2(this.targetX - pos.x, this.targetZ - pos.z));
+			// @ts-expect-error (correct for C++ conversion)
 			Engine.PostMessage(this.entity, MT_MotionUpdate, { "updateString": "likelySuccess" });
 			return;
 		}
@@ -223,6 +224,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 		distanceToTargetSquared <= this.targetMaxRange * this.targetMaxRange)
 	{
 		this.reachedTarget = true;
+		// @ts-expect-error (correct for C++ conversion)
 		Engine.PostMessage(this.entity, MT_MotionUpdate, { "updateString": "likelySuccess" });
 	}
 

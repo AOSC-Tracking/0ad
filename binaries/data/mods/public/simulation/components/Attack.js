@@ -656,6 +656,7 @@ Attack.prototype.PerformAttack = function(type, target)
 		return;
 	let attackerOwner = cmpOwnership.GetOwner();
 
+	/** @ts-expect-error; @type {DelayedDamageData} */
 	let data = {
 		"type": type,
 		"attackData": this.GetAttackEffectsData(type),

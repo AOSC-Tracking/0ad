@@ -8,6 +8,7 @@ Loot.prototype.Schema =
 	"</a:example>" +
 	Resources.BuildSchema("nonNegativeInteger", ["xp"]);
 
+// @ts-expect-error
 Loot.prototype.Serialize = null; // we have no dynamic state to save
 
 Loot.prototype.GetXp = function()

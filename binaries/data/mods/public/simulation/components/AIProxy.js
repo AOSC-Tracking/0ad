@@ -32,6 +32,7 @@ AIProxy.prototype.Schema =
 
 AIProxy.prototype.Init = function()
 {
+	// @ts-expect-error (ignore to make linting the file easier)
 	this.changes = null;
 	this.needsFullGet = true;
 	this.cmpAIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIInterface);
@@ -56,6 +57,7 @@ AIProxy.prototype.GetRepresentation = function()
 	// Initialise changes to null instead of {}, to avoid memory allocations in the
 	// common case where there will be no changes; event handlers should each reset
 	// it to {} if needed
+	// @ts-expect-error (ignore to make linting the file easier)
 	this.changes = null;
 
 	return ret;
