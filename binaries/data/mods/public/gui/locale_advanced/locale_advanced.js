@@ -46,6 +46,12 @@ function init(initData)
 
 	// fill the script
 	scriptInput.caption = Engine.GetLocaleScript(initData.locale);
+
+	distributeButtonsHorizontally([
+		Engine.GetGUIObjectByName("cancelButton"),
+		Engine.GetGUIObjectByName("autoDetectButton"),
+		Engine.GetGUIObjectByName("acceptButton")
+	]);
 }
 
 // TODO: an onChanged event for input boxes would be useful and would allow us to avoid a tick event here.

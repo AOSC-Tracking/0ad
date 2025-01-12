@@ -21,6 +21,12 @@ function init()
 		localeText.caption = "long";
 	else
 		localeText.caption = currentLocale;
+
+	distributeButtonsHorizontally([
+		Engine.GetGUIObjectByName("cancelButton"),
+		Engine.GetGUIObjectByName("advancedButton"),
+		Engine.GetGUIObjectByName("acceptButton")
+	]);
 }
 
 function cancelSetup()

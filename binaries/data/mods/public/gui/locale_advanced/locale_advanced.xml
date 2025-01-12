@@ -59,21 +59,23 @@
 			<object type="text" size="5 258 50% 290" style="ModernLeftLabelText">
 				<translatableAttribute id="caption">Dictionary files used:</translatableAttribute>
 			</object>
-			<object name="dictionaryFile" type="text" size="50%+10 260 100% 345" style="ModernText" />
+			<object name="dictionaryFile" type="text" size="50%+10 260 100% 354" style="ModernText" />
 
-			<object type="button" size="0 100%-60 33% 100%-25" style="ModernButtonRed" hotkey="cancel">
-				<translatableAttribute id="caption">Cancel</translatableAttribute>
-				<action on="Press">cancelSetup();</action>
-			</object>
+			<object size="0 100%-54 100% 100%-12">
+				<object name="cancelButton" type="button" style="ModernButtonRed" hotkey="cancel">
+					<translatableAttribute id="caption">Cancel</translatableAttribute>
+					<action on="Press">cancelSetup();</action>
+				</object>
 
-			<object type="button" size="33%+5 100%-60 66% 100%-25" style="ModernButtonRed">
-				<translatableAttribute id="caption">Auto detect</translatableAttribute>
-				<action on="Press">autoDetectLocale();</action>
-			</object>
+				<object name="autoDetectButton" type="button" style="ModernButtonRed">
+					<translatableAttribute id="caption">Auto detect</translatableAttribute>
+					<action on="Press">autoDetectLocale();</action>
+				</object>
 
-			<object name="acceptButton" type="button" style="ModernButtonRed" size="66%+5 100%-60 100% 100%-25">
-				<translatableAttribute id="caption">Accept</translatableAttribute>
-				<action on="Press">applySelectedLocale();</action>
+				<object name="acceptButton" type="button" style="ModernButtonRed">
+					<translatableAttribute id="caption">Accept</translatableAttribute>
+					<action on="Press">applySelectedLocale();</action>
+				</object>
 			</object>
 		</object>
 	</object>
