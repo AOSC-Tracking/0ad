@@ -150,7 +150,7 @@ Barter.prototype.ProgressTimeout = function(data)
 
 	if (!needRestore)
 	{
-		Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).CancelTimer(this.restoreTimer);
+		Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).CancelTimer(/** @type {number} */(this.restoreTimer));
 		delete this.restoreTimer;
 	}
 };

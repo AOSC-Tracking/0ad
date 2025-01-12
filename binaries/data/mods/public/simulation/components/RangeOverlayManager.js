@@ -59,7 +59,7 @@ RangeOverlayManager.prototype.RegenerateRangeOverlays = function(forceUpdate)
 	// Only render individual range types that have been enabled
 	for (let rangeOverlayType of this.rangeVisualizations.keys())
 		if (this.enabledRangeTypes[rangeOverlayType])
-			for (let rangeOverlay of this.rangeVisualizations.get(rangeOverlayType))
+			for (let rangeOverlay of /** @type {RangeOverlayData[]} */(this.rangeVisualizations.get(rangeOverlayType)))
 				cmpRangeOverlayRenderer.AddRangeOverlay(
 					rangeOverlay.radius,
 					rangeOverlay.texture,

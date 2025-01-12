@@ -20,7 +20,7 @@ StatusBars.prototype.Schema =
  * Modders who need extra sprites can just modify this array, and
  * provide the right methods.
  */
-StatusBars.prototype.Sprites = [
+StatusBars.prototype.Sprites = /** @type {const} */([
 	"ExperienceBar",
 	"PackBar",
 	"UpgradeBar",
@@ -320,7 +320,7 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	 */
 	let setCaptureBarPart = function(playerID, startSize)
 	{
-		let c = QueryPlayerIDInterface(playerID).GetDisplayedColor();
+		let c = /** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player)).GetDisplayedColor();
 		let strColor = (c.r * 255) + " " + (c.g * 255) + " " + (c.b * 255) + " 255";
 		let size = width * capturePoints[playerID] / cmpCapturable.GetMaxCapturePoints();
 

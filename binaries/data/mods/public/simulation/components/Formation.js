@@ -408,7 +408,7 @@ Formation.prototype.RemoveMembers = function(ents, renamed = false)
 
 	for (let ent of this.formationMembersWithAura)
 	{
-		const cmpAuras = Engine.QueryInterface(ent, IID_Auras);
+		const cmpAuras = /** @type {Auras} */(Engine.QueryInterface(ent, IID_Auras));
 		cmpAuras.RemoveFormationAura(ents);
 
 		// The unit with the aura is also removed from the formation.
@@ -452,7 +452,7 @@ Formation.prototype.AddMembers = function(ents)
 
 	for (let ent of ents)
 	{
-		let cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
+		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(ent, IID_UnitAI));
 		cmpUnitAI.SetFormationController(this.entity);
 		if (!cmpUnitAI.GetOrders().length)
 			cmpUnitAI.SetNextState("FORMATIONMEMBER.IDLE");

@@ -71,7 +71,7 @@ AttackDetection.prototype.OnGlobalAttacked = function(msg)
  */
 AttackDetection.prototype.AttackAlert = function(target, attacker, type, attackerOwner)
 {
-	let playerID = Engine.QueryInterface(this.entity, IID_Player).GetPlayerID();
+	let playerID = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID();
 
 	// Don't register attacks dealt against other players
 	if (Engine.QueryInterface(target, IID_Ownership).GetOwner() != playerID)

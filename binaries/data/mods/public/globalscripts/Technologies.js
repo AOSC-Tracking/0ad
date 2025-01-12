@@ -24,7 +24,7 @@ function GetTechModifiedProperty(modifications, classes, originalValue)
 	// From indicative profiling, splitting in two sub-functions or checking directly
 	// is about as efficient, but splitting makes it easier to report errors.
 	if (typeof originalValue === "string")
-		return GetTechModifiedProperty_string(modifications, classes, originalValue);
+		return /** @type {T} */(GetTechModifiedProperty_string(modifications, classes, originalValue));
 	if (typeof originalValue === "number")
 		return GetTechModifiedProperty_numeric(modifications, classes, originalValue);
 	return GetTechModifiedProperty_generic(modifications, classes, originalValue);
@@ -45,7 +45,7 @@ function GetTechModifiedProperty_generic(modifications, classes, originalValue)
 		if (!modification.replace)
 			warn("GetTechModifiedProperty: modification format not recognised : " + uneval(modification));
 
-		return modification.replace;
+		return /** @type {T} */(modification.replace);
 	}
 
 	return originalValue;
@@ -66,7 +66,7 @@ function GetTechModifiedProperty_numeric(modifications, classes, originalValue)
 		if (!DoesModificationApply(modification, classes))
 			continue;
 		if (modification.replace !== undefined)
-			return modification.replace;
+			return /** @type {number} */(modification.replace);
 		if (modification.multiply)
 			multiply *= modification.multiply;
 		else if (modification.add)
@@ -90,7 +90,7 @@ function GetTechModifiedProperty_string(modifications, classes, originalValue)
 		if (!DoesModificationApply(modification, classes))
 			continue;
 		if (modification.replace !== undefined)
-			return modification.replace;
+			return /** @type {string} */(modification.replace);
 		// Multiple token replacement works, though ordering is not technically guaranteed.
 		// In practice, the order will be that of 'research', which ought to be fine,
 		// and operations like adding tokens are order-independent anyways,

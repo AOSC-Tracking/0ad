@@ -163,7 +163,7 @@ TechnologyManager.prototype.Technology.prototype.GetBasicInfo = function()
 {
 	return {
 		"paused": this.paused,
-		"progress": 1 - (this.timeRemaining / (this.timeTotal || 1)),
+		"progress": 1 - (/** @type {number} */(this.timeRemaining) / (this.timeTotal || 1)),
 		"researcher": this.researcher,
 		"templateName": this.templateName,
 		"timeRemaining": this.timeRemaining
@@ -393,7 +393,7 @@ TechnologyManager.prototype.DoesEntitySpecPass = function(entity)
 TechnologyManager.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	// This automatically updates classCounts and typeCountsByClass
-	var playerID = (Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID();
+	var playerID = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player)).GetPlayerID();
 	if (msg.to == playerID)
 	{
 		var cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);

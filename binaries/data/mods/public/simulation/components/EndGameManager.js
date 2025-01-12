@@ -58,7 +58,7 @@ EndGameManager.prototype.SetGameSettings = function(newSettings = {})
  */
 EndGameManager.prototype.MarkPlayerAndAlliesAsWon = function(playerID, victoryString, defeatString)
 {
-	const cmpPlayer = QueryPlayerIDInterface(playerID);
+	const cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player));
 	if (!cmpPlayer.IsActive())
 	{
 		warn("Can't mark player " + playerID + " as won, since the state is " + cmpPlayer.GetState());
@@ -89,7 +89,7 @@ EndGameManager.prototype.MarkPlayersAsWon = function(winningPlayers, victoryStri
 	this.skipAlliedVictoryCheck = true;
 	for (let playerID of winningPlayers)
 	{
-		let cmpPlayer = QueryPlayerIDInterface(playerID);
+		let cmpPlayer = /** @type {Player} */(QueryPlayerIDInterface(playerID, IID_Player));
 		if (!cmpPlayer.IsActive())
 		{
 			warn("Can't mark player " + playerID + " as won, since the state is " + cmpPlayer.GetState());

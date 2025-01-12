@@ -92,7 +92,7 @@ AttackHelper.prototype.BuildAttackEffectsSchema = function()
  * @param {EntityId} entity
  * @return {Template}
  */
-AttackHelper.prototype.GetAttackEffectsData = function(valueModifRoot, template, entity)
+AttackHelperClass.prototype.GetAttackEffectsData = function(valueModifRoot, template, entity)
 {
 	/** @type {Template} */
 	let ret = {};

@@ -23,7 +23,7 @@
  */
 function loadCivFiles(selectableOnly)
 {
-	let propertyNames = [
+	let propertyNames = /** @type {const} */([
 		"Code", "Culture", "Music", "CivBonuses", "StartEntities",
 		"AINames", "SkirmishReplacements", "SelectableInGameSetup"];
 
@@ -679,5 +679,5 @@ function calculateCarriedResources(carriedResources, tradingGoods)
  */
 function removeFiltersFromTemplateName(templateName)
 {
-	return templateName.split("|").pop();
+	return /** @type {string} */(templateName.split("|").pop());
 }

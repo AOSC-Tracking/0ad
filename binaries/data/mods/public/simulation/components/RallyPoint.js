@@ -46,8 +46,10 @@ RallyPoint.prototype.GetPositions = function()
 		ret.push(this.pos[i]);
 
 		// Update the rallypoint coordinates if the target is alive
-		if (!this.data[i] || !this.data[i].target || !this.TargetIsAlive(this.data[i].target))
+		if (!this.data[i] || !this.data[i].target || !this.TargetIsAlive(/** @type {number} */(this.data[i].target)))
 			continue;
+
+		let target = /** @type {number} */(this.data[i].target);
 
 		// and visible
 		if (cmpRangeManager && cmpOwnership &&

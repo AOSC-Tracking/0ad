@@ -17,7 +17,7 @@ PlayerManager.prototype.AddPlayer = function(templateName)
 {
 	const ent = Engine.AddEntity(templateName);
 	const id = this.playerEntities.length;
-	Engine.QueryInterface(ent, IID_Player).SetPlayerID(id);
+	/** @type {Player} */(Engine.QueryInterface(ent, IID_Player)).SetPlayerID(id);
 	this.playerEntities.push(ent);
 
 	const newDiplo = [];
@@ -27,7 +27,7 @@ PlayerManager.prototype.AddPlayer = function(templateName)
 		newDiplo[i] = -1;
 	}
 	newDiplo[id] = 1;
-	Engine.QueryInterface(ent, IID_Diplomacy).SetDiplomacy(newDiplo);
+	/** @type {Diplomacy} */(Engine.QueryInterface(ent, IID_Diplomacy)).SetDiplomacy(newDiplo);
 
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": id,
@@ -131,7 +131,7 @@ PlayerManager.prototype.GetNonGaiaPlayers = function()
 PlayerManager.prototype.GetActivePlayers = function()
 {
 	return this.GetNonGaiaPlayers().filter(playerID =>
-		Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player).IsActive()
+		/** @type {Player} */(Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player)).IsActive()
 	);
 };
 
@@ -144,7 +144,7 @@ PlayerManager.prototype.RemoveLastPlayer = function()
 	if (!this.playerEntities.length)
 		return;
 
-	const lastId = this.playerEntities.pop();
+	const lastId = /** @type {number} */(this.playerEntities.pop());
 	Engine.BroadcastMessage(MT_PlayerEntityChanged, {
 		"player": this.playerEntities.length + 1,
 		"from": lastId,
@@ -177,7 +177,7 @@ PlayerManager.prototype.RedistributeWorldPopulation = function()
 
 	const newMaxPopulation = worldPopulation / activePlayers.length;
 	for (const playerID of activePlayers)
-		Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player).SetMaxPopulation(newMaxPopulation);
+		/** @type {Player} */(Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player)).SetMaxPopulation(newMaxPopulation);
 };
 
 /** @param {MessagePlayerDefeated} msg */

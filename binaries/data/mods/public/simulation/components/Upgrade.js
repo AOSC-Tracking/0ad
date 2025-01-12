@@ -136,13 +136,13 @@ Upgrade.prototype.GetUpgrades = function()
 	let ret = [];
 
 	for (const option in this.upgradeTemplates)
-	{
+		{
 		const choice = this.template[this.upgradeTemplates[option]];
 
 		/** @type {Record<string, number>} */
 		let cost = {};
 		if (choice.Cost)
-			cost = this.GetResourceCosts(option);
+			cost = /** @type {Record<string, number>} */(this.GetResourceCosts(option));
 		if (choice.Time)
 			cost.time = this.GetUpgradeTime(option);
 
@@ -355,9 +355,9 @@ Upgrade.prototype.SetUpgradeAnimationVariant = function()
 
 Upgrade.prototype.UpgradeProgress = function(data, lateness)
 {
-	if (this.elapsedTime/1000.0 < this.GetUpgradeTime())
+	if (/** @type {number} */(this.elapsedTime)/1000.0 < /** @type {number} */(this.GetUpgradeTime()))
 	{
-		this.SetElapsedTime(this.GetElapsedTime() + UPGRADING_PROGRESS_INTERVAL + lateness);
+		this.SetElapsedTime(/** @type {number} */(this.GetElapsedTime()) + UPGRADING_PROGRESS_INTERVAL + lateness);
 		return;
 	}
 
@@ -367,7 +367,7 @@ Upgrade.prototype.UpgradeProgress = function(data, lateness)
 	this.ChangeUpgradedEntityCount(-1);
 	this.expendedResources = {};
 
-	let newEntity = ChangeEntityTemplate(this.entity, this.upgrading);
+	let newEntity = ChangeEntityTemplate(this.entity, /** @type {string} */(this.upgrading));
 
 	if (newEntity)
 		PlaySound("upgraded", newEntity);

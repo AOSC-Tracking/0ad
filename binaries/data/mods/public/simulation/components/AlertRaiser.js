@@ -60,7 +60,7 @@ AlertRaiser.prototype.RaiseAlert = function()
 			continue;
 
 		let size = cmpGarrisonable.TotalSize();
-		let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
+		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(unit, IID_UnitAI));
 
 		let holder = cmpRangeManager.ExecuteQuery(unit, 0, +this.template.SearchRange, mutualAllies, IID_GarrisonHolder, true).find(ent => {
 			// Ignore moving garrison holders
@@ -114,7 +114,7 @@ AlertRaiser.prototype.EndOfAlert = function()
 	let units = cmpRangeManager.ExecuteQuery(this.entity, 0, +this.template.EndOfAlertRange, [owner], IID_UnitAI, true).filter(ent => this.UnitFilter(ent));
 	for (let unit of units)
 	{
-		let cmpUnitAI = Engine.QueryInterface(unit, IID_UnitAI);
+		let cmpUnitAI = /** @type {UnitAI} */(Engine.QueryInterface(unit, IID_UnitAI));
 		if (cmpUnitAI.HasWorkOrders() && cmpUnitAI.ShouldRespondToEndOfAlert())
 			cmpUnitAI.BackToWork();
 		else if (cmpUnitAI.ShouldRespondToEndOfAlert())
@@ -132,7 +132,7 @@ AlertRaiser.prototype.EndOfAlert = function()
 		if (Engine.QueryInterface(holder, IID_UnitAI))
 			continue;
 
-		let cmpGarrisonHolder = Engine.QueryInterface(holder, IID_GarrisonHolder);
+		let cmpGarrisonHolder = /** @type {GarrisonHolder} */(Engine.QueryInterface(holder, IID_GarrisonHolder));
 		let units = cmpGarrisonHolder.GetEntities().filter(ent => {
 			let cmpOwner = Engine.QueryInterface(ent, IID_Ownership);
 			return cmpOwner && cmpOwner.GetOwner() == owner && this.UnitFilter(ent);

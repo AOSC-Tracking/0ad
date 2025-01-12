@@ -483,7 +483,7 @@ Attack.prototype.GetAttackYOrigin = function(type)
 
 /** @param {g_AttackTypes[number]} type */
 Attack.prototype.RepeatRangeCheck = function (type) {
-	if (!this.IsTargetInRange(this.target, type))
+	if (!this.IsTargetInRange(/** @type {EntityId} */(this.target), type))
 		this.StopAttacking("OutOfRange");
 };
 

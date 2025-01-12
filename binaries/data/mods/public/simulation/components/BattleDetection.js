@@ -135,7 +135,7 @@ BattleDetection.prototype.StopTimer = function()
 /** @param {MessageAttacked} msg */
 BattleDetection.prototype.OnGlobalAttacked = function(msg)
 {
-	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
+	var cmpPlayer = /** @type {Player} */(Engine.QueryInterface(this.entity, IID_Player));
 	// Only register attacks dealt by myself.
 	var cmpAttackerOwnership = Engine.QueryInterface(msg.attacker, IID_Ownership);
 	if (!cmpAttackerOwnership || cmpAttackerOwnership.GetOwner() != cmpPlayer.GetPlayerID())

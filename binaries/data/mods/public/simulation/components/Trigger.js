@@ -6,7 +6,7 @@ Trigger.prototype.Schema =
 /**
  * Events we're able to receive and call handlers for.
  */
-Trigger.prototype.eventNames =
+Trigger.prototype.eventNames = /** @type {const} */(
 [
 	"OnCinemaPathEnded",
 	"OnCinemaQueueEnded",

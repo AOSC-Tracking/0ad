@@ -619,7 +619,7 @@ Player.prototype.OnGlobalInitGame = function(msg)
 	// Replace the "{civ}" code with this civ ID.
 	let disabledTemplates = this.disabledTemplates;
 	this.disabledTemplates = {};
-	const civ = Engine.QueryInterface(this.entity, IID_Identity).GetCiv();
+	const civ = /** @type {Identity} */ (Engine.QueryInterface(this.entity, IID_Identity)).GetCiv();
 	for (let template in disabledTemplates)
 		if (disabledTemplates[template])
 			this.disabledTemplates[template.replace(/\{civ\}/g, civ)] = true;

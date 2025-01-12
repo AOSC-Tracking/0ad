@@ -132,7 +132,7 @@ Promotion.prototype.CheckTrickleTimer = function()
 
 Promotion.prototype.TrickleTick = function()
 {
-	this.IncreaseXp(this.trickleRate);
+	this.IncreaseXp(/** @type {number} */(this.trickleRate));
 };
 
 /** @param {MessageValueModification} msg */

@@ -226,7 +226,7 @@ function ObstructionsBlockingTemplateChange(ent, templateArg)
 	cmpNewPosition.JumpTo(pos.x, pos.y);
 	cmpNewPosition.SetYRotation(angle.y);
 
-	var cmpNewOwnership = Engine.QueryInterface(previewEntity, IID_Ownership);
+	var cmpNewOwnership = /** @type {Ownership} */(Engine.QueryInterface(previewEntity, IID_Ownership));
 	cmpNewOwnership.SetOwner(cmpOwnership.GetOwner());
 
 	var checkPlacement = cmpBuildRestrictions.CheckPlacement();

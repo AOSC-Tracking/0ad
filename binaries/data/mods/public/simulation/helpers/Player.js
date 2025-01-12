@@ -63,7 +63,7 @@ function LoadPlayerSettings(settings, newPlayers)
 
 	for (let i = 0; i < numPlayers; ++i)
 	{
-		QueryPlayerIDInterface(i, IID_Identity).SetName(getPlayerSetting(i, "Name"));
+		/** @type {Identity} */(QueryPlayerIDInterface(i, IID_Identity)).SetName(getPlayerSetting(i, "Name"));
 
 		const color = getPlayerSetting(i, "Color");
 		const cmpPlayer = QueryPlayerIDInterface(i);
@@ -94,7 +94,7 @@ function LoadPlayerSettings(settings, newPlayers)
 		else if (settings.StartingResources)
 		{
 			let resourceCounts = cmpPlayer.GetResourceCounts();
-			let newResourceCounts = {};
+			let newResourceCounts = /** @type {Record<string, number>} */({});
 			for (let resources in resourceCounts)
 				newResourceCounts[resources] = settings.StartingResources;
 			cmpPlayer.SetResourceCounts(newResourceCounts);
@@ -111,9 +111,9 @@ function LoadPlayerSettings(settings, newPlayers)
 		// If diplomacy explicitly defined, use that; otherwise use teams.
 		const diplomacy = getPlayerSetting(i, "Diplomacy");
 		if (diplomacy !== undefined)
-			QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(diplomacy);
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetDiplomacy(diplomacy);
 		else
-			QueryPlayerIDInterface(i, IID_Diplomacy).ChangeTeam(getPlayerSetting(i, "Team") ?? -1);
+			/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).ChangeTeam(getPlayerSetting(i, "Team") ?? -1);
 
 		const formations = getPlayerSetting(i, "Formations");
 		if (formations)

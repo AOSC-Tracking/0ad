@@ -90,7 +90,7 @@ Repairable.prototype.RemoveBuilder = function(builderEnt)
 	if (!this.builders.has(builderEnt))
 		return;
 
-	this.totalBuilderRate -= this.builders.get(builderEnt);
+	this.totalBuilderRate -= /** @type {number} */(this.builders.get(builderEnt));
 	this.builders.delete(builderEnt);
 	this.SetBuildMultiplier();
 };

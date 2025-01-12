@@ -194,7 +194,7 @@ MarketMirage.prototype.AddTrader = function(trader) { this.traders.add(trader); 
 /** @type {Market["RemoveTrader"]} */
 MarketMirage.prototype.RemoveTrader = function(trader) { this.traders.delete(trader); };
 
-MarketMirage.prototype.UpdateTraders = function(msg)
+MarketMirage.prototype.UpdateTraders = function()
 {
 	let cmpMarket = Engine.QueryInterface(this.parent, IID_Market);
 	if (!cmpMarket)	// The parent market does not exist anymore

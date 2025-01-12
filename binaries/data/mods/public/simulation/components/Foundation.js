@@ -238,7 +238,7 @@ Foundation.prototype.SetBuildMultiplier = function()
 
 Foundation.prototype.GetBuildTime = function()
 {
-	let timeLeft = (1 - this.GetBuildProgress()) * Engine.QueryInterface(this.entity, IID_Cost).GetBuildTime();
+	let timeLeft = (1 - this.GetBuildProgress()) * /** @type {Cost} */(Engine.QueryInterface(this.entity, IID_Cost)).GetBuildTime();
 	let rate = this.totalBuilderRate * this.buildMultiplier;
 	let rateNew = (this.totalBuilderRate + 1) * this.CalculateBuildMultiplier(this.GetNumBuilders() + 1);
 	return {
@@ -342,7 +342,7 @@ Foundation.prototype.Build = function(builderEnt, work)
 	{
 		let cmpPlayerStatisticsTracker = QueryOwnerInterface(this.entity, IID_StatisticsTracker);
 
-		let building = ChangeEntityTemplate(this.entity, this.finalTemplateName);
+		let building = ChangeEntityTemplate(this.entity, /** @type {string} */(this.finalTemplateName));
 
 		if (cmpPlayerStatisticsTracker)
 			cmpPlayerStatisticsTracker.IncreaseConstructedBuildingsCounter(building);

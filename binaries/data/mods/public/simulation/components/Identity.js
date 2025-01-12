@@ -115,7 +115,7 @@ Identity.prototype.Deserialize = function (data)
 		this.name = data.name;
 };
 
- Identity.prototype.Serialize = function()
+Identity.prototype.Serialize = function()
 {
 	/** @type {{phenotype: string, controllable: boolean, name?: string}} */
 	const result = {

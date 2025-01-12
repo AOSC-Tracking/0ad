@@ -131,7 +131,7 @@ ProductionQueue.prototype.Item.prototype.Progress = function(allocatedTime)
 	}
 	if (this.technology)
 	{
-		const cmpResearcher = Engine.QueryInterface(this.producer, IID_Researcher);
+		const cmpResearcher = /** @type {Researcher} */(Engine.QueryInterface(this.producer, IID_Researcher));
 		allocatedTime -= cmpResearcher.Progress(this.technology, allocatedTime);
 		if (!cmpResearcher.HasItem(this.technology))
 			delete this.technology;
@@ -146,7 +146,7 @@ ProductionQueue.prototype.Item.prototype.Pause = function()
 {
 	this.paused = true;
 	if (this.entity)
-		Engine.QueryInterface(this.producer, IID_Trainer).PauseBatch(this.entity);
+		/** @type {Trainer} */(Engine.QueryInterface(this.producer, IID_Trainer)).PauseBatch(this.entity);
 	if (this.technology)
 		Engine.QueryInterface(this.producer, IID_Researcher).PauseTechnology(this.technology);
 };
@@ -167,7 +167,7 @@ ProductionQueue.prototype.Item.prototype.IsPaused = function()
 /**
  * @return {(ReturnType<Trainer["GetBatch"]>|ReturnType<Researcher["GetResearchingTechnology"]>) & {id: number, paused: boolean}} - Some basic information of this item.
  */
-ProductionQueue.prototype.Item.prototype.GetBasicInfo = function()
+ProductionQueueItem.prototype.GetBasicInfo = function()
 {
 	/** @type {any} */
 	let result;
@@ -451,7 +451,7 @@ ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
 				this.DisableAutoQueue();
 				const cmpGUIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
 				cmpGUIInterface.PushNotification({
-					"players": [QueryOwnerInterface(this.entity).GetPlayerID()],
+					"players": [/** @type {Player} */(QueryOwnerInterface(this.entity, IID_Player)).GetPlayerID()],
 					"message": markForTranslation("Could not auto-queue unit, de-activating."),
 					"translateMessage": true
 				});

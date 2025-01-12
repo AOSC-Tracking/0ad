@@ -117,7 +117,7 @@ CeasefireManager.prototype.StopCeasefire = function()
 	// Reset diplomacies to original settings
 	let numPlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetNumPlayers();
 	for (let i = 1; i < numPlayers; ++i)
-		QueryPlayerIDInterface(i, IID_Diplomacy).SetDiplomacy(this.diplomacyBeforeCeasefire[i-1]);
+		/** @type {Diplomacy} */(QueryPlayerIDInterface(i, IID_Diplomacy)).SetDiplomacy(this.diplomacyBeforeCeasefire[i-1]);
 
 	this.ceasefireIsActive = false;
 	this.ceasefireTime = 0;

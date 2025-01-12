@@ -200,7 +200,7 @@ Researcher.prototype.GetTechnologiesList = function()
 	let techs = string.split(/\s+/);
 
 	// Replace the civ specific technologies.
-	const civ = Engine.QueryInterface(playerEnt, IID_Identity).GetCiv();
+	const civ = /** @type {Identity} */(Engine.QueryInterface(playerEnt, IID_Identity)).GetCiv();
 	for (let i = 0; i < techs.length; ++i)
 	{
 		const tech = techs[i];

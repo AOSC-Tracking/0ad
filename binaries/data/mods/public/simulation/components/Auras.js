@@ -113,7 +113,7 @@ Auras.prototype.GetRangeOverlays = function()
 				} :
 				// Specify default in order not to specify it in about 40 auras
 				{
-					"radius": this.GetRange(name),
+					"radius": /** @type {number} */(this.GetRange(name)),
 					"texture": "outline_border.png",
 					"textureMask": "outline_border_mask.png",
 					"thickness": 0.2

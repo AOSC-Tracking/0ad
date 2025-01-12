@@ -56,7 +56,7 @@ Mirage.prototype.Mirages = function(iid)
  */
 Mirage.prototype.Get = function(iid)
 {
-	return this.miragedIids.get(iid);
+	return /** @type {ReturnType<IIDs[T]["Mirage"]>} */(this.miragedIids.get(iid));
 };
 
 // ============================

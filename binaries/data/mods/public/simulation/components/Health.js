@@ -361,7 +361,7 @@ Health.prototype.CreateCorpse = function()
 		entCorpse = Engine.AddLocalEntity("corpse|" + templateName);
 
 	// Copy various parameters so it looks just like us.
-	let cmpPositionCorpse = Engine.QueryInterface(entCorpse, IID_Position);
+	let cmpPositionCorpse = /** @type {Position} */(Engine.QueryInterface(entCorpse, IID_Position));
 	let pos = cmpPosition.GetPosition();
 	cmpPositionCorpse.JumpTo(pos.x, pos.z);
 	let rot = cmpPosition.GetRotation();
