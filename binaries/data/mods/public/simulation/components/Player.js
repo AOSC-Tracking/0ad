@@ -28,6 +28,7 @@ Player.prototype.STATE_WON = "won";
 
 Player.prototype.Serialize = function()
 {
+	/** @type {any} */
 	let state = {};
 	for (let key in this)
 		if (this.hasOwnProperty(key))
@@ -38,6 +39,7 @@ Player.prototype.Serialize = function()
 	return state;
 };
 
+/** @param {any} state */
 Player.prototype.Deserialize = function(state)
 {
 	for (let prop in state)
@@ -96,6 +98,7 @@ Player.prototype.Init = function()
 		});
 };
 
+/** @param {number} id */
 Player.prototype.SetPlayerID = function(id)
 {
 	this.playerID = id;
@@ -106,6 +109,11 @@ Player.prototype.GetPlayerID = function()
 	return this.playerID;
 };
 
+/**
+ * @param {number} r
+ * @param {number} g
+ * @param {number} b
+ */
 Player.prototype.SetColor = function(r, g, b)
 {
 	let colorInitialized = !!this.color;
@@ -119,6 +127,7 @@ Player.prototype.SetColor = function(r, g, b)
 		});
 };
 
+/** @param {unknown} displayDiplomacyColor */
 Player.prototype.SetDisplayDiplomacyColor = function(displayDiplomacyColor)
 {
 	this.displayDiplomacyColor = displayDiplomacyColor;
@@ -134,7 +143,10 @@ Player.prototype.GetDisplayedColor = function()
 	return this.displayDiplomacyColor ? Engine.QueryInterface(this.entity, IID_Diplomacy).GetColor() : this.color;
 };
 
-// Try reserving num population slots. Returns 0 on success or number of missing slots otherwise.
+/**
+ * Try reserving num population slots. Returns 0 on success or number of missing slots otherwise.
+ * @param {number} num
+ */
 Player.prototype.TryReservePopulationSlots = function(num)
 {
 	if (num != 0 && num > (this.GetPopulationLimit() - this.popUsed))
@@ -144,6 +156,7 @@ Player.prototype.TryReservePopulationSlots = function(num)
 	return 0;
 };
 
+/** @param {number} num */
 Player.prototype.UnReservePopulationSlots = function(num)
 {
 	this.popUsed -= num;
@@ -154,16 +167,19 @@ Player.prototype.GetPopulationCount = function()
 	return this.popUsed;
 };
 
+/** @param {number} num */
 Player.prototype.AddPopulation = function(num)
 {
 	this.popUsed += num;
 };
 
+/** @param {number} num */
 Player.prototype.SetPopulationBonuses = function(num)
 {
 	this.popBonuses = num;
 };
 
+/** @param {number} num */
 Player.prototype.AddPopulationBonuses = function(num)
 {
 	this.popBonuses += num;
@@ -174,6 +190,7 @@ Player.prototype.GetPopulationLimit = function()
 	return Math.min(this.GetMaxPopulation(), this.popBonuses);
 };
 
+/** @param {number} max */
 Player.prototype.SetMaxPopulation = function(max)
 {
 	this.maxPop = max;
@@ -219,6 +236,7 @@ Player.prototype.UnBlockTraining = function()
 	this.trainingBlocked = false;
 };
 
+/** @param {Record<GenericResName, number>} resources */
 Player.prototype.SetResourceCounts = function(resources)
 {
 	for (let res in resources)
@@ -263,6 +281,7 @@ Player.prototype.AddResource = function(type, amount)
 
 /**
  * Add resources to player.
+ * @param {Record<GenericResName, number>} amounts
  */
 Player.prototype.AddResources = function(amounts)
 {
@@ -270,9 +289,11 @@ Player.prototype.AddResources = function(amounts)
 		this.resourceCount[type] += +amounts[type];
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.GetNeededResources = function(amounts)
 {
 	// Check if we can afford it all.
+	/** @type {Record<GenericResName, number>} */
 	let amountsNeeded = {};
 	for (let type in amounts)
 		if (this.resourceCount[type] != undefined && amounts[type] > this.resourceCount[type])
@@ -283,6 +304,7 @@ Player.prototype.GetNeededResources = function(amounts)
 	return amountsNeeded;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.SubtractResourcesOrNotify = function(amounts)
 {
 	let amountsNeeded = this.GetNeededResources(amounts);
@@ -290,6 +312,7 @@ Player.prototype.SubtractResourcesOrNotify = function(amounts)
 	// If we don't have enough resources, send a notification to the player.
 	if (amountsNeeded)
 	{
+		/** @type {Record<string, any>} */
 		let parameters = {};
 		let i = 0;
 		for (let type in amountsNeeded)
@@ -338,6 +361,7 @@ Player.prototype.SubtractResourcesOrNotify = function(amounts)
 	return true;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.TrySubtractResources = function(amounts)
 {
 	if (!this.SubtractResourcesOrNotify(amounts))
@@ -351,6 +375,7 @@ Player.prototype.TrySubtractResources = function(amounts)
 	return true;
 };
 
+/** @param {Record<GenericResName, number>} amounts */
 Player.prototype.RefundResources = function(amounts)
 {
 	const cmpStatisticsTracker = QueryPlayerIDInterface(this.playerID, IID_StatisticsTracker);
@@ -377,6 +402,7 @@ Player.prototype.GetNextTradingGoods = function()
 
 Player.prototype.GetTradingGoods = function()
 {
+	/** @type {Record<string, number>} */
 	let tradingGoods = {};
 	for (let resource of this.tradingGoods)
 		tradingGoods[resource.goods] = resource.proba;
@@ -384,6 +410,7 @@ Player.prototype.GetTradingGoods = function()
 	return tradingGoods;
 };
 
+/** @param {Record<GenericResName, number>} tradingGoods */
 Player.prototype.SetTradingGoods = function(tradingGoods)
 {
 	let resTradeCodes = Resources.GetTradableCodes();
@@ -413,7 +440,7 @@ Player.prototype.SetTradingGoods = function(tradingGoods)
 };
 
 /**
- * @param {string} message - The message to send in the chat. May be undefined.
+ * @param {string=} message - The message to send in the chat. May be undefined.
  */
 Player.prototype.Win = function(message)
 {
@@ -421,7 +448,7 @@ Player.prototype.Win = function(message)
 };
 
 /**
- * @param {string} message - The message to send in the chat. May be undefined.
+ * @param {string=} message - The message to send in the chat. May be undefined.
  */
 Player.prototype.Defeat = function(message)
 {
@@ -531,6 +558,7 @@ Player.prototype.GetFormations = function()
 	return this.formations;
 };
 
+/** @param {string[]} formations */
 Player.prototype.SetFormations = function(formations)
 {
 	this.formations = formations;
@@ -546,6 +574,10 @@ Player.prototype.GetStartingCameraRot = function()
 	return this.startCam.rotation;
 };
 
+/**
+ * @param {Vector3D} pos
+ * @param {Vector3D} rot
+ */
 Player.prototype.SetStartingCamera = function(pos, rot)
 {
 	this.startCam = { "position": pos, "rotation": rot };
@@ -556,6 +588,7 @@ Player.prototype.HasStartingCamera = function()
 	return this.startCam !== undefined;
 };
 
+/** @param {boolean} c */
 Player.prototype.SetControlAllUnits = function(c)
 {
 	this.controlAllUnits = c;
@@ -566,6 +599,7 @@ Player.prototype.CanControlAllUnits = function()
 	return this.controlAllUnits;
 };
 
+/** @param {boolean} flag */
 Player.prototype.SetAI = function(flag)
 {
 	this.isAI = flag;
@@ -578,6 +612,7 @@ Player.prototype.IsAI = function()
 
 /**
  * Do some map dependant initializations
+ * @param {MessageInitGame} msg
  */
 Player.prototype.OnGlobalInitGame = function(msg)
 {
@@ -593,6 +628,7 @@ Player.prototype.OnGlobalInitGame = function(msg)
 /**
  * Keep track of population effects of all entities that
  * become owned or unowned by this player.
+ * @param {MessageOwnershipChanged} msg
  */
 Player.prototype.OnGlobalOwnershipChanged = function(msg)
 {
@@ -631,6 +667,7 @@ Player.prototype.OnGlobalOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageValueModification} msg */
 Player.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Player")
@@ -647,6 +684,7 @@ Player.prototype.OnValueModification = function(msg)
 		}
 };
 
+/** @param {boolean} flag */
 Player.prototype.SetCheatsEnabled = function(flag)
 {
 	this.cheatsEnabled = flag;
@@ -657,6 +695,10 @@ Player.prototype.GetCheatsEnabled = function()
 	return this.cheatsEnabled;
 };
 
+/**
+ * @param {number} player
+ * @param {Record<GenericResName, number>} amounts
+ */
 Player.prototype.TributeResource = function(player, amounts)
 {
 	let cmpPlayer = QueryPlayerIDInterface(player);
@@ -704,18 +746,21 @@ Player.prototype.TributeResource = function(player, amounts)
 	});
 };
 
+/** @param {string} template */
 Player.prototype.AddDisabledTemplate = function(template)
 {
 	this.disabledTemplates[template] = true;
 	Engine.BroadcastMessage(MT_DisabledTemplatesChanged, { "player": this.playerID });
 };
 
+/** @param {string} template */
 Player.prototype.RemoveDisabledTemplate = function(template)
 {
 	this.disabledTemplates[template] = false;
 	Engine.BroadcastMessage(MT_DisabledTemplatesChanged, { "player": this.playerID });
 };
 
+/** @param {string[]} templates */
 Player.prototype.SetDisabledTemplates = function(templates)
 {
 	this.disabledTemplates = {};
@@ -729,18 +774,21 @@ Player.prototype.GetDisabledTemplates = function()
 	return this.disabledTemplates;
 };
 
+/** @param {string} tech */
 Player.prototype.AddDisabledTechnology = function(tech)
 {
 	this.disabledTechnologies[tech] = true;
 	Engine.BroadcastMessage(MT_DisabledTechnologiesChanged, { "player": this.playerID });
 };
 
+/** @param {string} tech */
 Player.prototype.RemoveDisabledTechnology = function(tech)
 {
 	this.disabledTechnologies[tech] = false;
 	Engine.BroadcastMessage(MT_DisabledTechnologiesChanged, { "player": this.playerID });
 };
 
+/** @param {string[]} techs */
 Player.prototype.SetDisabledTechnologies = function(techs)
 {
 	this.disabledTechnologies = {};
@@ -754,6 +802,7 @@ Player.prototype.GetDisabledTechnologies = function()
 	return this.disabledTechnologies;
 };
 
+/** @param {MessagePlayerDefeated} msg */
 Player.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	let cmpSound = Engine.QueryInterface(this.entity, IID_Sound);

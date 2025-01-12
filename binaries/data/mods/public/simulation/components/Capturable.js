@@ -43,7 +43,7 @@ Capturable.prototype.GetGarrisonRegenRate = function()
  * Set the new capture points, used for cloning entities.
  * The caller should assure that the sum of capture points
  * matches the max.
- * @param {number[]} - Array with for all players the new value.
+ * @param {number[]} capturePointsArray - Array with for all players the new value.
  */
 Capturable.prototype.SetCapturePoints = function(capturePointsArray)
 {
@@ -280,7 +280,7 @@ Capturable.prototype.UpdateCachedValues = function()
 /**
  * Update all chached values that could be affected by modifications.
  * Check timer and send changed messages when required.
- * @param {boolean} message - Whether not to send a CapturePointsChanged message. When false, caller should take care of sending that message.
+ * @param sendMessage - Whether not to send a CapturePointsChanged message. When false, caller should take care of sending that message.
 */
 Capturable.prototype.UpdateCachedValuesAndNotify = function(sendMessage = true)
 {
@@ -305,28 +305,33 @@ Capturable.prototype.UpdateCachedValuesAndNotify = function(sendMessage = true)
 
 // Message Listeners
 
+/** @param {MessageValueModification} msg */
 Capturable.prototype.OnValueModification = function(msg)
 {
 	if (msg.component == "Capturable")
 		this.UpdateCachedValuesAndNotify();
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 Capturable.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	this.CheckTimer();
 };
 
+/** @param {MessageTerritoryDecayChanged} msg */
 Capturable.prototype.OnTerritoryDecayChanged = function(msg)
 {
 	if (msg.to)
 		this.CheckTimer();
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Capturable.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.CheckTimer();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Capturable.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -366,6 +371,7 @@ Capturable.prototype.OnOwnershipChanged = function(msg)
  * When a player is defeated, reassign the capture points of non-owned entities to gaia.
  * Those owned by the defeated player are dealt with onOwnershipChanged.
  */
+/** @param {MessagePlayerDefeated} msg */
 Capturable.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	if (!this.capturePoints[msg.playerId])
@@ -387,8 +393,11 @@ CapturableMirage.prototype.Init = function(cmpCapturable)
 	this.maxCapturePoints = cmpCapturable.GetMaxCapturePoints();
 };
 
+/** @type {Capturable["GetCapturePoints"]} */
 CapturableMirage.prototype.GetCapturePoints = function() { return this.capturePoints; };
+/** @type {Capturable["GetMaxCapturePoints"]} */
 CapturableMirage.prototype.GetMaxCapturePoints = function() { return this.maxCapturePoints; };
+/** @type {Capturable["CanCapture"]} */
 CapturableMirage.prototype.CanCapture = Capturable.prototype.CanCapture;
 
 Engine.RegisterGlobal("CapturableMirage", CapturableMirage);

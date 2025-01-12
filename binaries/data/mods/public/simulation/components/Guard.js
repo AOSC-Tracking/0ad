@@ -8,6 +8,7 @@ Guard.prototype.Init = function()
 	this.entities = [];
 };
 
+/** @param {EntityId} entity */
 Guard.prototype.GetRange = function(entity)
 {
 	let range = 8;
@@ -28,11 +29,13 @@ Guard.prototype.GetEntities = function()
 	return this.entities.slice();
 };
 
+/** @param {EntityId[]} entities */
 Guard.prototype.SetEntities = function(entities)
 {
 	this.entities = entities;
 };
 
+/** @param {EntityId} ent */
 Guard.prototype.AddGuard = function(ent)
 {
 	if (this.entities.indexOf(ent) != -1)
@@ -40,6 +43,7 @@ Guard.prototype.AddGuard = function(ent)
 	this.entities.push(ent);
 };
 
+/** @param {EntityId} ent */
 Guard.prototype.RemoveGuard = function(ent)
 {
 	let index = this.entities.indexOf(ent);
@@ -47,6 +51,10 @@ Guard.prototype.RemoveGuard = function(ent)
 		this.entities.splice(index, 1);
 };
 
+/**
+ * @param {EntityId} oldent
+ * @param {EntityId} newent
+ */
 Guard.prototype.RenameGuard = function(oldent, newent)
 {
 	let index = this.entities.indexOf(oldent);
@@ -54,6 +62,7 @@ Guard.prototype.RenameGuard = function(oldent, newent)
 		this.entities[index] = newent;
 };
 
+/** @param {MessageAttacked} msg */
 Guard.prototype.OnAttacked = function(msg)
 {
 	for (let ent of this.entities)
@@ -64,6 +73,7 @@ Guard.prototype.OnAttacked = function(msg)
  * If an entity is captured, or about to be killed (so its owner
  * changes to '-1') or if diplomacy changed, update the guards list
  */
+/** @param {MessageOwnershipChanged} msg */
 Guard.prototype.OnOwnershipChanged = function(msg)
 {
 	if (!this.entities.length)
@@ -71,6 +81,7 @@ Guard.prototype.OnOwnershipChanged = function(msg)
 	this.CheckGuards(msg.to == INVALID_PLAYER);
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Guard.prototype.OnDiplomacyChanged = function(msg)
 {
 	if (!this.entities.length)

@@ -159,6 +159,7 @@ Researcher.prototype.Serialize = function()
 	};
 };
 
+/** @param {ReturnType<Researcher["Serialize"]>} data */
 Researcher.prototype.Deserialize = function(data)
 {
 	this.Init();
@@ -216,6 +217,7 @@ Researcher.prototype.GetTechnologiesList = function()
 			true));
 
 	const techList = [];
+	/** @type {Record<string, string>} */
 	const superseded = {};
 
 	const disabledTechnologies = cmpPlayer.GetDisabledTechnologies();
@@ -267,10 +269,11 @@ Researcher.prototype.GetTechnologiesList = function()
 };
 
 /**
- * @return {Object} - The multipliers to change the costs of any research with.
+ * @return The multipliers to change the costs of any research with.
  */
 Researcher.prototype.GetTechCostMultiplier = function()
 {
+	/** @type {Record<string, number>} */
 	const techCostMultiplier = {};
 	for (const res of Resources.GetCodes().concat(["time"]))
 		techCostMultiplier[res] = ApplyValueModificationsToEntity(
@@ -283,6 +286,7 @@ Researcher.prototype.GetTechCostMultiplier = function()
 
 /**
  * Checks whether we can research the given technology, minding paired techs.
+ * @param {string} tech - The technology to check.
  */
 Researcher.prototype.IsTechnologyResearchedOrInProgress = function(tech)
 {
@@ -356,7 +360,7 @@ Researcher.prototype.HasItem = function(id)
 };
 
 /**
- * @parameter {number} id - The id of the research.
+ * @param {number} id - The id of the research.
  * @return {Object} - Some basic information about the research.
  */
 Researcher.prototype.GetResearchingTechnology = function(id)

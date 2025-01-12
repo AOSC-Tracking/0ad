@@ -218,6 +218,7 @@ Attack.prototype.GetAttackTypes = function(wantedTypes)
 	      (!wantedTypesReal || !wantedTypesReal.length || wantedTypesReal.indexOf(type) != -1));
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetPreferredClasses = function(type)
 {
 	if (this.template[type] && this.template[type].PreferredClasses &&
@@ -227,6 +228,7 @@ Attack.prototype.GetPreferredClasses = function(type)
 	return [];
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRestrictedClasses = function(type)
 {
 	if (this.template[type] && this.template[type].RestrictedClasses &&
@@ -236,6 +238,10 @@ Attack.prototype.GetRestrictedClasses = function(type)
 	return [];
 };
 
+/**
+ * @param {EntityId} target
+ * @param {string[]=} wantedTypes
+ */
 Attack.prototype.CanAttack = function(target, wantedTypes)
 {
 	const cmpFormation = Engine.QueryInterface(target, IID_Formation);
@@ -301,6 +307,7 @@ Attack.prototype.CanAttack = function(target, wantedTypes)
 
 /**
  * Returns undefined if we have no preference or the lowest index of a preferred class.
+ * @param {EntityId} target
  */
 Attack.prototype.GetPreference = function(target)
 {
@@ -355,9 +362,9 @@ Attack.prototype.GetAttackEffectsData = function(type, splash)
 
 /**
  * Find the best attack against a target.
- * @param {number} target - The entity-ID of the target.
+ * @param {EntityId} target - The entity-ID of the target.
  * @param {boolean} allowCapture - Whether capturing is allowed.
- * @return {string} - The preferred attack type.
+ * @return {g_AttackTypes[number] | "Slaughter" | undefined} - The best attack type.
  */
 Attack.prototype.GetBestAttackAgainst = function(target, allowCapture)
 {
@@ -375,6 +382,7 @@ Attack.prototype.GetBestAttackAgainst = function(target, allowCapture)
 		return "Slaughter";
 
 	const targetClasses = cmpIdentity.GetClassesList();
+	/** @param {g_AttackTypes[number]} attackType */
 	const getPreferrence = attackType => {
 		let pref = 0;
 		if (MatchesClassList(targetClasses, this.GetPreferredClasses(attackType)))
@@ -392,6 +400,10 @@ Attack.prototype.GetBestAttackAgainst = function(target, allowCapture)
 	}).pop();
 };
 
+/**
+ * @param {EntityId} a
+ * @param {EntityId} b
+ */
 Attack.prototype.CompareEntitiesByPreference = function(a, b)
 {
 	let aPreference = this.GetPreference(a);
@@ -403,6 +415,7 @@ Attack.prototype.CompareEntitiesByPreference = function(a, b)
 	return aPreference - bPreference;
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetAttackName = function(type)
 {
 	return {
@@ -411,6 +424,7 @@ Attack.prototype.GetAttackName = function(type)
 	};
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRepeatTime = function(type)
 {
 	let repeatTime = 1000;
@@ -421,6 +435,7 @@ Attack.prototype.GetRepeatTime = function(type)
 	return ApplyValueModificationsToEntity("Attack/" + type + "/RepeatTime", repeatTime, this.entity);
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetTimers = function(type)
 {
 	return {
@@ -429,6 +444,7 @@ Attack.prototype.GetTimers = function(type)
 	};
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetSplashData = function(type)
 {
 	if (!this.template[type].Splash)
@@ -442,6 +458,7 @@ Attack.prototype.GetSplashData = function(type)
 	};
 };
 
+/** @param {g_AttackTypes[number] | "Slaughter"} type */
 Attack.prototype.GetRange = function(type)
 {
 	if (!type)
@@ -456,6 +473,7 @@ Attack.prototype.GetRange = function(type)
 	return { "max": max, "min": min };
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetAttackYOrigin = function(type)
 {
 	if (!this.template[type].Origin)
@@ -463,15 +481,16 @@ Attack.prototype.GetAttackYOrigin = function(type)
 	return ApplyValueModificationsToEntity("Attack/" + type + "/Origin/Y", +this.template[type].Origin.Y, this.entity);
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.RepeatRangeCheck = function (type) {
 	if (!this.IsTargetInRange(this.target, type))
 		this.StopAttacking("OutOfRange");
 };
 
 /**
- * @param {number} target - The target to attack.
- * @param {string} type - The type of attack to use.
- * @param {number} callerIID - The IID to notify on specific events.
+ * @param {EntityId} target - The target to attack.
+ * @param {g_AttackTypes[number]} type - The type of attack to use.
+ * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
  *
  * @return {boolean} - Whether we started attacking.
  */
@@ -531,7 +550,7 @@ Attack.prototype.StartAttacking = function(target, type, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped attacking.
+ * @param {string=} reason - The reason why we stopped attacking.
  */
 Attack.prototype.StopAttacking = function(reason)
 {
@@ -569,7 +588,7 @@ Attack.prototype.StopAttacking = function(reason)
 
 /**
  * Attack our target entity.
- * @param {string} data - The attack type to use.
+ * @param {g_AttackTypes[number]} type - The type of attack to use.
  * @param {number} lateness - The offset of the actual call and when it was expected.
  */
 Attack.prototype.Attack = function(type, lateness)
@@ -617,6 +636,8 @@ Attack.prototype.Attack = function(type, lateness)
  * Attack the target entity. This should only be called after a successful range check,
  * and should only be called after GetTimers().repeat msec has passed since the last
  * call to PerformAttack.
+ * @param {g_AttackTypes[number]} type - The type of attack to use.
+ * @param {EntityId} target - The target entity to attack.
  */
 Attack.prototype.PerformAttack = function(type, target)
 {
@@ -754,7 +775,8 @@ Attack.prototype.PerformAttack = function(type, target)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {EntityId} target - The entity ID of the target to check.
+ * @param {g_AttackTypes[number]} type - The type of attack to use.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Attack.prototype.IsTargetInRange = function(target, type)
@@ -769,6 +791,7 @@ Attack.prototype.IsTargetInRange = function(target, type)
 		false);
 };
 
+/** @param {MessageValueModification} msg */
 Attack.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Attack")
@@ -783,6 +806,7 @@ Attack.prototype.OnValueModification = function(msg)
 		cmpUnitAI.UpdateRangeQueries();
 };
 
+/** @param {g_AttackTypes[number]} type */
 Attack.prototype.GetRangeOverlays = function(type = "Ranged")
 {
 	if (!this.template[type] || !this.template[type].RangeOverlay)

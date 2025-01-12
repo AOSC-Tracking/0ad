@@ -39,6 +39,7 @@ BattleDetection.prototype.Init = function()
 	this.state = "PEACE";
 };
 
+/** @param {"PEACE" | "BATTLE"} state */
 BattleDetection.prototype.SetState = function(state)
 {
 	if (state == this.state)
@@ -96,6 +97,8 @@ BattleDetection.prototype.TimerHandler = function(data, lateness)
  * Set up the damage rate timer to run after 'offset' msecs, and then optionally
  * every 'repeat' msecs until StopTimer is called, if 'repeat' is set. A "Timer" message
  * will be sent each time the timer runs. Must not be called if a timer is already active.
+ * @param {number} offset
+ * @param {number | undefined} repeat
  */
 BattleDetection.prototype.StartTimer = function(offset, repeat)
 {
@@ -129,6 +132,7 @@ BattleDetection.prototype.StopTimer = function()
 	this.timer = undefined;
 };
 
+/** @param {MessageAttacked} msg */
 BattleDetection.prototype.OnGlobalAttacked = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);

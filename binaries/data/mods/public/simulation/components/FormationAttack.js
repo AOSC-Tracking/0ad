@@ -21,6 +21,7 @@ FormationAttack.prototype.GetAttackTypes = function()
 	return [];
 };
 
+/** @param {EntityId} target */
 FormationAttack.prototype.GetRange = function(target)
 {
 	var result = { "min": 0, "max": this.canAttackAsFormation ? -1 : 0 };

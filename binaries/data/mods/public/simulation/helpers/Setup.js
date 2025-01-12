@@ -2,6 +2,7 @@
 /**
  * Used to initialize non-player settings relevant to the map, like
  * default stance and victory conditions. DO NOT load players here
+ * @param {Record<string, any>} settings
  */
 function LoadMapSettings(settings)
 {
@@ -48,6 +49,7 @@ function LoadMapSettings(settings)
 	}
 
 	const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
+	/** @type {VictorySettings} */
 	const gameSettings = { "victoryConditions": clone(settings.VictoryConditions) };
 	if (gameSettings.victoryConditions.indexOf("capture_the_relic") != -1)
 	{

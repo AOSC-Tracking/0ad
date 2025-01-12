@@ -63,6 +63,7 @@ UnitMotionFlying.prototype.Init = function()
 	this.passabilityClass = Engine.QueryInterface(SYSTEM_ENTITY, IID_Pathfinder).GetPassabilityClass(this.template.PassabilityClass);
 };
 
+/** @param {MessageUpdate} msg */
 UnitMotionFlying.prototype.OnUpdate = function(msg)
 {
 	let turnLength = msg.turnLength;
@@ -265,6 +266,7 @@ UnitMotionFlying.prototype.OnUpdate = function(msg)
 	cmpPosition.MoveTo(pos.x, pos.z);
 };
 
+/** @type {UnitMotion["MoveToPointRange"]} */
 UnitMotionFlying.prototype.MoveToPointRange = function(x, z, minRange, maxRange)
 {
 	this.hasTarget = true;
@@ -278,6 +280,7 @@ UnitMotionFlying.prototype.MoveToPointRange = function(x, z, minRange, maxRange)
 	return true;
 };
 
+/** @type {UnitMotion["MoveToTargetRange"]} */
 UnitMotionFlying.prototype.MoveToTargetRange = function(target, minRange, maxRange)
 {
 	let cmpTargetPosition = Engine.QueryInterface(target, IID_Position);
@@ -311,6 +314,7 @@ UnitMotionFlying.prototype.GetWalkSpeed = function()
 	return +this.template.MaxSpeed;
 };
 
+/** @type {UnitMotion["SetSpeedMultiplier"]} */
 UnitMotionFlying.prototype.SetSpeedMultiplier = function(multiplier)
 {
 	// Ignore this, the speed is always the walk speed.
@@ -324,6 +328,7 @@ UnitMotionFlying.prototype.GetRunMultiplier = function()
 /**
  * Estimate the next position of the unit. Just linearly extrapolate.
  * TODO: Reuse the movement code for a better estimate.
+ * @type {UnitMotion["EstimateFuturePosition"]}
  */
 UnitMotionFlying.prototype.EstimateFuturePosition = function(dt)
 {
@@ -365,6 +370,7 @@ UnitMotionFlying.prototype.GetPassabilityClassName = function()
 	return this.passabilityClassName ? this.passabilityClassName : this.template.PassabilityClass;
 };
 
+/** @type {UnitMotion["SetPassabilityClassName"]} */
 UnitMotionFlying.prototype.SetPassabilityClassName = function(passClassName)
 {
 	this.passabilityClassName = passClassName;
@@ -378,6 +384,7 @@ UnitMotionFlying.prototype.GetPassabilityClass = function()
 	return this.passabilityClass;
 };
 
+/** @type {UnitMotion["FaceTowardsPoint"]} */
 UnitMotionFlying.prototype.FaceTowardsPoint = function(x, z)
 {
 	// Ignore this - angle is controlled by the target-seeking code instead.
@@ -396,6 +403,7 @@ UnitMotionFlying.prototype.StopMoving = function()
 
 };
 
+/** @param {boolean} enabled */
 UnitMotionFlying.prototype.SetDebugOverlay = function(enabled)
 {
 };

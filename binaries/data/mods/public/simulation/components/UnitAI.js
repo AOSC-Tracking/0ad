@@ -190,7 +190,10 @@ UnitAI.prototype.DEFAULT_CAPTURE = false;
 // To reject an order, use 'return this.FinishOrder();'
 const ACCEPT_ORDER = true;
 
-// See ../helpers/FSM.js for some documentation of this FSM specification syntax
+/**
+ * See ../helpers/FSM.js for some documentation of this FSM specification syntax
+ * @type {FsmSpec}
+ */
 UnitAI.prototype.UnitFsmSpec = {
 
 	// Default event handlers:
@@ -2271,6 +2274,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					// If the target is a formation, pick closest member.
 					if (cmpFormation)
 					{
+						/** @type {function(EntityId): boolean} */
 						let filter = (t) => this.CanAttack(t);
 						this.order.data.formationTarget = this.order.data.target;
 						let target = cmpFormation.GetClosestMember(this.entity, filter);
@@ -2619,6 +2623,7 @@ UnitAI.prototype.UnitFsmSpec = {
 					if (!cmpPosition || !cmpPosition.IsInWorld())
 						return true;
 
+					/** @type {function(EntityId, { specific: string }, string): boolean} */
 					let filter = (ent, type, template) => {
 						if (previousTarget == ent)
 							return false;
@@ -3487,13 +3492,14 @@ UnitAI.prototype.Init = function()
 
 	this.isGuardOf = undefined;
 
+	/** @type {string | undefined} */
 	this.formationAnimationVariant = undefined;
 	this.cheeringTime = +(this.template.CheeringTime || 0);
 	this.SetStance(this.template.DefaultStance);
 };
 
 /**
- * @param {cmpTurretable} cmpTurretable - Optionally the component to save a query here.
+ * @param {Turretable=} cmpTurretable - Optionally the component to save a query here.
  * @return {boolean} - Whether we are occupying a turret point.
  */
 UnitAI.prototype.IsTurret = function(cmpTurretable)
@@ -3518,6 +3524,7 @@ UnitAI.prototype.GetFormationsList = function()
 	return this.template.Formations?._string?.split(/\s+/) || [];
 };
 
+/** @param {string} formation */
 UnitAI.prototype.CanUseFormation = function(formation)
 {
 	return this.GetFormationsList().includes(formation);
@@ -3606,8 +3613,8 @@ UnitAI.prototype.SetMobile = function()
 };
 
 /**
- * @param cmpUnitMotion - optionally pass unitMotion to avoid querying it here
- * @returns true if the entity can move, i.e. has UnitMotion and isn't immobile.
+ * @param {UnitMotion=} cmpUnitMotion - optionally pass unitMotion to avoid querying it here
+ * @returns {cmpUnitMotion is UnitMotion}true if the entity can move, i.e. has UnitMotion and isn't immobile.
  */
 UnitAI.prototype.AbleToMove = function(cmpUnitMotion)
 {
@@ -3634,6 +3641,7 @@ UnitAI.prototype.IsWalking = function()
 
 /**
  * Return true if the current order is WalkAndFight or Patrol.
+ * @returns {boolean}
  */
 UnitAI.prototype.IsWalkingAndFighting = function()
 {
@@ -3652,6 +3660,7 @@ UnitAI.prototype.OnCreate = function()
 	this.isIdle = true;
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 UnitAI.prototype.OnDiplomacyChanged = function(msg)
 {
 	let cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
@@ -3662,6 +3671,7 @@ UnitAI.prototype.OnDiplomacyChanged = function(msg)
 		this.RemoveGuard();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 UnitAI.prototype.OnOwnershipChanged = function(msg)
 {
 	this.SetupRangeQueries();
@@ -3716,17 +3726,20 @@ UnitAI.prototype.OnDestroy = function()
 		cmpRangeManager.DestroyActiveQuery(this.losAttackRangeQuery);
 };
 
+/** @param {MessageVisionRangeChanged} msg */
 UnitAI.prototype.OnVisionRangeChanged = function(msg)
 {
 	if (this.entity == msg.entity)
 		this.SetupRangeQueries();
 };
 
+/** @param {EntityId} entity */
 UnitAI.prototype.HasPickupOrder = function(entity)
 {
 	return this.orderQueue.some(order => order.type == "PickupUnit" && order.data.target == entity);
 };
 
+/** @param {MessagePickupRequested} msg */
 UnitAI.prototype.OnPickupRequested = function(msg)
 {
 	if (this.HasPickupOrder(msg.entity))
@@ -3734,6 +3747,7 @@ UnitAI.prototype.OnPickupRequested = function(msg)
 	this.PushOrderAfterForced("PickupUnit", { "target": msg.entity, "iid": msg.iid });
 };
 
+/** @param {MessagePickupCanceled} msg */
 UnitAI.prototype.OnPickupCanceled = function(msg)
 {
 	for (let i = 0; i < this.orderQueue.length; ++i)
@@ -3877,14 +3891,20 @@ UnitAI.prototype.SetupAttackRangeQuery = function(enable = true)
 
 // FSM linkage functions
 
-// Setting the next state to the current state will leave/re-enter the top-most substate.
-// Must be called from inside the FSM.
+/**
+ * Setting the next state to the current state will leave/re-enter the top-most substate.
+ * Must be called from inside the FSM.
+ * @param {string} state
+ */
 UnitAI.prototype.SetNextState = function(state)
 {
 	this.UnitFsm.SetNextState(this, state);
 };
 
-// Must be called from inside the FSM.
+/**
+ * Must be called from inside the FSM.
+ * @param {Record<string, any>} msg
+ */
 UnitAI.prototype.DeferMessage = function(msg)
 {
 	this.UnitFsm.DeferMessage(this, msg);
@@ -3895,6 +3915,7 @@ UnitAI.prototype.GetCurrentState = function()
 	return this.UnitFsm.GetCurrentState(this);
 };
 
+/** @param {string} state */
 UnitAI.prototype.FsmStateNameChanged = function(state)
 {
 	Engine.PostMessage(this.entity, MT_UnitAIStateChanged, { "to": state });
@@ -3964,6 +3985,8 @@ UnitAI.prototype.FinishOrder = function()
 /**
  * Add an order onto the back of the queue,
  * and execute it if we didn't already have an order.
+ * @param {string} type
+ * @param {any} data
  */
 UnitAI.prototype.PushOrder = function(type, data)
 {
@@ -3993,6 +4016,8 @@ UnitAI.prototype.PushOrder = function(type, data)
 /**
  * Add an order onto the front of the queue,
  * and execute it immediately.
+ * @param {string} type
+ * @param {any} data
  */
 UnitAI.prototype.PushOrderFront = function(type, data, ignorePacking = false)
 {
@@ -4023,6 +4048,8 @@ UnitAI.prototype.PushOrderFront = function(type, data, ignorePacking = false)
 /**
  * Insert an order after the last forced order onto the queue
  * and after the other orders of the same type
+ * @param {string} type
+ * @param {any} data
  */
 UnitAI.prototype.PushOrderAfterForced = function(type, data)
 {
@@ -4088,6 +4115,7 @@ UnitAI.prototype.EnsureCorrectPackStateForAttack = function(requirePacked)
 	return false;
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.WillMoveFromFoundation = function(target, checkPacking = true)
 {
 	let cmpUnitAI = Engine.QueryInterface(target, IID_UnitAI);
@@ -4099,6 +4127,10 @@ UnitAI.prototype.WillMoveFromFoundation = function(target, checkPacking = true)
 	return !this.CheckTargetRangeExplicit(target, g_LeaveFoundationRange, -1);
 };
 
+/**
+ * @param {string} type
+ * @param {any} data
+ */
 UnitAI.prototype.ReplaceOrder = function(type, data)
 {
 	// Remember the previous work orders to be able to go back to them later if required
@@ -4161,6 +4193,7 @@ UnitAI.prototype.GetOrders = function()
 	return this.orderQueue.slice();
 };
 
+/** @param {UnitAIOrder[]} orders */
 UnitAI.prototype.AddOrders = function(orders)
 {
 	orders.forEach(order => this.PushOrder(order.type, order.data));
@@ -4176,8 +4209,10 @@ UnitAI.prototype.GetOrderData = function()
 	return orders;
 };
 
+/** @param {string} type */
 UnitAI.prototype.UpdateWorkOrders = function(type)
 {
+	/** @param {string} type */
 	var isWorkType = type => type == "Gather" || type == "Trade" || type == "Repair" || type == "ReturnResource";
 	if (isWorkType(type))
 	{
@@ -4253,11 +4288,16 @@ UnitAI.prototype.GetWorkOrders = function()
 	return this.workOrders;
 };
 
+/** @param {UnitAIOrder[]} orders */
 UnitAI.prototype.SetWorkOrders = function(orders)
 {
 	this.workOrders = orders;
 };
 
+/**
+ * @param {any} data
+ * @param {number} lateness
+ */
 UnitAI.prototype.TimerHandler = function(data, lateness)
 {
 	// Reset the timer
@@ -4271,6 +4311,8 @@ UnitAI.prototype.TimerHandler = function(data, lateness)
  * Set up the UnitAI timer to run after 'offset' msecs, and then
  * every 'repeat' msecs until StopTimer is called. A "Timer" message
  * will be sent each time the timer runs.
+ * @param {number} offset
+ * @param {number=} repeat
  */
 UnitAI.prototype.StartTimer = function(offset, repeat)
 {
@@ -4299,6 +4341,7 @@ UnitAI.prototype.StopTimer = function()
 	this.timer = undefined;
 };
 
+/** @param {MessageMotionUpdate} msg */
 UnitAI.prototype.OnMotionUpdate = function(msg)
 {
 	if (msg.veryObstructed)
@@ -4310,12 +4353,14 @@ UnitAI.prototype.OnMotionUpdate = function(msg)
  * Called directly by cmpFoundation and cmpRepairable to
  * inform builders that repairing has finished.
  * This not done by listening to a global message due to performance.
+ * @param {MessageConstructionFinished} msg
  */
 UnitAI.prototype.ConstructionFinished = function(msg)
 {
 	this.UnitFsm.ProcessMessage(this, { "type": "ConstructionFinished", "data": msg });
 };
 
+/** @param {MessageEntityRenamed} msg */
 UnitAI.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	let changed = false;
@@ -4347,6 +4392,7 @@ UnitAI.prototype.OnGlobalEntityRenamed = function(msg)
 	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
+/** @param {MessageAttacked} msg */
 UnitAI.prototype.OnAttacked = function(msg)
 {
 	if (msg.fromStatusEffect)
@@ -4355,11 +4401,13 @@ UnitAI.prototype.OnAttacked = function(msg)
 	this.UnitFsm.ProcessMessage(this, { "type": "Attacked", "data": msg });
 };
 
+/** @param {MessageGuardedAttacked} msg */
 UnitAI.prototype.OnGuardedAttacked = function(msg)
 {
 	this.UnitFsm.ProcessMessage(this, { "type": "GuardedAttacked", "data": msg.data });
 };
 
+/** @param {MessageRangeUpdate} msg */
 UnitAI.prototype.OnRangeUpdate = function(msg)
 {
 	if (msg.tag == this.losRangeQuery)
@@ -4370,6 +4418,7 @@ UnitAI.prototype.OnRangeUpdate = function(msg)
 		this.UnitFsm.ProcessMessage(this, { "type": "LosAttackRangeUpdate", "data": msg });
 };
 
+/** @param {MessagePackFinished} msg */
 UnitAI.prototype.OnPackFinished = function(msg)
 {
 	this.UnitFsm.ProcessMessage(this, { "type": "PackFinished", "packed": msg.packed });
@@ -4378,7 +4427,7 @@ UnitAI.prototype.OnPackFinished = function(msg)
 /**
  * A general function to process messages sent from components.
  * @param {string} type - The type of message to process.
- * @param {Object} msg - Optionally extra data to use.
+ * @param {Object=} msg - Optionally extra data to use.
  */
 UnitAI.prototype.ProcessMessage = function(type, msg)
 {
@@ -4405,6 +4454,7 @@ UnitAI.prototype.GetRunMultiplier = function()
 
 /**
  * Returns true if the target exists and has non-zero hitpoints.
+ * @param {EntityId} ent
  */
 UnitAI.prototype.TargetIsAlive = function(ent)
 {
@@ -4419,6 +4469,7 @@ UnitAI.prototype.TargetIsAlive = function(ent)
 /**
  * Returns true if the target exists and needs to be killed before
  * beginning to gather resources from it.
+ * @param {EntityId} ent
  */
 UnitAI.prototype.MustKillGatherTarget = function(ent)
 {
@@ -4435,6 +4486,7 @@ UnitAI.prototype.MustKillGatherTarget = function(ent)
 /**
  * Returns the position of target or, if there is none,
  * the entity's position, or undefined.
+ * @param {EntityId} target
  */
 UnitAI.prototype.TargetPosOrEntPos = function(target)
 {
@@ -4453,8 +4505,10 @@ UnitAI.prototype.TargetPosOrEntPos = function(target)
 /**
  * Returns the entity ID of the nearest resource supply where the given
  * filter returns true, or undefined if none can be found.
- * "Nearest" is nearest from @param position.
+ * "Nearest" is nearest from @param {Vector2D} position
  * TODO: extend this to exclude resources that already have lots of gatherers.
+ * @param {Vector2D} position
+ * @param {function(EntityId, { generic: string, specific: string }, string): boolean} filter - A function that returns true if the resource
  */
 UnitAI.prototype.FindNearbyResource = function(position, filter)
 {
@@ -4487,6 +4541,7 @@ UnitAI.prototype.FindNearbyResource = function(position, filter)
 /**
  * Returns the entity ID of the nearest resource dropsite that accepts
  * the given type, or undefined if none can be found.
+ * @param {string} genericType - The type of resource to find a dropsite for.
  */
 UnitAI.prototype.FindNearestDropsite = function(genericType)
 {
@@ -4542,7 +4597,7 @@ UnitAI.prototype.FindNearestDropsite = function(genericType)
 
 /**
  * Returns the entity ID of the nearest building that needs to be constructed.
- * "Nearest" is nearest from @param position.
+ * "Nearest" is nearest from @param {Vector2D} position
  */
 UnitAI.prototype.FindNearbyFoundation = function(position)
 {
@@ -4568,7 +4623,7 @@ UnitAI.prototype.FindNearbyFoundation = function(position)
 
 /**
  * Returns the entity ID of the nearest treasure.
- * "Nearest" is nearest from @param position.
+ * "Nearest" is nearest from @param {Vector2D} position
  */
 UnitAI.prototype.FindNearbyTreasure = function(position)
 {
@@ -4590,6 +4645,7 @@ UnitAI.prototype.FindNearbyTreasure = function(position)
 
 /**
  * Play a sound appropriate to the current entity.
+ * @param {string} name
  */
 UnitAI.prototype.PlaySound = function(name)
 {
@@ -4606,12 +4662,12 @@ UnitAI.prototype.PlaySound = function(name)
 	}
 };
 
-/*
+/**
  * Set a visualActor animation variant.
  * By changing the animation variant, you can change animations based on unitAI state.
  * If there are no specific variants or the variant doesn't exist in the actor,
  * the actor fallbacks to any existing animation.
- * @param type if present, switch to a specific animation variant.
+ * @param {string=} type if present, switch to a specific animation variant.
  */
 UnitAI.prototype.SetAnimationVariant = function(type)
 {
@@ -4657,6 +4713,9 @@ UnitAI.prototype.ResetAnimation = function()
 	cmpVisual.SelectAnimation("idle", false, 1.0);
 };
 
+/**
+ * @param {string} name - The name of the animation to select.
+ */
 UnitAI.prototype.SelectAnimation = function(name, once = false, speed = 1.0)
 {
 	let cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -4666,6 +4725,10 @@ UnitAI.prototype.SelectAnimation = function(name, once = false, speed = 1.0)
 	cmpVisual.SelectAnimation(name, once, speed);
 };
 
+/**
+ * @param {number} actiontime
+ * @param {number} repeattime
+ */
 UnitAI.prototype.SetAnimationSync = function(actiontime, repeattime)
 {
 	var cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -4691,8 +4754,9 @@ UnitAI.prototype.StopMoving = function()
 
 /**
  * Generic dispatcher for other MoveTo functions.
- * @param iid - Interface ID (optional) implementing GetRange
- * @param type - Range type for the interface call
+ * @param {({target: number } | {x: number, z: number}) & { min?: number, max?: number}} data
+ * @param {IIDsWithRange=} iid - Interface ID (optional) implementing GetRange
+ * @param {string=} type - Range type for the interface call
  * @returns whether the move succeeded or failed.
  */
 UnitAI.prototype.MoveTo = function(data, iid, type)
@@ -4712,18 +4776,31 @@ UnitAI.prototype.MoveTo = function(data, iid, type)
 	return this.MoveToPoint(data.x, data.z);
 };
 
+/**
+ * @param {number} x
+ * @param {number} z
+ */
 UnitAI.prototype.MoveToPoint = function(x, z)
 {
 	let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 	return this.AbleToMove(cmpUnitMotion) && cmpUnitMotion.MoveToPointRange(x, z, 0, 0); // For point goals, allow a max range of 0.
 };
 
+/**
+ * @param {number} x
+ * @param {number} z
+ * @param {number} rangeMin
+ * @param {number} rangeMax
+ */
 UnitAI.prototype.MoveToPointRange = function(x, z, rangeMin, rangeMax)
 {
 	let cmpUnitMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
 	return this.AbleToMove(cmpUnitMotion) && cmpUnitMotion.MoveToPointRange(x, z, rangeMin, rangeMax);
 };
 
+/**
+ * @param {EntityId} target
+ */
 UnitAI.prototype.MoveToTarget = function(target)
 {
 	if (!this.CheckTargetVisible(target))
@@ -4733,6 +4810,12 @@ UnitAI.prototype.MoveToTarget = function(target)
 	return this.AbleToMove(cmpUnitMotion) && cmpUnitMotion.MoveToTargetRange(target, 0, 1);
 };
 
+/**
+ * @template {IIDsWithRange} T
+ * @param {EntityId} target
+ * @param {T} iid
+ * @param {string=} type
+ */
 UnitAI.prototype.MoveToTargetRange = function(target, iid, type)
 {
 	if (!this.CheckTargetVisible(target))
@@ -4750,6 +4833,8 @@ UnitAI.prototype.MoveToTargetRange = function(target, iid, type)
  * Move unit so we hope the target is in the attack range
  * for melee attacks, this goes straight to the default range checks
  * for ranged attacks, the parabolic range is used
+ * @param {EntityId} target
+ * @param {string} type
  */
 UnitAI.prototype.MoveToTargetAttackRange = function(target, type)
 {
@@ -4789,6 +4874,11 @@ UnitAI.prototype.MoveToTargetAttackRange = function(target, type)
 	return cmpUnitMotion && cmpUnitMotion.MoveToTargetRange(target, range.min, guessedMaxRange);
 };
 
+/**
+ * @param {EntityId} target
+ * @param {number} min
+ * @param {number} max
+ */
 UnitAI.prototype.MoveToTargetRangeExplicit = function(target, min, max)
 {
 	if (!this.CheckTargetVisible(target))
@@ -4824,8 +4914,9 @@ UnitAI.prototype.MoveFormationToTargetAttackRange = function(target)
 
 /**
  * Generic dispatcher for other Check...Range functions.
- * @param iid - Interface ID (optional) implementing GetRange
- * @param type - Range type for the interface call
+ * @param {({target: number} | {x: number, z: number}) & {min?: number, max?: number}} data
+ * @param {IIDsWithRange=} iid - Interface ID (optional) implementing GetRange
+ * @param {string=} type - Range type for the interface call
  */
 UnitAI.prototype.CheckRange = function(data, iid, type)
 {
@@ -4844,12 +4935,23 @@ UnitAI.prototype.CheckRange = function(data, iid, type)
 	return this.CheckPointRangeExplicit(data.x, data.z, 0, 0);
 };
 
+/**
+ * @param {number} x
+ * @param {number} z
+ * @param {number} min
+ * @param {number} max
+ */
 UnitAI.prototype.CheckPointRangeExplicit = function(x, z, min, max)
 {
 	let cmpObstructionManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ObstructionManager);
 	return cmpObstructionManager.IsInPointRange(this.entity, x, z, min, max, false);
 };
 
+/**
+ * @param {EntityId} target
+ * @param {IIDsWithRange} iid
+ * @param {string=} type
+ */
 UnitAI.prototype.CheckTargetRange = function(target, iid, type)
 {
 	let range = this.GetRange(iid, type, target);
@@ -4865,6 +4967,8 @@ UnitAI.prototype.CheckTargetRange = function(target, iid, type)
  * For melee attacks, this goes straigt to the regular range calculation
  * For ranged attacks, the parabolic formula is used to accout for bigger ranges
  * when the target is lower, and smaller ranges when the target is higher
+ * @param {EntityId} target
+ * @param {"Melee" | "Ranged" | "Capture"} type
  */
 UnitAI.prototype.CheckTargetAttackRange = function(target, type)
 {
@@ -4885,6 +4989,11 @@ UnitAI.prototype.CheckTargetAttackRange = function(target, type)
 	return cmpAttack && cmpAttack.IsTargetInRange(target, type);
 };
 
+/**
+ * @param {EntityId} target
+ * @param {number} min
+ * @param {number} max
+ */
 UnitAI.prototype.CheckTargetRangeExplicit = function(target, min, max)
 {
 	let cmpObstructionManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_ObstructionManager);
@@ -4914,6 +5023,7 @@ UnitAI.prototype.CheckFormationTargetAttackRange = function(target)
 
 /**
  * Returns true if the target entity is visible through the FoW/SoD.
+ * @param {EntityId} target - The entity ID to check.
  */
 UnitAI.prototype.CheckTargetVisible = function(target)
 {
@@ -4941,7 +5051,9 @@ UnitAI.prototype.CheckTargetVisible = function(target)
 };
 
 /**
- * Returns true if the given position is currentl visible (not in FoW/SoD).
+ * Returns true if the given position is currently visible (not in FoW/SoD).
+ * @param {number} x - The x-coordinate.
+ * @param {number} z - The z-coordinate.
  */
 UnitAI.prototype.CheckPositionVisible = function(x, z)
 {
@@ -4963,6 +5075,8 @@ UnitAI.prototype.CheckPositionVisible = function(x, z)
 UnitAI.prototype.DefaultRelaxedMaxRange = 12;
 
 /**
+ * @param {({target: number} | {x: number, z: number}) & {relaxed: boolean}} data
+ * @param {number} relaxedRange
  * @returns true if the unit is in the relaxed-range from the target.
  */
 UnitAI.prototype.RelaxedMaxRangeCheck = function(data, relaxedRange)
@@ -4970,6 +5084,7 @@ UnitAI.prototype.RelaxedMaxRangeCheck = function(data, relaxedRange)
 	if (!data.relaxed)
 		return false;
 
+	/** @type {({target: number} | {x: number, z: number}) & {min?: number, max?: number}} */
 	let ndata = data;
 	ndata.min = 0;
 	ndata.max = relaxedRange;
@@ -4978,7 +5093,7 @@ UnitAI.prototype.RelaxedMaxRangeCheck = function(data, relaxedRange)
 
 /**
  * Let an entity face its target.
- * @param {number} target - The entity-ID of the target.
+ * @param {EntityId} target - The entity-ID of the target.
  */
 UnitAI.prototype.FaceTowardsTarget = function(target)
 {
@@ -5001,6 +5116,11 @@ UnitAI.prototype.FaceTowardsTarget = function(target)
 		cmpPosition.TurnTo(cmpPosition.GetPosition2D().angleTo(targetPosition));
 };
 
+/**
+ * @param {EntityId} target
+ * @param {IIDsWithRange} iid
+ * @param {string=} type
+ */
 UnitAI.prototype.CheckTargetDistanceFromHeldPosition = function(target, iid, type)
 {
 	let range = this.GetRange(iid, type, target);
@@ -5024,6 +5144,7 @@ UnitAI.prototype.CheckTargetDistanceFromHeldPosition = function(target, iid, typ
 	return Math.euclidDistance2D(pos.x, pos.z, heldPosition.x, heldPosition.z) < halfvision + range.max;
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CheckTargetIsInVisionRange = function(target)
 {
 	let cmpVision = Engine.QueryInterface(this.entity, IID_Vision);
@@ -5044,7 +5165,8 @@ UnitAI.prototype.GetBestAttackAgainst = function(target, allowCapture = this.DEF
 /**
  * Try to find one of the given entities which can be attacked,
  * and start attacking it.
- * Returns true if it found something to attack.
+ * @param {EntityId[]} ents - An array of the IDs of the spotted entities.
+ * @returns true if it found something to attack.
  */
 UnitAI.prototype.AttackVisibleEntity = function(ents)
 {
@@ -5059,7 +5181,8 @@ UnitAI.prototype.AttackVisibleEntity = function(ents)
 /**
  * Try to find one of the given entities which can be attacked
  * and which is close to the hold position, and start attacking it.
- * Returns true if it found something to attack.
+ * @param {EntityId[]} ents - An array of the IDs of the spotted entities.
+ * @returns true if it found something to attack.
  */
 UnitAI.prototype.AttackEntityInZone = function(ents)
 {
@@ -5078,7 +5201,8 @@ UnitAI.prototype.AttackEntityInZone = function(ents)
 /**
  * Try to respond appropriately given our current stance,
  * given a list of entities that match our stance's target criteria.
- * Returns true if it responded.
+ * @param {EntityId[]} ents - An array of the IDs of the spotted entities.
+ * @returns true if it responded.
  */
 UnitAI.prototype.RespondToTargetedEntities = function(ents)
 {
@@ -5106,7 +5230,7 @@ UnitAI.prototype.RespondToTargetedEntities = function(ents)
 };
 
 /**
- * @param {number} ents - An array of the IDs of the spotted entities.
+ * @param {EntityId[]} ents - An array of the IDs of the spotted entities.
  * @return {boolean} - Whether we responded.
  */
 UnitAI.prototype.RespondToSightedEntities = function(ents)
@@ -5125,7 +5249,8 @@ UnitAI.prototype.RespondToSightedEntities = function(ents)
 
 /**
  * Try to respond to healable entities.
- * Returns true if it responded.
+ * @param {EntityId[]} ents
+ * @returns true if it responded.
  */
 UnitAI.prototype.RespondToHealableEntities = function(ents)
 {
@@ -5138,7 +5263,11 @@ UnitAI.prototype.RespondToHealableEntities = function(ents)
 };
 
 /**
- * Returns true if we should stop following the target entity.
+ * @param {EntityId} target
+ * @param {boolean} force
+ * @param {IIDsWithRange} iid
+ * @param {string=} type
+ * @returns true if we should stop following the target entity.
  */
 UnitAI.prototype.ShouldAbandonChase = function(target, force, iid, type)
 {
@@ -5171,8 +5300,10 @@ UnitAI.prototype.ShouldAbandonChase = function(target, force, iid, type)
 	return false;
 };
 
-/*
- * Returns whether we should chase the targeted entity,
+/**
+ * @param {EntityId} target
+ * @param {boolean} force
+ * @returns whether we should chase the targeted entity,
  * given our current stance.
  */
 UnitAI.prototype.ShouldChaseTargetedEntity = function(target, force)
@@ -5215,6 +5346,7 @@ UnitAI.prototype.LeaveFormation = function(queued = true)
 		this.PushOrderFront("LeaveFormation", { "force": true });
 };
 
+/** @param {EntityId} ent */
 UnitAI.prototype.SetFormationController = function(ent)
 {
 	this.formationController = ent;
@@ -5347,6 +5479,9 @@ UnitAI.prototype.AddOrder = function(type, data, queued, pushFront)
 
 /**
  * Adds guard/escort order to the queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
+ * @param {boolean} pushFront
  */
 UnitAI.prototype.Guard = function(target, queued, pushFront)
 {
@@ -5370,6 +5505,7 @@ UnitAI.prototype.Guard = function(target, queued, pushFront)
 };
 
 /**
+ * @param {EntityId} target
  * @return {boolean} - Whether it makes sense to guard the given entity.
  */
 UnitAI.prototype.ShouldGuard = function(target)
@@ -5379,6 +5515,7 @@ UnitAI.prototype.ShouldGuard = function(target)
 		Engine.QueryInterface(target, IID_StatusEffectsReceiver);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.AddGuard = function(target)
 {
 	if (!this.CanGuard())
@@ -5422,6 +5559,7 @@ UnitAI.prototype.IsGuardOf = function()
 	return this.isGuardOf;
 };
 
+/** @param {EntityId} entity */
 UnitAI.prototype.SetGuardOf = function(entity)
 {
 	// entity may be undefined
@@ -5447,6 +5585,9 @@ UnitAI.prototype.CanPatrol = function()
 
 /**
  * Adds walk order to queue, forced by the player.
+ * @param {number} x
+ * @param {number} z
+ * @param {boolean} queued
  */
 UnitAI.prototype.Walk = function(x, z, queued, pushFront)
 {
@@ -5458,6 +5599,11 @@ UnitAI.prototype.Walk = function(x, z, queued, pushFront)
 
 /**
  * Adds walk to point range order to queue, forced by the player.
+ * @param {number} x
+ * @param {number} z
+ * @param {number} min
+ * @param {number} max
+ * @param {boolean} queued
  */
 UnitAI.prototype.WalkToPointRange = function(x, z, min, max, queued, pushFront)
 {
@@ -5466,6 +5612,7 @@ UnitAI.prototype.WalkToPointRange = function(x, z, min, max, queued, pushFront)
 
 /**
  * Adds stop order to queue, forced by the player.
+ * @param {boolean} queued
  */
 UnitAI.prototype.Stop = function(queued, pushFront)
 {
@@ -5475,6 +5622,7 @@ UnitAI.prototype.Stop = function(queued, pushFront)
 /**
  * The unit will drop all resources at the closest dropsite. If this unit is no gatherer or
  * no dropsite is available, it will do nothing.
+ * @param {boolean} queued
  */
 UnitAI.prototype.DropAtNearestDropSite = function(queued, pushFront)
 {
@@ -5484,6 +5632,7 @@ UnitAI.prototype.DropAtNearestDropSite = function(queued, pushFront)
 /**
  * Adds walk-to-target order to queue, this only occurs in response
  * to a player order, and so is forced.
+ * @param {EntityId} target
  */
 UnitAI.prototype.WalkToTarget = function(target, queued, pushFront)
 {
@@ -5494,6 +5643,9 @@ UnitAI.prototype.WalkToTarget = function(target, queued, pushFront)
  * Adds walk-and-fight order to queue, this only occurs in response
  * to a player order, and so is forced.
  * If targetClasses is given, only entities matching the targetClasses can be attacked.
+ * @param {number} x
+ * @param {number} z
+ * @param {string[]} targetClasses
  */
 UnitAI.prototype.WalkAndFight = function(x, z, targetClasses, allowCapture = this.DEFAULT_CAPTURE, queued = false, pushFront = false)
 {
@@ -5513,6 +5665,7 @@ UnitAI.prototype.Patrol = function(x, z, targetClasses, allowCapture = this.DEFA
 
 /**
  * Adds leave foundation order to queue, treated as forced.
+ * @param {EntityId} target
  */
 UnitAI.prototype.LeaveFoundation = function(target)
 {
@@ -5537,6 +5690,7 @@ UnitAI.prototype.LeaveFoundation = function(target)
 
 /**
  * Adds attack order to the queue, forced by the player.
+ * @param {EntityId} target
  */
 UnitAI.prototype.Attack = function(target, allowCapture = this.DEFAULT_CAPTURE, queued = false, pushFront = false)
 {
@@ -5551,6 +5705,7 @@ UnitAI.prototype.Attack = function(target, allowCapture = this.DEFAULT_CAPTURE, 
 		return;
 	}
 
+	/** @type {UnitAIOrder["data"]} */
 	let order = {
 		"target": target,
 		"force": true,
@@ -5576,6 +5731,8 @@ UnitAI.prototype.Attack = function(target, allowCapture = this.DEFAULT_CAPTURE, 
 
 /**
  * Adds garrison order to the queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.Garrison = function(target, queued, pushFront)
 {
@@ -5604,6 +5761,8 @@ UnitAI.prototype.Ungarrison = function()
 
 /**
  * Adds garrison order to the queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.OccupyTurret = function(target, queued, pushFront)
 {
@@ -5620,6 +5779,8 @@ UnitAI.prototype.OccupyTurret = function(target, queued, pushFront)
 /**
  * Adds gather order to the queue, forced by the player
  * until the target is reached
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.Gather = function(target, queued, pushFront)
 {
@@ -5628,6 +5789,9 @@ UnitAI.prototype.Gather = function(target, queued, pushFront)
 
 /**
  * Internal function to abstract the force parameter.
+ * @param {EntityId} target
+ * @param {boolean} queued
+ * @param {boolean} force
  */
 UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = false)
 {
@@ -5654,6 +5818,7 @@ UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = fal
 	if (template.indexOf("resource|") != -1)
 		template = template.slice(9);
 
+	/** @type {UnitAIOrder["data"]} */
 	let order = {
 		"target": target,
 		"type": type,
@@ -5687,6 +5852,10 @@ UnitAI.prototype.PerformGather = function(target, queued, force, pushFront = fal
 /**
  * Adds gather-near-position order to the queue, not forced, so it can be
  * interrupted by attacks.
+ * @param {number} x
+ * @param {number} z
+ * @param {string} type
+ * @param {string} template
  */
 UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pushFront)
 {
@@ -5701,6 +5870,8 @@ UnitAI.prototype.GatherNearPosition = function(x, z, type, template, queued, pus
 
 /**
  * Adds heal order to the queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.Heal = function(target, queued, pushFront)
 {
@@ -5724,6 +5895,8 @@ UnitAI.prototype.Heal = function(target, queued, pushFront)
 
 /**
  * Adds return resource order to the queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.ReturnResource = function(target, queued, pushFront)
 {
@@ -5738,6 +5911,8 @@ UnitAI.prototype.ReturnResource = function(target, queued, pushFront)
 
 /**
  * Adds order to collect a treasure to queue, forced by the player.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.CollectTreasure = function(target, queued, pushFront)
 {
@@ -5749,6 +5924,9 @@ UnitAI.prototype.CollectTreasure = function(target, queued, pushFront)
 
 /**
  * Adds order to collect a treasure to queue, forced by the player.
+ * @param {number} posX
+ * @param {number} posZ
+ * @param {boolean} queued
  */
 UnitAI.prototype.CollectTreasureNearPosition = function(posX, posZ, queued, pushFront)
 {
@@ -5759,6 +5937,7 @@ UnitAI.prototype.CollectTreasureNearPosition = function(posX, posZ, queued, push
 	}, queued, pushFront);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CancelSetupTradeRoute = function(target)
 {
 	let cmpTrader = Engine.QueryInterface(this.entity, IID_Trader);
@@ -5775,6 +5954,10 @@ UnitAI.prototype.CancelSetupTradeRoute = function(target)
  * start a new route. Not forced, so it can be interrupted by attacks.
  * The possible route may be given directly as a SetupTradeRoute argument
  * if coming from a RallyPoint, or through this.expectedRoute if a user command.
+ * @param {EntityId} target
+ * @param {EntityId} source
+ * @param {number[][]} route
+ * @param {boolean} queued
  */
 UnitAI.prototype.SetupTradeRoute = function(target, source, route, queued, pushFront)
 {
@@ -5806,6 +5989,7 @@ UnitAI.prototype.SetupTradeRoute = function(target, source, route, queued, pushF
 	var cmpTrader = Engine.QueryInterface(this.entity, IID_Trader);
 	if (cmpTrader.HasBothMarkets())
 	{
+		/** @type {UnitAIOrder["data"]} */
 		let data = {
 			"target": cmpTrader.GetFirstMarket(),
 			"route": route,
@@ -5839,6 +6023,10 @@ UnitAI.prototype.SetupTradeRoute = function(target, source, route, queued, pushF
 	}
 };
 
+/**
+ * @param {EntityId} target
+ * @param {EntityId} source
+ */
 UnitAI.prototype.SetTargetMarket = function(target, source)
 {
 	var cmpTrader = Engine.QueryInterface(this.entity, IID_Trader);
@@ -5852,12 +6040,17 @@ UnitAI.prototype.SetTargetMarket = function(target, source)
 	return marketsChanged;
 };
 
+/**
+ * @param {EntityId} oldMarket
+ * @param {EntityId} newMarket
+ */
 UnitAI.prototype.SwitchMarketOrder = function(oldMarket, newMarket)
 {
 	if (this.order && this.order.data && this.order.data.target && this.order.data.target == oldMarket)
 		this.order.data.target = newMarket;
 };
 
+/** @param {EntityId} targetMarket */
 UnitAI.prototype.MoveToMarket = function(targetMarket)
 {
 	let nextTarget;
@@ -5869,6 +6062,7 @@ UnitAI.prototype.MoveToMarket = function(targetMarket)
 	return this.MoveTo(this.order.data.nextTarget, IID_Trader);
 };
 
+/** @param {EntityId} market */
 UnitAI.prototype.MarketRemoved = function(market)
 {
 	if (this.order && this.order.data && this.order.data.target && this.order.data.target == market)
@@ -5878,6 +6072,9 @@ UnitAI.prototype.MarketRemoved = function(market)
 /**
  * Adds repair/build order to the queue, forced by the player
  * until the target is reached
+ * @param {EntityId} target
+ * @param {boolean} autocontinue
+ * @param {boolean} queued
  */
 UnitAI.prototype.Repair = function(target, autocontinue, queued, pushFront)
 {
@@ -5903,6 +6100,8 @@ UnitAI.prototype.Repair = function(target, autocontinue, queued, pushFront)
 /**
  * Adds flee order to the queue, not forced, so it can be
  * interrupted by attacks.
+ * @param {EntityId} target
+ * @param {boolean} queued
  */
 UnitAI.prototype.Flee = function(target, queued, pushFront)
 {
@@ -5940,6 +6139,7 @@ UnitAI.prototype.CancelUnpack = function(queued, pushFront)
 		this.AddOrder("CancelUnpack", { "force": true }, queued, pushFront);
 };
 
+/** @param {keyof g_Stances} stance */
 UnitAI.prototype.SetStance = function(stance)
 {
 	if (g_Stances[stance])
@@ -5951,6 +6151,7 @@ UnitAI.prototype.SetStance = function(stance)
 		error("UnitAI: Setting to invalid stance '"+stance+"'");
 };
 
+/** @param {keyof g_Stances} stance */
 UnitAI.prototype.SwitchToStance = function(stance)
 {
 	var cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
@@ -6039,6 +6240,7 @@ UnitAI.prototype.FindWalkAndFightTargets = function()
 
 	let cmpAttack = Engine.QueryInterface(this.entity, IID_Attack);
 
+	/** @type {EntityId[]} */
 	let entities;
 	if (!this.losAttackRangeQuery || !this.GetStance().targetVisibleEnemies || !cmpAttack)
 		entities = [];
@@ -6048,6 +6250,7 @@ UnitAI.prototype.FindWalkAndFightTargets = function()
 		entities = cmpRangeManager.ResetActiveQuery(this.losAttackRangeQuery);
 	}
 
+	/** @param {EntityId} e */
 	let attackfilter = e => {
 		if (this?.order?.data?.targetClasses)
 		{
@@ -6070,6 +6273,7 @@ UnitAI.prototype.FindWalkAndFightTargets = function()
 		return cmpUnitAI && (!cmpUnitAI.IsAnimal() || cmpUnitAI.IsDangerousAnimal());
 	};
 
+	/** @param {EntityId} target */
 	const attack = target => {
 		const order = {
 			"target": target,
@@ -6082,6 +6286,7 @@ UnitAI.prototype.FindWalkAndFightTargets = function()
 			this.PushOrderFront("Attack", order);
 	};
 
+	/** @type {Record<EntityId, number | undefined>} */
 	let prefs = {};
 	let bestPref;
 	let targets = [];
@@ -6118,6 +6323,7 @@ UnitAI.prototype.FindWalkAndFightTargets = function()
 	return false;
 };
 
+/** @param {IIDsWithRange | IID_Vision} iid */
 UnitAI.prototype.GetQueryRange = function(iid)
 {
 	let ret = { "min": 0, "max": 0 };
@@ -6208,10 +6414,10 @@ UnitAI.prototype.TryMatchTargetSpeed = function(target, mayRun = true)
 	}
 };
 
-/*
+/**
  * Remember the position of the target (in lastPos), if any, in case it disappears later
  * and we want to head to its last known position.
- * @param orderData - The order data to set this on. Defaults to this.order.data
+ * @param {Record<string, any>=} orderData - The order data to set this on. Defaults to this.order.data
  */
 UnitAI.prototype.RememberTargetPosition = function(orderData)
 {
@@ -6222,11 +6428,16 @@ UnitAI.prototype.RememberTargetPosition = function(orderData)
 		orderData.lastPos = cmpPosition.GetPosition();
 };
 
+/**
+ * @param {number} x
+ * @param {number} z
+ */
 UnitAI.prototype.SetHeldPosition = function(x, z)
 {
 	this.heldPosition = { "x": x, "z": z };
 };
 
+/** @param {EntityId} entity */
 UnitAI.prototype.SetHeldPositionOnEntity = function(entity)
 {
 	var cmpPosition = Engine.QueryInterface(this.entity, IID_Position);
@@ -6254,14 +6465,25 @@ UnitAI.prototype.WalkToHeldPosition = function()
 // Helper functions
 
 /**
+ * @template T
+ * @typedef {{ [K in keyof Omit<IIDs, IID_UnitAI> as IIDs[K] extends T ? K : never]: any } } IIDsWith
+ */
+
+/**
+ * @typedef {keyof IIDsWith<{GetRange: (...args: any) => { min: number, max: number } | undefined}>} IIDsWithRange
+ */
+/**
+ * @template {IIDsWithRange} K
+ * @typedef {Parameters<IIDs[K]["GetRange"]>} GetRangeArgs
+ */
+/**
  * General getter for ranges.
  *
- * @param {number} iid
- * @param {number} target - [Optional]
- * @param {string} type - [Optional]
- * @return {Object | undefined} - The range in the form
- *	{ "min": number, "max": number }
- *	Returns undefined when the entity does not have the requested component.
+ * @template {IIDsWithRange} T
+ * @param {T} iid
+ * @param {GetRangeArgs<T>[0]=} type - [Optional]
+ * @param {GetRangeArgs<T>[1]=} target - [Optional]
+ * @return {{ min: number, max: number} | undefined} - undefined when the entity does not have the requested component.
  */
 UnitAI.prototype.GetRange = function(iid, type, target)
 {
@@ -6272,6 +6494,7 @@ UnitAI.prototype.GetRange = function(iid, type, target)
 	return component.GetRange(type, target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanAttack = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6283,6 +6506,7 @@ UnitAI.prototype.CanAttack = function(target)
 	return cmpAttack && cmpAttack.CanAttack(target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanGarrison = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6294,6 +6518,7 @@ UnitAI.prototype.CanGarrison = function(target)
 	return cmpGarrisonable && cmpGarrisonable.CanGarrison(target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanGather = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6305,6 +6530,7 @@ UnitAI.prototype.CanGather = function(target)
 	return cmpResourceGatherer && cmpResourceGatherer.CanGather(target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanHeal = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6317,9 +6543,9 @@ UnitAI.prototype.CanHeal = function(target)
 };
 
 /**
- * Check if the entity can return carried resources at @param target
- * @param checkCarriedResource check we are carrying resources
- * @param cmpResourceGatherer if present, use this directly instead of re-querying.
+ * Check if the entity can return carried resources at @param {EntityId} target
+ * @param {boolean} checkCarriedResource check we are carrying resources
+ * @param {ResourceGatherer=} cmpResourceGatherer if present, use this directly instead of re-querying.
  */
 UnitAI.prototype.CanReturnResource = function(target, checkCarriedResource, cmpResourceGatherer = undefined)
 {
@@ -6334,6 +6560,7 @@ UnitAI.prototype.CanReturnResource = function(target, checkCarriedResource, cmpR
 	return cmpResourceGatherer && cmpResourceGatherer.CanReturnResource(target, checkCarriedResource);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanTrade = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6345,6 +6572,7 @@ UnitAI.prototype.CanTrade = function(target)
 	return cmpTrader && cmpTrader.CanTrade(target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanRepair = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6356,6 +6584,7 @@ UnitAI.prototype.CanRepair = function(target)
 	return cmpBuilder && cmpBuilder.CanRepair(target);
 };
 
+/** @param {EntityId} target */
 UnitAI.prototype.CanOccupyTurret = function(target)
 {
 	// Formation controllers should always respond to commands
@@ -6394,6 +6623,7 @@ UnitAI.prototype.IsAttackingAsFormation = function()
 		this.GetCurrentState() == "FORMATIONCONTROLLER.COMBAT.ATTACKING";
 };
 
+/** @param {number} distance */
 UnitAI.prototype.MoveRandomly = function(distance)
 {
 	// To minimize drift all across the map, describe circles
@@ -6432,6 +6662,7 @@ UnitAI.prototype.MoveRandomly = function(distance)
 	cmpUnitMotion.MoveToPointRange(pos.x - 0.5 * Math.sin(ang), pos.z - 0.5 * Math.cos(ang), dist, -1);
 };
 
+/** @param {boolean} val */
 UnitAI.prototype.SetFacePointAfterMove = function(val)
 {
 	var cmpMotion = Engine.QueryInterface(this.entity, IID_UnitMotion);
@@ -6445,6 +6676,7 @@ UnitAI.prototype.GetFacePointAfterMove = function()
 	return cmpUnitMotion && cmpUnitMotion.GetFacePointAfterMove();
 };
 
+/** @param {EntityId[]} ents */
 UnitAI.prototype.AttackEntitiesByPreference = function(ents)
 {
 	if (!ents.length)
@@ -6454,6 +6686,7 @@ UnitAI.prototype.AttackEntitiesByPreference = function(ents)
 	if (!cmpAttack)
 		return false;
 
+	/** @param {EntityId} e */
 	let attackfilter = function(e) {
 		if (!cmpAttack.CanAttack(e))
 			return false;
@@ -6466,6 +6699,7 @@ UnitAI.prototype.AttackEntitiesByPreference = function(ents)
 		return cmpUnitAI && (!cmpUnitAI.IsAnimal() || cmpUnitAI.IsDangerousAnimal());
 	};
 
+	/** @type {Record<number, EntityId[]>} */
 	let entsByPreferences = {};
 	let preferences = [];
 	let entsWithoutPref = [];
@@ -6505,7 +6739,15 @@ UnitAI.prototype.AttackEntitiesByPreference = function(ents)
 };
 
 /**
+ * @template T
+ * @typedef {keyof { [K in keyof T]: T[K] extends (...args: any) => any ? K : never }} MemberFunctionsKeys
+ */
+
+/**
  * Call UnitAI.funcname(args) on all formation members.
+ * @template {MemberFunctionsKeys<Omit<UnitAI, "CallMemberFunction">>} T
+ * @param {T} funcname - The function name to call.
+ * @param {Parameters<UnitAI[T]> | never[]} args - The arguments to pass to the function.
  * @param resetFinishedEntities - If true, call ResetFinishedEntities first.
  *     If the controller wants to wait on its members to finish their order,
  *     this needs to be reset before sending new orders (in case they instafail)
@@ -6532,6 +6774,10 @@ UnitAI.prototype.CallMemberFunction = function(funcname, args, resetFinishedEnti
 
 /**
  * Call obj.funcname(args) on UnitAI components owned by player in given range.
+ * @template {MemberFunctionsKeys<Omit<UnitAI, "CallMemberFunction">>} T
+ * @param {T} funcname - The function name to call.
+ * @param {Parameters<UnitAI[T]>} args - The arguments to pass to the function.
+ * @param {number} range - The range in which to search for entities.
  */
 UnitAI.prototype.CallPlayerOwnedEntitiesFunctionInRange = function(funcname, args, range)
 {
@@ -6553,6 +6799,9 @@ UnitAI.prototype.CallPlayerOwnedEntitiesFunctionInRange = function(funcname, arg
 /**
  * Call obj.functname(args) on UnitAI components of all formation members,
  * and return true if all calls return true.
+ * @template {MemberFunctionsKeys<Omit<UnitAI, "CallMemberFunction">>} T
+ * @param {T} funcname - The function name to call.
+ * @param {Parameters<UnitAI[T]> | never[]} args - The arguments to pass to the function.
  */
 UnitAI.prototype.TestAllMemberFunction = function(funcname, args)
 {

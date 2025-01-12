@@ -9,6 +9,10 @@ RallyPoint.prototype.Init = function()
 	this.data = [];
 };
 
+/**
+ * @param {number} x
+ * @param {number} z
+ */
 RallyPoint.prototype.AddPosition = function(x, z)
 {
 	this.pos.push({
@@ -71,8 +75,11 @@ RallyPoint.prototype.GetPositions = function()
 	return ret;
 };
 
-// Extra data for the rally point, should have a command property and then helpful data for that command
-// See getActionInfo in gui/input.js
+/**
+ * Extra data for the rally point, should have a command property and then helpful data for that command
+ * See getActionInfo in gui/input.js
+ * @param {RallyPointData} data
+ */
 RallyPoint.prototype.AddData = function(data)
 {
 	this.data.push(data);
@@ -125,6 +132,7 @@ RallyPoint.prototype.OrderToRallyPoint = function(entity, ignore = [])
 		ProcessCommand(owner, command);
 };
 
+/** @param {MessageEntityRenamed} msg */
 RallyPoint.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	for (let data of this.data)
@@ -153,6 +161,7 @@ RallyPoint.prototype.OnGlobalEntityRenamed = function(msg)
 	}
 };
 
+/** @param {MessageOwnershipChanged} msg */
 RallyPoint.prototype.OnOwnershipChanged = function(msg)
 {
 	// No need to reset when constructing or destructing the entity
@@ -164,6 +173,7 @@ RallyPoint.prototype.OnOwnershipChanged = function(msg)
 
 /**
  * Returns true if the target exists and has non-zero hitpoints.
+ * @param {EntityId} ent
  */
 RallyPoint.prototype.TargetIsAlive = function(ent)
 {

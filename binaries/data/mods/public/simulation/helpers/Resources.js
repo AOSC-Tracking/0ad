@@ -3,10 +3,10 @@
  *
  * To prevent validation errors, disabled resources are included in the schema.
  *
- * @param datatype - The datatype of the element
- * @param additional - Array of additional data elements. Time, xp, etc.
+ * @param {"decimal" | "nonNegativeDecimal" | "positiveDecimal" | string} datatype - The datatype of the element
+ * @param {string[]} additional - Array of additional data elements. Time, xp, etc.
  * @param subtypes - If true, resource subtypes will be included as well.
- * @return RelaxNG schema string
+ * @return {string} RelaxNG schema string
  */
 Resources.prototype.BuildSchema = function(datatype, additional = [], subtypes = false)
 {

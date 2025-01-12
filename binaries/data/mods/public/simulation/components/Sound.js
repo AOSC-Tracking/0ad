@@ -25,11 +25,13 @@ Sound.prototype.Init = function()
 
 Sound.prototype.Serialize = null; // we have no dynamic state to save
 
+/** @param {string} name */
 Sound.prototype.GetSoundGroup = function(name)
 {
 	return this.template.SoundGroups[name] || "";
 };
 
+/** @param {string} name */
 Sound.prototype.PlaySoundGroup = function(name)
 {
 	if (name in this.template.SoundGroups)

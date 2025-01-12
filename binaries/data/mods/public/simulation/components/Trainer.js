@@ -39,7 +39,7 @@ Trainer.prototype.Item = function(templateName, count, trainer, metadata)
 
 /**
  * Prepare for the queue.
- * @param {Object} trainCostMultiplier - The multipliers to use when calculating costs.
+ * @param {Record<string, number>} trainCostMultiplier - The multipliers to use when calculating costs.
  * @param {number} batchTimeMultiplier - The factor to use when training this batches.
  *
  * @return {boolean} - Whether the item was successfully initiated.
@@ -61,7 +61,9 @@ Trainer.prototype.Item.prototype.Queue = function(trainCostMultiplier, batchTime
 		return false;
 	this.player = cmpPlayer.GetPlayerID();
 
+	/** @type {Record<string, number>} */
 	this.resources = {};
+	/** @type {Record<string, number>} */
 	const totalResources = {};
 
 	for (const res in template.Cost.Resources)
@@ -150,6 +152,7 @@ Trainer.prototype.Item.prototype.Stop = function()
 		if (this.started)
 			cmpPlayer.UnReservePopulationSlots(this.population * this.count);
 
+		/** @type {Record<string, number>} */
 		const totalCosts = {};
 		for (const resource in this.resources)
 			totalCosts[resource] = Math.floor(this.count * this.resources[resource]);
@@ -369,7 +372,7 @@ Trainer.prototype.Item.prototype.Unpause = function()
 };
 
 /**
- * @return {Object} - Some basic information of this batch.
+ * @return - Some basic information of this batch.
  */
 Trainer.prototype.Item.prototype.GetBasicInfo = function()
 {
@@ -402,6 +405,7 @@ Trainer.prototype.Item.prototype.SerializableAttributes = [
 
 Trainer.prototype.Item.prototype.Serialize = function(id)
 {
+	/** @type {any} */
 	const result = {
 		"id": id
 	};
@@ -447,6 +451,7 @@ Trainer.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 Trainer.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -500,8 +505,8 @@ Trainer.prototype.CalculateEntitiesMap = function()
 	 * - remove disabled entities
 	 * - upgrade templates where necessary
 	 * This also updates currently queued production (it's more convenient to do it here).
+	 * @param {string} token - The token to process.
 	 */
-
 	const removeAllQueuedTemplate = (token) => {
 		const queue = clone(this.queue);
 		const template = this.entitiesMap.get(token);
@@ -510,7 +515,11 @@ Trainer.prototype.CalculateEntitiesMap = function()
 				this.StopBatch(id);
 	};
 
-	// ToDo: Notice this doesn't account for entity limits changing due to the template change.
+	/**
+	 * ToDo: Notice this doesn't account for entity limits changing due to the template change.
+	 * @param {string} token - The token to update.
+	 * @param {string} updateTo - The new template to use.
+	 */
 	const updateAllQueuedTemplate = (token, updateTo) => {
 		const template = this.entitiesMap.get(token);
 		for (const [id, item] of this.queue)
@@ -573,14 +582,15 @@ Trainer.prototype.CalculateTrainCostMultiplier = function()
 };
 
 /**
- * @return {Object} - The multipliers to change the costs of any training activity with.
+ * @return The multipliers to change the costs of any training activity with.
  */
 Trainer.prototype.TrainCostMultiplier = function()
 {
 	return this.trainCostMultiplier;
 };
 
-/*
+/**
+ * @param {number} batchSize - The size of the batch we want to train.
  * Returns batch build time.
  */
 Trainer.prototype.GetBatchTime = function(batchSize)
@@ -646,7 +656,7 @@ Trainer.prototype.HasBatch = function(id)
 };
 
 /**
- * @parameter {number} id - The id of the training.
+ * @param {number} id - The id of the training.
  * @return {Object} - Some basic information about the training.
  */
 Trainer.prototype.GetBatch = function(id)
@@ -669,12 +679,14 @@ Trainer.prototype.Progress = function(id, allocatedTime)
 	return usedTime;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Trainer.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)
 		this.CalculateEntitiesMap();
 };
 
+/** @param {MessageValueModification} msg */
 Trainer.prototype.OnValueModification = function(msg)
 {
 	// If the promotion requirements of units is changed,
@@ -698,6 +710,7 @@ Trainer.prototype.OnValueModification = function(msg)
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).SetSelectionDirty(cmpPlayer.GetPlayerID());
 };
 
+/** @param {MessageDisabledTemplatesChanged} msg */
 Trainer.prototype.OnDisabledTemplatesChanged = function(msg)
 {
 	this.CalculateEntitiesMap();

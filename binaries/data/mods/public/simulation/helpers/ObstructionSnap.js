@@ -4,6 +4,23 @@
  */
 class ObstructionSnap
 {
+	/**
+	 * @typedef {{
+	 *  begin: Vector2D,
+	 *  end: Vector2D,
+	 *  normal: Vector2D,
+	 *  angle: number,
+	 *  signedDistance: number,
+	 *  offsetDistance: number,
+	 *  order: "cw" | "ccw",
+	 * }} Edge
+	 */
+
+	/**
+	 * @param {Edge[]} allEdges
+	 * @param {Vector2D} position
+	 * @param {number} maxSide
+	 */
 	getValidEdges(allEdges, position, maxSide)
 	{
 		let edges = [];
@@ -37,8 +54,11 @@ class ObstructionSnap
 		return edges;
 	}
 
-	// We need a small padding to avoid unnecessary collisions
-	// because of loss of accuracy.
+	/**
+	 * We need a small padding to avoid unnecessary collisions
+	 * because of loss of accuracy.
+	 * @param {Omit<Edge, "angle">} edge
+	 */
 	getPadding(edge)
 	{
 		const snapPadding = 0.05;
@@ -47,10 +67,14 @@ class ObstructionSnap
 		return edge.order == "ccw" ? 0 : snapPadding;
 	}
 
-	// Pick a base edge, it will be the first axis and fix the angle.
-	// We can't just pick an edge by signed distance, because we might have
-	// a case when one segment is closer by signed distance than another
-	// one but much farther by actual (euclid) distance.
+	/**
+	 * Pick a base edge, it will be the first axis and fix the angle.
+	 * We can't just pick an edge by signed distance, because we might have
+	 * a case when one segment is closer by signed distance than another
+	 * one but much farther by actual (euclid) distance.
+	 * @param {Omit<Edge, "angle">} a
+	 * @param {Omit<Edge, "angle">} b
+	 */
 	compareEdges(a, b)
 	{
 		const behindA = a.signedDistance < -this.EPS;
@@ -68,6 +92,12 @@ class ObstructionSnap
 		return scoreA - scoreB;
 	}
 
+	/**
+	 * @param {number} width
+	 * @param {number} depth
+	 * @param {number} angle
+	 * @param {Vector2D} normal
+	 */
 	getNearestSizeAlongNormal(width, depth, angle, normal)
 	{
 		// Front face direction.
@@ -80,6 +110,10 @@ class ObstructionSnap
 		return [width, depth];
 	}
 
+	/**
+	 * @param {{ snapToEdges: Edge[], angle?: number, x: number, z: number }} data
+	 * @param {Template} template
+	 */
 	getPosition(data, template)
 	{
 		if (!data.snapToEdges || !template.Obstruction || !template.Obstruction.Static)

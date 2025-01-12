@@ -1,5 +1,10 @@
+/**
+ * @template K
+ * @constructor
+ */
 function WeightedList()
 {
+	/** @type {Map<K, number>} */
 	this.elements = new Map();
 	this.totalWeight = 0;
 };
@@ -9,12 +14,14 @@ WeightedList.prototype.length = function()
 	return this.elements.size;
 };
 
+/** @param {K} item */
 WeightedList.prototype.push = function(item, weight = 1)
 {
 	this.elements.set(item, weight);
 	this.totalWeight += weight;
 };
 
+/** @param {K} item */
 WeightedList.prototype.remove = function(item)
 {
 	const weight = this.elements.get(item);

@@ -226,7 +226,7 @@ BuildRestrictions.prototype.CheckPlacement = function()
 		result.translateParameters.push("territoryType");
 		result.translateParameters.push("validTerritories");
 		result.parameters.territoryType = { "context": "Territory type", "_string": invalidTerritory };
-		// gui code will join this array to a string
+		// @ts-expect-error, gui code will join this array to a string
 		result.parameters.validTerritories = { "context": "Territory type list", "list": this.GetTerritories() };
 		return result;	// Fail
 	}
@@ -252,6 +252,7 @@ BuildRestrictions.prototype.CheckPlacement = function()
 		var cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
 		var cat = this.template.Distance.FromClass;
 
+		/** @param {number} id */
 		var filter = function(id)
 		{
 			var cmpIdentity = Engine.QueryInterface(id, IID_Identity);
@@ -318,6 +319,9 @@ BuildRestrictions.prototype.GetTerritories = function()
 	return ApplyValueModificationsToEntity("BuildRestrictions/Territory", this.template.Territory, this.entity).split(/\s+/);
 };
 
+/**
+ * @param {"own" | "ally" | "neutral" | "enemy"} territory
+ */
 BuildRestrictions.prototype.HasTerritory = function(territory)
 {
 	return (this.GetTerritories().indexOf(territory) != -1);

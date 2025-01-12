@@ -17,6 +17,7 @@ Diplomacy.prototype.SerializableAttributes = [
 
 Diplomacy.prototype.Serialize = function()
 {
+	/** @type {any} */
 	const state = {};
 	for (const key of this.SerializableAttributes)
 		if (this.hasOwnProperty(key))
@@ -25,6 +26,7 @@ Diplomacy.prototype.Serialize = function()
 	return state;
 };
 
+/** @param {any} state */
 Diplomacy.prototype.Deserialize = function(state)
 {
 	for (const att of this.SerializableAttributes)
@@ -42,16 +44,13 @@ Diplomacy.prototype.Init = function()
 };
 
 /**
- * @param {Object} color - r, g, b values of the diplomacy colour.
+ * @param {{ r: number, g: number, b: number }} color - r, g, b values of the diplomacy colour.
  */
 Diplomacy.prototype.SetDiplomacyColor = function(color)
 {
 	this.diplomacyColor = { "r": color.r / 255, "g": color.g / 255, "b": color.b / 255, "a": 1 };
 };
 
-/**
- * @return {Object} -
- */
 Diplomacy.prototype.GetColor = function()
 {
 	return this.diplomacyColor;
@@ -172,7 +171,7 @@ Diplomacy.prototype.SetDiplomacyIndex = function(idx, value)
 
 /**
  * Helper function for getting allies etc.
- * @param {string} func - Name of the function to test.
+ * @param {"IsAlly" | "IsMutualAlly" | "IsExclusiveAlly" | "IsExclusiveMutualAlly" | "IsEnemy" | "IsNeutral"} func - The function to call.
  * @return {number[]} - Player IDs matching the function.
  */
 Diplomacy.prototype.GetPlayersByDiplomacy = function(func)
@@ -185,7 +184,7 @@ Diplomacy.prototype.GetPlayersByDiplomacy = function(func)
 };
 
 /**
- * @param {number} - id
+ * @param {number} id
  */
 Diplomacy.prototype.Ally = function(id)
 {
@@ -223,7 +222,6 @@ Diplomacy.prototype.IsExclusiveAlly = function(id)
 /**
  * Check if given player is our ally, and we are its ally.
  * @param {number} id -
- * @return {boolean} -
  */
 Diplomacy.prototype.IsMutualAlly = function(id)
 {
@@ -231,9 +229,6 @@ Diplomacy.prototype.IsMutualAlly = function(id)
 	return playerID !== undefined && this.IsAlly(id) && QueryPlayerIDInterface(id, IID_Diplomacy)?.IsAlly(playerID);
 };
 
-/**
- * @return {number[]} -
- */
 Diplomacy.prototype.GetMutualAllies = function()
 {
 	return this.GetPlayersByDiplomacy("IsMutualAlly");
@@ -241,8 +236,7 @@ Diplomacy.prototype.GetMutualAllies = function()
 
 /**
  * Check if given player is our ally, and we are its ally, excluding ourself.
- * @param {number} id -
- * @return {boolean} -
+ * @param {number} id
  */
 Diplomacy.prototype.IsExclusiveMutualAlly = function(id)
 {
@@ -251,7 +245,7 @@ Diplomacy.prototype.IsExclusiveMutualAlly = function(id)
 };
 
 /**
- * @param {number} id -
+ * @param {number} id
  */
 Diplomacy.prototype.SetEnemy = function(id)
 {
@@ -260,24 +254,20 @@ Diplomacy.prototype.SetEnemy = function(id)
 
 /**
  * Check if given player is our enemy.
- * @param {number} id -
- * @return {boolean} -
+ * @param {number} id
  */
 Diplomacy.prototype.IsEnemy = function(id)
 {
 	return this.diplomacy[id] < 0;
 };
 
-/**
- * @return {number[]} -
- */
 Diplomacy.prototype.GetEnemies = function()
 {
 	return this.GetPlayersByDiplomacy("IsEnemy");
 };
 
 /**
- * @param {number} id -
+ * @param {number} id
  */
 Diplomacy.prototype.SetNeutral = function(id)
 {
@@ -286,25 +276,18 @@ Diplomacy.prototype.SetNeutral = function(id)
 
 /**
  * Check if given player is neutral.
- * @param {number} id -
- * @return {boolean} -
+ * @param {number} id
  */
 Diplomacy.prototype.IsNeutral = function(id)
 {
 	return this.diplomacy[id] === 0;
 };
 
-/**
- * @return {boolean} -
- */
 Diplomacy.prototype.HasSharedDropsites = function()
 {
 	return this.sharedDropsites;
 };
 
-/**
- * @return {boolean} -
- */
 Diplomacy.prototype.HasSharedLos = function()
 {
 	const cmpTechnologyManager = Engine.QueryInterface(this.entity, IID_TechnologyManager);
@@ -321,6 +304,7 @@ Diplomacy.prototype.UpdateSharedLos = function()
 		SetSharedLos(playerID, this.HasSharedLos() ? this.GetMutualAllies() : [playerID]);
 };
 
+/** @param {MessageResearchFinished} msg */
 Diplomacy.prototype.OnResearchFinished = function(msg)
 {
 	if (msg.tech === this.template.SharedLosTech)
@@ -329,6 +313,7 @@ Diplomacy.prototype.OnResearchFinished = function(msg)
 		this.sharedDropsites = true;
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Diplomacy.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.UpdateSharedLos();

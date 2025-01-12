@@ -21,11 +21,13 @@ Market.prototype.Init = function()
 	this.tradeType = new Set(this.template.TradeType.split(/\s+/));
 };
 
+/** @param {EntityId} ent */
 Market.prototype.AddTrader = function(ent)
 {
 	this.traders.add(ent);
 };
 
+/** @param {EntityId} ent */
 Market.prototype.RemoveTrader = function(ent)
 {
 	this.traders.delete(ent);
@@ -36,6 +38,7 @@ Market.prototype.GetInternationalBonus = function()
 	return ApplyValueModificationsToEntity("Market/InternationalBonus", +this.template.InternationalBonus, this.entity);
 };
 
+/** @param {("land" | "naval")} type */
 Market.prototype.HasType = function(type)
 {
 	return this.tradeType.has(type);
@@ -54,8 +57,8 @@ Market.prototype.GetTraders = function()
 /**
  * Check if the traders attached to this market can still trade with it
  * Warning: traders currently trading with a mirage of this market are dealt with in Mirage.js
+ * @param {boolean} onDestruction
  */
-
 Market.prototype.UpdateTraders = function(onDestruction)
 {
 	for (let trader of this.traders)
@@ -74,6 +77,11 @@ Market.prototype.UpdateTraders = function(onDestruction)
 	}
 };
 
+/**
+ * @param {EntityId} secondMarket
+ * @param {{ GainMultiplier: string }} traderTemplate
+ * @param {EntityId} trader
+ */
 Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, trader)
 {
 	let cmpMarket2 = QueryMiragedInterface(secondMarket, IID_Market);
@@ -138,11 +146,13 @@ Market.prototype.CalculateTraderGain = function(secondMarket, traderTemplate, tr
 	return gain;
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Market.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.UpdateTraders(false);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Market.prototype.OnOwnershipChanged = function(msg)
 {
 	this.UpdateTraders(msg.to == INVALID_PLAYER);
@@ -175,9 +185,13 @@ MarketMirage.prototype.Init = function(cmpMarket, entity, parent, player)
 	this.internationalBonus = cmpMarket.GetInternationalBonus();
 };
 
+/** @type {Market["HasType"]} */
 MarketMirage.prototype.HasType = function(type) { return this.marketType.has(type); };
+/** @type {Market["GetInternationalBonus"]} */
 MarketMirage.prototype.GetInternationalBonus = function() { return this.internationalBonus; };
+/** @type {Market["AddTrader"]} */
 MarketMirage.prototype.AddTrader = function(trader) { this.traders.add(trader); };
+/** @type {Market["RemoveTrader"]} */
 MarketMirage.prototype.RemoveTrader = function(trader) { this.traders.delete(trader); };
 
 MarketMirage.prototype.UpdateTraders = function(msg)
@@ -210,6 +224,10 @@ MarketMirage.prototype.CalculateTraderGain = Market.prototype.CalculateTraderGai
 
 Engine.RegisterGlobal("MarketMirage", MarketMirage);
 
+/**
+ * @param {EntityId} mirageID
+ * @param {number} miragePlayer
+ */
 Market.prototype.Mirage = function(mirageID, miragePlayer)
 {
 	let mirage = new MarketMirage();

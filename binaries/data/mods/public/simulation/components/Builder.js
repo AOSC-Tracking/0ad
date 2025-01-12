@@ -84,7 +84,7 @@ Builder.prototype.CanRepair = function(target)
 
 /**
  * @param {number} target - The target to repair.
- * @param {number} callerIID - The IID to notify on specific events.
+ * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
  * @return {boolean} - Whether we started repairing.
  */
 Builder.prototype.StartRepairing = function(target, callerIID)
@@ -113,7 +113,7 @@ Builder.prototype.StartRepairing = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped repairing.
+ * @param {string=} reason - The reason why we stopped repairing.
  */
 Builder.prototype.StopRepairing = function(reason)
 {
@@ -149,7 +149,8 @@ Builder.prototype.StopRepairing = function(reason)
 
 /**
  * Repair our target entity.
- * @params - data and lateness are unused.
+ * @param {any} data - Unused.
+ * @param {number} lateness - Unused.
  */
 Builder.prototype.PerformBuilding = function(data, lateness)
 {
@@ -184,7 +185,7 @@ Builder.prototype.PerformBuilding = function(data, lateness)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {number} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Builder.prototype.IsTargetInRange = function(target)
@@ -194,6 +195,7 @@ Builder.prototype.IsTargetInRange = function(target)
 	return cmpObstructionManager.IsInTargetRange(this.entity, target, range.min, range.max, false);
 };
 
+/** @param {MessageValueModification} msg */
 Builder.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Builder" || !msg.valueNames.some(name => name.endsWith('_string')))

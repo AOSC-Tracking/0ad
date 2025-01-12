@@ -8,6 +8,7 @@ MotionBallScripted.prototype.Init = function() {
 	this.speedZ = 0;
 };
 
+/** @param {MessageUpdate} msg */
 MotionBallScripted.prototype.OnUpdate = function(msg) {
 	var dt = msg.turnLength;
 

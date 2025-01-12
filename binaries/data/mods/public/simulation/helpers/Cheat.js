@@ -1,3 +1,10 @@
+/**
+ * @param {{
+ *  player: number,
+ *  action: string,
+ *  [prop: string]: any
+ * }} input
+ */
 function Cheat(input)
 {
 	if (input.player < 0)

@@ -5,6 +5,7 @@ TechnologyManager.prototype.Schema =
 
 /**
  * This object represents a technology under research.
+ * @constructor
  * @param {string} templateName - The name of the template to research.
  * @param {number} player - The player ID researching.
  * @param {number} researcher - The entity ID researching.
@@ -18,7 +19,7 @@ TechnologyManager.prototype.Technology = function(templateName, player, research
 
 /**
  * Prepare for the queue.
- * @param {Object} techCostMultiplier - The multipliers to use when calculating costs.
+ * @param {Record<string, number>} techCostMultiplier - The multipliers to use when calculating costs.
  * @return {boolean} - Whether the technology was successfully initiated.
  */
 TechnologyManager.prototype.Technology.prototype.Queue = function(techCostMultiplier)
@@ -27,6 +28,7 @@ TechnologyManager.prototype.Technology.prototype.Queue = function(techCostMultip
 	if (!template)
 		return false;
 
+	/** @type {Record<string, number>} */
 	this.resources = {};
 	if (template.cost)
 		for (const res in template.cost)
@@ -203,9 +205,11 @@ TechnologyManager.prototype.Init = function()
 	// Maps from technolgy name to the technology object.
 	this.researchQueued = new Map();
 
+	/** @type {Record<string, number>} */
 	this.classCounts = {}; // stores the number of entities of each Class
+	/** @type {Record<string, Record<string, number>>} */
 	this.typeCountsByClass = {}; // stores the number of entities of each type for each class i.e.
-	                             // {"someClass": {"unit/spearman": 2, "unit/cav": 5} "someOtherClass":...}
+									// {"someClass": {"unit/spearman": 2, "unit/cav": 5} "someOtherClass":...}
 
 	// Some technologies are automatically researched when their conditions are met.  They have no cost and are
 	// researched instantly.  This allows civ bonuses and more complicated technologies.
@@ -225,6 +229,7 @@ TechnologyManager.prototype.SerializableAttributes = [
 
 TechnologyManager.prototype.Serialize = function()
 {
+	/** @type {Record<string, any>} */
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
@@ -237,6 +242,7 @@ TechnologyManager.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 TechnologyManager.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -273,7 +279,10 @@ TechnologyManager.prototype.UpdateAutoResearch = function()
 	}
 };
 
-// Checks an entity template to see if its technology requirements have been met
+/**
+ * Checks an entity template to see if its technology requirements have been met
+ * @param {string} templateName
+ */
 TechnologyManager.prototype.CanProduce = function(templateName)
 {
 	var cmpTempManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
@@ -285,17 +294,22 @@ TechnologyManager.prototype.CanProduce = function(templateName)
 	return true;
 };
 
+/** @param {string} tech */
 TechnologyManager.prototype.IsTechnologyQueued = function(tech)
 {
 	return this.researchQueued.has(tech);
 };
 
+/** @param {string} tech */
 TechnologyManager.prototype.IsTechnologyResearched = function(tech)
 {
 	return this.researchedTechs.has(tech);
 };
 
-// Checks the requirements for a technology to see if it can be researched at the current time
+/**
+ * Checks the requirements for a technology to see if it can be researched at the current time
+ * @param {string} tech
+ */
 TechnologyManager.prototype.CanResearch = function(tech)
 {
 	let template = TechnologyTemplates.Get(tech);
@@ -324,7 +338,7 @@ TechnologyManager.prototype.CanResearch = function(tech)
 
 /**
  * Private function for checking a set of requirements is met
- * @param {Object} reqs - Technology requirements as derived from the technology template by globalscripts
+ * @param {({ techs: string[], entities: TechMgtEntitySpec[] })[]} reqs - Technology requirements as derived from the technology template by globalscripts
  * @param {boolean} civonly - True if only the civ requirement is to be checked
  *
  * @return true if the requirements pass, false otherwise
@@ -354,6 +368,10 @@ TechnologyManager.prototype.CheckTechnologyRequirements = function(reqs, civonly
 	});
 };
 
+/**
+ * @typedef {{check: "count" | "variants", class: string, number: number}} TechMgtEntitySpec
+ * @param {TechMgtEntitySpec} entity
+ */
 TechnologyManager.prototype.DoesEntitySpecPass = function(entity)
 {
 	switch (entity.check)
@@ -371,6 +389,7 @@ TechnologyManager.prototype.DoesEntitySpecPass = function(entity)
 	return true;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 TechnologyManager.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	// This automatically updates classCounts and typeCountsByClass
@@ -453,7 +472,7 @@ TechnologyManager.prototype.ResearchTechnology = function(tech, researcher = INV
  * Marks a technology as being queued for research at the given entityID.
  * @param {string} tech - The technology to queue.
  * @param {number} researcher - The entity ID of the entity researching this technology.
- * @param {Object} techCostMultiplier - The multipliers used when calculating the costs.
+ * @param {Record<string, any>} techCostMultiplier - The multipliers used when calculating the costs.
  *
  * @return {boolean} - Whether we successfully have queued the technology.
  */
@@ -470,7 +489,6 @@ TechnologyManager.prototype.QueuedResearch = function(tech, researcher, techCost
 /**
  * Marks a technology as not being currently researched and optionally sends a GUI notification.
  * @param {string} tech - The name of the technology to stop.
- * @param {boolean} notification - Whether a GUI notification ought to be sent.
  */
 TechnologyManager.prototype.StoppedResearch = function(tech)
 {
@@ -487,7 +505,7 @@ TechnologyManager.prototype.Pause = function(tech)
 };
 
 /**
- * @param {string} tech - The technology to advance.
+ * @param {string} techName - The technology to advance.
  * @param {number} allocatedTime - The time allocated to the technology.
  * @return {number} - The time we've actually used.
  */
@@ -511,6 +529,7 @@ TechnologyManager.prototype.GetBasicInfo = function(tech)
 
 /**
  * Checks whether a technology is set to be researched.
+ * @param {string} tech - The technology to check.
  */
 TechnologyManager.prototype.IsInProgress = function(tech)
 {
@@ -519,6 +538,7 @@ TechnologyManager.prototype.IsInProgress = function(tech)
 
 TechnologyManager.prototype.GetBasicInfoOfStartedTechs = function()
 {
+	/** @type {Record<string, unknown>} */
 	const result = {};
 	for (const [techName, tech] of this.researchQueued)
 		if (tech.started)

@@ -28,6 +28,7 @@ ModifiersManager.prototype.Serialize = function()
 	// The value cache will be affected by property reads from the GUI and other places so we shouldn't serialize it.
 	// Furthermore it is cyclically self-referencing.
 	// We need to store the player for the Player-Entities cache.
+	/** @type {number[]} */
 	let players = [];
 	this.playerEntitiesCached.forEach((_, player) => players.push(player));
 	return {
@@ -36,6 +37,7 @@ ModifiersManager.prototype.Serialize = function()
 	};
 };
 
+/** @param {ReturnType<ModifiersManager["Serialize"]>} data */
 ModifiersManager.prototype.Deserialize = function(data)
 {
 	this.Init();
@@ -47,6 +49,8 @@ ModifiersManager.prototype.Deserialize = function(data)
  * Inform entities that we have changed possibly all values affected by that property.
  * It's not hugely efficient and would be nice to batch.
  * Invalidate caches where relevant.
+ * @param {string} propertyName
+ * @param {EntityId} entity
  */
 ModifiersManager.prototype.ModifiersChanged = function(propertyName, entity)
 {
@@ -63,6 +67,10 @@ ModifiersManager.prototype.ModifiersChanged = function(propertyName, entity)
 		Engine.PostMessage(entity, MT_ValueModification, { "entities": [entity], "component": propertyName.split("/")[0], "valueNames": [propertyName] });
 };
 
+/**
+ * @param {string} propertyName
+ * @param {number} player
+ */
 ModifiersManager.prototype.SendPlayerModifierMessages = function(propertyName, player)
 {
 	// TODO: it would be preferable to be able to batch this (i.e. one message for several properties)
@@ -74,6 +82,11 @@ ModifiersManager.prototype.SendPlayerModifierMessages = function(propertyName, p
 	Engine.BroadcastMessage(MT_ValueModification, { "entities": ents, "component": propertyName.split("/")[0], "valueNames": [propertyName] });
 };
 
+/**
+ * @param {NonNullable<ReturnType<ModifiersManager["cachedValues"]["get"]>>} valueCache
+ * @param {string} propertyName
+ * @param {NonNullable<ReturnType<ModifiersManager["playerEntitiesCached"]["get"]>>} entsMap
+ */
 ModifiersManager.prototype.InvalidatePlayerEntCache = function(valueCache, propertyName, entsMap)
 {
 	entsMap = entsMap.get(propertyName);
@@ -85,6 +98,11 @@ ModifiersManager.prototype.InvalidatePlayerEntCache = function(valueCache, prope
 	}
 };
 
+/**
+ * @param {string} propertyName
+ * @param {EntityId} entity
+ * @param {NonNullable<ReturnType<ModifiersManager["playerEntitiesCached"]["get"]>>=} playerCache
+ */
 ModifiersManager.prototype.InvalidateCache = function(propertyName, entity, playerCache)
 {
 	let valueCache = this.cachedValues.get(propertyName);
@@ -97,6 +115,10 @@ ModifiersManager.prototype.InvalidateCache = function(propertyName, entity, play
 };
 
 /**
+ * @param {string[]} classesList - List of classes of the entity.
+ * @param {string} propertyName - Handle of a technology property (eg Attack/Ranged/Pierce) that was changed.
+ * @param {any} originalValue - template/raw/before-modifiers value.
+ * @param {EntityId} target - ID of the target entity
  * @returns originalValue after modifiers.
  */
 ModifiersManager.prototype.FetchModifiedProperty = function(classesList, propertyName, originalValue, target)
@@ -105,12 +127,17 @@ ModifiersManager.prototype.FetchModifiedProperty = function(classesList, propert
 	if (!modifs.length)
 		return originalValue;
 	// Flatten the list of modifications
+	/** @type {Modification[][]} */
 	let modifications = [];
 	modifs.forEach(item => { modifications.push(item.value); });
 	return GetTechModifiedProperty(modifications.flat(), classesList, originalValue);
 };
 
 /**
+ * @param {string[]} classesList
+ * @param {string} propertyName
+ * @param {unknown} originalValue
+ * @param {EntityId} entity
  * @returns originalValue after modifiers
  */
 ModifiersManager.prototype.Cache = function(classesList, propertyName, originalValue, entity)
@@ -132,11 +159,11 @@ ModifiersManager.prototype.Cache = function(classesList, propertyName, originalV
  * Caching system in front of FetchModifiedProperty(), as calling that every time is quite slow.
  * This recomputes lazily.
  * Applies per-player modifiers before per-entity modifiers, so the latter take priority;
- * @param propertyName - Handle of a technology property (eg Attack/Ranged/Pierce) that was changed.
- * @param originalValue - template/raw/before-modifiers value.
+ * @param {string} propertyName - Handle of a technology property (eg Attack/Ranged/Pierce) that was changed.
+ * @param {unknown} originalValue - template/raw/before-modifiers value.
 		Note that if this is supposed to be a number (i.e. you call add/multiply on it)
 		You must make sure to pass a number and not a string (by using + if necessary)
- * @param ent - ID of the target entity
+ * @param {EntityId} entity - ID of the target entity
  * @returns originalValue after the modifiers
  */
 ModifiersManager.prototype.ApplyModifiers = function(propertyName, originalValue, entity)
@@ -182,6 +209,10 @@ ModifiersManager.prototype.ApplyModifiers = function(propertyName, originalValue
 /**
  * Alternative version of ApplyModifiers, applies to templates instead of entities.
  * Only needs to handle global modifiers.
+ * @param {string} propertyName
+ * @param {unknown} originalValue
+ * @param {Template & { Identity?: unknown }} template
+ * @param {number} player
  */
 ModifiersManager.prototype.ApplyTemplateModifiers = function(propertyName, originalValue, template, player)
 {
@@ -195,6 +226,7 @@ ModifiersManager.prototype.ApplyTemplateModifiers = function(propertyName, origi
 /**
  * For efficiency in InvalidateCache, keep playerEntitiesCached updated.
  */
+/** @param {MessagePlayerEntityChanged} msg */
 ModifiersManager.prototype.OnGlobalPlayerEntityChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER && !this.playerEntitiesCached.has(msg.to))
@@ -211,6 +243,7 @@ ModifiersManager.prototype.OnGlobalPlayerEntityChanged = function(msg)
  * Handle modifiers when an entity changes owner.
  * We do not retain the original modifiers for now.
  */
+/** @param {MessageOwnershipChanged} msg */
 ModifiersManager.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -232,6 +265,7 @@ ModifiersManager.prototype.OnGlobalOwnershipChanged = function(msg)
 
 	// Warn entities that our values have changed.
 	// Local modifiers will be added by the relevant components, so no need to check for them here.
+	/** @type {Record<string, string[]>} */
 	let modifiedComponents = {};
 	let playerModifs = this.modifiersStorage.GetAllItems(owner);
 	for (let propertyName in playerModifs)
@@ -255,27 +289,54 @@ ModifiersManager.prototype.OnGlobalOwnershipChanged = function(msg)
 
 /**
  * The following functions simply proxy MultiKeyMap's interface.
+ * @param {string} propName
+ * @param {string} ModifID
+ * @param {Modification[]} Modif
+ * @param {EntityId} entity
  */
 ModifiersManager.prototype.AddModifier = function(propName, ModifID, Modif, entity, stackable = false) {
 	return this.modifiersStorage.AddItem(propName, ModifID, Modif, entity, stackable);
 };
 
+/**
+ * @param {string} ModifID
+ * @param {Record<string, Modification[]>} Modifs
+ * @param {EntityId} entity
+ */
 ModifiersManager.prototype.AddModifiers = function(ModifID, Modifs, entity, stackable = false) {
 	return this.modifiersStorage.AddItems(ModifID, Modifs, entity, stackable);
 };
 
+/**
+ * @param {string} propName
+ * @param {string} ModifID
+ * @param {EntityId} entity
+ */
 ModifiersManager.prototype.RemoveModifier = function(propName, ModifID, entity, stackable = false) {
 	return this.modifiersStorage.RemoveItem(propName, ModifID, entity, stackable);
 };
 
+/**
+ * @param {string} ModifID
+ * @param {EntityId} entity
+ */
 ModifiersManager.prototype.RemoveAllModifiers = function(ModifID, entity, stackable = false) {
 	return this.modifiersStorage.RemoveAllItems(ModifID, entity, stackable);
 };
 
+/**
+ * @param {string} propName
+ * @param {string} ModifID
+ * @param {EntityId} entity
+ */
 ModifiersManager.prototype.HasModifier = function(propName, ModifID, entity) {
 	return this.modifiersStorage.HasItem(propName, ModifID, entity);
 };
 
+/**
+ * @param {string} ModifID
+ * @param {EntityId} entity
+ */
 ModifiersManager.prototype.HasAnyModifier = function(ModifID, entity) {
 	return this.modifiersStorage.HasAnyItem(ModifID, entity);
 };

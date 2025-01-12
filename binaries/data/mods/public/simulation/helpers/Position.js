@@ -24,7 +24,7 @@ PositionHelper.prototype.DistanceBetweenEntities = function(firstEntity, secondE
  * @param {Vector2D} origin - The point to check around.
  * @param {number}   radius - The radius around the point to check.
  * @param {number[]} players - The players of which we need to check entities.
- * @param {number}   iid - Interface IID that returned entities must implement. Defaults to none.
+ * @param {IID | 0}   iid - Interface IID that returned entities must implement. Defaults to none.
  *
  * @return {number[]} The id's of the entities in range of the given point.
  */
@@ -44,7 +44,7 @@ PositionHelper.prototype.EntitiesNearPoint = function(origin, radius, players, i
  * @param {number} ent - Entity id of the entity we are finding the location for.
  * @param {number} lateness - The time passed since the expected time to fire the function.
  *
- * @return {Vector3D} The interpolated location of the entity.
+ * @return {Vector3D | undefined} The interpolated location of the entity.
  */
 PositionHelper.prototype.InterpolatedLocation = function(ent, lateness)
 {
@@ -110,7 +110,7 @@ PositionHelper.prototype.TestCollision = function(ent, point, lateness)
  * @param {Vector3D} targetPosition - The 3D position of the target.
  * @param {Vector3D} targetVelocity - The 3D velocity vector of the target.
  *
- * @return {number|boolean} - The time to collision or false if the collision will not happen.
+ * @return {number|false} - The time to collision or false if the collision will not happen.
  */
 PositionHelper.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed, targetPosition, targetVelocity)
 {
@@ -137,7 +137,7 @@ PositionHelper.prototype.PredictTimeToTarget = function(firstPosition, selfSpeed
  * @param {number} target - EntityID to find the spawn position for.
  * @param {number} entity - EntityID to find the spawn position for.
  * @param {boolean} forced - Optionally whether the spawning is forced.
- * @return {Vector3D} - An appropriate spawning position.
+ * @return {Vector3D | null} - An appropriate spawning position.
  */
 PositionHelper.prototype.GetSpawnPosition = function(target, entity, forced)
 {

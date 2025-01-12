@@ -22,6 +22,9 @@ AlertRaiser.prototype.GetTargetClasses = function()
 	return this.template.List._string;
 };
 
+/**
+ * @param {EntityId} unit
+ */
 AlertRaiser.prototype.UnitFilter = function(unit)
 {
 	let cmpIdentity = Engine.QueryInterface(unit, IID_Identity);

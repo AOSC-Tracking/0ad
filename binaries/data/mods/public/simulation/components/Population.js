@@ -27,6 +27,7 @@ Population.prototype.RecalculateValues = function()
 	this.bonus = Math.round(ApplyValueModificationsToEntity("Population/Bonus", +this.template.Bonus, this.entity));
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Population.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.from != INVALID_PLAYER)
@@ -44,6 +45,7 @@ Population.prototype.OnOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageValueModification} msg */
 Population.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Population")

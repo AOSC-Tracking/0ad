@@ -78,6 +78,7 @@ PlayerManager.prototype.ReplacePlayerTemplate = function(id, newTemplateName)
 /**
  * Returns the player entity ID for the given player ID.
  * The player ID must be valid (else there will be an error message).
+ * @param {number} id - The player number.
  */
 PlayerManager.prototype.GetPlayerByID = function(id)
 {
@@ -152,6 +153,7 @@ PlayerManager.prototype.RemoveLastPlayer = function()
 	Engine.DestroyEntity(lastId);
 };
 
+/** @param {number} max */
 PlayerManager.prototype.SetMaxWorldPopulation = function(max)
 {
 	this.maxWorldPopulation = max;
@@ -178,6 +180,7 @@ PlayerManager.prototype.RedistributeWorldPopulation = function()
 		Engine.QueryInterface(this.GetPlayerByID(playerID), IID_Player).SetMaxPopulation(newMaxPopulation);
 };
 
+/** @param {MessagePlayerDefeated} msg */
 PlayerManager.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.RedistributeWorldPopulation();

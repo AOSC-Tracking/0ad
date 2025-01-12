@@ -60,6 +60,9 @@ Fogging.prototype.IsActivated = function()
 	return this.activated;
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.LoadMirage = function(player)
 {
 	if (!this.activated)
@@ -134,6 +137,7 @@ Fogging.prototype.LoadMirage = function(player)
 /**
  * Should only be called for entities that are currently explored, but not visible or
  * things will 'bug out' (double entities and such).
+ * @param {number} player
  */
 Fogging.prototype.ForceMiraging = function(player)
 {
@@ -145,6 +149,9 @@ Fogging.prototype.ForceMiraging = function(player)
 	this.LoadMirage(player);
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.IsMiraged = function(player)
 {
 	if (player < 0 || player >= this.mirages.length)
@@ -153,6 +160,9 @@ Fogging.prototype.IsMiraged = function(player)
 	return this.miraged[player];
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.GetMirage = function(player)
 {
 	if (player < 0 || player >= this.mirages.length)
@@ -161,6 +171,9 @@ Fogging.prototype.GetMirage = function(player)
 	return this.mirages[player];
 };
 
+/**
+ * @param {number} player
+ */
 Fogging.prototype.WasSeen = function(player)
 {
 	if (player < 0 || player >= this.seen.length)
@@ -169,6 +182,7 @@ Fogging.prototype.WasSeen = function(player)
 	return this.seen[player];
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Fogging.prototype.OnOwnershipChanged = function(msg)
 {
 	// Always activate fogging for non-Gaia entities.
@@ -198,6 +212,7 @@ Fogging.prototype.OnOwnershipChanged = function(msg)
 	}
 };
 
+/** @param {MessageVisibilityChanged} msg */
 Fogging.prototype.OnVisibilityChanged = function(msg)
 {
 	if (msg.player < 0 || msg.player >= this.mirages.length)

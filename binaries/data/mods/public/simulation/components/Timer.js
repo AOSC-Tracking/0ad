@@ -31,11 +31,12 @@ Timer.prototype.GetLatestTurnLength = function()
  * Create a new timer, which will call the 'funcname' method with arguments (data, lateness)
  * on the 'iid' component of the 'ent' entity, after at least 'time' milliseconds.
  * 'lateness' is how late the timer is executed after the specified time (in milliseconds).
+ * @template {IID} T
  * @param {number} ent - The entity id to which the timer will be assigned to.
- * @param {number} iid - The component iid of the timer.
+ * @param {T} iid - The component iid of the timer.
  * @param {string} funcname - The name of the function to be called in the component.
  * @param {number} time - The delay before running the function for the first time.
- * @param {any} data - The data to pass to the function.
+ * @param {unknown=} data - The data to pass to the function.
  * @returns {number} - A non-zero id that can be passed to CancelTimer.
  */
 Timer.prototype.SetTimeout = function(ent, iid, funcname, time, data)
@@ -48,12 +49,13 @@ Timer.prototype.SetTimeout = function(ent, iid, funcname, time, data)
  * on the 'iid' component of the 'ent' entity, after at least 'time' milliseconds.
  * 'lateness' is how late the timer is executed after the specified time (in milliseconds)
  * and then every 'repeattime' milliseconds thereafter.
+ * @template {IID} T
  * @param {number} ent - The entity the timer will be assigned to.
- * @param {number} iid - The component iid of the timer.
+ * @param {T} iid - The component iid of the timer.
  * @param {string} funcname - The name of the function to be called in the component.
  * @param {number} time - The delay before running the function for the first time.
  * @param {number} repeattime - If non-zero, the interval between each execution of the function.
- * @param {any} data - The data to pass to the function.
+ * @param {unknown} data - The data to pass to the function.
  * @returns {number} - A non-zero id that can be passed to CancelTimer.
  */
 Timer.prototype.SetInterval = function(ent, iid, funcname, time, repeattime, data)
@@ -103,7 +105,7 @@ Timer.prototype.CancelTimer = function(id)
 };
 
 /**
- * @param {{ "turnLength": number }} msg - A message containing the turn length in seconds.
+ * @param {MessageUpdate} msg - A message containing the turn length in seconds.
  */
 Timer.prototype.OnUpdate = function(msg)
 {
@@ -113,6 +115,7 @@ Timer.prototype.OnUpdate = function(msg)
 	// Collect the timers that need to run
 	// (We do this in two stages to avoid deleting from the timer list while
 	// we're in the middle of iterating through it)
+	/** @type {number[]} */
 	let run = [];
 	this.timers.forEach((timer, id) => {
 		if (timer.time <= this.time)

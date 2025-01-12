@@ -30,6 +30,7 @@ Foundation.prototype.Serialize = function()
 	return ret;
 };
 
+/** @param {ReturnType<Foundation["Serialize"]>} data */
 Foundation.prototype.Deserialize = function(data)
 {
 	this.Init();
@@ -41,6 +42,7 @@ Foundation.prototype.OnDeserialized = function()
 	this.CreateConstructionPreview();
 };
 
+/** @param {string} template */
 Foundation.prototype.InitialiseConstruction = function(template)
 {
 	this.finalTemplateName = template;
@@ -62,6 +64,7 @@ Foundation.prototype.InitialiseConstruction = function(template)
  * Moving the revelation logic from Build to here makes the building sink if
  * it is attacked.
  */
+/** @param {MessageHealthChanged} msg */
 Foundation.prototype.OnHealthChanged = function(msg)
 {
 	let cmpPosition = Engine.QueryInterface(this.previewEntity, IID_Position);
@@ -106,6 +109,7 @@ Foundation.prototype.IsFinished = function()
 	return (this.GetBuildProgress() == 1.0);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Foundation.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER && this.previewEntity != INVALID_ENTITY)
@@ -219,6 +223,7 @@ Foundation.prototype.HandleBuildersChanged = function()
 /**
  * The build multiplier is a penalty that is applied to each builder.
  * For example, ten women build at a combined rate of 10^0.7 = 5.01 instead of 10.
+ * @param {number} num - The number of builders.
  */
 Foundation.prototype.CalculateBuildMultiplier = function(num)
 {
@@ -301,7 +306,9 @@ Foundation.prototype.Commit = function()
 
 /**
  * Perform some number of seconds of construction work.
- * Returns true if the construction is completed.
+ * @returns true if the construction is completed.
+ * @param {number} builderEnt - The entity doing the work.
+ * @param {number} work - The amount of work to do.
  */
 Foundation.prototype.Build = function(builderEnt, work)
 {
@@ -412,6 +419,7 @@ Foundation.prototype.CreateConstructionPreview = function()
 	}
 };
 
+/** @param {MessageEntityRenamed} msg */
 Foundation.prototype.OnEntityRenamed = function(msg)
 {
 	let cmpFoundationNew = Engine.QueryInterface(msg.newentity, IID_Foundation);
@@ -426,7 +434,9 @@ FoundationMirage.prototype.Init = function(cmpFoundation)
 	this.buildTime = cmpFoundation.GetBuildTime();
 };
 
+/** @type Foundation["GetNumBuilders"] */
 FoundationMirage.prototype.GetNumBuilders = function() { return this.numBuilders; };
+/** @type Foundation["GetBuildTime"] */
 FoundationMirage.prototype.GetBuildTime = function() { return this.buildTime; };
 
 Engine.RegisterGlobal("FoundationMirage", FoundationMirage);

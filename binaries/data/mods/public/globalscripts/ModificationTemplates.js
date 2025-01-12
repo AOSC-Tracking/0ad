@@ -1,7 +1,18 @@
 /**
+ * @typedef {Template} TechTemplate
+ */
+/**
+ * @typedef {Template} AuraTemplate
+ */
+
+/** @typedef {{ add?: number, multiply?: number, replace?: unknown, tokens?: string, affects?: (string | string[])[] }} Modification */
+
+/**
  * @file This provides a cache for Aura and Technology templates.
  * They may not be serialized, otherwise rejoined clients would refer
  * to different objects, triggering an Out-of-sync error.
+ * @template {TechTemplate | AuraTemplate} Template
+ * @param {string} path
  */
 function ModificationTemplates(path)
 {
@@ -9,6 +20,7 @@ function ModificationTemplates(path)
 
 	this.names = deepfreeze(listFiles(path, suffix, true));
 
+	/** @type {Record<string, Template>} */
 	this.templates = {};
 
 	for (let name of this.names)
@@ -22,11 +34,14 @@ ModificationTemplates.prototype.GetNames = function()
 	return this.names;
 };
 
+
+/** @param {string} name */
 ModificationTemplates.prototype.Has = function(name)
 {
 	return this.names.indexOf(name) != -1;
 };
 
+/** @param {string} name */
 ModificationTemplates.prototype.Get = function(name)
 {
 	return this.templates[name];
@@ -47,14 +62,15 @@ function LoadModificationTemplates()
 /**
  * Derives modifications (to be applied to entities) from a given aura/technology.
  *
- * @param {Object} techTemplate - The aura/technology template to derive the modifications from.
- * @return {Object} - An object containing the relevant modifications.
+ * @param {(AuraTemplate | TechTemplate)} techTemplate - The aura/technology template to derive the modifications from.
+ * @return An object containing the relevant modifications.
  */
 function DeriveModificationsFromTech(techTemplate)
 {
 	if (!techTemplate.modifications)
 		return {};
 
+	/** @type {Record<string, { affects: string[], [key: string]: any }[]>} */
 	let techMods = {};
 	let techAffects = [];
 	if (techTemplate.affects && techTemplate.affects.length)
@@ -72,6 +88,7 @@ function DeriveModificationsFromTech(techTemplate)
 				affects[a] = affects[a].concat(specAffects);
 		}
 
+		/** @type {{ affects: string[], [key: string]: any }} */
 		let newModifier = { "affects": affects };
 		for (let idx in mod)
 			if (idx !== "value" && idx !== "affects")
@@ -88,14 +105,15 @@ function DeriveModificationsFromTech(techTemplate)
  * Derives modifications (to be applied to entities) from a provided array
  * of aura/technology template data.
  *
- * @param {Object[]} techsDataArray
- * @return {Object} - The combined relevant modifications of all the technologies.
+ * @param {(AuraTemplate | TechTemplate)[]} techsDataArray
+ * @return The combined relevant modifications of all the technologies.
  */
 function DeriveModificationsFromTechnologies(techsDataArray)
 {
 	if (!techsDataArray.length)
 		return {};
 
+	/** @type {ReturnType<DeriveModificationsFromTech>} */
 	let derivedModifiers = {};
 	for (let technology of techsDataArray)
 	{
@@ -157,11 +175,11 @@ const ModificationsSchema =
 /**
  * Derives a single modification (to be applied to entities) from a given XML template.
  *
- * @param {Object} techTemplate - The XML template node to derive the modification from.
- * @return {Object} containing the relevant modification.
+ * @param {Template} template - The XML template node to derive the modification from.
  */
 function DeriveModificationFromXMLTemplate(template)
 {
+	/** @type {Modification} */
 	let effect = {};
 	if (template.Add)
 		effect.add = +template.Add;
@@ -171,6 +189,7 @@ function DeriveModificationFromXMLTemplate(template)
 		effect.replace = template.Replace;
 	effect.affects = template.Affects ? template.Affects._string.split(/\s/) : [];
 
+	/** @type {Record<string, Modification[]>} */
 	let ret = {};
 	for (let path of template.Paths._string.split(/\s/))
 	{
@@ -183,11 +202,11 @@ function DeriveModificationFromXMLTemplate(template)
 /**
  * Derives all modifications (to be applied to entities) from a given XML template.
  *
- * @param {Object} techTemplate - The XML template node to derive the modifications from.
- * @return {Object} containing the combined modifications.
+ * @param {Template} template - The XML template node to derive the modifications from.
  */
 function DeriveModificationsFromXMLTemplate(template)
 {
+	/** @type {Record<string, Modification[]>} */
 	let ret = {};
 	for (let name in template)
 	{

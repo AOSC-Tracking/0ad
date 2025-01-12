@@ -56,6 +56,7 @@ Upgrade.prototype.Init = function()
 };
 
 // This will also deal with the "OnDestroy" case.
+/** @param {MessageOwnershipChanged} msg */
 Upgrade.prototype.OnOwnershipChanged = function(msg)
 {
 	if (!this.completed)
@@ -90,6 +91,7 @@ Upgrade.prototype.DetermineUpgrades = function()
 	}
 };
 
+/** @param {number} amount */
 Upgrade.prototype.ChangeUpgradedEntityCount = function(amount)
 {
 	if (!this.IsUpgrading())
@@ -123,6 +125,7 @@ Upgrade.prototype.ChangeUpgradedEntityCount = function(amount)
 		cmpEntityLimits.ChangeCount(categoryTo, amount);
 };
 
+/** @param {string} template */
 Upgrade.prototype.CanUpgradeTo = function(template)
 {
 	return this.upgradeTemplates[template] !== undefined;
@@ -136,6 +139,7 @@ Upgrade.prototype.GetUpgrades = function()
 	{
 		const choice = this.template[this.upgradeTemplates[option]];
 
+		/** @type {Record<string, number>} */
 		let cost = {};
 		if (choice.Cost)
 			cost = this.GetResourceCosts(option);
@@ -175,6 +179,7 @@ Upgrade.prototype.GetUpgradingTo = function()
 	return this.upgrading;
 };
 
+/** @param {string} template */
 Upgrade.prototype.WillCheckPlacementRestrictions = function(template)
 {
 	if (!this.upgradeTemplates[template])
@@ -184,6 +189,7 @@ Upgrade.prototype.WillCheckPlacementRestrictions = function(template)
 	return "CheckPlacementRestrictions" in this.template[this.upgradeTemplates[template]];
 };
 
+/** @param {string} templateArg */
 Upgrade.prototype.GetRequirements = function(templateArg)
 {
 	let choice = this.upgradeTemplates[templateArg] || templateArg;
@@ -205,6 +211,7 @@ Upgrade.prototype.GetRequirements = function(templateArg)
 	return template.Identity.Requirements || undefined;
 };
 
+/** @param {string} template */
 Upgrade.prototype.GetResourceCosts = function(template)
 {
 	if (!this.upgradeTemplates[template])
@@ -217,6 +224,7 @@ Upgrade.prototype.GetResourceCosts = function(template)
 	if (!this.template[choice].Cost)
 		return {};
 
+	/** @type {Record<string, number>} */
 	let costs = {};
 	for (let r in this.template[choice].Cost)
 		costs[r] = ApplyValueModificationsToEntity("Upgrade/Cost/"+r, +this.template[choice].Cost[r], this.entity);
@@ -224,6 +232,7 @@ Upgrade.prototype.GetResourceCosts = function(template)
 	return costs;
 };
 
+/** @param {string} template */
 Upgrade.prototype.Upgrade = function(template)
 {
 	if (this.IsUpgrading() || !this.upgradeTemplates[template])
@@ -269,6 +278,7 @@ Upgrade.prototype.Upgrade = function(template)
 	return true;
 };
 
+/** @param {number} owner */
 Upgrade.prototype.CancelUpgrade = function(owner)
 {
 	if (!this.IsUpgrading())
@@ -295,6 +305,7 @@ Upgrade.prototype.CancelUpgrade = function(owner)
 	this.SetElapsedTime(0);
 };
 
+/** @param {string=} templateArg */
 Upgrade.prototype.GetUpgradeTime = function(templateArg)
 {
 	let template = this.upgrading || templateArg;
@@ -321,6 +332,7 @@ Upgrade.prototype.GetProgress = function()
 	return this.GetUpgradeTime() == 0 ? 1 : Math.min(this.elapsedTime / 1000.0 / this.GetUpgradeTime(), 1.0);
 };
 
+/** @param {number} time */
 Upgrade.prototype.SetElapsedTime = function(time)
 {
 	this.elapsedTime = time;

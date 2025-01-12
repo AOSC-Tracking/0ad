@@ -1,11 +1,28 @@
 /**
+ * @typedef {{
+ *   code: string,
+ *   name: string,
+ *   description: string,
+ *   IID: string,
+ *   method: string,
+ *   order: number
+ * }} AttackEffectMetadata
+ */
+/**
+ * @typedef {{ type: string, IID: IID, method: string }} AttackEffectDefinition
+ */
+
+/**
  * This class provides a cache for accessing attack effects stored in JSON files.
  */
 class AttackEffects
 {
 	constructor()
 	{
+		/** @type {Record<string, AttackEffectMetadata>} */
 		let effectsDataObj = {};
+
+		/** @type {AttackEffectDefinition[]} */
 		this.effectReceivers = [];
 
 		for (let filename of Engine.ListDirectoryFiles("simulation/data/attack_effects", "*.json", false))
@@ -29,7 +46,15 @@ class AttackEffects
 			});
 		}
 
+		/**
+		 * @param {AttackEffectMetadata} a
+		 * @param {AttackEffectMetadata} b
+		 */
 		let effDataSort = (a, b) => a.order < b.order ? -1 : a.order > b.order ? 1 : 0;
+		/**
+		 * @param {AttackEffectDefinition} a
+		 * @param {AttackEffectDefinition} b
+		 */
 		let effSort = (a, b) => effDataSort(
 			effectsDataObj[a.type],
 			effectsDataObj[b.type]
@@ -40,7 +65,7 @@ class AttackEffects
 	}
 
 	/**
-	 * @return {Object[]} - The effects possible with their data.
+	 * @return {AttackEffectDefinition[]} - The effects possible with their data.
 	 */
 	Receivers()
 	{

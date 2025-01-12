@@ -125,7 +125,7 @@ Heal.prototype.GetRangeOverlays = function()
 
 /**
  * @param {number} target - The target to heal.
- * @param {number} callerIID - The IID to notify on specific events.
+ * @param {typeof IID_UnitAI} callerIID - The IID to notify on specific events.
  * @return {boolean} - Whether we started healing.
  */
 Heal.prototype.StartHealing = function(target, callerIID)
@@ -166,7 +166,7 @@ Heal.prototype.StartHealing = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped healing.
+ * @param {string=} reason - The reason why we stopped healing.
  */
 Heal.prototype.StopHealing = function(reason)
 {
@@ -198,7 +198,7 @@ Heal.prototype.StopHealing = function(reason)
 
 /**
  * Heal our target entity.
- * @param data - Unused.
+ * @param {any} data - Unused.
  * @param {number} lateness - The offset of the actual call and when it was expected.
  */
 Heal.prototype.PerformHeal = function(data, lateness)
@@ -253,7 +253,7 @@ Heal.prototype.PerformHeal = function(data, lateness)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {number} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 Heal.prototype.IsTargetInRange = function(target)
@@ -263,6 +263,7 @@ Heal.prototype.IsTargetInRange = function(target)
 	return cmpObstructionManager.IsInTargetRange(this.entity, target, range.min, range.max, false);
 };
 
+/** @param {MessageValueModification} msg */
 Heal.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Heal" || msg.valueNames.indexOf("Heal/Range") === -1)

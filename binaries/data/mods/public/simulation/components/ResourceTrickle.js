@@ -45,6 +45,7 @@ ResourceTrickle.prototype.ComputeRates = function()
 	return hasTrickle;
 };
 
+/** @param {any} data; @param {number} lateness */
 ResourceTrickle.prototype.Trickle = function(data, lateness)
 {
 	// The player entity may also have a ResourceTrickle component
@@ -55,6 +56,7 @@ ResourceTrickle.prototype.Trickle = function(data, lateness)
 	cmpPlayer.AddResources(this.rates);
 };
 
+/** @param {MessageValueModification} msg */
 ResourceTrickle.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "ResourceTrickle")
@@ -63,6 +65,7 @@ ResourceTrickle.prototype.OnValueModification = function(msg)
 	this.CheckTimer();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 ResourceTrickle.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)

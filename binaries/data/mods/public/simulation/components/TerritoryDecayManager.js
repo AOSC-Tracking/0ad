@@ -8,11 +8,17 @@ TerritoryDecayManager.prototype.Init = function()
 	this.list = new Set();
 };
 
+/**
+ * @param {number} ent
+ */
 TerritoryDecayManager.prototype.Add = function(ent)
 {
 	this.list.add(ent);
 };
 
+/**
+ * @param {number} ent
+ */
 TerritoryDecayManager.prototype.Remove = function(ent)
 {
 	this.list.delete(ent);

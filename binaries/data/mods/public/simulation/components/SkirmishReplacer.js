@@ -15,11 +15,16 @@ SkirmishReplacer.prototype.Init = function()
 
 SkirmishReplacer.prototype.Serialize = null; // We have no dynamic state to save
 
+/**
+ * @param {string} civ
+ * @return {Record<string, string>}
+*/
 function getReplacementEntities(civ)
 {
 	return Engine.ReadJSONFile("simulation/data/civs/" + civ + ".json").SkirmishReplacements;
 }
 
+/** @param {MessageOwnershipChanged} msg */
 SkirmishReplacer.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == 0)
@@ -82,6 +87,7 @@ SkirmishReplacer.prototype.ReplaceEntities = function()
  * Message is sent right before InitGame() is called, in InitGame.js
  * Replacement needs to happen early on real games to not confuse the AI
  */
+/** @param {MessageSkirmishReplace} msg */
 SkirmishReplacer.prototype.OnSkirmishReplace = function(msg)
 {
 	this.ReplaceEntities();
@@ -92,6 +98,7 @@ SkirmishReplacer.prototype.OnSkirmishReplace = function(msg)
  * This is needed for Atlas, when the entity isn't replaced before the game starts,
  * so it needs to be replaced on the first turn.
  */
+/** @param {MessageUpdate} msg */
 SkirmishReplacer.prototype.OnUpdate = function(msg)
 {
 	this.ReplaceEntities();

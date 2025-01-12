@@ -97,8 +97,8 @@ RequirementsHelper.prototype.AreRequirementsMet = function(template, playerID)
 };
 
 /**
- * @param {Object} template - The requirements template for "all".
- * @param {component} cmpTechManager -
+ * @param {Template} template - The requirements template for "all".
+ * @param {TechnologyManager} cmpTechManager -
  * @return {boolean} -
  */
 RequirementsHelper.prototype.AllRequirementsMet = function(template, cmpTechManager)
@@ -131,8 +131,8 @@ RequirementsHelper.prototype.AllRequirementsMet = function(template, cmpTechMana
 };
 
 /**
- * @param {Object} template - The requirements template for "any".
- * @param {component} cmpTechManager -
+ * @param {Template} template - The requirements template for "any".
+ * @param {TechnologyManager} cmpTechManager -
  * @return {boolean} -
  */
 RequirementsHelper.prototype.AnyRequirementsMet = function(template, cmpTechManager)

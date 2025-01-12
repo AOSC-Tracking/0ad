@@ -43,8 +43,10 @@ AIInterface.prototype.Init = function()
 	this.enabled = true;
 };
 
+/** @returns {Record<keyof AIInterface, unknown>} */
 AIInterface.prototype.Serialize = function()
 {
+	/** @type {Record<string, unknown>} */
 	let state = {};
 	for (var key in this)
 	{
@@ -59,6 +61,9 @@ AIInterface.prototype.Serialize = function()
 	return state;
 };
 
+/**
+ * @param {ReturnType<AIInterface["Serialize"]>} data
+ */
 AIInterface.prototype.Deserialize = function(data)
 {
 	for (let key in data)
@@ -133,6 +138,7 @@ AIInterface.prototype.GetRepresentation = function()
 
 /**
  * Intended to be called first, during the map initialization: no caching
+ * @param {boolean} flushEvents
  */
 AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 {
@@ -158,6 +164,10 @@ AIInterface.prototype.GetFullRepresentation = function(flushEvents)
 	return state;
 };
 
+/**
+ * @param {EntityId} ent
+ */
+// @ts-expect-error (duplicate because we disable with nop)
 AIInterface.prototype.ChangedEntity = function(ent)
 {
 	this.changedEntities[ent] = 1;
@@ -167,6 +177,8 @@ AIInterface.prototype.ChangedEntity = function(ent)
  * AIProxy sets up a load of event handlers to capture interesting things going on
  * in the world, which we will report to AI. Handle those, and add a few more handlers
  * for events that AIProxy won't capture.
+ * @param {string} type
+ * @param {unknown} msg
  */
 AIInterface.prototype.PushEvent = function(type, msg)
 {
@@ -175,6 +187,7 @@ AIInterface.prototype.PushEvent = function(type, msg)
 	this.events[type].push(msg);
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 AIInterface.prototype.OnDiplomacyChanged = function(msg)
 {
 	this.events.DiplomacyChanged.push(msg);
@@ -196,11 +209,13 @@ AIInterface.prototype.OnGlobalTributeExchanged = function(msg)
 	this.events.TributeExchanged.push(msg);
 };
 
+/** @param {MessageTerritoriesChanged} msg */
 AIInterface.prototype.OnTerritoriesChanged = function(msg)
 {
 	this.events.TerritoriesChanged.push(msg);
 };
 
+/** @param {MessageCeasefireEnded} msg */
 AIInterface.prototype.OnCeasefireEnded = function(msg)
 {
 	this.events.CeasefireEnded.push(msg);
@@ -211,6 +226,7 @@ AIInterface.prototype.OnCeasefireEnded = function(msg)
  * and send the updated values to the AI.
  * this relies on the fact that any "value" in a technology can only ever change
  * one template value, and that the naming is the same (with / in place of .)
+ * @param {MessageTemplateModification} msg
  */
 AIInterface.prototype.OnTemplateModification = function(msg)
 {

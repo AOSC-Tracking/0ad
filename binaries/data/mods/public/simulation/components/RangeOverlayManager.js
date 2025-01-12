@@ -14,14 +14,16 @@ RangeOverlayManager.prototype.Init = function()
 	this.rangeVisualizations = new Map();
 };
 
-// The GUI enables visualizations
+/** @type {any} The GUI enables visualizations */
 RangeOverlayManager.prototype.Serialize = null;
 
+/** @param {unknown} data */
 RangeOverlayManager.prototype.Deserialize = function(data)
 {
 	this.Init();
 };
 
+/** @param {"Attack" | "Auras" | "Heal"} componentName */
 RangeOverlayManager.prototype.UpdateRangeOverlays = function(componentName)
 {
 	let cmp = Engine.QueryInterface(this.entity, global["IID_" + componentName]);
@@ -29,6 +31,11 @@ RangeOverlayManager.prototype.UpdateRangeOverlays = function(componentName)
 		this.rangeVisualizations.set(componentName, cmp.GetRangeOverlays());
 };
 
+/**
+ * @param {boolean} enabled
+ * @param {{Attack: boolean, Auras: boolean, Heal: boolean}} enabledRangeTypes
+ * @param {boolean} forceUpdate
+ */
 RangeOverlayManager.prototype.SetEnabled = function(enabled, enabledRangeTypes, forceUpdate)
 {
 	this.enabled = enabled;
@@ -37,6 +44,7 @@ RangeOverlayManager.prototype.SetEnabled = function(enabled, enabledRangeTypes, 
 	this.RegenerateRangeOverlays(forceUpdate);
 };
 
+/** @param {boolean} forceUpdate */
 RangeOverlayManager.prototype.RegenerateRangeOverlays = function(forceUpdate)
 {
 	let cmpRangeOverlayRenderer = Engine.QueryInterface(this.entity, IID_RangeOverlayRenderer);
@@ -59,6 +67,7 @@ RangeOverlayManager.prototype.RegenerateRangeOverlays = function(forceUpdate)
 					rangeOverlay.thickness);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 RangeOverlayManager.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to == INVALID_PLAYER)
@@ -69,6 +78,7 @@ RangeOverlayManager.prototype.OnOwnershipChanged = function(msg)
 	this.RegenerateRangeOverlays(false);
 };
 
+/** @param {MessageValueModification} msg */
 RangeOverlayManager.prototype.OnValueModification = function(msg)
 {
 	if (msg.valueNames.indexOf("Heal/Range") == -1 &&

@@ -9,7 +9,7 @@ ProductionQueue.prototype.MaxQueueSize = 16;
 
 /**
  * This object represents an item in the queue.
- *
+ * @class
  * @param {number} producer - The entity ID of our producer.
  * @param {string} metadata - Optionally any metadata attached to us.
  */
@@ -22,7 +22,7 @@ ProductionQueue.prototype.Item = function(producer, metadata)
 /**
  * @param {string} type - The type of queue to use.
  * @param {string} templateName - The template to queue.
- * @param {number} count - The amount of template to queue. Only applicable for type == "unit".
+ * @param {number | undefined} count - The amount of template to queue. Only applicable for type == "unit".
  *
  * @return {boolean} - Whether the item could be queued.
  */
@@ -165,10 +165,11 @@ ProductionQueue.prototype.Item.prototype.IsPaused = function()
 };
 
 /**
- * @return {Object} - Some basic information of this item.
+ * @return {(ReturnType<Trainer["GetBatch"]>|ReturnType<Researcher["GetResearchingTechnology"]>) & {id: number, paused: boolean}} - Some basic information of this item.
  */
 ProductionQueue.prototype.Item.prototype.GetBasicInfo = function()
 {
+	/** @type {any} */
 	let result;
 	if (this.technology)
 		result = Engine.QueryInterface(this.producer, IID_Researcher).GetResearchingTechnology(this.technology);
@@ -180,7 +181,7 @@ ProductionQueue.prototype.Item.prototype.GetBasicInfo = function()
 };
 
 /**
- * @return {Object} - The originally queued item.
+ * @return - The originally queued item.
  */
 ProductionQueue.prototype.Item.prototype.OriginalItem = function()
 {
@@ -200,6 +201,7 @@ ProductionQueue.prototype.Item.prototype.SerializableAttributes = [
 
 ProductionQueue.prototype.Item.prototype.Serialize = function()
 {
+	/** @type {any} */
 	const result = {};
 	for (const att of this.SerializableAttributes)
 		if (this.hasOwnProperty(att))
@@ -229,6 +231,7 @@ ProductionQueue.prototype.SerializableAttributes = [
 
 ProductionQueue.prototype.Serialize = function()
 {
+	/** @type {any} */
 	const result = {
 		"queue": []
 	};
@@ -242,6 +245,7 @@ ProductionQueue.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 ProductionQueue.prototype.Deserialize = function(data)
 {
 	for (const att of this.SerializableAttributes)
@@ -282,12 +286,12 @@ ProductionQueue.prototype.DisableAutoQueue = function()
 	delete this.autoqueuing;
 };
 
-/*
+/**
  * Adds a new batch of identical units to train or a technology to research to the production queue.
  * @param {string} templateName - The template to start production on.
  * @param {string} type - The type of production (i.e. "unit" or "technology").
- * @param {number} count - The amount of units to be produced. Ignored for a tech.
- * @param {any} metadata - Optionally any metadata to be attached to the item.
+ * @param {number | undefined} count - The amount of units to be produced. Ignored for a tech.
+ * @param {any} metadata - Optionaly any metadata to be attached to the item.
  * @param {boolean} pushFront - Whether to push the item to the front of the queue and pause any item(s) currently in progress.
  *
  * @return {boolean} - Whether the addition of the item has succeeded.
@@ -350,8 +354,8 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	return true;
 };
 
-/*
- * @param {number} - The ID of the item to remove from the queue.
+/**
+ * @param {number} id - The ID of the item to remove from the queue.
  */
 ProductionQueue.prototype.RemoveItem = function(id)
 {
@@ -367,6 +371,7 @@ ProductionQueue.prototype.RemoveItem = function(id)
 		this.StopTimer();
 };
 
+/** @param {string} name */
 ProductionQueue.prototype.SetAnimation = function(name)
 {
 	let cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
@@ -393,9 +398,9 @@ ProductionQueue.prototype.ResetQueue = function()
 	this.DisableAutoQueue();
 };
 
-/*
+/**
  * Increments progress on the first item in the production queue.
- * @param {Object} data - Unused in this case.
+ * @param {unknown} data - Unused in this case.
  * @param {number} lateness - The time passed since the expected time to fire the function.
  */
 ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
@@ -505,6 +510,7 @@ ProductionQueue.prototype.HasQueuedProduction = function()
 	return this.queue.length > 0;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 ProductionQueue.prototype.OnOwnershipChanged = function(msg)
 {
 	// Reset the production queue whenever the owner changes.
@@ -515,6 +521,7 @@ ProductionQueue.prototype.OnOwnershipChanged = function(msg)
 	this.ResetQueue();
 };
 
+/** @param {MessageGarrisonedStateChanged} msg */
 ProductionQueue.prototype.OnGarrisonedStateChanged = function(msg)
 {
 	if (msg.holderID != INVALID_ENTITY)

@@ -7,6 +7,7 @@ Looter.prototype.Serialize = null; // We have no dynamic state to save
 
 /**
  * Try to collect loot from target entity
+ * @param {EntityId} targetEntity
  */
 Looter.prototype.Collect = function(targetEntity)
 {

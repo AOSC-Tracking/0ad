@@ -42,6 +42,10 @@ Trigger.prototype.Init = function()
 		this.triggers[eventName] = {};
 };
 
+/**
+ * @param {EntityId} ent
+ * @param {string} ref
+ */
 Trigger.prototype.RegisterTriggerPoint = function(ref, ent)
 {
 	if (!this.triggerPoints[ref])
@@ -49,6 +53,10 @@ Trigger.prototype.RegisterTriggerPoint = function(ref, ent)
 	this.triggerPoints[ref].push(ent);
 };
 
+/**
+ * @param {EntityId} ent
+ * @param {string} ref
+ */
 Trigger.prototype.RemoveRegisteredTriggerPoint = function(ref, ent)
 {
 	if (!this.triggerPoints[ref])
@@ -65,6 +73,9 @@ Trigger.prototype.RemoveRegisteredTriggerPoint = function(ref, ent)
 	this.triggerPoints[ref].splice(i, 1);
 };
 
+/**
+ * @param {string} ref
+ */
 Trigger.prototype.GetTriggerPoints = function(ref)
 {
 	return this.triggerPoints[ref] || [];
@@ -73,11 +84,11 @@ Trigger.prototype.GetTriggerPoints = function(ref)
 /**
  * Create a trigger listening on a specific event.
  *
- * @param {string} event - One of eventNames
+ * @param {Trigger["eventNames"][number]} event - One of the eventNames.
  * @param {string} name - Name of the trigger.
  *     If no action is specified in triggerData, the action will be the trigger name.
- * @param {Object} triggerData - f.e. enabled or not, delay for timers, range for range triggers.
- * @param {Object} customData - User-defined data that will be forwarded to the action.
+ * @param {TriggerData} triggerData - f.e. enabled or not, delay for timers, range for range triggers.
+ * @param {Object=} customData - User-defined data that will be forwarded to the action.
  *
  * @example
  * triggerData = { enabled: true, interval: 1000, delay: 500 }
@@ -139,6 +150,10 @@ Trigger.prototype.RegisterTrigger = function(event, name, triggerData, customDat
 		this.EnableTrigger(event, name);
 };
 
+/**
+ * @param {Trigger["eventNames"][number]} event
+ * @param {string} name
+ */
 Trigger.prototype.DisableTrigger = function(event, name)
 {
 	if (!this.triggers[event][name])
@@ -172,6 +187,10 @@ Trigger.prototype.DisableTrigger = function(event, name)
 	triggerData.enabled = false;
 };
 
+/**
+ * @param {Trigger["eventNames"][number]} event
+ * @param {string} name
+ */
 Trigger.prototype.EnableTrigger = function(event, name)
 {
 	if (!this.triggers[event][name])
@@ -209,16 +228,19 @@ Trigger.prototype.EnableTrigger = function(event, name)
 	triggerData.enabled = true;
 };
 
+/** @param {MessageInitGame} msg */
 Trigger.prototype.OnGlobalInitGame = function(msg)
 {
 	this.CallEvent("OnInitGame", {});
 };
 
+/** @param {MessageConstructionFinished} msg */
 Trigger.prototype.OnGlobalConstructionFinished = function(msg)
 {
 	this.CallEvent("OnStructureBuilt", { "building": msg.newentity, "foundation": msg.entity });
 };
 
+/** @param {MessageTrainingFinished} msg */
 Trigger.prototype.OnGlobalTrainingFinished = function(msg)
 {
 	this.CallEvent("OnTrainingFinished", msg);
@@ -228,48 +250,57 @@ Trigger.prototype.OnGlobalTrainingFinished = function(msg)
 	// See function "SpawnUnits" in ProductionQueue for more details
 };
 
+/** @param {MessageResearchFinished} msg */
 Trigger.prototype.OnGlobalResearchFinished = function(msg)
 {
 	this.CallEvent("OnResearchFinished", msg);
 	// The data for this one is { "player": playerID, "tech": tech }
 };
 
+/** @param {MessageCinemaPathEnded} msg */
 Trigger.prototype.OnGlobalCinemaPathEnded = function(msg)
 {
 	this.CallEvent("OnCinemaPathEnded", msg);
 };
 
+/** @param {MessageCinemaQueueEnded} msg */
 Trigger.prototype.OnGlobalCinemaQueueEnded = function(msg)
 {
 	this.CallEvent("OnCinemaQueueEnded", msg);
 };
 
+/** @param {MessageDeserialized} msg */
 Trigger.prototype.OnGlobalDeserialized = function(msg)
 {
 	this.CallEvent("OnDeserialized", msg);
 };
 
+/** @param {MessageEntityRenamed} msg */
 Trigger.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	this.CallEvent("OnEntityRenamed", msg);
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Trigger.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	this.CallEvent("OnOwnershipChanged", msg);
 	// data is {"entity": ent, "from": playerId, "to": playerId}
 };
 
+/** @param {MessagePlayerDefeated} msg */
 Trigger.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.CallEvent("OnPlayerDefeated", msg);
 };
 
+/** @param {MessagePlayerWon} msg */
 Trigger.prototype.OnGlobalPlayerWon = function(msg)
 {
 	this.CallEvent("OnPlayerWon", msg);
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 Trigger.prototype.OnGlobalDiplomacyChanged = function(msg)
 {
 	this.CallEvent("OnDiplomacyChanged", msg);
@@ -295,7 +326,7 @@ Trigger.prototype.DoAfterDelay = function(time, action, eventData)
 /**
  * Execute a function each time a certain delay has passed.
  *
- * @param {number} interval - Interval in milleseconds between consecutive calls.
+ * @param {number} time - Interval in milleseconds between consecutive calls.
  * @param {string} action - Name of the action function.
  * @param {Object} eventData - Arbitrary object that will be passed to the action function.
  * @param {number} [start] - Optional initial delay in milleseconds before starting the calls.
@@ -316,8 +347,8 @@ Trigger.prototype.DoRepeatedly = function(time, action, eventData, start)
  * It's either called directlty from other simulation scripts,
  * or from message listeners in this file
  *
- * @param {string} event - One of eventNames
- * @param {Object} data - will be passed to the actions
+ * @param {Trigger["eventNames"][number]} event - One of the eventNames.
+ * @param {Object} eventData - will be passed to the actions
  */
 Trigger.prototype.CallEvent = function(event, eventData)
 {
@@ -340,6 +371,9 @@ Trigger.prototype.CallEvent = function(event, eventData)
 /**
  * Call the action method of a trigger with the given event Data.
  * By default, call the trigger even if it is currently disabled.
+ * @param {Trigger["eventNames"][number]} event - One of the eventNames.
+ * @param {string} name - Name of the trigger.
+ * @param {Object} eventData - Arbitrary object that will be passed to the action function.
  */
 Trigger.prototype.CallTrigger = function(event, name, eventData, evenIfDisabled = true)
 {
@@ -364,6 +398,11 @@ Trigger.prototype.CallTrigger = function(event, name, eventData, evenIfDisabled 
 /**
  * Called by the trigger listeners to execute the actual action. Including sanity checks.
  * Intended for internal use, prefer CallEvent or CallTrigger.
+ * @param {Object} msg - The message object.
+ * @param {string} msg.action - The action to call.
+ * @param {Object} msg.eventData - The event data to pass to the action.
+ * @param {Object} msg.customData - The custom data to pass to the action.
+ * @param {TriggerData=} msg.triggerData - The trigger data to pass to the action.
  */
 Trigger.prototype.DoAction = function(msg)
 {
@@ -381,6 +420,9 @@ Trigger.prototype.GetDifficulty = function()
 	return this.difficulty;
 };
 
+/**
+ * @param {number} diff
+ */
 Trigger.prototype.SetDifficulty = function(diff)
 {
 	this.difficulty = diff;

@@ -51,12 +51,18 @@ StatusBars.prototype.Serialize = function()
 	return { "auraSources": this.auraSources };
 };
 
+/** @param {any} data */
 StatusBars.prototype.Deserialize = function(data)
 {
 	this.Init();
 	this.auraSources = data.auraSources;
 };
 
+/**
+ * @param {boolean} enabled
+ * @param {boolean} showRank
+ * @param {boolean} showExperience
+ */
 StatusBars.prototype.SetEnabled = function(enabled, showRank, showExperience)
 {
 	// Quick return if no change
@@ -71,6 +77,10 @@ StatusBars.prototype.SetEnabled = function(enabled, showRank, showExperience)
 	this.RegenerateSprites();
 };
 
+/**
+ * @param {EntityId} source
+ * @param {string} auraName
+ */
 StatusBars.prototype.AddAuraSource = function(source, auraName)
 {
 	if (this.auraSources.has(source))
@@ -80,6 +90,10 @@ StatusBars.prototype.AddAuraSource = function(source, auraName)
 	this.RegenerateSprites();
 };
 
+/**
+ * @param {EntityId} source
+ * @param {string} auraName
+ */
 StatusBars.prototype.RemoveAuraSource = function(source, auraName)
 {
 	let names = this.auraSources.get(source);
@@ -87,30 +101,35 @@ StatusBars.prototype.RemoveAuraSource = function(source, auraName)
 	this.RegenerateSprites();
 };
 
+/** @param {MessageHealthChanged} msg */
 StatusBars.prototype.OnHealthChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
+/** @param {MessageCapturePointsChanged} msg */
 StatusBars.prototype.OnCapturePointsChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
+/** @param {MessageResourceSupplyChanged} msg */
 StatusBars.prototype.OnResourceSupplyChanged = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
+/** @param {MessagePackProgressUpdate} msg */
 StatusBars.prototype.OnPackProgressUpdate = function(msg)
 {
 	if (this.enabled)
 		this.RegenerateSprites();
 };
 
+/** @param {MessageUpgradeProgressUpdate} msg */
 StatusBars.prototype.OnUpgradeProgressUpdate = function(msg)
 {
 	if (this.enabled)
@@ -129,6 +148,7 @@ StatusBars.prototype.UpdateColor = function()
 		this.RegenerateSprites();
 };
 
+/** @param {MessagePlayerColorChanged} msg */
 StatusBars.prototype.OnPlayerColorChanged = function(msg)
 {
 	if (this.enabled)
@@ -148,6 +168,10 @@ StatusBars.prototype.RegenerateSprites = function()
 // Internal helper functions
 /**
  * Generic piece of code to add a bar.
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ * @param {string} type
+ * @param {number} amount
  */
 StatusBars.prototype.AddBar = function(cmpOverlayRenderer, yoffset, type, amount, heightMultiplier = 1)
 {
@@ -179,6 +203,10 @@ StatusBars.prototype.AddBar = function(cmpOverlayRenderer, yoffset, type, amount
 	return height * 1.2;
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddExperienceBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled || !this.showExperience)
@@ -191,6 +219,10 @@ StatusBars.prototype.AddExperienceBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "pack", cmpPromotion.GetCurrentXp() / cmpPromotion.GetRequiredXp(), 2/3);
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddPackBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -203,6 +235,10 @@ StatusBars.prototype.AddPackBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "pack", cmpPack.GetProgress());
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddUpgradeBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -215,6 +251,10 @@ StatusBars.prototype.AddUpgradeBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "upgrade", cmpUpgrade.GetProgress());
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddHealthBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -227,6 +267,10 @@ StatusBars.prototype.AddHealthBar = function(cmpOverlayRenderer, yoffset)
 	return this.AddBar(cmpOverlayRenderer, yoffset, "health", cmpHealth.GetHitpoints() / cmpHealth.GetMaxHitpoints());
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddResourceSupplyBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -239,6 +283,10 @@ StatusBars.prototype.AddResourceSupplyBar = function(cmpOverlayRenderer, yoffset
 	return this.AddBar(cmpOverlayRenderer, yoffset, "supply", value);
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled)
@@ -266,6 +314,10 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	// World-space offset from the unit's position
 	let offset = { "x": 0, "y": +this.template.HeightOffset, "z": 0 };
 
+	/**
+	 * @param {number} playerID
+	 * @param {number} startSize
+	 */
 	let setCaptureBarPart = function(playerID, startSize)
 	{
 		let c = QueryPlayerIDInterface(playerID).GetDisplayedColor();
@@ -292,6 +344,10 @@ StatusBars.prototype.AddCaptureBar = function(cmpOverlayRenderer, yoffset)
 	return height * 1.2;
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 {
 	let cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
@@ -330,6 +386,10 @@ StatusBars.prototype.AddAuraIcons = function(cmpOverlayRenderer, yoffset)
 	return iconSize + this.template.BarHeight / 2;
 };
 
+/**
+ * @param {OverlayRenderer} cmpOverlayRenderer
+ * @param {number} yoffset
+ */
 StatusBars.prototype.AddRankIcon = function(cmpOverlayRenderer, yoffset)
 {
 	if (!this.enabled || !this.showRank)

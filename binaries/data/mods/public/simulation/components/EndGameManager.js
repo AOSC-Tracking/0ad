@@ -49,11 +49,12 @@ EndGameManager.prototype.SetGameSettings = function(newSettings = {})
  * Sets the given player (and the allies if allied victory is enabled) as a winner.
  *
  * @param {number} playerID - The player that should win.
- * @param {function} victoryReason - Function that maps from number to plural string, for example
+ * @param {function} victoryString - Function that maps from number to plural string, for example
  *   n => markForPluralTranslation(
  *       "%(lastPlayer)s has won (game mode).",
  *       "%(players)s and %(lastPlayer)s have won (game mode).",
  *       n));
+ * @param {function} defeatString - Function that maps from number to plural string, for
  */
 EndGameManager.prototype.MarkPlayerAndAlliesAsWon = function(playerID, victoryString, defeatString)
 {
@@ -75,12 +76,13 @@ EndGameManager.prototype.MarkPlayerAndAlliesAsWon = function(playerID, victorySt
 /**
  * Sets the given players as won and others as defeated.
  *
- * @param {array} winningPlayers - The players that should win.
- * @param {function} victoryReason - Function that maps from number to plural string, for example
+ * @param {number[]} winningPlayers - The players that should win.
+ * @param {function} victoryString - Function that maps from number to plural string, for example
  *   n => markForPluralTranslation(
  *       "%(lastPlayer)s has won (game mode).",
  *       "%(players)s and %(lastPlayer)s have won (game mode).",
  *       n));
+ * @param {function} defeatString - Function that maps from number to plural string, for example
  */
 EndGameManager.prototype.MarkPlayersAsWon = function(winningPlayers, victoryString, defeatString)
 {
@@ -121,6 +123,7 @@ EndGameManager.prototype.MarkPlayersAsWon = function(winningPlayers, victoryStri
 	this.skipAlliedVictoryCheck = false;
 };
 
+/** @param {boolean} flag */
 EndGameManager.prototype.SetAlliedVictory = function(flag)
 {
 	this.alliedVictory = flag;
@@ -179,16 +182,19 @@ EndGameManager.prototype.AlliedVictoryCheck = function()
 		}, 12 * 60 * 60 * 1000); // 12 hours
 };
 
+/** @param {MessageInitGame} msg */
 EndGameManager.prototype.OnInitGame = function(msg)
 {
 	this.AlliedVictoryCheck();
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 EndGameManager.prototype.OnGlobalDiplomacyChanged = function(msg)
 {
 	this.AlliedVictoryCheck();
 };
 
+/** @param {MessagePlayerDefeated} msg */
 EndGameManager.prototype.OnGlobalPlayerDefeated = function(msg)
 {
 	this.AlliedVictoryCheck();

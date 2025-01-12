@@ -27,12 +27,19 @@ AttackDetection.prototype.ActivateTimer = function()
 	Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).SetTimeout(this.entity, IID_AttackDetection, "HandleTimeout", this.suppressionTime);
 };
 
+/**
+ * @param {AttackEvent} event
+ */
 AttackDetection.prototype.AddSuppression = function(event)
 {
 	this.suppressedList.push(event);
 	this.ActivateTimer();
 };
 
+/**
+ * @param {number} index
+ * @param {AttackEvent} event
+ */
 AttackDetection.prototype.UpdateSuppressionEvent = function(index, event)
 {
 	this.suppressedList[index] = event;
@@ -41,6 +48,7 @@ AttackDetection.prototype.UpdateSuppressionEvent = function(index, event)
 
 // Message handlers
 
+/** @param {MessageAttacked} msg */
 AttackDetection.prototype.OnGlobalAttacked = function(msg)
 {
 	var cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -55,6 +63,12 @@ AttackDetection.prototype.OnGlobalAttacked = function(msg)
 
 // External interface
 
+/**
+ * @param {EntityId} target
+ * @param {EntityId} attacker
+ * @param {string} type
+ * @param {number} attackerOwner
+ */
 AttackDetection.prototype.AttackAlert = function(target, attacker, type, attackerOwner)
 {
 	let playerID = Engine.QueryInterface(this.entity, IID_Player).GetPlayerID();

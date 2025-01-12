@@ -101,12 +101,20 @@ EntityLimits.prototype.Init = function()
 	}
 };
 
+/**
+ * @param {string} category
+ * @param {number} value
+ */
 EntityLimits.prototype.ChangeCount = function(category, value)
 {
 	if (this.count[category] !== undefined)
 		this.count[category] += value;
 };
 
+/**
+ * @param {string} template
+ * @param {number} value
+ */
 EntityLimits.prototype.ChangeMatchCount = function(template, value)
 {
 	if (!this.matchTemplateCount[template])
@@ -135,6 +143,7 @@ EntityLimits.prototype.GetLimitChangers = function()
 	return this.changers;
 };
 
+/** @param {string} tech */
 EntityLimits.prototype.UpdateLimitsFromTech = function(tech)
 {
 	for (var category in this.removers)
@@ -162,6 +171,13 @@ EntityLimits.prototype.UpdateLimitRemoval = function()
 	}
 };
 
+/**
+ * @param {string} limitType
+ * @param {string} category
+ * @param {number} count
+ * @param {string=} templateName
+ * @param {number=} matchLimit
+ */
 EntityLimits.prototype.AllowedToCreate = function(limitType, category, count, templateName, matchLimit)
 {
 	if (this.count[category] !== undefined && this.limit[category] !== undefined &&
@@ -181,6 +197,11 @@ EntityLimits.prototype.AllowedToCreate = function(limitType, category, count, te
 	return true;
 };
 
+/**
+ * @param {string} limitType
+ * @param {string} category
+ * @param {number} limit
+ */
 EntityLimits.prototype.NotifyLimit = function(limitType, category, limit)
 {
 	let cmpPlayer = Engine.QueryInterface(this.entity, IID_Player);
@@ -204,6 +225,7 @@ EntityLimits.prototype.NotifyLimit = function(limitType, category, limit)
 	cmpGUIInterface.PushNotification(notification);
 };
 
+/** @param {string} category */
 EntityLimits.prototype.AllowedToBuild = function(category)
 {
 	// We pass count 0 as the creation of the building has already taken place and
@@ -211,6 +233,12 @@ EntityLimits.prototype.AllowedToBuild = function(category)
 	return this.AllowedToCreate(BUILD, category, 0);
 };
 
+/**
+ * @param {string} category
+ * @param {number} count
+ * @param {string} templateName
+ * @param {number} matchLimit
+ */
 EntityLimits.prototype.AllowedToTrain = function(category, count, templateName, matchLimit)
 {
 	return this.AllowedToCreate(TRAINING, category, count, templateName, matchLimit);
@@ -242,6 +270,7 @@ EntityLimits.prototype.AllowedToReplace = function(ent, template)
 	return true;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 EntityLimits.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	// check if we are adding or removing an entity from this player

@@ -41,6 +41,7 @@ Repairable.prototype.IsRepairable = function()
 	return !this.unrepairable;
 };
 
+/** @param {boolean} repairable */
 Repairable.prototype.SetRepairability = function(repairable)
 {
 	this.unrepairable = !repairable;
@@ -64,7 +65,7 @@ Repairable.prototype.GetNumBuilders = function()
 /**
  * Adds an array of builders.
  *
- * @param {number[]} - An array containing the entity IDs of builders to assign.
+ * @param {number[]} builders - An array containing the entity IDs of builders to assign.
  */
 Repairable.prototype.AddBuilders = function(builders)
 {
@@ -72,6 +73,7 @@ Repairable.prototype.AddBuilders = function(builders)
 		this.AddBuilder(builder);
 };
 
+/** @param {EntityId} builderEnt */
 Repairable.prototype.AddBuilder = function(builderEnt)
 {
 	if (this.builders.has(builderEnt))
@@ -82,6 +84,7 @@ Repairable.prototype.AddBuilder = function(builderEnt)
 	this.SetBuildMultiplier();
 };
 
+/** @param {EntityId} builderEnt */
 Repairable.prototype.RemoveBuilder = function(builderEnt)
 {
 	if (!this.builders.has(builderEnt))
@@ -95,6 +98,7 @@ Repairable.prototype.RemoveBuilder = function(builderEnt)
 /**
  * The build multiplier is a penalty that is applied to each builder.
  * For example, ten women build at a combined rate of 10^0.7 = 5.01 instead of 10.
+ * @param {number} num
  */
 Repairable.prototype.CalculateBuildMultiplier = function(num)
 {
@@ -120,7 +124,11 @@ Repairable.prototype.GetBuildTime = function()
 	};
 };
 
-// TODO: should we have resource costs?
+/**
+ * TODO: should we have resource costs?
+ * @param {EntityId} builderEnt
+ * @param {number} rate
+ */
 Repairable.prototype.Repair = function(builderEnt, rate)
 {
 	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -164,6 +172,7 @@ Repairable.prototype.GetRepairRate = function()
 	return repairTime ? cmpHealth.GetMaxHitpoints() / repairTime : 1;
 };
 
+/** @param {MessageEntityRenamed} msg */
 Repairable.prototype.OnEntityRenamed = function(msg)
 {
 	let cmpRepairableNew = Engine.QueryInterface(msg.newentity, IID_Repairable);
@@ -180,8 +189,11 @@ RepairableMirage.prototype.Init = function(cmpRepairable)
 		this.unrepairable = cmpRepairable.unrepairable;
 };
 
+/** @type {Repairable["GetNumBuilders"]} */
 RepairableMirage.prototype.GetNumBuilders = function() { return this.numBuilders; };
+/** @type {Repairable["GetBuildTime"]} */
 RepairableMirage.prototype.GetBuildTime = function() { return this.buildTime; };
+/** @type {Repairable["IsRepairable"]} */
 RepairableMirage.prototype.IsRepairable = function() { return !this.unrepairable; };
 
 Engine.RegisterGlobal("RepairableMirage", RepairableMirage);

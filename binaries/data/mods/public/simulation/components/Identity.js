@@ -105,6 +105,7 @@ Identity.prototype.Init = function()
 	this.controllable = this.template.Controllable ? this.template.Controllable == "true" : true;
 };
 
+/** @param {ReturnType<Identity["Serialize"]>} data */
 Identity.prototype.Deserialize = function (data)
 {
 	this.Init();
@@ -116,6 +117,7 @@ Identity.prototype.Deserialize = function (data)
 
  Identity.prototype.Serialize = function()
 {
+	/** @type {{phenotype: string, controllable: boolean, name?: string}} */
 	const result = {
 		"phenotype": this.phenotype,
 		"controllable": this.controllable,
@@ -173,6 +175,7 @@ Identity.prototype.GetVisibleClassesList = function()
 	return this.visibleClassesList;
 };
 
+/** @param {string} name */
 Identity.prototype.HasClass = function(name)
 {
 	return this.GetClassesList().indexOf(name) != -1;
@@ -198,6 +201,7 @@ Identity.prototype.IsControllable = function()
 	return this.controllable;
 };
 
+/** @param {boolean} controllability */
 Identity.prototype.SetControllable = function(controllability)
 {
 	this.controllable = controllability;
@@ -244,6 +248,7 @@ IdentityMirage.prototype.Init = function(cmpIdentity)
 	// and that array is deleted when serializing (as it's not seralized), which ends in OOS.
 	this.classes = clone(cmpIdentity.GetClassesList());
 };
+/** @type {Identity["GetClassesList"]} */
 IdentityMirage.prototype.GetClassesList = function() { return this.classes; };
 
 Engine.RegisterGlobal("IdentityMirage", IdentityMirage);

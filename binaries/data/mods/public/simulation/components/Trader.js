@@ -28,6 +28,10 @@ Trader.prototype.Init = function()
 	};
 };
 
+/**
+ * @param {EntityId} currentMarket
+ * @param {EntityId} nextMarket
+ */
 Trader.prototype.CalculateGain = function(currentMarket, nextMarket)
 {
 	let cmpMarket = QueryMiragedInterface(currentMarket, IID_Market);
@@ -67,7 +71,7 @@ Trader.prototype.CalculateGain = function(currentMarket, nextMarket)
 
 /**
  * Remove market from trade route iff only first market is set.
- * @param {number} id of market to be removed.
+ * @param {EntityId} target - id of market to be removed.
  * @return {boolean} true iff removal was successful.
  */
 Trader.prototype.RemoveTargetMarket = function(target)
@@ -83,8 +87,12 @@ Trader.prototype.RemoveTargetMarket = function(target)
 	return true;
 };
 
-// Set target as target market.
-// Return true if at least one of markets was changed.
+/**
+ * Set target as target market.
+ * @param {EntityId} target - id of market to be set as target.
+ * @param {EntityId} source - id of market to be set as source.
+ * @returns true if at least one of markets was changed.
+ */
 Trader.prototype.SetTargetMarket = function(target, source)
 {
 	let cmpTargetMarket = QueryMiragedInterface(target, IID_Market);
@@ -165,6 +173,9 @@ Trader.prototype.HasBothMarkets = function()
 	return this.markets.length >= 2;
 };
 
+/**
+ * @param {EntityId} target
+ */
 Trader.prototype.CanTrade = function(target)
 {
 	const cmpTargetMarket = QueryMiragedInterface(target, IID_Market);
@@ -186,6 +197,10 @@ Trader.prototype.CanTrade = function(target)
 	return cmpTraderDiplomacy && cmpTargetPlayer && !cmpTraderDiplomacy.IsEnemy(cmpTargetPlayer.GetPlayerID());
 };
 
+/**
+ * @param {EntityId} ent
+ * @param {number} gain
+ */
 Trader.prototype.AddResources = function(ent, gain)
 {
 	let cmpPlayer = QueryOwnerInterface(ent);
@@ -197,6 +212,10 @@ Trader.prototype.AddResources = function(ent, gain)
 		cmpStatisticsTracker.IncreaseTradeIncomeCounter(gain);
 };
 
+/**
+ * @param {EntityId} currentMarket
+ * @param {EntityId} nextMarket
+ */
 Trader.prototype.GenerateResources = function(currentMarket, nextMarket)
 {
 	this.AddResources(this.entity, this.goods.amount.traderGain);
@@ -208,6 +227,7 @@ Trader.prototype.GenerateResources = function(currentMarket, nextMarket)
 		this.AddResources(nextMarket, this.goods.amount.market2Gain);
 };
 
+/** @param {EntityId} currentMarket */
 Trader.prototype.PerformTrade = function(currentMarket)
 {
 	let previousMarket = this.markets[this.index];
@@ -239,7 +259,8 @@ Trader.prototype.GetGoods = function()
 };
 
 /**
- * Returns true if the trader has the given market (can be either a market or a mirage)
+ * @param {EntityId} market
+ * @returns true if the trader has the given market (can be either a market or a mirage)
  */
 Trader.prototype.HasMarket = function(market)
 {
@@ -248,6 +269,7 @@ Trader.prototype.HasMarket = function(market)
 
 /**
  * Remove a market when this trader can no longer trade with it
+ * @param {EntityId} market
  */
 Trader.prototype.RemoveMarket = function(market)
 {
@@ -262,6 +284,8 @@ Trader.prototype.RemoveMarket = function(market)
 
 /**
  * Switch between a market and its mirage according to visibility
+ * @param {EntityId} oldMarket
+ * @param {EntityId} newMarket
  */
 Trader.prototype.SwitchMarket = function(oldMarket, newMarket)
 {

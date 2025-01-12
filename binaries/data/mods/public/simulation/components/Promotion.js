@@ -34,6 +34,9 @@ Promotion.prototype.GetPromotedTemplateName = function()
 	return this.template.Entity;
 };
 
+/**
+ * @param {string} promotedTemplateName
+ */
 Promotion.prototype.Promote = function(promotedTemplateName)
 {
 	let cmpHealth = Engine.QueryInterface(this.entity, IID_Health);
@@ -54,6 +57,9 @@ Promotion.prototype.SetPromotedEntity = function(entity)
 	this.promotedUnitEntity = entity;
 };
 
+/**
+ * @param {number} amount
+ */
 Promotion.prototype.IncreaseXp = function(amount)
 {
 	// if the unit was already promoted, but is waiting for the engine to be destroyed
@@ -129,6 +135,7 @@ Promotion.prototype.TrickleTick = function()
 	this.IncreaseXp(this.trickleRate);
 };
 
+/** @param {MessageValueModification} msg */
 Promotion.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Promotion")

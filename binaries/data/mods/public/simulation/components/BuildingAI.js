@@ -31,6 +31,7 @@ BuildingAI.prototype.Init = function()
 	this.focusTargets = [];
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 BuildingAI.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	let classes = this.template.GarrisonArrowClasses;
@@ -48,6 +49,7 @@ BuildingAI.prototype.OnGarrisonedUnitsChanged = function(msg)
 	}
 };
 
+/** @param {MessageOwnershipChanged} msg */
 BuildingAI.prototype.OnOwnershipChanged = function(msg)
 {
 	this.targetUnits = [];
@@ -56,6 +58,7 @@ BuildingAI.prototype.OnOwnershipChanged = function(msg)
 	this.SetupGaiaRangeQuery();
 };
 
+/** @param {MessageDiplomacyChanged} msg */
 BuildingAI.prototype.OnDiplomacyChanged = function(msg)
 {
 	if (!IsOwnedByPlayer(msg.player, this.entity))
@@ -87,6 +90,7 @@ BuildingAI.prototype.OnDestroy = function()
 /**
  * React on Attack value modifications, as it might influence the range.
  */
+/** @param {MessageValueModification} msg */
 BuildingAI.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Attack")
@@ -168,6 +172,7 @@ BuildingAI.prototype.SetupGaiaRangeQuery = function()
 /**
  * Called when units enter or leave range.
  */
+/** @param {MessageRangeUpdate} msg */
 BuildingAI.prototype.OnRangeUpdate = function(msg)
 {
 
@@ -261,6 +266,7 @@ BuildingAI.prototype.GetArrowCount = function()
 	return Math.min(count, this.GetMaxArrowCount());
 };
 
+/** @param {EntityId} ent */
 BuildingAI.prototype.SetUnitAITarget = function(ent)
 {
 	this.unitAITarget = ent;
@@ -270,7 +276,9 @@ BuildingAI.prototype.SetUnitAITarget = function(ent)
 
 /**
  * Adds index to keep track of the user-targeted units supporting a queue
- * @param {ent} - Target of focus-fire from unit-actions if the selection is an enemy.
+ * @param {EntityId} ent - Target of focus-fire from unit-actions if the selection is an enemy.
+ * @param {boolean} queued
+ * @param {boolean} push
  */
 BuildingAI.prototype.AddFocusTarget = function(ent, queued, push)
 {
@@ -328,7 +336,9 @@ BuildingAI.prototype.FireArrows = function()
 	}
 
 	// Add targets to a list.
+	/** @type {{ entityId: number, preference: number }[]} */
     let targets = [];
+	/** @param {EntityId} target */
     let addTarget = function(target)
 	{
 	    const pref = (cmpAttack.GetPreference(target) ?? 49);
@@ -395,6 +405,7 @@ BuildingAI.prototype.FireArrows = function()
 
 /**
  * Returns true if the target entity is visible through the FoW/SoD.
+ * @param {EntityId} target
  */
 BuildingAI.prototype.CheckTargetVisible = function(target)
 {

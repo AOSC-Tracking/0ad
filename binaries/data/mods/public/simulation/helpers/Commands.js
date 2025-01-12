@@ -2,12 +2,23 @@
 //	are likely to fail, which may be useful for debugging AIs
 var g_DebugCommands = false;
 
+/**
+ * @typedef {{cmpPlayer: Player, controlAllUnits: boolean, formation?: string}} Data
+ */
+
+/**
+ * @param {number} player
+ * @param {any} cmd
+ */
 function ProcessCommand(player, cmd)
 {
 	let cmpPlayer = QueryPlayerIDInterface(player);
 	if (!cmpPlayer)
 		return;
 
+	/**
+	 * @type {Data & { entities?: EntityId[] }}
+	 */
 	let data = {
 		"cmpPlayer": cmpPlayer,
 		"controlAllUnits": cmpPlayer.CanControlAllUnits()
@@ -22,7 +33,10 @@ function ProcessCommand(player, cmd)
 	if (!cmd.queued || cmd.formation == NULL_FORMATION)
 		data.formation = cmd.formation || undefined;
 
-	// Allow focusing the camera on recent commands
+	/**
+	 * Allow focusing the camera on recent commands
+	 * @type {{ "type": string, "players": number[], "cmd": any, "position"?: Vector2D }}
+	 */
 	let commandData = {
 		"type": "playercommand",
 		"players": [player],
@@ -55,23 +69,31 @@ function ProcessCommand(player, cmd)
 	else
 		error("Invalid command: unknown command type: "+uneval(cmd));
 }
-
+/**
+ * @typedef {(player: number, cmd: any, data: Data) => void} CommandHandler
+ * * @typedef {(player: number, cmd: any, data: Data & { entities: EntityId[] }) => void} CommandHandlerWithEntities
+ * @type { { [key: string]: CommandHandler | CommandHandlerWithEntities } }
+ */
 var g_Commands = {
 
+	/** @type CommandHandler */
 	"aichat": function(player, cmd, data)
 	{
 		var cmpGuiInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface);
+		/** @type {{ players: number[], [key: string]: any }} */
 		var notification = { "players": [player] };
 		for (var key in cmd)
 			notification[key] = cmd[key];
 		cmpGuiInterface.PushNotification(notification);
 	},
 
+	/** @type CommandHandler */
 	"cheat": function(player, cmd, data)
 	{
 		Cheat(cmd);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"collect-treasure": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -79,6 +101,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"collect-treasure-near-position": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -86,6 +109,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"diplomacy": function(player, cmd, data)
 	{
 		if (Engine.QueryInterface(SYSTEM_ENTITY, IID_CeasefireManager).IsCeasefireActive())
@@ -118,11 +142,13 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandler */
 	"tribute": function(player, cmd, data)
 	{
 		data.cmpPlayer.TributeResource(cmd.player, cmd.amounts);
 	},
 
+	/** @type CommandHandler */
 	"control-all": function(player, cmd, data)
 	{
 		if (!data.cmpPlayer.GetCheatsEnabled())
@@ -138,6 +164,7 @@ var g_Commands = {
 		data.cmpPlayer.SetControlAllUnits(cmd.flag);
 	},
 
+	/** @type CommandHandler */
 	"reveal-map": function(player, cmd, data)
 	{
 		if (!data.cmpPlayer.GetCheatsEnabled())
@@ -156,6 +183,7 @@ var g_Commands = {
 		cmpRangeManager.SetLosRevealAll(-1, cmd.enable);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"walk": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -163,6 +191,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"walk-custom": function(player, cmd, data)
 	{
 		for (let ent in data.entities)
@@ -171,6 +200,7 @@ var g_Commands = {
 			});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"walk-to-range": function(player, cmd, data)
 	{
 		// Only used by the AI
@@ -182,6 +212,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"attack-walk": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -189,6 +220,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"attack-walk-custom": function(player, cmd, data)
 	{
 		for (let ent in data.entities)
@@ -197,6 +229,7 @@ var g_Commands = {
 			});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"attack": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -204,6 +237,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"patrol": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI =>
@@ -211,6 +245,7 @@ var g_Commands = {
 		);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"heal": function(player, cmd, data)
 	{
 		if (g_DebugCommands && !(IsOwnedByPlayer(player, cmd.target) || IsOwnedByAllyOfPlayer(player, cmd.target)))
@@ -221,6 +256,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"repair": function(player, cmd, data)
 	{
 		// This covers both repairing damaged buildings, and constructing unfinished foundations
@@ -232,6 +268,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"gather": function(player, cmd, data)
 	{
 		if (g_DebugCommands && !(IsOwnedByPlayer(player, cmd.target) || IsOwnedByGaia(cmd.target)))
@@ -242,6 +279,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"gather-near-position": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -249,6 +287,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"returnresource": function(player, cmd, data)
 	{
 		if (g_DebugCommands && !IsOwnedByPlayer(player, cmd.target))
@@ -259,6 +298,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"back-to-work": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -269,6 +309,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"call-to-arms": function(player, cmd, data)
 	{
 		const unitsToMove = data.entities.filter(ent =>
@@ -289,6 +330,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"remove-guard": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -299,6 +341,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"train": function(player, cmd, data)
 	{
 		if (!Number.isInteger(cmd.count) || cmd.count <= 0)
@@ -320,7 +363,6 @@ var g_Commands = {
 				warn("Invalid command: training building(s) cannot be controlled by player "+player+": "+uneval(cmd));
 			return;
 		}
-
 		for (let ent of data.entities)
 		{
 			if (unitCategory)
@@ -358,6 +400,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"research": function(player, cmd, data)
 	{
 		var cmpTechnologyManager = QueryOwnerInterface(cmd.entity, IID_TechnologyManager);
@@ -373,6 +416,7 @@ var g_Commands = {
 			queue.AddItem(cmd.template, "technology", undefined, cmd.metadata, cmd.pushFront);
 	},
 
+	/** @type CommandHandler */
 	"stop-production": function(player, cmd, data)
 	{
 		let cmpProductionQueue = Engine.QueryInterface(cmd.entity, IID_ProductionQueue);
@@ -380,16 +424,19 @@ var g_Commands = {
 			cmpProductionQueue.RemoveItem(cmd.id);
 	},
 
+	/** @type CommandHandler */
 	"construct": function(player, cmd, data)
 	{
 		TryConstructBuilding(player, data.cmpPlayer, data.controlAllUnits, cmd);
 	},
 
+	/** @type CommandHandler */
 	"construct-wall": function(player, cmd, data)
 	{
 		TryConstructWall(player, data.cmpPlayer, data.controlAllUnits, cmd);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"delete-entities": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -431,6 +478,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"focus-fire": function (player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -439,6 +487,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"set-rallypoint": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -455,6 +504,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"unset-rallypoint": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -465,11 +515,13 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandler */
 	"resign": function(player, cmd, data)
 	{
 		data.cmpPlayer.Defeat(markForTranslation("%(player)s has resigned."));
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"occupy-turret": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player).forEach(cmpUnitAI => {
@@ -477,6 +529,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"garrison": function(player, cmd, data)
 	{
 		if (!CanPlayerOrAllyControlUnit(cmd.target, player, data.controlAllUnits))
@@ -491,6 +544,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"guard": function(player, cmd, data)
 	{
 		if (!IsOwnedByPlayerOrMutualAlly(cmd.target, player, data.controlAllUnits))
@@ -505,6 +559,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"stop": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -512,6 +567,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"leave-turret": function(player, cmd, data)
 	{
 		let notUnloaded = 0;
@@ -526,6 +582,7 @@ var g_Commands = {
 			notifyUnloadFailure(player);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"unload-turrets": function(player, cmd, data)
 	{
 		let notUnloaded = 0;
@@ -544,6 +601,7 @@ var g_Commands = {
 			notifyUnloadFailure(player);
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"unload": function(player, cmd, data)
 	{
 		if (!CanPlayerOrAllyControlUnit(cmd.garrisonHolder, player, data.controlAllUnits))
@@ -568,6 +626,7 @@ var g_Commands = {
 			notifyUnloadFailure(player, cmd.garrisonHolder);
 	},
 
+	/** @type CommandHandler */
 	"unload-template": function(player, cmd, data)
 	{
 		var entities = FilterEntityListWithAllies(cmd.garrisonHolders, player, data.controlAllUnits);
@@ -587,6 +646,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandler */
 	"unload-all-by-owner": function(player, cmd, data)
 	{
 		var entities = FilterEntityListWithAllies(cmd.garrisonHolders, player, data.controlAllUnits);
@@ -598,6 +658,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandler */
 	"unload-all": function(player, cmd, data)
 	{
 		var entities = FilterEntityList(cmd.garrisonHolders, player, data.controlAllUnits);
@@ -609,6 +670,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"alert-raise": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -619,6 +681,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"alert-end": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -629,6 +692,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"formation": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation, true).forEach(cmpUnitAI => {
@@ -636,6 +700,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandler */
 	"promote": function(player, cmd, data)
 	{
 		if (!data.cmpPlayer.GetCheatsEnabled())
@@ -657,6 +722,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"stance": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -667,6 +733,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"lock-gate": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -682,6 +749,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"setup-trade-route": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -689,6 +757,7 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"cancel-setup-trade-route": function(player, cmd, data)
 	{
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
@@ -696,17 +765,20 @@ var g_Commands = {
 		});
 	},
 
+	/** @type CommandHandler */
 	"set-trading-goods": function(player, cmd, data)
 	{
 		data.cmpPlayer.SetTradingGoods(cmd.tradingGoods);
 	},
 
+	/** @type CommandHandler */
 	"barter": function(player, cmd, data)
 	{
 		var cmpBarter = Engine.QueryInterface(SYSTEM_ENTITY, IID_Barter);
 		cmpBarter.ExchangeResources(player, cmd.sell, cmd.buy, cmd.amount);
 	},
 
+	/** @type CommandHandler */
 	"set-shading-color": function(player, cmd, data)
 	{
 		// Prevent multiplayer abuse
@@ -722,6 +794,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"pack": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -737,6 +810,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"cancel-pack": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -752,6 +826,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"upgrade": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -791,6 +866,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"cancel-upgrade": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -801,6 +877,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandler */
 	"attack-request": function(player, cmd, data)
 	{
 		// Send a chat message to human players
@@ -819,6 +896,7 @@ var g_Commands = {
 			cmpAIInterface.PushEvent("AttackRequest", cmd);
 	},
 
+	/** @type CommandHandler */
 	"spy-request": function(player, cmd, data)
 	{
 		let cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
@@ -853,6 +931,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandler */
 	"diplomacy-request": function(player, cmd, data)
 	{
 		let cmpAIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIInterface);
@@ -860,6 +939,7 @@ var g_Commands = {
 			cmpAIInterface.PushEvent("DiplomacyRequest", cmd);
 	},
 
+	/** @type CommandHandler */
 	"tribute-request": function(player, cmd, data)
 	{
 		let cmpAIInterface = Engine.QueryInterface(SYSTEM_ENTITY, IID_AIInterface);
@@ -867,12 +947,14 @@ var g_Commands = {
 			cmpAIInterface.PushEvent("TributeRequest", cmd);
 	},
 
+	/** @type CommandHandler */
 	"dialog-answer": function(player, cmd, data)
 	{
 		// Currently nothing. Triggers can read it anyway, and send this
 		// message to any component you like.
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"set-dropsite-sharing": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -883,6 +965,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"autoqueue-on": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -893,6 +976,7 @@ var g_Commands = {
 		}
 	},
 
+	/** @type CommandHandlerWithEntities */
 	"autoqueue-off": function(player, cmd, data)
 	{
 		for (let ent of data.entities)
@@ -907,6 +991,7 @@ var g_Commands = {
 
 /**
  * Sends a GUI notification about unit(s) that failed to ungarrison.
+ * @param {number} player - The player-ID of the player that needs to receive this message.
  */
 function notifyUnloadFailure(player)
 {
@@ -921,6 +1006,7 @@ function notifyUnloadFailure(player)
 
 /**
  * Sends a GUI notification about worker(s) that failed to go back to work.
+ * @param {number} player - The player-ID of the player that needs to receive this message.
  */
 function notifyBackToWorkFailure(player)
 {
@@ -935,6 +1021,7 @@ function notifyBackToWorkFailure(player)
 
 /**
  * Sends a GUI notification about entities that can't be controlled.
+ * @param {EntityId} entity
  * @param {number} player - The player-ID of the player that needs to receive this message.
  */
 function notifyOrderFailure(entity, player)
@@ -956,11 +1043,13 @@ function notifyOrderFailure(entity, player)
 
 /**
  * Get some information about the formations used by entities.
+ * @param {EntityId[]} ents
  */
 function ExtractFormations(ents)
 {
 	let entities = []; // Entities with UnitAI.
 	let members = {}; // { formationentity: [ent, ent, ...], ... }
+	/** @type {Record<EntityId, string>} */
 	let templates = {};  // { formationentity: template }
 	for (let ent of ents)
 	{
@@ -992,6 +1081,9 @@ function ExtractFormations(ents)
 /**
  * Tries to find the best angle to put a dock at a given position
  * Taken from GuiInterface.js
+ * @param {Template} template
+ * @param {number} x
+ * @param {number} z
  */
 function GetDockAngle(template, x, z)
 {
@@ -1067,13 +1159,34 @@ function GetDockAngle(template, x, z)
 /**
  * Attempts to construct a building using the specified parameters.
  * Returns true on success, false on failure.
+ * @typedef {{
+ *  type: string,
+*  formation?: string,
+*  pushFront?: boolean,
+*  entities: EntityId[],
+*  template: string,
+*  x: number,
+*  z: number,
+*  angle: number,
+*  metadata?: any,
+*  actorSeed?: number,
+*  autorepair: boolean,
+*  autocontinue: boolean,
+*  queued: boolean,
+*  obstructionControlGroup?: number,
+*  obstructionControlGroup2?: number
+* }} ConstructBuildingCmd
+ * @param {number} player
+ * @param {Player} cmpPlayer
+ * @param {boolean} controlAllUnits
+ * @param {ConstructBuildingCmd} cmd
  */
 function TryConstructBuilding(player, cmpPlayer, controlAllUnits, cmd)
 {
 	// Message structure:
 	// {
 	//   "type": "construct",
-	//   "entities": [...],                 // entities that will be ordered to construct the building (if applicable)
+	//   "entities": [...],                 
 	//   "template": "...",                 // template name of the entity being constructed
 	//   "x": ...,
 	//   "z": ...,
@@ -1155,6 +1268,7 @@ function TryConstructBuilding(player, cmpPlayer, controlAllUnits, cmd)
 	var cmpBuildRestrictions = Engine.QueryInterface(ent, IID_BuildRestrictions);
 	if (cmpBuildRestrictions)
 	{
+		/** @type {ReturnType<BuildRestrictions["CheckPlacement"]> & { players?: number[] }}*/
 		var ret = cmpBuildRestrictions.CheckPlacement();
 		if (!ret.success)
 		{
@@ -1250,6 +1364,12 @@ function TryConstructBuilding(player, cmpPlayer, controlAllUnits, cmd)
 	return ent;
 }
 
+/**
+ * @param {number} player
+ * @param {Player} cmpPlayer
+ * @param {boolean} controlAllUnits
+ * @param {Record<string, any>} cmd // TODO
+ */
 function TryConstructWall(player, cmpPlayer, controlAllUnits, cmd)
 {
 	// 'cmd' message structure:
@@ -1366,6 +1486,7 @@ function TryConstructWall(player, cmpPlayer, controlAllUnits, cmd)
 			}
 		}
 
+		/** @type {ConstructBuildingCmd} */
 		var constructPieceCmd = {
 			"type": "construct",
 			"entities": cmd.entities,
@@ -1407,7 +1528,6 @@ function TryConstructWall(player, cmpPlayer, controlAllUnits, cmd)
 				{
 					//warn("   updating previous wall piece's secondary control group to " + newTowerControlGroup);
 					var cmpPreviousObstruction = Engine.QueryInterface(pieces[i-1].ent, IID_Obstruction);
-					// TODO: ensure that cmpPreviousObstruction exists
 					// TODO: ensure that the previous obstruction does not yet have a secondary control group set
 					cmpPreviousObstruction.SetControlGroup2(newTowerControlGroup);
 				}
@@ -1492,6 +1612,7 @@ function TryConstructWall(player, cmpPlayer, controlAllUnits, cmd)
 
 /**
  * Remove the given list of entities from their current formations.
+ * @param {EntityId[]} ents
  */
 function RemoveFromFormation(ents)
 {
@@ -1507,6 +1628,12 @@ function RemoveFromFormation(ents)
 /**
  * Returns a list of UnitAI components, each belonging either to a
  * selected unit or to a formation entity for groups of the selected units.
+ * @param {EntityId[]} ents - The list of selected entities.
+ * @param {number} player - The player ID.
+ * @param {Record<string, any>=} cmd - The command.
+ * @param {string=} formationTemplate - The formation template to use.
+ * @param {boolean=} forceTemplate - Whether to force the template.
+ * @returns {UnitAI[]} - The list of UnitAI components.
  */
 function GetFormationUnitAIs(ents, player, cmd, formationTemplate, forceTemplate)
 {
@@ -1523,6 +1650,7 @@ function GetFormationUnitAIs(ents, player, cmd, formationTemplate, forceTemplate
 		return [ cmpUnitAI ];
 	}
 
+	/** @type UnitAI[] */
 	let formationUnitAIs = [];
 	// Find what formations the selected entities are currently in,
 	// and default to that unless the formation is forced or it's the null formation
@@ -1641,9 +1769,12 @@ function GetFormationUnitAIs(ents, player, cmd, formationTemplate, forceTemplate
 
 /**
  * Group a list of entities in clusters via single-links
+ * @param {EntityId[]} ents - The list of entities to cluster
+ * @param {number} separationDistance - The maximum distance between entities in a cluster
  */
 function ClusterEntities(ents, separationDistance)
 {
+	/** @type EntityId[][] */
 	let clusters = [];
 	if (!ents.length)
 		return clusters;
@@ -1652,6 +1783,7 @@ function ClusterEntities(ents, separationDistance)
 	let positions = [];
 	// triangular matrix with the (squared) distances between the different clusters
 	// the other half is not initialised
+	/** @type number[][] */
 	let matrix = [];
 	for (let i = 0; i < ents.length; ++i)
 	{
@@ -1712,6 +1844,9 @@ function ClusterEntities(ents, separationDistance)
 	return clusters;
 }
 
+/**
+ * @param {string} formationTemplate
+ */
 function GetFormationRequirements(formationTemplate)
 {
 	var template = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager).GetTemplate(formationTemplate);
@@ -1721,7 +1856,10 @@ function GetFormationRequirements(formationTemplate)
 	return { "minCount": +template.Formation.RequiredMemberCount };
 }
 
-
+/**
+ * @param {EntityId[]} ents
+ * @param {string} formationTemplate
+ */
 function CanMoveEntsIntoFormation(ents, formationTemplate)
 {
 	// TODO: should check the player's civ is allowed to use this formation
@@ -1743,6 +1881,9 @@ function CanMoveEntsIntoFormation(ents, formationTemplate)
  * Check if player can control this entity
  * returns: true if the entity is owned by the player and controllable
  *          or control all units is activated, else false
+ * @param {number} entity - The entityID to verify.
+ * @param {number} player - The playerID to check against.
+ * @param {boolean} controlAll - Whether the player can control all units.
  */
 function CanControlUnit(entity, player, controlAll)
 {
@@ -1772,6 +1913,9 @@ function IsOwnedByPlayerOrMutualAlly(entity, player)
  * @return {boolean} - True if the entity is valid and controlled by the player
  *          or the entity is owned by an mutualAlly and can be controlled
  *          or control all units is activated, else false.
+ * @param {number} entity - The entityID to verify.
+ * @param {number} player - The playerID to check against.
+ * @param {boolean} controlAll - Whether the player can control all units.
  */
 function CanPlayerOrAllyControlUnit(entity, player, controlAll)
 {
@@ -1780,6 +1924,7 @@ function CanPlayerOrAllyControlUnit(entity, player, controlAll)
 }
 
 /**
+ * @param {number} entity - The entityID to verify.
  * @return {boolean} - Whether the owner of this entity can control the entity.
  */
 function CanOwnerControlEntity(entity)
@@ -1790,6 +1935,9 @@ function CanOwnerControlEntity(entity)
 
 /**
  * Filter entities which the player can control.
+ * @param {EntityId[]} entities - The list of entities to filter.
+ * @param {number} player - The playerID to check against.
+ * @param {boolean} controlAll - Whether the player can control all units.
  */
 function FilterEntityList(entities, player, controlAll)
 {
@@ -1798,6 +1946,9 @@ function FilterEntityList(entities, player, controlAll)
 
 /**
  * Filter entities which the player can control or are mutualAlly
+ * @param {EntityId[]} entities - The list of entities to filter.
+ * @param {number} player - The playerID to check against.
+ * @param {boolean} controlAll - Whether the player can control all units.
  */
 function FilterEntityListWithAllies(entities, player, controlAll)
 {
@@ -1807,6 +1958,10 @@ function FilterEntityListWithAllies(entities, player, controlAll)
 /**
  * Incur the player with the cost of a bribe, optionally multiply the cost with
  * the additionalMultiplier
+ * @param {Template} template - The template of the entity being bribed
+ * @param {number} player - The playerID of the player bribing
+ * @param {number} playerBribed - The playerID of the player being bribed
+ * @param {boolean} failedBribe - Whether the bribe failed
  */
 function IncurBribeCost(template, player, playerBribed, failedBribe)
 {
@@ -1814,6 +1969,7 @@ function IncurBribeCost(template, player, playerBribed, failedBribe)
 	if (!cmpPlayerBribed)
 		return false;
 
+	/** @type {Record<string, number>} */
 	let costs = {};
 	// Additional cost for this owner
 	let multiplier = cmpPlayerBribed.GetSpyCostMultiplier();

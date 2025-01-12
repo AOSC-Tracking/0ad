@@ -54,6 +54,7 @@ Upkeep.prototype.ComputeRates = function()
 /**
  * Try to subtract the needed resources.
  * Data and lateness are unused.
+ * @param {any} data; @param {number} lateness
  */
 Upkeep.prototype.Pay = function(data, lateness)
 {
@@ -95,6 +96,7 @@ Upkeep.prototype.HandleSufficientUpkeep = function()
 	delete this.unpayed;
 };
 
+/** @param {MessageValueModification} msg */
 Upkeep.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "Upkeep")

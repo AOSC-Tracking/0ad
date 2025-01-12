@@ -168,6 +168,7 @@ Formation.prototype.Serialize = function()
 	return result;
 };
 
+/** @param {any} data */
 Formation.prototype.Deserialize = function(data)
 {
 	this.Init(true);
@@ -177,6 +178,7 @@ Formation.prototype.Deserialize = function(data)
 
 /**
  * Set the value from which two twin formations will become one.
+ * @param {number} value
  */
 Formation.prototype.SetFormationSeparation = function(value)
 {
@@ -203,6 +205,10 @@ Formation.prototype.GetMembers = function()
 	return this.members;
 };
 
+/**
+ * @param {EntityId} ent
+ * @param {function(EntityId): boolean=} filter
+ */
 Formation.prototype.GetClosestMember = function(ent, filter)
 {
 	let cmpEntPosition = Engine.QueryInterface(ent, IID_Position);
@@ -246,7 +252,7 @@ Formation.prototype.GetPrimaryMember = function()
 
 /**
  * Get the formation animation variant for a certain member of this formation.
- * @param entity The entity ID to get the animation for.
+ * @param {EntityId} entity The entity ID to get the animation for.
  * @return The name of the animation variant as defined in the template,
  * e.g. "testudo_front" or undefined if does not exist.
  */
@@ -287,6 +293,7 @@ Formation.prototype.GetFormationAnimationVariant = function(entity)
 	return undefined;
 };
 
+/** @param {EntityId} ent */
 Formation.prototype.SetFinishedEntity = function(ent)
 {
 	// Rotate the entity to the correct angle.
@@ -298,6 +305,7 @@ Formation.prototype.SetFinishedEntity = function(ent)
 	this.finishedEntities.add(ent);
 };
 
+/** @param {EntityId} ent */
 Formation.prototype.UnsetFinishedEntity = function(ent)
 {
 	this.finishedEntities.delete(ent);
@@ -313,11 +321,13 @@ Formation.prototype.AreAllMembersFinished = function()
 	return this.finishedEntities.size === this.members.length;
 };
 
+/** @param {EntityId} ent */
 Formation.prototype.SetIdleEntity = function(ent)
 {
 	this.idleEntities.add(ent);
 };
 
+/** @param {EntityId} ent */
 Formation.prototype.UnsetIdleEntity = function(ent)
 {
 	this.idleEntities.delete(ent);
@@ -335,6 +345,7 @@ Formation.prototype.AreAllMembersIdle = function()
 
 /**
  * Set whether we are allowed to rearrange formation members.
+ * @param {boolean} rearrange
  */
 Formation.prototype.SetRearrange = function(rearrange)
 {
@@ -344,7 +355,8 @@ Formation.prototype.SetRearrange = function(rearrange)
 /**
  * Initialize the members of this formation.
  * Must only be called once.
- * All members must implement UnitAI.
+ * All members must implement UnitAI
+ * @param {EntityId[]} ents
  */
 Formation.prototype.SetMembers = function(ents)
 {
@@ -374,7 +386,8 @@ Formation.prototype.SetMembers = function(ents)
 /**
  * Remove the given list of entities.
  * The entities must already be members of this formation.
- * @param {boolean} rename - Whether the removal was part of an entity rename
+ * @param {EntityId[]} ents
+ * @param {boolean} renamed - Whether the removal was part of an entity rename
 	(prevents disbanding of the formation when under the member limit).
  */
 Formation.prototype.RemoveMembers = function(ents, renamed = false)
@@ -422,6 +435,9 @@ Formation.prototype.RemoveMembers = function(ents, renamed = false)
 	this.MoveMembersIntoFormation(true, true, this.lastOrderVariant);
 };
 
+/**
+ * @param {EntityId[]} ents
+ */
 Formation.prototype.AddMembers = function(ents)
 {
 	this.offsets = undefined;
@@ -597,6 +613,10 @@ Formation.prototype.MoveToMembersCenter = function()
  * Set formation position.
  * If formation is not in world at time this is called, set new rotation and flag
  * for rangeManager. Also set the rotation if it is forced.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} rot
+ * @param {boolean} forceRotation
  */
 Formation.prototype.SetupPositionAndHandleRotation = function(x, y, rot, forceRotation)
 {
@@ -614,6 +634,9 @@ Formation.prototype.SetupPositionAndHandleRotation = function(x, y, rot, forceRo
 		Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager).SetEntityFlag(this.entity, "normal", false);
 };
 
+/**
+ * @param {EntityId[]} active
+ */
 Formation.prototype.GetAvgFootprint = function(active)
 {
 	let footprints = [];
@@ -645,6 +668,10 @@ Formation.prototype.GetAvgFootprint = function(active)
 	return r;
 };
 
+/**
+ * @param {EntityId[]} active
+ * @param {Vector2D[]} positions
+ */
 Formation.prototype.ComputeFormationOffsets = function(active, positions)
 {
 	let separation = this.GetAvgFootprint(active);
@@ -660,6 +687,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 
 	// The entities will be assigned to positions in the formation in
 	// the same order as the types list is ordered.
+	/** @type {Record<string, {ent: EntityId, pos: Vector2D}[]>} */
 	let types = {};
 	for (let i = 0; i < sortingClasses.length; ++i)
 		types[sortingClasses[i]] = [];
@@ -688,6 +716,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 	let shiftRows = this.shiftRows;
 	let centerGap = this.centerGap;
 	let sortingOrder = this.template.SortingOrder;
+	/** @type {(Vector2D & { row: number, column: number })[]} */
 	let offsets = [];
 
 	// Choose a sensible size/shape for the various formations, depending on number of units.
@@ -811,6 +840,7 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 
 	// Use realistic place assignment,
 	// every soldier searches the closest available place in the formation.
+	/** @type {(Vector2D & { ent: EntityId, row: number, column: number })[]} */
 	let newOffsets = [];
 	for (const i of sortingClasses.reverse())
 	{
@@ -833,9 +863,9 @@ Formation.prototype.ComputeFormationOffsets = function(active, positions)
 
 /**
  * Search the closest position in the realPositions list to the given entity.
- * @param entPos - Object with entity position and entity ID.
- * @param realPositions - The world coordinates of the available offsets.
- * @param offsets
+ * @param {{ pos: Vector2D, ent: EntityId }} entPos - Object with entity position and entity ID.
+ * @param {Vector2D[]} realPositions - The world coordinates of the available offsets.
+ * @param {Record<EntityId, { row: number, column: number}>} offsets
  * @return The index of the closest offset position.
  */
 Formation.prototype.TakeClosestOffset = function(entPos, realPositions, offsets)
@@ -858,6 +888,7 @@ Formation.prototype.TakeClosestOffset = function(entPos, realPositions, offsets)
 
 /**
  * Get the world positions for a list of offsets in this formation.
+ * @param {(Vector2D & { row: number, column: number})[]} offsets
  */
 Formation.prototype.GetRealOffsetPositions = function(offsets)
 {
@@ -878,8 +909,9 @@ Formation.prototype.GetRealOffsetPositions = function(offsets)
  * Returns true if the difference between two given angles (in radians)
  * are smaller than the maximum turning angle of the formation and therfore allow
  * the formation turn without reassigning positions.
+ * @param {number} a1
+ * @param {number} a2
  */
-
 Formation.prototype.DoesAngleDifferenceAllowTurning = function(a1, a2)
 {
 	const d = Math.abs(a1 - a2) % (2 * Math.PI);
@@ -984,6 +1016,7 @@ Formation.prototype.ResetOrderVariant = function()
 	this.lastOrderVariant = undefined;
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Formation.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	// When an entity is captured or destroyed, it should no longer be
@@ -994,6 +1027,7 @@ Formation.prototype.OnGlobalOwnershipChanged = function(msg)
 		Engine.QueryInterface(this.entity, IID_Visual)?.SetVariant("animationVariant", QueryPlayerIDInterface(msg.to, IID_Identity).GetCiv());
 };
 
+/** @param {MessageEntityRenamed} msg */
 Formation.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	if (this.members.indexOf(msg.entity) === -1)
@@ -1014,6 +1048,7 @@ Formation.prototype.OnGlobalEntityRenamed = function(msg)
 	this.rearrange = temp;
 };
 
+/** @param {EntityId} entity */
 Formation.prototype.RegisterTwinFormation = function(entity)
 {
 	let cmpFormation = Engine.QueryInterface(entity, IID_Formation);
@@ -1034,6 +1069,7 @@ Formation.prototype.DeleteTwinFormations = function()
 	this.twinFormations = [];
 };
 
+/** @param {string} newTemplate */
 Formation.prototype.LoadFormation = function(newTemplate)
 {
 	const newFormation = ChangeEntityTemplate(this.entity, newTemplate);
@@ -1041,6 +1077,7 @@ Formation.prototype.LoadFormation = function(newTemplate)
 };
 
 
+/** @param {MessageEntityRenamed} msg */
 Formation.prototype.OnEntityRenamed = function(msg)
 {
 	const members = clone(this.members);

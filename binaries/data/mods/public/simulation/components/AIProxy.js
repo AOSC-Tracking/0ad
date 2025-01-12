@@ -82,6 +82,7 @@ AIProxy.prototype.NotifyChange = function()
 
 // AI representation-updating event handlers:
 
+/** @param {MessagePositionChanged} msg */
 AIProxy.prototype.OnPositionChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -99,6 +100,7 @@ AIProxy.prototype.OnPositionChanged = function(msg)
 	}
 };
 
+/** @param {MessageHealthChanged} msg */
 AIProxy.prototype.OnHealthChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -106,6 +108,7 @@ AIProxy.prototype.OnHealthChanged = function(msg)
 	this.changes.hitpoints = msg.to;
 };
 
+/** @param {MessageGarrisonedStateChanged} msg */
 AIProxy.prototype.OnGarrisonedStateChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -113,6 +116,7 @@ AIProxy.prototype.OnGarrisonedStateChanged = function(msg)
 	this.changes.garrisonHolderID = msg.holderID;
 };
 
+/** @param {MessageCapturePointsChanged} msg */
 AIProxy.prototype.OnCapturePointsChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -120,6 +124,7 @@ AIProxy.prototype.OnCapturePointsChanged = function(msg)
 	this.changes.capturePoints = msg.capturePoints;
 };
 
+/** @param {MessageInvulnerabilityChanged} msg */
 AIProxy.prototype.OnInvulnerabilityChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -127,6 +132,7 @@ AIProxy.prototype.OnInvulnerabilityChanged = function(msg)
 	this.changes.invulnerability = msg.invulnerability;
 };
 
+/** @param {MessageUnitIdleChanged} msg */
 AIProxy.prototype.OnUnitIdleChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -134,6 +140,7 @@ AIProxy.prototype.OnUnitIdleChanged = function(msg)
 	this.changes.idle = msg.idle;
 };
 
+/** @param {MessageUnitStanceChanged} msg */
 AIProxy.prototype.OnUnitStanceChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -141,6 +148,7 @@ AIProxy.prototype.OnUnitStanceChanged = function(msg)
 	this.changes.stance = msg.to;
 };
 
+/** @param {MessageUnitAIStateChanged} msg */
 AIProxy.prototype.OnUnitAIStateChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -148,6 +156,7 @@ AIProxy.prototype.OnUnitAIStateChanged = function(msg)
 	this.changes.unitAIState = msg.to;
 };
 
+/** @param {MessageUnitAIOrderDataChanged} msg */
 AIProxy.prototype.OnUnitAIOrderDataChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -155,6 +164,7 @@ AIProxy.prototype.OnUnitAIOrderDataChanged = function(msg)
 	this.changes.unitAIOrderData = msg.to;
 };
 
+/** @param {MessageProductionQueueChanged} msg */
 AIProxy.prototype.OnProductionQueueChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -163,6 +173,7 @@ AIProxy.prototype.OnProductionQueueChanged = function(msg)
 	this.changes.trainingQueue = cmpProductionQueue.GetQueue();
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 AIProxy.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -179,6 +190,7 @@ AIProxy.prototype.OnGarrisonedUnitsChanged = function(msg)
 		this.cmpAIInterface.PushEvent("UnGarrison", { "entity": ent, "holder": this.entity });
 };
 
+/** @param {MessageFoundationProgressChanged} msg */
 AIProxy.prototype.OnFoundationProgressChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -186,6 +198,7 @@ AIProxy.prototype.OnFoundationProgressChanged = function(msg)
 	this.changes.foundationProgress = msg.to;
 };
 
+/** @param {MessageFoundationBuildersChanged} msg */
 AIProxy.prototype.OnFoundationBuildersChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -193,6 +206,7 @@ AIProxy.prototype.OnFoundationBuildersChanged = function(msg)
 	this.changes.foundationBuilders = msg.to;
 };
 
+/** @param {MessageDropsiteSharingChanged} msg */
 AIProxy.prototype.OnDropsiteSharingChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -200,6 +214,7 @@ AIProxy.prototype.OnDropsiteSharingChanged = function(msg)
 	this.changes.sharedDropsite = msg.shared;
 };
 
+/** @param {MessageTerritoryDecayChanged} msg */
 AIProxy.prototype.OnTerritoryDecayChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -215,6 +230,7 @@ AIProxy.prototype.GetFullRepresentation = function()
 	this.needsFullGet = false;
 	let cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
 
+	/** @type {Record<string, unknown>} */
 	let ret = {
 		// These properties are constant and won't need to be updated
 		"id": this.entity,
@@ -324,6 +340,7 @@ AIProxy.prototype.GetFullRepresentation = function()
 // events.)
 
 // special case: this changes the state and sends an event.
+/** @param {MessageOwnershipChanged} msg */
 AIProxy.prototype.OnOwnershipChanged = function(msg)
 {
 	this.NotifyChange();
@@ -343,26 +360,31 @@ AIProxy.prototype.OnOwnershipChanged = function(msg)
 	this.cmpAIInterface.PushEvent("OwnershipChanged", msg);
 };
 
+/** @param {MessageAttacked} msg */
 AIProxy.prototype.OnAttacked = function(msg)
 {
 	this.cmpAIInterface.PushEvent("Attacked", msg);
 };
 
+/** @param {MessageConstructionFinished} msg */
 AIProxy.prototype.OnConstructionFinished = function(msg)
 {
 	this.cmpAIInterface.PushEvent("ConstructionFinished", msg);
 };
 
+/** @param {MessageTrainingStarted} msg */
 AIProxy.prototype.OnTrainingStarted = function(msg)
 {
 	this.cmpAIInterface.PushEvent("TrainingStarted", msg);
 };
 
+/** @param {MessageTrainingFinished} msg */
 AIProxy.prototype.OnTrainingFinished = function(msg)
 {
 	this.cmpAIInterface.PushEvent("TrainingFinished", msg);
 };
 
+/** @param {MessageAIMetadata} msg */
 AIProxy.prototype.OnAIMetadata = function(msg)
 {
 	this.cmpAIInterface.PushEvent("AIMetadata", msg);

@@ -1,6 +1,14 @@
 /**
  * This class holds the functions regarding entities being visible on
  * another entity, but tied to their parents location.
+ * @typedef {Object} TurretPoint
+ * @property {string} name - The name of the turret point.
+ * @property {{x: number, y: number, z: number}} offset - The offset from the parent entity.
+ * @property {string} allowedClasses - The classes of entities that can occupy this turret point.
+ * @property {number=} angle - The angle in radians relative to the turretHolder direction.
+ * @property {EntityId=} entity - The entity occupying this turret point.
+ * @property {string=} template - The template of the entity to be created.
+ * @property {boolean} ejectable - Whether this template is tied to the turret position (i.e. not allowed to leave the turret point).
  */
 class TurretHolder
 {
@@ -29,7 +37,7 @@ class TurretHolder
 	 * Add a subunit as specified in the template.
 	 * This function creates an entity and places it on the turret point.
 	 *
-	 * @param {Object} turretPoint - A turret point to (re)create the predefined subunit for.
+	 * @param {string} turretPointName - A turret point to (re)create the predefined subunit for.
 	 *
 	 * @return {boolean} - Whether the turret creation has succeeded.
 	 */
@@ -72,8 +80,8 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {number} entity - The entity to check for.
-	 * @param {Object} turretPoint - The turret point to use.
+	 * @param {EntityId} entity - The entity to check for.
+	 * @param {TurretPoint} turretPoint - The turret point to use.
 	 *
 	 * @return {boolean} - Whether the entity is allowed to occupy the specified turret point.
 	 */
@@ -104,7 +112,7 @@ class TurretHolder
 	/**
 	 * Occupy a turret point with the given entity.
 	 * @param {number} entity - The entity to use.
-	 * @param {Object} requestedTurretPoint - Optionally the specific turret point to occupy.
+	 * @param {TurretPoint=} requestedTurretPoint - Optionally the specific turret point to occupy.
 	 *
 	 * @return {boolean} - Whether the occupation was successful.
 	 */
@@ -168,7 +176,7 @@ class TurretHolder
 
 	/**
 	 * @param {string} turretPointName - The name of the requested turret point.
-	 * @return {Object} - The requested turret point.
+	 * @return {TurretPoint | undefined} - The requested turret point.
 	 */
 	TurretPointByName(turretPointName)
 	{
@@ -177,9 +185,9 @@ class TurretHolder
 
 	/**
 	 * Remove the entity from a turret.
-	 * @param {number} entity - The specific entity to eject.
+	 * @param {EntityId} entity - The specific entity to eject.
 	 * @param {boolean} forced - Whether ejection is forced (e.g. due to death or renaming).
-	 * @param {Object} turret - Optionally the turret to abandon.
+	 * @param {TurretPoint=} requestedTurretPoint - Optionally the turret to abandon.
 	 *
 	 * @return {boolean} - Whether the entity succesfully left us.
 	 */
@@ -209,7 +217,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @param {Object} turret - Optionally the turret to check.
+	 * @param {TurretPoint=} requestedTurretPoint - Optionally the turret to check.
 	 *
 	 * @return {boolean} - Whether the entity is positioned on a turret of this entity.
 	 */
@@ -221,7 +229,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @return {Object} - The turret this entity is positioned on, if applicable.
+	 * @return {TurretPoint | undefined} - The turret this entity is positioned on, if applicable.
 	 */
 	GetOccupiedTurretPoint(entity)
 	{
@@ -230,7 +238,7 @@ class TurretHolder
 
 	/**
 	 * @param {number} entity - The entity's id.
-	 * @return {Object} - The turret this entity is positioned on, if applicable.
+	 * @return {string} - The turret this entity is positioned on, if applicable.
 	 */
 	GetOccupiedTurretPointName(entity)
 	{
@@ -259,7 +267,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @return {Object} - Max and min ranges at which entities can occupy any turret.
+	 * @return {{ max: number, min: number }} - Max and min ranges at which entities can occupy any turret.
 	 */
 	LoadingRange()
 	{
@@ -323,6 +331,7 @@ class TurretHolder
 
 	/**
 	 * Update list of turreted entities when a game inits.
+	 * @param {MessageSkirmishReplacerReplaced} msg
 	 */
 	OnGlobalSkirmishReplacerReplaced(msg)
 	{
@@ -345,6 +354,7 @@ class TurretHolder
 
 	/**
 	 * Initialise turreted units.
+	 * @param {MessageInitGame} msg
 	 */
 	OnGlobalInitGame(msg)
 	{
@@ -363,7 +373,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {Object} msg - { "entity": number, "newentity": number }.
+	 * @param {MessageEntityRenamed} msg - The message to be processed.
 	 */
 	OnEntityRenamed(msg)
 	{
@@ -379,7 +389,7 @@ class TurretHolder
 	}
 
 	/**
-	 * @param {Object} msg - { "entity": number, "from": number, "to": number }.
+	 * @param {MessageOwnershipChanged} msg
 	 */
 	OnOwnershipChanged(msg)
 	{

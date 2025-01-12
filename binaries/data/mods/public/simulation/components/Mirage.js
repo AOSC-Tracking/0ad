@@ -16,6 +16,9 @@ Mirage.prototype.Init = function()
 	this.miragedIids = new Map();
 };
 
+/**
+ * @param {EntityId} ent
+ */
 Mirage.prototype.SetParent = function(ent)
 {
 	this.parent = ent;
@@ -26,6 +29,9 @@ Mirage.prototype.GetParent = function()
 	return this.parent;
 };
 
+/**
+ * @param {number} player
+ */
 Mirage.prototype.SetPlayer = function(player)
 {
 	this.player = player;
@@ -36,11 +42,18 @@ Mirage.prototype.GetPlayer = function()
 	return this.player;
 };
 
+/**
+ * @param {IID} iid
+ */
 Mirage.prototype.Mirages = function(iid)
 {
 	return this.miragedIids.has(iid);
 };
 
+/**
+ * @template {Fogging["componentsToMirage"][number]} T
+ * @param {T} iid
+ */
 Mirage.prototype.Get = function(iid)
 {
 	return this.miragedIids.get(iid);
@@ -50,7 +63,7 @@ Mirage.prototype.Get = function(iid)
 // Parent entity data
 
 /**
- * @param {number} iid - The component to mirage.
+ * @param {Fogging["componentsToMirage"][number]} iid - The component to mirage.
  */
 Mirage.prototype.CopyComponent = function(iid)
 {
@@ -61,6 +74,7 @@ Mirage.prototype.CopyComponent = function(iid)
 
 // ============================
 
+/** @param {MessageVisibilityChanged} msg */
 Mirage.prototype.OnVisibilityChanged = function(msg)
 {
 	// Mirages get VIS_HIDDEN when the original entity becomes VIS_VISIBLE.

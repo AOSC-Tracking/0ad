@@ -14,7 +14,7 @@ TreasureCollector.prototype.Init = function()
 };
 
 /**
- * @return {Object} - Min/Max range at which this entity can claim a treasure.
+ * @return - Min/Max range at which this entity can claim a treasure.
  */
 TreasureCollector.prototype.GetRange = function()
 {
@@ -22,7 +22,7 @@ TreasureCollector.prototype.GetRange = function()
 };
 
 /**
- * @param {number} target - Entity ID of the target.
+ * @param {EntityId} target - Entity ID of the target.
  * @return {boolean} - Whether we can collect from the target.
  */
 TreasureCollector.prototype.CanCollect = function(target)
@@ -61,7 +61,7 @@ TreasureCollector.prototype.StartCollecting = function(target, callerIID)
 };
 
 /**
- * @param {string} reason - The reason why we stopped collecting, used to notify the caller.
+ * @param {string=} reason - The reason why we stopped collecting, used to notify the caller.
  */
 TreasureCollector.prototype.StopCollecting = function(reason)
 {
@@ -114,7 +114,7 @@ TreasureCollector.prototype.CollectTreasure = function(data, lateness)
 };
 
 /**
- * @param {number} - The entity ID of the target to check.
+ * @param {number} target - The entity ID of the target to check.
  * @return {boolean} - Whether this entity is in range of its target.
  */
 TreasureCollector.prototype.IsTargetInRange = function(target)

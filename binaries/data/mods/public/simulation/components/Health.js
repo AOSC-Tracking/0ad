@@ -86,6 +86,9 @@ Health.prototype.IsInjured = function()
 	return this.hitpoints > 0 && this.hitpoints < this.GetMaxHitpoints();
 };
 
+/**
+ * @param {number} value - The new hitpoint value.
+ */
 Health.prototype.SetHitpoints = function(value)
 {
 	// If we're already dead, don't allow resurrection
@@ -182,14 +185,13 @@ Health.prototype.Kill = function()
  * @param {number} amount - The amount of damage to be taken.
  * @param {number} attacker - The entityID of the attacker.
  * @param {number} attackerOwner - The playerID of the owner of the attacker.
- *
- * @eturn {Object} - Object of the form { "healthChange": number }.
  */
 Health.prototype.TakeDamage = function(amount, attacker, attackerOwner)
 {
 	if (!amount || !this.hitpoints)
 		return { "healthChange": 0 };
 
+	/** @type {{ healthChange: number, xp?: number }} */
 	let change = this.Reduce(amount);
 
 	let cmpLoot = Engine.QueryInterface(this.entity, IID_Loot);
@@ -306,6 +308,9 @@ Health.prototype.HandleDeath = function()
 	Engine.DestroyEntity(this.entity);
 };
 
+/**
+ * @param {number} amount - The amount of hitpoints to add.
+ */
 Health.prototype.Increase = function(amount)
 {
 	// Before changing the value, activate Fogging if necessary to hide changes
@@ -475,18 +480,21 @@ Health.prototype.RecalculateValues = function()
 		this.CheckRegenTimer();
 };
 
+/** @param {MessageValueModification} msg */
 Health.prototype.OnValueModification = function(msg)
 {
 	if (msg.component == "Health")
 		this.RecalculateValues();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 Health.prototype.OnOwnershipChanged = function(msg)
 {
 	if (msg.to != INVALID_PLAYER)
 		this.RecalculateValues();
 };
 
+/** @param {number} from */
 Health.prototype.RegisterHealthChanged = function(from)
 {
 	this.CheckRegenTimer();
@@ -503,10 +511,16 @@ HealthMirage.prototype.Init = function(cmpHealth)
 	this.injured = cmpHealth.IsInjured();
 	this.unhealable = cmpHealth.IsUnhealable();
 };
+
+/** @type {Health["GetMaxHitpoints"]} */
 HealthMirage.prototype.GetMaxHitpoints = function() { return this.maxHitpoints; };
+/** @type {Health["GetHitpoints"]} */
 HealthMirage.prototype.GetHitpoints = function() { return this.hitpoints; };
+/** @type {Health["IsRepairable"]} */
 HealthMirage.prototype.IsRepairable = function() { return this.repairable; };
+/** @type {Health["IsInjured"]} */
 HealthMirage.prototype.IsInjured = function() { return this.injured; };
+/** @type {Health["IsUnhealable"]} */
 HealthMirage.prototype.IsUnhealable = function() { return this.unhealable; };
 
 Engine.RegisterGlobal("HealthMirage", HealthMirage);

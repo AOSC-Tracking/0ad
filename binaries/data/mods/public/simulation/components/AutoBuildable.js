@@ -65,6 +65,7 @@ class AutoBuildable
 		cmpFoundation.Build(this.entity, this.rate);
 	}
 
+	/** @param {MessageValueModification} msg */
 	OnValueModification(msg)
 	{
 		if (msg.component != "AutoBuildable")
@@ -73,6 +74,7 @@ class AutoBuildable
 		this.UpdateRate();
 	}
 
+	/** @param {MessageOwnershipChanged} msg */
 	OnOwnershipChanged(msg)
 	{
 		if (msg.to == INVALID_PLAYER)

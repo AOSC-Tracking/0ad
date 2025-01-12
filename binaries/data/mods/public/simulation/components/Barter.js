@@ -47,8 +47,10 @@ Barter.prototype.Init = function()
 		this.priceDifferences[resource] = 0;
 };
 
+/** @param {Player} cmpPlayer */
 Barter.prototype.GetPrices = function(cmpPlayer)
 {
+	/** @type {{ buy: Record<GenericResName, number>, sell: Record<GenericResName, number> }} */
 	const prices = { "buy": {}, "sell": {} };
 	const multiplier = cmpPlayer.GetBarterMultiplier();
 	for (const resource in this.priceDifferences)
@@ -60,6 +62,12 @@ Barter.prototype.GetPrices = function(cmpPlayer)
 	return prices;
 };
 
+/**
+ * @param {number} playerID
+ * @param {GenericResName} resourceToSell
+ * @param {GenericResName} resourceToBuy
+ * @param {number} amount
+ */
 Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resourceToBuy, amount)
 {
 	if (amount <= 0)
@@ -127,6 +135,7 @@ Barter.prototype.ExchangeResources = function(playerID, resourceToSell, resource
 		this.restoreTimer = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).SetInterval(this.entity, IID_Barter, "ProgressTimeout", this.RESTORE_TIMER_INTERVAL, this.RESTORE_TIMER_INTERVAL, null);
 };
 
+/** @param {null} data */
 Barter.prototype.ProgressTimeout = function(data)
 {
 	let needRestore = false;

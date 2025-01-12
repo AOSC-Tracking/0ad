@@ -98,17 +98,23 @@ VisionSharing.prototype.IsBribable = function()
 	return this.template.Bribable == "true";
 };
 
+/** @param {MessageGarrisonedUnitsChanged} msg */
 VisionSharing.prototype.OnGarrisonedUnitsChanged = function(msg)
 {
 	this.CheckVisionSharings();
 };
 
+/** @param {MessageOwnershipChanged} msg */
 VisionSharing.prototype.OnOwnershipChanged = function(msg)
 {
 	if (this.activated)
 		this.CheckVisionSharings();
 };
 
+/**
+ * @param {number} player
+ * @param {number=} timeLength
+ */
 VisionSharing.prototype.AddSpy = function(player, timeLength)
 {
 	if (!this.IsBribable())
@@ -157,6 +163,9 @@ VisionSharing.prototype.AddSpy = function(player, timeLength)
 	return this.spyId;
 };
 
+/**
+ * @param {{ id: number }} data
+ */
 VisionSharing.prototype.RemoveSpy = function(data)
 {
 	this.spies.delete(data.id);
@@ -165,6 +174,7 @@ VisionSharing.prototype.RemoveSpy = function(data)
 
 /**
  * Returns true if this entity share its vision with player
+ * @param {number} player
  */
 VisionSharing.prototype.ShareVisionWith = function(player)
 {

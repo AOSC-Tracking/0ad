@@ -16,7 +16,7 @@ Garrisonable.prototype.Init = function()
 /**
  * @param {string} type - Unused.
  * @param {number} target - The entity ID of the target to check.
- * @return {Object} - Min and max ranges this entity needs to be in in order to garrison the target.
+ * @return {{ min: number, max: number }} - Min and max ranges this entity needs to be in in order to garrison the target.
  */
 Garrisonable.prototype.GetRange = function(type, target)
 {
@@ -159,6 +159,7 @@ Garrisonable.prototype.UnGarrison = function(forced = false)
 	return true;
 };
 
+/** @param {MessageEntityRenamed} msg */
 Garrisonable.prototype.OnEntityRenamed = function(msg)
 {
 	if (!this.holder)

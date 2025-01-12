@@ -24,6 +24,10 @@ function PreInitGame()
 	cmpRangeManager.ExploreTerritories();
 }
 
+/**
+ * @typedef {Record<string, any>} InitAttributesType
+ * @param {InitAttributesType} settings
+ */
 function InitGame(settings)
 {
 	// No settings when loading a map in Atlas, so do nothing

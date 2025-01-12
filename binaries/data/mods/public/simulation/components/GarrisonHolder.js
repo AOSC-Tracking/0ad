@@ -59,13 +59,16 @@ GarrisonHolder.prototype.IsGarrisoned = function(entity)
 };
 
 /**
- * @return {Object} max and min range at which entities can garrison the holder.
+ * @return {{ max: number, min: number }} max and min range at which entities can garrison the holder.
  */
 GarrisonHolder.prototype.LoadingRange = function()
 {
 	return { "max": +this.template.LoadingRange, "min": 0 };
 };
 
+/**
+ * @param {EntityId} ent - The entity to check.
+ */
 GarrisonHolder.prototype.CanPickup = function(ent)
 {
 	if (!this.template.Pickup || this.IsFull())
@@ -80,7 +83,7 @@ GarrisonHolder.prototype.GetEntities = function()
 };
 
 /**
- * @return {Array} unit classes which can be garrisoned inside this
+ * @return {Array<string>} unit classes which can be garrisoned inside this
  * particular entity. Obtained from the entity's template.
  */
 GarrisonHolder.prototype.GetAllowedClasses = function()
@@ -113,6 +116,7 @@ GarrisonHolder.prototype.GetHealRate = function()
  * This more useful for modern-day features. For example you can't garrison or ungarrison
  * a driving vehicle or plane.
  * @param {boolean} allow - Whether the entity should be garrisonable.
+ * @param {IID} callerID - The ID of the component calling this function.
  */
 GarrisonHolder.prototype.AllowGarrisoning = function(allow, callerID)
 {
@@ -154,6 +158,9 @@ GarrisonHolder.prototype.OccupiedSlots = function()
 	return count;
 };
 
+/**
+ * @param {EntityId} entity - The entity to check.
+ */
 GarrisonHolder.prototype.IsAllowedToGarrison = function(entity)
 {
 	if (!this.IsGarrisoningAllowed())
@@ -166,6 +173,9 @@ GarrisonHolder.prototype.IsAllowedToGarrison = function(entity)
 	return this.IsAllowedToBeGarrisoned(entity);
 };
 
+/**
+ * @param {EntityId} entity - The entity to check.
+ */
 GarrisonHolder.prototype.IsAllowedToBeGarrisoned = function(entity)
 {
 	if (!IsOwnedByMutualAllyOfEntity(entity, this.entity))
@@ -309,6 +319,7 @@ GarrisonHolder.prototype.UnloadAll = function()
  * Used to check if the garrisoning entity's health has fallen below
  * a certain limit after which all garrisoned units are unloaded.
  */
+/** @param {MessageHealthChanged} msg */
 GarrisonHolder.prototype.OnHealthChanged = function(msg)
 {
 	if (!this.HasEnoughHealth() && this.entities.length)
@@ -343,7 +354,8 @@ GarrisonHolder.prototype.StopTimer = function()
 };
 
 /**
- * @params data and lateness are unused.
+ * @param {any=} data unused
+ * @param {number=} lateness unused
  */
 GarrisonHolder.prototype.HealTimeout = function(data, lateness)
 {
@@ -390,6 +402,7 @@ GarrisonHolder.prototype.OnDestroy = function()
  * If a garrisoned entity is captured, or about to be killed (so its owner changes to '-1'),
  * remove it from the building so we only ever contain valid entities.
  */
+/** @param {MessageOwnershipChanged} msg */
 GarrisonHolder.prototype.OnGlobalOwnershipChanged = function(msg)
 {
 	// The ownership change may be on the garrisonholder
@@ -412,6 +425,7 @@ GarrisonHolder.prototype.OnGlobalOwnershipChanged = function(msg)
 /**
  * Update list of garrisoned entities when a game inits.
  */
+/** @param {MessageSkirmishReplacerReplaced} msg */
 GarrisonHolder.prototype.OnGlobalSkirmishReplacerReplaced = function(msg)
 {
 	if (!this.initGarrison)
@@ -442,6 +456,7 @@ GarrisonHolder.prototype.OnDiplomacyChanged = function()
 /**
  * Eject or kill a garrisoned unit which can no more be garrisoned
  * (garrisonholder's health too small or ownership changed).
+ * @param {EntityId[]} entities - The entity to check.
  */
 GarrisonHolder.prototype.EjectOrKill = function(entities)
 {
@@ -510,6 +525,7 @@ GarrisonHolder.prototype.SetInitGarrison = function(entities)
 /**
  * Initialise the garrisoned units.
  */
+/** @param {MessageInitGame} msg */
 GarrisonHolder.prototype.OnGlobalInitGame = function(msg)
 {
 	if (!this.initGarrison)
@@ -524,6 +540,7 @@ GarrisonHolder.prototype.OnGlobalInitGame = function(msg)
 	delete this.initGarrison;
 };
 
+/** @param {MessageValueModification} msg */
 GarrisonHolder.prototype.OnValueModification = function(msg)
 {
 	if (msg.component != "GarrisonHolder")

@@ -43,6 +43,7 @@ CeasefireManager.prototype.GetDiplomacyBeforeCeasefire = function()
 	return this.diplomacyBeforeCeasefire;
 };
 
+/** @param {number} ceasefireTime */
 CeasefireManager.prototype.StartCeasefire = function(ceasefireTime)
 {
 	// If invalid timeout given, return
