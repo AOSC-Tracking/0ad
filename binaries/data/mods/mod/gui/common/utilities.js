@@ -31,6 +31,10 @@ function distributeButtonsHorizontally(buttons)
 		}
 	});
 
+	if (buttonHeight === regularButtonHeight) {
+		return;
+	}
+
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
 			button.size.left,
