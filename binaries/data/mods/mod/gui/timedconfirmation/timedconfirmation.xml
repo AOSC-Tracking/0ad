@@ -27,21 +27,22 @@
 				style="ModernLabelText"
 				size="18 40 100%-18 100%-64"
 		/>
-		<!-- The size of the following buttons is set dynamically in timedconfirmation.js -->
-		<object name="tmcButton1"
-				style="ModernButtonRed"
-				type="button"
-				hidden="true"
-		/>
-		<object name="tmcButton2"
-				style="ModernButtonRed"
-				type="button"
-				hidden="true"
-		/>
-		<object name="tmcButton3"
-				style="ModernButtonRed"
-				type="button"
-				hidden="true"
-		/>
+		<object size="14 100%-56 100%-14 100%-8">
+			<object name="tmcButton1"
+					style="ModernButtonRed"
+					type="button"
+					hidden="true"
+			/>
+			<object name="tmcButton2"
+					style="ModernButtonRed"
+					type="button"
+					hidden="true"
+			/>
+			<object name="tmcButton3"
+					style="ModernButtonRed"
+					type="button"
+					hidden="true"
+			/>
+		</object>
 	</object>
 </objects>

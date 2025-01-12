@@ -13,21 +13,23 @@
 			<translatableAttribute id="caption">Pyrogenesis Mod Selector</translatableAttribute>
 		</object>
 
-		<object type="image" sprite="ModernFade" size="20 20 100%-20 100%-58">
+		<object type="image" sprite="ModernFade" size="20 20 100%-20 100%-56">
 			<object name="mainText" type="text" style="ModernTextPanel"/>
 		</object>
 
-		<object type="button" style="ModernButtonRed" tooltip_style="snToolTip" size="0%+24 100%-52 33%-4 100%-24" hotkey="cancel">
-			<translatableAttribute id="caption">Close</translatableAttribute>
-			<action on="Press">Engine.PopGuiPage();</action>
-		</object>
-		<object type="button" style="ModernButtonRed" size="33%+4 100%-52 66%-4 100%-24">
-			<translatableAttribute id="caption">Modding Guide</translatableAttribute>
-			<action on="Press">Engine.OpenURL("https://gitea.wildfiregames.com/0ad/0ad/wiki/Modding_Guide");</action>
-		</object>
-		<object type="button" style="ModernButtonRed" size="66%+4 100%-52 100%-24 100%-24">
-			<translatableAttribute id="caption">Visit mod.io</translatableAttribute>
-			<action on="Press">Engine.OpenURL("https://mod.io");</action>
+		<object size="14 100%-56 100%-14 100%-8">
+			<object type="button" name="closeButton" style="ModernButtonRed" tooltip_style="snToolTip" size="0%+24 100%-52 33%-4 100%-24" hotkey="cancel">
+				<translatableAttribute id="caption">Close</translatableAttribute>
+				<action on="Press">Engine.PopGuiPage();</action>
+			</object>
+			<object type="button" name="guideButton" style="ModernButtonRed" size="33%+4 100%-52 66%-4 100%-24">
+				<translatableAttribute id="caption">Modding Guide</translatableAttribute>
+				<action on="Press">Engine.OpenURL("https://gitea.wildfiregames.com/0ad/0ad/wiki/Modding_Guide");</action>
+			</object>
+			<object type="button" name="visitButton" style="ModernButtonRed" size="66%+4 100%-52 100%-24 100%-24">
+				<translatableAttribute id="caption">Visit mod.io</translatableAttribute>
+				<action on="Press">Engine.OpenURL("https://mod.io");</action>
+			</object>
 		</object>
 	</object>
 

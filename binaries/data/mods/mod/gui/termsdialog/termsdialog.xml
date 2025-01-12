@@ -17,27 +17,24 @@
 			<object type="dropdown" name="languageDropdown" style="ModernDropDown"/>
 		</object>
 
-		<object size="20 60 100%-20 100%-50">
+		<object size="20 60 100%-20 100%-56">
 			<object name="mainTextPanel" type="image" sprite="ModernFade">
 				<object name="mainText" type="text" style="ModernTextPanel"/>
 			</object>
 		</object>
 
-		<object size="25 100%-45 100% 100%-16">
+		<object size="14 100%-56 100%-14 100%-8">
+			<object type="button" name="button[0]" style="ModernButtonRed" hidden="true"/>
+			<object type="button" name="button[1]" style="ModernButtonRed" hidden="true"/>
 
-			<object size="0 0 160 100%" type="button" name="button[0]" style="ModernButtonRed" hidden="true"/>
-			<object size="170 0 330 100%" type="button" name="button[1]" style="ModernButtonRed" hidden="true"/>
+			<object type="button" name="closeButton" style="ModernButtonRed" hotkey="cancel">
+				<translatableAttribute id="caption">Decline</translatableAttribute>
+				<action on="Press">closeTerms(false);</action>
+			</object>
 
-			<object size="100%-355 0 100% 100%">
-				<object type="button" style="ModernButtonRed" size="0 0 160 100%" hotkey="cancel">
-					<translatableAttribute id="caption">Decline</translatableAttribute>
-					<action on="Press">closeTerms(false);</action>
-				</object>
-
-				<object name="connectButton" type="button" style="ModernButtonRed" size="170 0 330 100%">
-					<translatableAttribute id="caption">Accept</translatableAttribute>
-					<action on="Press">closeTerms(true);</action>
-				</object>
+			<object type="button" name="connectButton"  style="ModernButtonRed">
+				<translatableAttribute id="caption">Accept</translatableAttribute>
+				<action on="Press">closeTerms(true);</action>
 			</object>
 		</object>
 

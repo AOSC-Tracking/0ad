@@ -64,7 +64,7 @@
 		</object>
 
 		<!-- Available Mods Wrapper -->
-		<object size="16 66 100%-15 62%">
+		<object size="16 66 100%-15 60%">
 
 			<object style="ModernLabelText" type="text" size="0 5 100% 25">
 				<translatableAttribute id="caption">Available Mods</translatableAttribute>
@@ -108,7 +108,7 @@
 		</object>
 
 		<!-- Enabled Mods Wrapper -->
-		<object size="16 62% 100%-15 100%-84">
+		<object size="16 60% 100%-15 100%-100">
 
 			<object style="ModernLabelText" type="text" size="0 5 100% 25">
 				<translatableAttribute id="caption">Enabled Mods</translatableAttribute>
@@ -178,44 +178,48 @@
 		</object>
 
 		<!-- MOD-SPECIFIC BUTTONS -->
-		<object name="toggleModButton" type="button" style="ModernButtonRed" size="16 100%-80 196 100%-52" enabled="false"/>
-		<object name="visitWebButton" type="button" style="ModernButtonRed" size="200 100%-80 380 100%-52" enabled="false">
-			<translatableAttribute id="caption">Visit Website</translatableAttribute>
-			<action on="Press">visitModWebsite();</action>
+		<object size="14 100%-98 412 100%-56">
+			<object name="toggleModButton" type="button" style="ModernButtonRed" enabled="false"/>
+			<object name="visitWebButton" type="button" style="ModernButtonRed" enabled="false">
+				<translatableAttribute id="caption">Visit Website</translatableAttribute>
+				<action on="Press">visitModWebsite();</action>
+			</object>
 		</object>
 
 		<!-- Message -->
-		<object name="message" type="text" size="466 100%-78 100%-15 100%-52" text_align="left" textcolor="white"/>
+		<object name="message" type="text" size="466 100%-98 100%-15 100%-58" text_align="left" text_valign="center" textcolor="white"/>
 
 		<!-- BUTTONS -->
-		<object name="quitButton" type="button" style="ModernButtonRed" size="100%-932 100%-44 100%-752 100%-16">
-			<translatableAttribute id="caption">Quit</translatableAttribute>
-			<action on="Press">Engine.Exit();</action>
-		</object>
+		<object size="100%-1010 100%-56 100%-14 100%-14">
+			<object name="quitButton" type="button" style="ModernButtonRed">
+				<translatableAttribute id="caption">Quit</translatableAttribute>
+				<action on="Press">Engine.Exit();</action>
+			</object>
 
-		<object name="cancelButton" type="button" style="ModernButtonRed" size="100%-932 100%-44 100%-752 100%-16" hotkey="cancel">
-			<translatableAttribute id="caption">Cancel</translatableAttribute>
-			<action on="Press">closePage();</action>
-		</object>
+			<object name="cancelButton" type="button" style="ModernButtonRed" hotkey="cancel">
+				<translatableAttribute id="caption">Cancel</translatableAttribute>
+				<action on="Press">closePage();</action>
+			</object>
 
-		<object type="button" style="ModernButtonRed" size="100%-748 100%-44 100%-568 100%-16">
-			<translatableAttribute id="caption">Help</translatableAttribute>
-			<action on="Press">Engine.PushGuiPage("page_modhelp.xml");</action>
-		</object>
+			<object name="helpButton" type="button" style="ModernButtonRed">
+				<translatableAttribute id="caption">Help</translatableAttribute>
+				<action on="Press">Engine.PushGuiPage("page_modhelp.xml");</action>
+			</object>
 
-		<object type="button" style="ModernButtonRed" size="100%-564 100%-44 100%-384 100%-16">
-			<translatableAttribute id="caption">Download Mods</translatableAttribute>
-			<action on="Press">downloadModsButton();</action>
-		</object>
+			<object name="downloadButton" type="button" style="ModernButtonRed">
+				<translatableAttribute id="caption">Download Mods</translatableAttribute>
+				<action on="Press">downloadModsButton();</action>
+			</object>
 
-		<object name="saveConfigurationButton" type="button" style="ModernButtonRed" size="100%-380 100%-44 100%-200 100%-16">
-			<translatableAttribute id="caption">Save Configuration</translatableAttribute>
-			<action on="Press">saveMods();</action>
-		</object>
+			<object name="saveConfigurationButton" type="button" style="ModernButtonRed">
+				<translatableAttribute id="caption">Save Configuration</translatableAttribute>
+				<action on="Press">saveMods();</action>
+			</object>
 
-		<object name="startButton" type="button" style="ModernButtonRed" size="100%-196 100%-44 100%-16 100%-16">
-			<translatableAttribute id="caption">Save and Restart</translatableAttribute>
-			<action on="Press">startMods();</action>
+			<object name="startButton" type="button" style="ModernButtonRed">
+				<translatableAttribute id="caption">Save and Restart</translatableAttribute>
+				<action on="Press">startMods();</action>
+			</object>
 		</object>
 	</object>
 </objects>

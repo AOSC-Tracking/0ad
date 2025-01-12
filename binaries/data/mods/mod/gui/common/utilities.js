@@ -1,22 +1,37 @@
-function distributeButtonsHorizontally(button, captions)
+/**
+Distribute buttons equally across all available horizontal space.
+
+Also increases the buttons height equally if the caption of at least
+one button doesn't fit.
+*/
+function distributeButtonsHorizontally(buttons)
 {
-	const y1 = "100%-46";
-	const y2 = "100%-18";
-	switch (captions.length)
-	{
-	case 1:
-		button[0].size = "18 " + y1 + " 100%-18 " + y2;
-		break;
-	case 2:
-		button[0].size = "18 " + y1 + " 50%-5 " + y2;
-		button[1].size = "50%+5 " + y1 + " 100%-18 " + y2;
-		break;
-	case 3:
-		button[0].size = "18 " + y1 + " 33%-5 " + y2;
-		button[1].size = "33%+5 " + y1 + " 66%-5 " + y2;
-		button[2].size = "66%+5 " + y1 + " 100%-18 " + y2;
-		break;
-	}
+	const betweenButtonMargin = 8;
+	const regularButtonHeight = 28;
+	const multilineButtonHeight = 42;
+	const numButtons = buttons.length;
+
+	let y1 = "50%-" + (regularButtonHeight / 2);
+	let y2 = "50%+" + (regularButtonHeight / 2);
+	let buttonWidths = {};
+
+	buttons.forEach((button, i) => {
+		let x1 = i === 0 ? (betweenButtonMargin / 2) : (i * 100 / numButtons + "%+" + (betweenButtonMargin / 2));
+		let x2 = i === numButtons - 1 ? "100%-" + (betweenButtonMargin / 2) : ((i + 1) * 100 / numButtons + "%-" + (betweenButtonMargin / 2));
+		buttonWidths[i] = {"x1": x1, "x2": x2}
+		button.size = x1 + " " + y1 + " " + x2 + " " + y2
+
+		let captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
+		let buttonWidth = button.getComputedSize().right - button.getComputedSize().left;
+		if (captionWidth > (buttonWidth) && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
+			y1 = "50%-" + (multilineButtonHeight / 2);
+			y2 = "50%+" + (multilineButtonHeight / 2);
+		}
+	});
+
+	buttons.forEach((button, i) => {
+		button.size = buttonWidths[i].x1 + " " + y1 + " " + buttonWidths[i].x2 + " " + y2;
+	});
 }
 
 function setButtonCaptionsAndVisibility(buttons, captions, cancelHotkey, name)

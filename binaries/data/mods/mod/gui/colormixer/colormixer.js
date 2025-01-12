@@ -29,7 +29,7 @@ class ColorMixer
 		const button = [];
 		const closePromise =
 			setButtonCaptionsAndVisibility(button, this.captions, cancelHotkey, "cmButton");
-		distributeButtonsHorizontally(button, this.captions);
+		distributeButtonsHorizontally(button);
 
 		const c = color.split(" ");
 

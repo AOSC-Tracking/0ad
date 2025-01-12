@@ -48,7 +48,7 @@ class TimedConfirmation
 		const button = [];
 		const closePromise =
 			setButtonCaptionsAndVisibility(button, captions, cancelHotkey, "tmcButton");
-		distributeButtonsHorizontally(button, captions);
+		distributeButtonsHorizontally(button);
 
 		Engine.PopGuiPage(await closePromise);
 	}

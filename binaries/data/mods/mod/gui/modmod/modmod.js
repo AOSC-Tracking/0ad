@@ -147,9 +147,23 @@ function initGUIButtons(data)
 	let hasPreviousPage = !data || data.cancelbutton || false;
 	Engine.GetGUIObjectByName("cancelButton").hidden = !hasPreviousPage;
 	Engine.GetGUIObjectByName("quitButton").hidden = hasPreviousPage;
+
+	distributeButtonsHorizontally([
+		hasPreviousPage ? Engine.GetGUIObjectByName("cancelButton") : Engine.GetGUIObjectByName("quitButton"),
+		Engine.GetGUIObjectByName("helpButton"),
+		Engine.GetGUIObjectByName("downloadButton"),
+		Engine.GetGUIObjectByName("saveConfigurationButton"),
+		Engine.GetGUIObjectByName("startButton"),
+	]);
+
 	// Turn 'save' off, it will be enabled on any change.
 	Engine.GetGUIObjectByName("saveConfigurationButton").enabled = false;
 	Engine.GetGUIObjectByName("toggleModButton").caption = translateWithContext("mod activation", "Enable");
+
+	distributeButtonsHorizontally([
+	    Engine.GetGUIObjectByName("toggleModButton"),
+	    Engine.GetGUIObjectByName("visitWebButton")
+    ])
 }
 
 function saveMods()

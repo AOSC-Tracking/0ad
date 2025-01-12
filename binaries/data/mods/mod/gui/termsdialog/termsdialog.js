@@ -19,6 +19,13 @@ function init(data)
 
 	Engine.GetGUIObjectByName("title").caption = data.title;
 	initURLButtons(data.termsURL, data.urlButtons);
+	const buttons = [
+		Engine.GetGUIObjectByName("button[0]"),
+		Engine.GetGUIObjectByName("button[1]"),
+		Engine.GetGUIObjectByName("closeButton"),
+		Engine.GetGUIObjectByName("connectButton")
+	]
+	distributeButtonsHorizontally(buttons);
 	initLanguageSelection();
 }
 

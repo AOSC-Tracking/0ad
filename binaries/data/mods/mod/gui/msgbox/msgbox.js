@@ -25,7 +25,7 @@ async function init(data)
 
 	let mbButton = [];
 	const closePromise = setButtonCaptionsAndVisibility(mbButton, captions, mbCancelHotkey, "mbButton");
-	distributeButtonsHorizontally(mbButton, captions);
+	distributeButtonsHorizontally(mbButton);
 
 	Engine.PopGuiPage(await closePromise);
 }

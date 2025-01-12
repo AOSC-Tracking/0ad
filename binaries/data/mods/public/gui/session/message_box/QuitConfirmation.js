@@ -28,6 +28,6 @@ QuitConfirmation.prototype.Buttons =
 ];
 
 QuitConfirmation.prototype.Width = 600;
-QuitConfirmation.prototype.Height = 200;
+QuitConfirmation.prototype.Height = 180;
 
 QuitConfirmation.prototype.ResumeOnClose = false;
