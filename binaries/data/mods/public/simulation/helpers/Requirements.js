@@ -1,8 +1,8 @@
-function RequirementsHelper() {}
+function RequirementsHelperClass() {}
 
-RequirementsHelper.prototype.DEFAULT_RECURSION_DEPTH = 1;
+RequirementsHelperClass.prototype.DEFAULT_RECURSION_DEPTH = 1;
 
-RequirementsHelper.prototype.EntityRequirementsSchema =
+RequirementsHelperClass.prototype.EntityRequirementsSchema =
 	"<element name='Entities' a:help='Entities that need to be controlled.'>" +
 		"<oneOrMore>" +
 			"<element a:help='Class of entity that needs to be controlled.'>" +
@@ -21,7 +21,7 @@ RequirementsHelper.prototype.EntityRequirementsSchema =
 		"</oneOrMore>" +
 	"</element>";
 
-RequirementsHelper.prototype.TechnologyRequirementsSchema =
+RequirementsHelperClass.prototype.TechnologyRequirementsSchema =
 	"<element name='Techs' a:help='White-space separated list of technologies that need to be researched. ! negates a tech.'>" +
 		"<attribute name='datatype'>" +
 			"<value>tokens</value>" +
@@ -33,7 +33,7 @@ RequirementsHelper.prototype.TechnologyRequirementsSchema =
  * @param {number} recursionDepth - How deep we recurse.
  * @return {string} - A RelaxRNG schema for requirements.
  */
-RequirementsHelper.prototype.RequirementsSchema = function(recursionDepth)
+RequirementsHelperClass.prototype.RequirementsSchema = function(recursionDepth)
 {
 	return "" +
 		"<oneOrMore>" +
@@ -45,7 +45,7 @@ RequirementsHelper.prototype.RequirementsSchema = function(recursionDepth)
  * @param {number} recursionDepth - How deep we recurse.
  * @return {string} - A RelaxRNG schema for chosing requirements.
  */
-RequirementsHelper.prototype.ChoicesSchema = function(recursionDepth)
+RequirementsHelperClass.prototype.ChoicesSchema = function(recursionDepth)
 {
 	const allAnySchema = recursionDepth > 0 ? "" +
 		"<element name='All' a:help='Requires all of the conditions to be met.'>" +
@@ -67,7 +67,7 @@ RequirementsHelper.prototype.ChoicesSchema = function(recursionDepth)
  * @param {number} recursionDepth - How deeply recursive we build the schema.
  * @return {string} - A RelaxRNG schema for requirements.
  */
-RequirementsHelper.prototype.BuildSchema = function(recursionDepth = this.DEFAULT_RECURSION_DEPTH)
+RequirementsHelperClass.prototype.BuildSchema = function(recursionDepth = this.DEFAULT_RECURSION_DEPTH)
 {
 	return "" +
 		"<element name='Requirements' a:help='The requirements that ought to be met before this entity can be produced.'>" +
@@ -87,7 +87,7 @@ RequirementsHelper.prototype.BuildSchema = function(recursionDepth = this.DEFAUL
  * @param {number} playerID -
  * @return {boolean} -
  */
-RequirementsHelper.prototype.AreRequirementsMet = function(template, playerID)
+RequirementsHelperClass.prototype.AreRequirementsMet = function(template, playerID)
 {
 	if (!template || !Object.keys(template).length)
 		return true;
@@ -101,7 +101,7 @@ RequirementsHelper.prototype.AreRequirementsMet = function(template, playerID)
  * @param {component} cmpTechManager -
  * @return {boolean} -
  */
-RequirementsHelper.prototype.AllRequirementsMet = function(template, cmpTechManager)
+RequirementsHelperClass.prototype.AllRequirementsMet = function(template, cmpTechManager)
 {
 	for (const requirementType in template)
 	{
@@ -135,7 +135,7 @@ RequirementsHelper.prototype.AllRequirementsMet = function(template, cmpTechMana
  * @param {component} cmpTechManager -
  * @return {boolean} -
  */
-RequirementsHelper.prototype.AnyRequirementsMet = function(template, cmpTechManager)
+RequirementsHelperClass.prototype.AnyRequirementsMet = function(template, cmpTechManager)
 {
 	for (const requirementType in template)
 	{
@@ -164,4 +164,4 @@ RequirementsHelper.prototype.AnyRequirementsMet = function(template, cmpTechMana
 	return false;
 };
 
-Engine.RegisterGlobal("RequirementsHelper", new RequirementsHelper());
+Engine.RegisterGlobal("RequirementsHelper", new RequirementsHelperClass());

@@ -1,7 +1,7 @@
 /**
  * Provides attack and damage-related helpers.
  */
-function AttackHelper() {}
+function AttackHelperClass() {}
 
 const DirectEffectsSchema =
 	"<element name='Damage'>" +
@@ -58,7 +58,7 @@ const StatusEffectsSchema =
  *
  * @return {string} - RelaxNG schema string.
  */
-AttackHelper.prototype.BuildAttackEffectsSchema = function()
+AttackHelperClass.prototype.BuildAttackEffectsSchema = function()
 {
 	return "" +
 	"<oneOrMore>" +
@@ -88,7 +88,7 @@ AttackHelper.prototype.BuildAttackEffectsSchema = function()
 /**
  * Returns a template-like object of attack effects.
  */
-AttackHelper.prototype.GetAttackEffectsData = function(valueModifRoot, template, entity)
+AttackHelperClass.prototype.GetAttackEffectsData = function(valueModifRoot, template, entity)
 {
 	let ret = {};
 
@@ -112,7 +112,7 @@ AttackHelper.prototype.GetAttackEffectsData = function(valueModifRoot, template,
 	return ret;
 };
 
-AttackHelper.prototype.GetStatusEffectsData = function(valueModifRoot, template, entity)
+AttackHelperClass.prototype.GetStatusEffectsData = function(valueModifRoot, template, entity)
 {
 	let result = {};
 	for (let effect in template)
@@ -130,7 +130,7 @@ AttackHelper.prototype.GetStatusEffectsData = function(valueModifRoot, template,
 	return result;
 };
 
-AttackHelper.prototype.GetStatusEffectsModifications = function(valueModifRoot, template, entity, effect)
+AttackHelperClass.prototype.GetStatusEffectsModifications = function(valueModifRoot, template, entity, effect)
 {
 	let modifiers = {};
 	for (let modifier in template)
@@ -161,7 +161,7 @@ AttackHelper.prototype.GetStatusEffectsModifications = function(valueModifRoot, 
  *
  * @return {number} - The total value of the effect.
  */
-AttackHelper.prototype.GetTotalAttackEffects = function(target, effectData, effectType, bonusMultiplier, cmpResistance)
+AttackHelperClass.prototype.GetTotalAttackEffects = function(target, effectData, effectType, bonusMultiplier, cmpResistance)
 {
 	let total = 0;
 	if (!cmpResistance)
@@ -215,7 +215,7 @@ AttackHelper.prototype.GetTotalAttackEffects = function(target, effectData, effe
  * @param {boolean} friendlyFire - A flag indicating if allied entities are also damaged.
  * @return {number[]} The ids of players need to be damaged.
  */
-AttackHelper.prototype.GetPlayersToDamage = function(attackerOwner, friendlyFire)
+AttackHelperClass.prototype.GetPlayersToDamage = function(attackerOwner, friendlyFire)
 {
 	if (!friendlyFire)
 		return QueryPlayerIDInterface(attackerOwner, IID_Diplomacy).GetEnemies();
@@ -236,7 +236,7 @@ AttackHelper.prototype.GetPlayersToDamage = function(attackerOwner, friendlyFire
  * @param {Vector3D} [data.direction] - The unit vector defining the direction. Needed for linear splash damage.
  * @param {boolean}  data.friendlyFire - A flag indicating if allied entities also ought to be damaged.
  */
-AttackHelper.prototype.CauseDamageOverArea = function(data)
+AttackHelperClass.prototype.CauseDamageOverArea = function(data)
 {
 	let nearEnts = PositionHelper.EntitiesNearPoint(data.origin, data.radius,
 		this.GetPlayersToDamage(data.attackerOwner, data.friendlyFire));
@@ -300,7 +300,7 @@ AttackHelper.prototype.CauseDamageOverArea = function(data)
  *
  * @return {boolean} - Whether we handled the attack.
  */
-AttackHelper.prototype.HandleAttackEffects = function(target, data, bonusMultiplier = 1)
+AttackHelperClass.prototype.HandleAttackEffects = function(target, data, bonusMultiplier = 1)
 {
 	let cmpResistance = Engine.QueryInterface(target, IID_Resistance);
 	if (cmpResistance && cmpResistance.IsInvulnerable())
@@ -354,7 +354,7 @@ AttackHelper.prototype.HandleAttackEffects = function(target, data, bonusMultipl
  * @param {Object} template - The bonus' template.
  * @return {number} - The source entity's attack bonus against the specified target.
  */
-AttackHelper.prototype.GetAttackBonus = function(source, target, type, template)
+AttackHelperClass.prototype.GetAttackBonus = function(source, target, type, template)
 {
 	let cmpIdentity = Engine.QueryInterface(target, IID_Identity);
 	if (!cmpIdentity)
@@ -377,5 +377,5 @@ AttackHelper.prototype.GetAttackBonus = function(source, target, type, template)
 	return attackBonus;
 };
 
-Engine.RegisterGlobal("AttackHelper", new AttackHelper());
+Engine.RegisterGlobal("AttackHelper", new AttackHelperClass());
 Engine.RegisterGlobal("g_AttackEffects", new AttackEffects());
