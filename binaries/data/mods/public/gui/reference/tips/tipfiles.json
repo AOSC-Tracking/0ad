@@ -216,19 +216,31 @@
   {
     "textFile": "mp_friendly.txt",
     "imageFiles": [
-      "pikemen.png"
+      "war_elephants.png"
     ]
   },
   {
     "textFile": "mp_password_safety.txt",
     "imageFiles": [
-      "pikemen.png"
+      "civic_center.png"
     ]
   },
   {
     "textFile": "mp_report_violations.txt",
     "imageFiles": [
-      "pikemen.png"
+      "lighthouse.png"
+    ]
+  },
+  {
+    "textFile": "mp_prevent_phishing.txt",
+    "imageFiles": [
+      "spearmen.png"
+    ]
+  },
+  {
+    "textFile": "mp_unauthorized_software.txt",
+    "imageFiles": [
+      "defense_tower.png"
     ]
   },
   {
