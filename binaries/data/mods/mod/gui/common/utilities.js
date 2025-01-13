@@ -37,7 +37,7 @@ function distributeButtonsHorizontally(buttons)
 			(buttonHeight / 2),
 			(i * 100 / numButtons),
 			50,
-			i === numButtons ? 100 : ((i + 1) * 100 / numButtons),
+			((i + 1) * 100 / numButtons),
 			50
 		);
 	});
