@@ -13,6 +13,12 @@ function distributeButtonsHorizontally(buttons)
 
 	let buttonHeight = regularButtonHeight;
 
+	const buttonParents = buttons.map((button) => { return button.parent; });
+	if (new Set(buttonParents).size !== 1) {
+		warn("Buttons need to have the same parent object to be distributed horizontally.");
+		return;
+	}
+
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
 			(betweenButtonMargin / 2),
