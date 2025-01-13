@@ -19,6 +19,16 @@ function distributeButtonsHorizontally(buttons)
 		return;
 	}
 
+	const parentWidth = buttons[0].parent.getComputedSize().right - buttons[0].parent.getComputedSize().left;
+	const buttonWidth = (parentWidth - betweenButtonMargin * (numButtons - 1)) / numButtons;
+
+	buttons.forEach((button, i) => {
+		const captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
+		if (captionWidth > (buttonWidth) && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
+			buttonHeight = multilineButtonHeight;
+		}
+	});
+
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
 			(betweenButtonMargin / 2),
@@ -28,28 +38,6 @@ function distributeButtonsHorizontally(buttons)
 			(i * 100 / numButtons),
 			50,
 			i === numButtons ? 100 : ((i + 1) * 100 / numButtons),
-			50
-		);
-		const captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
-		const buttonWidth = button.getComputedSize().right - button.getComputedSize().left;
-		if (captionWidth > (buttonWidth) && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
-			buttonHeight = multilineButtonHeight;
-		}
-	});
-
-	if (buttonHeight === regularButtonHeight) {
-		return;
-	}
-
-	buttons.forEach((button, i) => {
-		button.size = new GUISize(
-			button.size.left,
-			-(buttonHeight / 2),
-			button.size.right,
-			(buttonHeight / 2),
-			button.size.rleft,
-			50,
-			button.size.rright,
 			50
 		);
 	});
