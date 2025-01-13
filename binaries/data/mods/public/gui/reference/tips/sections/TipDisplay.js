@@ -31,14 +31,17 @@ class TipDisplay
 		this.previousImageButton.tooltip = this.TooltipPreviousImage;
 		this.nextImageButton.tooltip = this.TooltipNextImage;
 
-		this.tipFilesData =
-			hotloadData?.tipFilesData ||
-			shuffleArray(
-				Engine.ReadJSONFile(this.TipFilesDataFile)
-			).map(tip => {
-				tip.imageFiles = shuffleArray(tip.imageFiles);
-				return tip;
-			});
+		if (Engine.HasNetClient()) 
+			this.tipFilesData = shuffleArray(Engine.ReadJSONFile(this.TipFilesDataFile).filter(tipFile => tipFile.textFile.startsWith("mp_")));
+		else 
+			this.tipFilesData =
+				hotloadData?.tipFilesData ||
+				shuffleArray(
+					Engine.ReadJSONFile(this.TipFilesDataFile)
+				).map(tip => {
+					tip.imageFiles = shuffleArray(tip.imageFiles);
+					return tip;
+				});
 
 		this.currentTip = {};
 		this.tipIndex = -1;

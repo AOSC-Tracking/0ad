@@ -208,6 +208,30 @@
     ]
   },
   {
+    "textFile": "mp_dont_cheat.txt",
+    "imageFiles": [
+      "pikemen.png"
+    ]
+  },
+  {
+    "textFile": "mp_friendly.txt",
+    "imageFiles": [
+      "pikemen.png"
+    ]
+  },
+  {
+    "textFile": "mp_password_safety.txt",
+    "imageFiles": [
+      "pikemen.png"
+    ]
+  },
+  {
+    "textFile": "mp_report_violations.txt",
+    "imageFiles": [
+      "pikemen.png"
+    ]
+  },
+  {
     "textFile": "nomad_mode.txt",
     "imageFiles": [
       "nomad_mode.png"
