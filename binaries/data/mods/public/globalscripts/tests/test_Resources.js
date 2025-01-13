@@ -24,7 +24,7 @@ let resources = {
 Engine.ListDirectoryFiles = () => Object.keys(resources);
 Engine.ReadJSONFile = (file) => resources[file];
 
-let res = new Resources();
+let res = new ResourcesData();
 
 TS_ASSERT_EQUALS(res.GetResources().length, 2);
 TS_ASSERT_EQUALS(res.GetResources()[0].code, "b");

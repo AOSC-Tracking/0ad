@@ -8,7 +8,7 @@
  * @param subtypes - If true, resource subtypes will be included as well.
  * @return RelaxNG schema string
  */
-Resources.prototype.BuildSchema = function(datatype, additional = [], subtypes = false)
+ResourcesData.prototype.BuildSchema = function(datatype, additional = [], subtypes = false)
 {
 	if (!datatype)
 		return "";
@@ -56,7 +56,7 @@ Resources.prototype.BuildSchema = function(datatype, additional = [], subtypes =
  * @oaram subtypes - If set to true, the choices returned will be resource subtypes, rather than main types
  * @return String of RelaxNG Schema `<choice/>` values.
  */
-Resources.prototype.BuildChoicesSchema = function(subtypes = false)
+ResourcesData.prototype.BuildChoicesSchema = function(subtypes = false)
 {
 	let schema = "";
 
@@ -71,4 +71,4 @@ Resources.prototype.BuildChoicesSchema = function(subtypes = false)
 	return "<choice>" + schema + "</choice>";
 };
 
-Resources = new Resources();
+Engine.RegisterGlobal("Resources", new ResourcesData());

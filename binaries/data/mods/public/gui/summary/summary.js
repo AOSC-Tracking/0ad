@@ -124,7 +124,7 @@ var g_Teams = [];
 var g_PlayerCount;
 
 var g_GameData;
-var g_ResourceData = new Resources();
+var g_ResourceData = new ResourcesData();
 
 /**
  * Selected chart indexes.

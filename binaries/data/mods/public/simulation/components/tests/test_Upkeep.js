@@ -1,4 +1,4 @@
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetCodes": () => ["food", "metal"],
 	"GetTradableCodes": () => ["food", "metal"],
 	"GetBarterableCodes": () => ["food", "metal"],
@@ -14,7 +14,7 @@ Resources = {
 				"</optional>";
 		return "<interleave>" + schema + "</interleave>";
 	}
-};
+});
 
 Engine.LoadComponentScript("interfaces/Player.js");
 Engine.LoadComponentScript("interfaces/StatisticsTracker.js");

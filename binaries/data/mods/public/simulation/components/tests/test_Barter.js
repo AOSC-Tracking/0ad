@@ -9,10 +9,10 @@ Engine.LoadComponentScript("Barter.js");
 // truePrice. Use the same for each resource for those tests.
 const truePrice = 110;
 
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetBarterableCodes": () => ["wood", "stone", "metal"],
 	"GetResource": (resource) => ({ "truePrice": truePrice })
-};
+});
 
 const playerID = 1;
 const playerEnt = 11;

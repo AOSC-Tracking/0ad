@@ -6,7 +6,7 @@
  * Provide the bare minimum so we can load templates without error.
  * We don't actually need to know the actual resource codes.
  */
-const g_Resources = {
+const Resources = {
 	"GetCodes": () => [],
 };
 
@@ -48,7 +48,7 @@ function loadWallsetsFromCivData()
 function loadWallset(wallsetPath, civ)
 {
 	const newWallset = { "curves": [] };
-	const wallsetData = GetTemplateDataHelper(wallsetPath, null, null, g_Resources).wallSet;
+	const wallsetData = GetTemplateDataHelper(wallsetPath, null, null, Resources).wallSet;
 
 	for (const element in wallsetData.templates)
 		if (element == "curves")
@@ -271,7 +271,7 @@ function getWallElement(element, style)
 function readyWallElement(path, civCode)
 {
 	path = path.replace(/\{civ\}/g, civCode);
-	const template = GetTemplateDataHelper(Engine.GetTemplate(path), null, null, g_Resources);
+	const template = GetTemplateDataHelper(Engine.GetTemplate(path), null, null, Resources);
 	const length = template.wallPiece ? template.wallPiece.length : template.obstruction.shape.width;
 
 	return deepfreeze({

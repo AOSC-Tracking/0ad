@@ -2,7 +2,7 @@
  * This needs to stay in the global scope, as it is used by various functions
  * within gui/common/tooltip.js
  */
-var g_ResourceData = new Resources();
+var g_ResourceData = new ResourcesData();
 
 var g_Page;
 

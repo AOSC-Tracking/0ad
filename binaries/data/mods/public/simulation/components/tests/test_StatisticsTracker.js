@@ -6,9 +6,9 @@ AddMock(SYSTEM_ENTITY, IID_Timer, {
 	"SetInterval": () => true
 });
 
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetCodes": () => ["food", "metal", "stone", "wood"]
-};
+});
 
 let cmpStatisticsTracker = ConstructComponent(SYSTEM_ENTITY, "StatisticsTracker", {
 	"UnitClasses": { "_string": "Infantry FishingBoat" },

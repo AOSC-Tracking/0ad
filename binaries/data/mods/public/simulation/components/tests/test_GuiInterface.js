@@ -47,7 +47,7 @@ Engine.LoadComponentScript("interfaces/Upkeep.js");
 Engine.LoadComponentScript("interfaces/BuildingAI.js");
 Engine.LoadComponentScript("GuiInterface.js");
 
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetCodes": () => ["food", "metal", "stone", "wood"],
 	"GetNames": () => ({
 		"food": "Food",
@@ -60,7 +60,7 @@ Resources = {
 			resource == "food" ? "ignore" :
 				resource == "wood" ? "abundant" : "sparse"
 	})
-};
+});
 
 var cmp = ConstructComponent(SYSTEM_ENTITY, "GuiInterface");
 

@@ -1,4 +1,4 @@
-Resources = new Resources();
+var Resources = new ResourcesData();
 
 var API3 = function(m)
 {

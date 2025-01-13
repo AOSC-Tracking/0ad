@@ -27,10 +27,7 @@ Looter.prototype.Collect = function(targetEntity)
 	let lootTemplate = cmpLoot.GetResources();
 	let resources = {};
 	for (let type of Resources.GetCodes())
-		resources[type] =
-			ApplyValueModificationsToEntity(
-				"Looter/Resource/"+type, lootTemplate[type] || 0, this.entity) +
-			(resourcesCarried[type] || 0);
+		resources[type] = ApplyValueModificationsToEntity("Looter/Resource/" + type, lootTemplate[type] || 0, this.entity) + (resourcesCarried[type] || 0);
 
 	// Transfer resources
 	var cmpPlayer = QueryOwnerInterface(this.entity);

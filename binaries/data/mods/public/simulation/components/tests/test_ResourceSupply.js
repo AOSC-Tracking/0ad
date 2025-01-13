@@ -1,4 +1,4 @@
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"BuildChoicesSchema": () => {
 		let schema = "";
 		for (let res of ["food", "metal"])
@@ -9,7 +9,7 @@ Resources = {
 		}
 		return "<choice>" + schema + "</choice>";
 	}
-};
+});
 
 Engine.LoadHelperScript("ValueModification.js");
 Engine.LoadComponentScript("interfaces/Health.js");

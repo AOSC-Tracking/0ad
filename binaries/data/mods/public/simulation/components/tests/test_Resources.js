@@ -1,4 +1,4 @@
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetCodes": () => ["food", "metal", "stone", "wood"],
 	"GetTradableCodes": () => ["food", "metal", "stone", "wood"],
 	"GetBarterableCodes": () => ["food", "metal", "stone", "wood"],
@@ -30,7 +30,7 @@ Resources = {
 			}
 		};
 	}
-};
+});
 
 Engine.LoadHelperScript("Player.js");
 Engine.LoadComponentScript("interfaces/Player.js");

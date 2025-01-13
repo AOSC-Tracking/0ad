@@ -1,7 +1,7 @@
 /**
  * This class provides a cache to all resource names and properties defined by the JSON files.
  */
-function Resources()
+function ResourcesData()
 {
 	this.resourceData = [];
 	this.resourceDataObj = {};
@@ -56,7 +56,7 @@ function Resources()
  * Returns the objects defined in the JSON files for all available resources,
  * ordered as defined in these files.
  */
-Resources.prototype.GetResources = function()
+ResourcesData.prototype.GetResources = function()
 {
 	return this.resourceData;
 };
@@ -64,7 +64,7 @@ Resources.prototype.GetResources = function()
 /**
  * Returns the object defined in the JSON file for the given resource.
  */
-Resources.prototype.GetResource = function(type)
+ResourcesData.prototype.GetResource = function(type)
 {
 	return this.resourceDataObj[type];
 };
@@ -73,7 +73,7 @@ Resources.prototype.GetResource = function(type)
  * Returns an array containing all resource codes ordered as defined in the resource files.
  * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
-Resources.prototype.GetCodes = function()
+ResourcesData.prototype.GetCodes = function()
 {
 	return this.resourceCodes;
 };
@@ -82,7 +82,7 @@ Resources.prototype.GetCodes = function()
  * Returns an array containing all barterable resource codes ordered as defined in the resource files.
  * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
-Resources.prototype.GetBarterableCodes = function()
+ResourcesData.prototype.GetBarterableCodes = function()
 {
 	return this.resourceCodesByProperty.barterable || [];
 };
@@ -91,7 +91,7 @@ Resources.prototype.GetBarterableCodes = function()
  * Returns an array containing all tradable resource codes ordered as defined in the resource files.
  * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
-Resources.prototype.GetTradableCodes = function()
+ResourcesData.prototype.GetTradableCodes = function()
 {
 	return this.resourceCodesByProperty.tradable || [];
 };
@@ -100,7 +100,7 @@ Resources.prototype.GetTradableCodes = function()
  * Returns an array containing all tributable resource codes ordered as defined in the resource files.
  * @return {string[]} - Data of the form [ "food", "wood", ... ].
  */
-Resources.prototype.GetTributableCodes = function()
+ResourcesData.prototype.GetTributableCodes = function()
 {
 	return this.resourceCodesByProperty.tributable || [];
 };
@@ -109,7 +109,7 @@ Resources.prototype.GetTributableCodes = function()
  * Returns an object mapping resource codes to translatable resource names. Includes subtypes.
  * For example { "food": "Food", "fish": "Fish", "fruit": "Fruit", "metal": "Metal", ... }
  */
-Resources.prototype.GetNames = function()
+ResourcesData.prototype.GetNames = function()
 {
 	return this.resourceNames;
 };

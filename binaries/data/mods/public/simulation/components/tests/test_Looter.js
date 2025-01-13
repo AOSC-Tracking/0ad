@@ -1,4 +1,4 @@
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"GetCodes": () => ["food", "metal", "stone", "wood"],
 	"GetTradableCodes": () => ["food", "metal", "stone", "wood"],
 	"GetBarterableCodes": () => ["food", "metal", "stone", "wood"],
@@ -14,7 +14,7 @@ Resources = {
 				"</optional>";
 		return "<interleave>" + schema + "</interleave>";
 	}
-};
+});
 
 Engine.LoadComponentScript("interfaces/Loot.js");
 Engine.LoadComponentScript("interfaces/Looter.js");

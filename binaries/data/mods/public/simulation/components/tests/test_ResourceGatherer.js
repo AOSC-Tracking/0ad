@@ -1,4 +1,4 @@
-Resources = {
+Engine.RegisterGlobal("Resources", {
 	"BuildSchema": () => {
 		let schema = "";
 		for (let res of ["food", "metal", "wood"])
@@ -18,7 +18,7 @@ Resources = {
 			}
 		};
 	}
-};
+});
 
 Engine.LoadHelperScript("Player.js");
 Engine.LoadComponentScript("interfaces/ResourceDropsite.js");

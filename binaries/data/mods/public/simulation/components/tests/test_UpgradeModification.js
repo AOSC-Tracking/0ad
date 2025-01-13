@@ -1,7 +1,8 @@
 Engine.LoadHelperScript("Player.js");
 Engine.LoadHelperScript("Requirements.js");
 Engine.LoadHelperScript("ValueModification.js");
-Resources = {
+
+Engine.RegisterGlobal("Resources", {
 	"BuildSchema": type => {
 		let schema = "";
 		for (let res of ["food", "metal", "stone", "wood"])
@@ -13,7 +14,8 @@ Resources = {
 				"</optional>";
 		return "<interleave>" + schema + "</interleave>";
 	}
-};
+});
+
 Engine.LoadComponentScript("interfaces/ProductionQueue.js");
 Engine.LoadComponentScript("interfaces/ModifiersManager.js"); // Provides `IID_ModifiersManager`, used below.
 Engine.LoadComponentScript("interfaces/Timer.js"); // Provides `IID_Timer`, used below.

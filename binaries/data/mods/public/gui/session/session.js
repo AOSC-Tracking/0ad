@@ -129,7 +129,7 @@ var g_EntityStates = {};
 var g_TemplateData = {};
 var g_TechnologyData = {};
 
-var g_ResourceData = new Resources();
+var g_ResourceData = new ResourcesData();
 
 /**
  * These handlers are called each time a new turn was simulated.
