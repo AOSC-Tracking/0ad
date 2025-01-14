@@ -31,13 +31,17 @@ class TipDisplay
 		this.previousImageButton.tooltip = this.TooltipPreviousImage;
 		this.nextImageButton.tooltip = this.TooltipNextImage;
 
+		this.singlePlayerTipsChance = 0.5;
+
 		if (Engine.HasNetClient()) 
-			this.tipFilesData = shuffleArray(Engine.ReadJSONFile(this.TipFilesDataFile).filter(tipFile => tipFile.textFile.startsWith("mp_")));
+			this.tipFilesData = this.getMultiplayerTipsList();
 		else 
 			this.tipFilesData =
 				hotloadData?.tipFilesData ||
 				shuffleArray(
 					Engine.ReadJSONFile(this.TipFilesDataFile)
+				).filter((tip) =>
+					!tip.textFile.startsWith("mp_")
 				).map(tip => {
 					tip.imageFiles = shuffleArray(tip.imageFiles);
 					return tip;
@@ -60,6 +64,27 @@ class TipDisplay
 		this.onTipIndexChange(hotloadData?.tipIndex ? hotloadData.tipIndex + 1 : 1);
 		if (hotloadData?.tipImageIndex)
 			this.onTipImageIndexChange(hotloadData.tipImageIndex + 1);
+	}
+
+	getMultiplayerTipsList() {
+		const tips = Engine.ReadJSONFile(this.TipFilesDataFile);
+		const multiPlayerTips = tips.filter(tipFile => tipFile.textFile.startsWith("mp_"));
+		const totalSinglePlayerTips = Math.floor(multiPlayerTips.length * this.singlePlayerTipsChance);
+		return shuffleArray(multiPlayerTips.concat(this.getRandomSinglePlayerTips(totalSinglePlayerTips)));
+	}
+
+	getRandomSinglePlayerTips(amount) {
+		const tips = Engine.ReadJSONFile(this.TipFilesDataFile);
+		const randomTips = [];
+		let i = 0;
+		while (i < amount) {
+			const tip = tips[Math.round(Math.random() * Object.keys(tips).length)];
+			if (tip.textFile.startsWith("mp_"))
+				continue;
+			randomTips.push(tip);
+			i++;
+		}
+		return randomTips;
 	}
 
 	getHotloadData()
