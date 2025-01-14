@@ -135,9 +135,10 @@ public:
 		void Reset();
 
 		/**
-		 * Image stacks, for left and right floating images.
+		 * Two arrays, for the left and right floating images respectively.
+		 * The pairs contain the specified filepath and a vertical displacement value.
 		 */
-		std::array<std::vector<CStr>, 2> m_Images; // left and right
+		std::array<std::vector<std::pair<CStr, float>>, 2> m_Images;
 
 		/**
 		 * Text and Sprite Calls.

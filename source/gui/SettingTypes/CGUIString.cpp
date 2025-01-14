@@ -111,11 +111,20 @@ void CGUIString::GenerateTextCall(const CGUI& pGUI, SFeedback& Feedback, CStrInt
 			switch (tag.m_TagType)
 			{
 			case TextChunk::Tag::TAG_IMGLEFT:
-				Feedback.m_Images[SFeedback::Left].push_back(path);
-				break;
 			case TextChunk::Tag::TAG_IMGRIGHT:
-				Feedback.m_Images[SFeedback::Right].push_back(path);
+			{
+				float displacement = 0;
+				for (const TextChunk::Tag::TagAttribute& tagAttrib : tag.m_TagAttributes)
+					if (tagAttrib.attrib == L"displace_v" && !tagAttrib.value.empty())
+						if (!CGUI::ParseString<float>(&pGUI, tagAttrib.value, displacement))
+							LOGERROR("Error parsing 'displace_v' value for tag [ICON]");
+
+				if (tag.m_TagType == TextChunk::Tag::TAG_IMGLEFT)
+					Feedback.m_Images[SFeedback::Left].push_back(std::make_pair(path, displacement));
+				else
+					Feedback.m_Images[SFeedback::Right].push_back(std::make_pair(path, displacement));
 				break;
+			}
 			case TextChunk::Tag::TAG_ICON:
 			{
 				// We'll need to setup a text-call that will point

@@ -195,7 +195,7 @@ public:
 
 	void SetupSpriteCalls(
 		const CGUI& pGUI,
-		const std::array<std::vector<CStr>, 2>& feedbackImages,
+		const std::array<std::vector<std::pair<CStr, float>>, 2>& feedbackImages,
 		const float y,
 		const float width,
 		const float bufferZone,

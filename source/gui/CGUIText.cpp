@@ -122,7 +122,8 @@ CGUIText::CGUIText(const CGUI& pGUI, const CGUIString& string, const CStrW& font
 // Loop through our images queues, to see if images have been added.
 void CGUIText::SetupSpriteCalls(
 	const CGUI& pGUI,
-	const std::array<std::vector<CStr>, 2>& feedbackImages,
+	// The pairs contain the specified filepath and a vertical displacement value.
+	const std::array<std::vector<std::pair<CStr, float>>, 2>& feedbackImages,
 	const float y,
 	const float width,
 	const float bufferZone,
@@ -137,7 +138,7 @@ void CGUIText::SetupSpriteCalls(
 
 	// Loop left/right
 	for (int j = 0; j < 2; ++j)
-		for (const CStr& imgname : feedbackImages[j])
+		for (const std::pair<const CStr&, const float> imageData : feedbackImages[j])
 		{
 			SSpriteCall spriteCall;
 			SGenerateTextImage image;
@@ -146,11 +147,11 @@ void CGUIText::SetupSpriteCalls(
 			//  after the last image, like a stack downwards.
 			float _y;
 			if (!images[j].empty())
-				_y = std::max(y, images[j].back().m_YTo);
+				_y = std::max(y, images[j].back().m_YTo) + imageData.second;
 			else
-				_y = y;
+				_y = y + imageData.second;
 
-			const SGUIIcon& icon = pGUI.GetIcon(imgname);
+			const SGUIIcon& icon = pGUI.GetIcon(imageData.first);
 			image.SetupSpriteCall(j == CGUIString::SFeedback::Left, spriteCall, width, _y, icon.m_Size, icon.m_SpriteName, bufferZone);
 
 			// Check if image is the lowest thing.
