@@ -56,3 +56,19 @@ TS_ASSERT(cmpGarrisonable.Garrison(garrisonHolderID));
 cmpGarrisonable.OnEntityRenamed({ "entity": garrisonableID, "newentity": newGarrisonableID });
 TS_ASSERT_UNEVAL_EQUALS(cmpGarrisonable.HolderID(), INVALID_ENTITY);
 TS_ASSERT_UNEVAL_EQUALS(cmpGarrisonableNew.HolderID(), garrisonHolderID);
+
+
+// Test garrisoning re-entrancy
+
+TS_ASSERT(cmpGarrisonable.Garrison(garrisonHolderID));
+TS_ASSERT_UNEVAL_EQUALS(cmpGarrisonable.HolderID(), garrisonHolderID);
+
+
+AddMock(garrisonHolderID, IID_GarrisonHolder, {
+	"Garrison": () => true,
+	"IsAllowedToGarrison": () => true,
+	"Eject": () => cmpGarrisonable.UnGarrison()
+});
+
+TS_ASSERT(cmpGarrisonable.UnGarrison());
+TS_ASSERT_UNEVAL_EQUALS(cmpGarrisonable.HolderID(), INVALID_ENTITY);
