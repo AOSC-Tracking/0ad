@@ -34,15 +34,14 @@ class TipDisplay
 		this.singlePlayerTipsChance = 0.5;
 
 		if (Engine.HasNetClient()) 
-			this.tipFilesData = this.getMultiplayerTipsList();
+			this.tipFilesData = this.getRandomMultiplayerTips();
 		else 
 			this.tipFilesData =
 				hotloadData?.tipFilesData ||
 				shuffleArray(
-					Engine.ReadJSONFile(this.TipFilesDataFile)
-				).filter((tip) =>
-					!tip.textFile.startsWith("mp_")
-				).map(tip => {
+					Engine.ReadJSONFile(this.TipFilesDataFile).singlePlayer
+				)
+				.map(tip => {
 					tip.imageFiles = shuffleArray(tip.imageFiles);
 					return tip;
 				});
@@ -66,25 +65,19 @@ class TipDisplay
 			this.onTipImageIndexChange(hotloadData.tipImageIndex + 1);
 	}
 
-	getMultiplayerTipsList() {
+	getRandomMultiplayerTips() {
 		const tips = Engine.ReadJSONFile(this.TipFilesDataFile);
-		const multiPlayerTips = tips.filter(tipFile => tipFile.textFile.startsWith("mp_"));
+		const multiPlayerTips = tips.multiPlayer;
 		const totalSinglePlayerTips = Math.floor(multiPlayerTips.length * this.singlePlayerTipsChance);
 		return shuffleArray(multiPlayerTips.concat(this.getRandomSinglePlayerTips(totalSinglePlayerTips)));
 	}
 
 	getRandomSinglePlayerTips(amount) {
-		const tips = Engine.ReadJSONFile(this.TipFilesDataFile);
-		const randomTips = [];
-		let i = 0;
-		while (i < amount) {
-			const tip = tips[Math.round(Math.random() * Object.keys(tips).length)];
-			if (tip.textFile.startsWith("mp_"))
-				continue;
-			randomTips.push(tip);
-			i++;
-		}
-		return randomTips;
+		const tips = Engine.ReadJSONFile(this.TipFilesDataFile).singlePlayer;
+		const randomizedTips = [];
+		for (let i = 0; i < amount; i++)
+			randomizedTips.push(tips[Math.round(Math.random() * tips.length)]);
+		return randomizedTips;
 	}
 
 	getHotloadData()
@@ -181,9 +174,19 @@ TipDisplay.prototype.TooltipNextImage = translate("Switch to the next image.");
 TipDisplay.prototype.TipFilesDataFile = "gui/reference/tips/tipfiles.json";
 
 /**
- * Directory storing .txt files containing the gameplay tips.
+ * Directory storing .txt files containing the multi and single player tips.
  */
 TipDisplay.prototype.TextPath = "gui/reference/tips/texts/";
+
+/**
+ * Directory storing all single player .txt tips. Contains gameplay tips.
+ */
+TipDisplay.prototype.SinglePlayerTipsPath = TipDisplay.prototype.TextPath + "singleplayer";
+
+/**
+ * Directory storing all multi player .txt tips. Contains community guidelines tips.
+ */
+TipDisplay.prototype.MultiPlayerTipsPath = TipDisplay.prototype.TextPath + "multiplayer";
 
 /**
  * Subdirectory of art/textures/ui storing the .png images illustrating the tips.
