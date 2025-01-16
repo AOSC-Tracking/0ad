@@ -389,6 +389,12 @@
       ]
     },
     {
+      "textFile": "multiplayer/stay_friendly.txt",
+      "imageFiles": [
+        "war_elephants.png"
+      ]
+    },
+    {
       "textFile": "multiplayer/prevent_phishing.txt",
       "imageFiles": [
         "spearmen.png"
