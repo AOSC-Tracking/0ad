@@ -728,7 +728,11 @@ class CheckRefs:
             self.roots.append(fp)
             with open(ffp, encoding="utf-8") as f:
                 tips = load(f)
-                for tip in tips:
+                for tip in tips["singlePlayer"]:
+                    self.deps.append((fp, Path(f"gui/reference/tips/texts/{tip['textFile']}")))
+                    for image in tip.get("imageFiles", []):
+                        self.deps.append((fp, Path(f"art/textures/ui/tips/{image}")))
+                for tip in tips["multiPlayer"]:
                     self.deps.append((fp, Path(f"gui/reference/tips/texts/{tip['textFile']}")))
                     for image in tip.get("imageFiles", []):
                         self.deps.append((fp, Path(f"art/textures/ui/tips/{image}")))
