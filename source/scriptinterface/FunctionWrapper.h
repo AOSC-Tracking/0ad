@@ -173,7 +173,7 @@ private:
 	static std::tuple<const ScriptInterface&, Types...> ConvertFromJS(const ScriptRequest& rq,
 		JS::CallArgs& args, bool& wentOk, std::tuple<const ScriptInterface&, Types...>*)
 	{
-		return std::tuple_cat(std::tie(rq.GetScriptInterface()),
+		return std::tuple_cat(std::tie(rq.GetCurrentScriptInterface()),
 			DoConvertFromJS<Types...>(std::index_sequence_for<Types...>(), rq, args, wentOk));
 	}
 
@@ -405,7 +405,7 @@ public:
 			}
 			catch (const std::exception& e)
 			{
-				JS::RootedValue global{rq.cx, rq.globalValue()};
+				JS::RootedValue global{rq.cx, Script::GetGlobalValue(rq)};
 				if (!ScriptFunction::Call(rq, global, "Error", &error, e.what()))
 					throw std::runtime_error{"Failed to construct `Error`."};
 			}
@@ -439,7 +439,7 @@ public:
 	static void Register(const ScriptRequest& rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
-		JS_DefineFunction(rq.cx, rq.nativeScope, name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
+		JS_DefineFunction(rq.cx, Script::GetNativeScope(rq), name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
 	}
 
 	/**

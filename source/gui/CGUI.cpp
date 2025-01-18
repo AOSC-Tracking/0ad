@@ -104,11 +104,10 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 		{
 			ret = IN_HANDLED;
 
-			ScriptRequestGuard rqg(m_ScriptInterface);
-			const ScriptRequest& rq = rqg;
-			JS::RootedObject globalObj(rq.cx, rq.glob);
-			JS::RootedValue result(rq.cx);
-			if (!JS_CallFunctionValue(rq.cx, globalObj, m_GlobalHotkeys[hotkey][eventName], JS::HandleValueArray::empty(), &result))
+			ScriptRequestGuard rq(m_ScriptInterface);
+			JS::RootedObject globalObj(rq.cx(), m_ScriptInterface->GetGlobalObject());
+			JS::RootedValue result(rq.cx());
+			if (!JS_CallFunctionValue(rq.cx(), globalObj, m_GlobalHotkeys[hotkey][eventName], JS::HandleValueArray::empty(), &result))
 				ScriptException::CatchPending(rq);
 		}
 

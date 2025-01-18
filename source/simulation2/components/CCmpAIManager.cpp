@@ -113,7 +113,7 @@ private:
 			std::string moduleName;
 			std::string constructor;
 			JS::RootedValue objectWithConstructor(rq.cx); // object that should contain the constructor function
-			JS::RootedValue global(rq.cx, rq.globalValue());
+			JS::RootedValue global(rq.cx, m_ScriptInterface->GetGlobalValue());
 			JS::RootedValue ctor(rq.cx);
 			if (!Script::HasProperty(rq, metadata, "moduleName"))
 			{
@@ -254,9 +254,9 @@ public:
 			ScriptRequestGuard simrqg(simInterface);
 			const ScriptRequest& simrq = simrqg;
 			// Register the sim globals for easy & explicit access. Mark it replaceable for hotloading.
-			JS::RootedValue global(rq.cx, simrq.globalValue());
+			JS::RootedValue global(simrq.cx, simInterface.GetGlobalValue());
 			m_ScriptInterface->SetGlobal("Sim", global, true);
-			JS::RootedValue scope(rq.cx, JS::ObjectValue(*simrq.nativeScope.get()));
+			JS::RootedValue scope(simrq.cx, JS::ObjectValue(*simInterface.GetNativeScope().get()));
 			m_ScriptInterface->SetGlobal("SimEngine", scope, true);
 		}
 
@@ -427,7 +427,7 @@ public:
 		// Constructor name is SharedScript, it's in the module API3
 		// TODO: Hardcoding this is bad, we need a smarter way.
 		JS::RootedValue AIModule(rq.cx);
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx, m_ScriptInterface->GetGlobalValue());
 		JS::RootedValue ctor(rq.cx);
 		if (!Script::GetProperty(rq, global, "API3", &AIModule) || AIModule.isUndefined())
 		{

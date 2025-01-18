@@ -49,7 +49,7 @@ bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
-	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
+	const ScriptInterface& scriptInterface = rq.GetCurrentScriptInterface();
 
 	JS::RootedObject obj(rq.cx, scriptInterface.CreateCustomObject("GUISize"));
 

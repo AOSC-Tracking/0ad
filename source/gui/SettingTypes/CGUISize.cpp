@@ -145,7 +145,7 @@ bool CGUISize::FromString(const CStr& Value)
 
 void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) const
 {
-	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
+	const ScriptInterface& scriptInterface = rq.GetCurrentScriptInterface();
 	ret.setObjectOrNull(scriptInterface.CreateCustomObject("GUISize"));
 
 	if (!ret.isObject())

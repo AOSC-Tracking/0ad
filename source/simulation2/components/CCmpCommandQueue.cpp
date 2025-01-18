@@ -106,7 +106,7 @@ public:
 		ScriptRequestGuard rqg(scriptInterface);
 		const ScriptRequest& rq = rqg;
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx, scriptInterface.GetGlobalValue());
 		std::vector<SimulationCommand> localCommands;
 		m_LocalQueue.swap(localCommands);
 

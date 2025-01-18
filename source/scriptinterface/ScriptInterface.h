@@ -148,6 +148,10 @@ public:
 	JSContext* GetGeneralJSContext() const;
 	ScriptContext& GetContext() const;
 
+	JS::Value GetGlobalValue() const;
+	JS::HandleObject GetGlobalObject() const;
+	JS::HandleObject GetNativeScope() const;
+
 	/**
 	 * Load global scripts that most script interfaces need,
 	 * located in the /globalscripts directory. VFS must be initialized.

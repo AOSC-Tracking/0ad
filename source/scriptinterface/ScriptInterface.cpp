@@ -59,28 +59,21 @@ struct ScriptInterface_impl
 	// members have to be called before the context destructor.
 	ScriptContext& m_context;
 
-	friend ScriptRequest;
-	friend ScriptRequestGuard;
+	friend class ScriptRequest;
+	friend class ScriptRequestGuard;
+	friend class ScriptInterface;
+
 	private:
 		JSContext* m_cx;
-		JS::PersistentRootedObject m_glob; // global scope object
-
-	public:
 		boost::rand48* m_rng;
+		JS::PersistentRootedObject m_glob; // global scope object
 		JS::PersistentRootedObject m_nativeScope; // native function scope object
 };
 
 /**
  * Constructor for ScriptRequest - here because it needs access into ScriptInterface_impl.
  */
-ScriptRequest::ScriptRequest(const ScriptInterface& scriptInterface) :
-	cx(scriptInterface.m->m_cx),
-	glob(scriptInterface.m->m_glob),
-	nativeScope(scriptInterface.m->m_nativeScope)
-{
-}
-
-ScriptRequest::ScriptRequest(JSContext* cx) : ScriptRequest(ScriptInterface::CmptPrivate::GetScriptInterface(cx))
+ScriptRequest::ScriptRequest(const ScriptInterface& scriptInterface) : ScriptRequest(scriptInterface.m->m_cx)
 {
 }
 
@@ -98,14 +91,17 @@ ScriptRequestGuard::~ScriptRequestGuard()
 	JS::LeaveRealm(rq.cx, m_FormerRealm);
 }
 
-JS::Value ScriptRequest::globalValue() const
-{
-	return JS::ObjectValue(*glob);
-}
-
-const ScriptInterface& ScriptRequest::GetScriptInterface() const
+const ScriptInterface& ScriptRequest::GetCurrentScriptInterface() const
 {
 	return ScriptInterface::CmptPrivate::GetScriptInterface(cx);
+}
+
+JS::Value globalValue(const ScriptRequest& rq) {
+	return rq.GetCurrentScriptInterface().GetGlobalValue();
+}
+
+JS::HandleObject nativeScope(const ScriptRequest& rq) {
+	return rq.GetCurrentScriptInterface().GetNativeScope();
 }
 
 namespace
@@ -367,10 +363,9 @@ ScriptInterface::ScriptInterface(const char* nativeScopeName, const char* debugN
 			g_ScriptStatsTable->Add(this, debugName);
 	}
 
-	ScriptRequestGuard rqg(this);
-	const ScriptRequest& rq = rqg;
+	ScriptRequestGuard rq(this);
 	m_CmptPrivate.pScriptInterface = this;
-	JS::SetRealmPrivate(JS::GetObjectRealmOrNull(rq.glob), (void*)&m_CmptPrivate);
+	JS::SetRealmPrivate(JS::GetObjectRealmOrNull(GetGlobalObject()), (void*)&m_CmptPrivate);
 }
 
 ScriptInterface::ScriptInterface(const char* nativeScopeName, const char* debugName, const ScriptInterface& neighbor)
@@ -386,10 +381,9 @@ ScriptInterface::ScriptInterface(const char* nativeScopeName, const char* debugN
 			g_ScriptStatsTable->Add(this, debugName);
 	}
 
-	ScriptRequestGuard rqg(this);
-	const ScriptRequest& rq = rqg;
+	ScriptRequestGuard rq(this);
 	m_CmptPrivate.pScriptInterface = this;
-	JS::SetRealmPrivate(JS::GetObjectRealmOrNull(rq.glob), (void*)&m_CmptPrivate);
+	JS::SetRealmPrivate(JS::GetObjectRealmOrNull(GetGlobalObject()), (void*)&m_CmptPrivate);
 }
 
 ScriptInterface::~ScriptInterface()
@@ -447,14 +441,13 @@ bool ScriptInterface::LoadGlobalScripts()
 
 bool ScriptInterface::ReplaceNondeterministicRNG(boost::rand48& rng)
 {
-	ScriptRequestGuard rqg(this);
-	const ScriptRequest& rq = rqg;
-	JS::RootedValue math(rq.cx);
-	JS::RootedObject global(rq.cx, rq.glob);
-	if (JS_GetProperty(rq.cx, global, "Math", &math) && math.isObject())
+	ScriptRequestGuard rq(this);
+	JS::RootedValue math(rq.cx());
+	JS::RootedObject global(rq.cx(), GetGlobalObject());
+	if (JS_GetProperty(rq.cx(), global, "Math", &math) && math.isObject())
 	{
-		JS::RootedObject mathObj(rq.cx, &math.toObject());
-		JS::RootedFunction random(rq.cx, JS_DefineFunction(rq.cx, mathObj, "random", Math_random, 0,
+		JS::RootedObject mathObj(rq.cx(), &math.toObject());
+		JS::RootedFunction random(rq.cx(), JS_DefineFunction(rq.cx(), mathObj, "random", Math_random, 0,
 			JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT));
 		if (random)
 		{
@@ -478,6 +471,33 @@ ScriptContext& ScriptInterface::GetContext() const
 	return m->m_context;
 }
 
+
+JS::Value ScriptInterface::GetGlobalValue() const
+{
+	return JS::ObjectValue(*m->m_glob);
+}
+JS::HandleObject ScriptInterface::GetGlobalObject() const
+{
+	return m->m_glob;
+}
+JS::HandleObject ScriptInterface::GetNativeScope() const
+{
+	return m-> m_nativeScope;
+}
+
+namespace Script
+{
+JS::Value GetGlobalValue(const ScriptRequest& rq)
+{
+	return rq.GetCurrentScriptInterface().GetGlobalValue();
+}
+JS::HandleObject GetNativeScope(const ScriptRequest& rq)
+{
+	return rq.GetCurrentScriptInterface().GetNativeScope();
+}
+}
+
+
 void ScriptInterface::CallConstructor(JS::HandleValue ctor, JS::HandleValueArray argv, JS::MutableHandleValue out) const
 {
 	ScriptRequestGuard rq(this);
@@ -497,8 +517,7 @@ void ScriptInterface::CallConstructor(JS::HandleValue ctor, JS::HandleValueArray
 
 void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructor, uint minArgs, JSPropertySpec *ps, JSFunctionSpec *fs, JSPropertySpec *static_ps, JSFunctionSpec *static_fs)
 {
-	ScriptRequestGuard rqg(this);
-	const ScriptRequest& rq = rqg;
+	ScriptRequestGuard rq(this);
 	std::string typeName = clasp->name;
 
 	if (m_CustomObjectTypes.find(typeName) != m_CustomObjectTypes.end())
@@ -507,8 +526,8 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 		throw PSERROR_Scripting_DefineType_AlreadyExists();
 	}
 
-	JS::RootedObject global(rq.cx, rq.glob);
-	JS::RootedObject obj(rq.cx, JS_InitClass(rq.cx, global,
+	JS::RootedObject global(rq.cx(), GetGlobalObject());
+	JS::RootedObject obj(rq.cx(), JS_InitClass(rq.cx(), global,
 	                                           clasp, nullptr, clasp->name,
 	                                           constructor, minArgs,     // Constructor, min args
 	                                           ps, fs,                   // Properties, methods
@@ -522,7 +541,7 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 
 	CustomType& type = m_CustomObjectTypes[typeName];
 
-	type.m_Prototype.init(rq.cx, obj);
+	type.m_Prototype.init(rq.cx(), obj);
 	type.m_Class = clasp;
 	type.m_Constructor = constructor;
 }
@@ -543,7 +562,7 @@ bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool r
 {
 	ScriptRequestGuard rqg(this);
 	const ScriptRequest& rq = rqg;
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx, GetGlobalObject());
 
 	bool found;
 	if (!JS_HasProperty(rq.cx, global, name, &found))
@@ -587,7 +606,7 @@ bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool r
 bool ScriptInterface::GetGlobalProperty(const ScriptRequest& rq, const std::string& name, JS::MutableHandleValue out)
 {
 	// Try to get the object as a property of the global object.
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx, rq.GetCurrentScriptInterface().GetGlobalObject());
 	if (!JS_GetProperty(rq.cx, global, name.c_str(), out))
 	{
 		out.set(JS::NullHandleValue);
@@ -600,7 +619,7 @@ bool ScriptInterface::GetGlobalProperty(const ScriptRequest& rq, const std::stri
 	// Some objects, such as const definitions, or Class definitions, are hidden inside closures.
 	// We must fetch those from the correct lexical scope.
 	//JS::RootedValue glob(cx);
-	JS::RootedObject lexical_environment(rq.cx, JS_GlobalLexicalEnvironment(rq.glob));
+	JS::RootedObject lexical_environment(rq.cx, JS_GlobalLexicalEnvironment(rq.GetCurrentScriptInterface().GetGlobalObject()));
 	if (!JS_GetProperty(rq.cx, lexical_environment, name.c_str(), out))
 	{
 		out.set(JS::NullHandleValue);
@@ -629,7 +648,7 @@ bool ScriptInterface::LoadScript(const VfsPath& filename, const std::string& cod
 {
 	ScriptRequestGuard rqg(this);
 	const ScriptRequest& rq = rqg;
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx, GetGlobalObject());
 
 	// CompileOptions does not copy the contents of the filename string pointer.
 	// Passing a temporary string there will cause undefined behaviour, so we create a separate string to avoid the temporary.

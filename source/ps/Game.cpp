@@ -347,7 +347,7 @@ PSRETURN CGame::ReallyStartGame()
 		ScriptRequestGuard rqg(scriptInterface);
 		const ScriptRequest& rq = rqg;
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx, scriptInterface->GetGlobalValue());
 		if (Script::HasProperty(rq, global, "reallyStartGame"))
 			ScriptFunction::CallVoid(rq, global, "reallyStartGame");
 	}

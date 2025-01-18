@@ -820,7 +820,7 @@ bool Autostart(const CmdLineArgs& args)
 		if (!Script::HasProperty(rq, cmdLineArgs, "autostart-port"))
 			Script::SetProperty(rq, cmdLineArgs, "autostart-port", PS_DEFAULT_PORT);
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx, scriptInterface.GetGlobalValue());
 		if (!ScriptFunction::CallVoid(rq, global, args.Has("autostart-client") ? "autostartClient" : "autostartHost", cmdLineArgs, true))
 			return false;
 
@@ -834,7 +834,7 @@ bool Autostart(const CmdLineArgs& args)
 	}
 	else
 	{
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx, scriptInterface.GetGlobalValue());
 		if (!ScriptFunction::CallVoid(rq, global, "autostartHost", cmdLineArgs, false))
 			return false;
 	}
@@ -888,7 +888,7 @@ void CancelLoad(const CStrW& message)
 	ScriptRequestGuard rqg(pScriptInterface);
 	const ScriptRequest& rq = rqg;
 
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	JS::RootedValue global(rq.cx, pScriptInterface->GetGlobalValue());
 
 	LDR_Cancel();
 

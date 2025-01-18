@@ -51,23 +51,28 @@ class ScriptRequest
 public:
 
 	static ScriptRequest FromAlreadyEntered(JSContext* cx) { return ScriptRequest(cx); }
-	/**
-	 * Return the scriptInterface active when creating this ScriptRequest.
-	 * Note that this is multi-request safe: even if another ScriptRequest is created,
-	 * it will point to the original scriptInterface, and thus can be used to re-enter the realm.
-	 */
-	const ScriptInterface& GetScriptInterface() const;
 
-	JS::Value globalValue() const;
+	/**
+	 * Returns the script interface of the currently entered realm.
+	 * NB: if the JS context changes, this will return a different script interface,
+	 * so be _very_ careful when juggling between different realms.
+	 */
+	const ScriptInterface& GetCurrentScriptInterface() const;
 
 	// Note that JSContext actually changes behind the scenes when creating another ScriptRequest for another realm,
 	// so be _very_ careful when juggling between different realms.
 	JSContext* cx;
-	JS::HandleObject glob;
-	JS::HandleObject nativeScope;
 private:
+	ScriptRequest(JSContext* cx): cx(cx) {}
+	// Implemented in ScriptInterface.cpp
 	ScriptRequest(const ScriptInterface& scriptInterface);
-	ScriptRequest(JSContext* cx);
+};
+
+// Defined in this file to avoid including ScriptInterface.h in a couple places.
+namespace Script
+{
+JS::Value GetGlobalValue(const ScriptRequest& rq);
+JS::HandleObject GetNativeScope(const ScriptRequest& rq);
 };
 
 /**

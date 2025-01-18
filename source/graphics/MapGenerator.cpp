@@ -408,7 +408,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 	CMapGenerationCallbacks callbackData{stopToken, progress, scriptInterface, mapData, flags};
 
 	// Copy settings to global variable
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	JS::RootedValue global(rq.cx, scriptInterface.GetGlobalValue());
 	if (!Script::SetProperty(rq, global, "g_MapSettings", settingsVal, flags & JSPROP_READONLY,
 		flags & JSPROP_ENUMERATE))
 	{

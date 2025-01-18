@@ -416,7 +416,6 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 		Script::StringifyJSON(rq, &settings, true));
 
 	// Run the detection script:
-	const ScriptRequest& rq2 = rq;
-	JS::RootedValue global(rq.cx(), rq2.globalValue());
+	JS::RootedValue global(rq.cx(), scriptInterface.GetGlobalValue());
 	ScriptFunction::CallVoid(rq, global, "RunHardwareDetection", settings);
 }

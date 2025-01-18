@@ -54,7 +54,7 @@ void JobQueue::runJobs(JSContext*)
 		JS::RootedObject localJob{rq.cx, element.job};
 		m_Jobs.pop();
 
-		JS::RootedValue globV{rq.cx, rq.globalValue()};
+		JS::RootedValue globV{rq.cx, Script::GetGlobalValue(rq)};
 		JS::RootedValue rval{rq.cx};
 		JS::Call(rq.cx, globV, localJob, JS::HandleValueArray::empty(), &rval);
 	}
