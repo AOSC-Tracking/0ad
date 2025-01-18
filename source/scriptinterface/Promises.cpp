@@ -49,7 +49,7 @@ void JobQueue::runJobs(JSContext*)
 	while (!m_Jobs.empty())
 	{
 		QueueElement& element = m_Jobs.front();
-		ScriptRequestGuard rqg {element.scriptInterface};
+		ScriptRequestGuard rqg {element.cx};
 		const ScriptRequest& rq = rqg;
 		JS::RootedObject localJob{rq.cx, element.job};
 		m_Jobs.pop();
@@ -70,7 +70,7 @@ bool JobQueue::enqueuePromiseJob(JSContext* cx, JS::HandleObject, JS::HandleObje
 {
 	try
 	{
-		m_Jobs.push({ScriptRequest::FromAlreadyEntered(cx).GetScriptInterface(), JS::PersistentRootedObject{cx, job}});
+		m_Jobs.push({cx, JS::PersistentRootedObject{cx, job}});
 		return true;
 	}
 	catch (...)

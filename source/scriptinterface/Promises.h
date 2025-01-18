@@ -29,8 +29,6 @@
 
 #include <queue>
 
-class ScriptInterface;
-
 namespace Script
 {
 void UnhandledRejectedPromise(JSContext* cx, bool, JS::HandleObject promise,
@@ -55,7 +53,7 @@ private:
 
 	struct QueueElement
 	{
-		const ScriptInterface& scriptInterface;
+		JSContext* cx;
 		JS::PersistentRootedObject job;
 	};
 	using QueueType = std::queue<QueueElement>;

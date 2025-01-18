@@ -76,8 +76,7 @@ struct ScriptInterface_impl
 ScriptRequest::ScriptRequest(const ScriptInterface& scriptInterface) :
 	cx(scriptInterface.m->m_cx),
 	glob(scriptInterface.m->m_glob),
-	nativeScope(scriptInterface.m->m_nativeScope),
-	m_ScriptInterface(scriptInterface)
+	nativeScope(scriptInterface.m->m_nativeScope)
 {
 }
 
@@ -88,6 +87,10 @@ ScriptRequest::ScriptRequest(JSContext* cx) : ScriptRequest(ScriptInterface::Cmp
 ScriptRequestGuard::ScriptRequestGuard(const ScriptInterface& scriptInterface) : rq(scriptInterface)
 {
 	m_FormerRealm = JS::EnterRealm(rq.cx, scriptInterface.m->m_glob);
+}
+
+ScriptRequestGuard::ScriptRequestGuard(JSContext* cx) : ScriptRequestGuard(ScriptInterface::CmptPrivate::GetScriptInterface(cx))
+{
 }
 
 ScriptRequestGuard::~ScriptRequestGuard()
@@ -102,7 +105,7 @@ JS::Value ScriptRequest::globalValue() const
 
 const ScriptInterface& ScriptRequest::GetScriptInterface() const
 {
-	return m_ScriptInterface;
+	return ScriptInterface::CmptPrivate::GetScriptInterface(cx);
 }
 
 namespace

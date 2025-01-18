@@ -41,21 +41,6 @@
 
 class ScriptInterface;
 
-/**
- * Spidermonkey maintains some 'local' state via the JSContext* object.
- * This object is an argument to most JSAPI functions.
- * Furthermore, this state is Realm (~ global) dependent. For many reasons, including GC safety,
- * The JSContext* Realm must be set up correctly when accessing it.
- * 'Entering' and 'Leaving' realms must be done in a LIFO manner.
- * SM recommends using JSAutoRealm, which provides an RAII option.
- *
- * ScriptRequest combines both of the above in a single convenient package,
- * providing safe access to the JSContext*, the global object, and ensuring that the proper realm has been entered.
- * Most scriptinterface/ functions will take a ScriptRequest, to ensure proper rooting. You may sometimes
- * have to create one from a ScriptInterface.
- *
- * Be particularly careful when manipulating several script interfaces.
- */
 class ScriptRequest
 {
 	friend class ScriptRequestGuard;
@@ -83,10 +68,25 @@ public:
 private:
 	ScriptRequest(const ScriptInterface& scriptInterface);
 	ScriptRequest(JSContext* cx);
-
-	const ScriptInterface& m_ScriptInterface;
 };
 
+/**
+ * Spidermonkey maintains some 'local' state via the JSContext* object.
+ * This object is an argument to most JSAPI functions.
+ * Furthermore, this state is Realm (~ global) dependent. For many reasons, including GC safety,
+ * The JSContext* Realm must be set up correctly when accessing it.
+ * 'Entering' and 'Leaving' realms must be done in a LIFO manner.
+ * SM recommends using JSAutoRealm, which provides an RAII option.
+ *
+ * ScriptRequestGuard combines both of the above in a single convenient package,
+ * providing safe access to the JSContext*, the global object, and ensuring that the proper realm has been entered.
+ * ScriptRequestGuard will enter the realm, where ScriptRequest assumes you have entered it somewhere before.
+ * ScriptRequestGuard is implicitly convertible to ScriptRequest for convenience.
+ * Most scriptinterface/ functions will take a ScriptRequest, to ensure proper rooting. You may sometimes
+ * have to create one from a ScriptInterface.
+ *
+ * Be particularly careful when manipulating several script interfaces.
+ */
 class ScriptRequestGuard
 {
 	ScriptRequestGuard() = delete;
@@ -102,6 +102,7 @@ public:
 	ScriptRequestGuard(const ScriptInterface& scriptInterface);
 	ScriptRequestGuard(const ScriptInterface* scriptInterface) : ScriptRequestGuard(*scriptInterface) {}
 	ScriptRequestGuard(std::shared_ptr<ScriptInterface> scriptInterface) : ScriptRequestGuard(*scriptInterface) {}
+	ScriptRequestGuard(JSContext* cx);
 	~ScriptRequestGuard();
 
 	operator const ScriptRequest&() const { return rq; }
