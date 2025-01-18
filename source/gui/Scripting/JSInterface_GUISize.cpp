@@ -1,4 +1,4 @@
-/* Copyright (C) 2025 Wildfire Games.
+/* Copyright (C) 2024 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -48,8 +48,8 @@ void JSI_GUISize::RegisterScriptClass(ScriptInterface& scriptInterface)
 bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
-	const ScriptInterface& scriptInterface = rq.GetCurrentScriptInterface();
+	ScriptRequest rq(cx);
+	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
 
 	JS::RootedObject obj(rq.cx, scriptInterface.CreateCustomObject("GUISize"));
 
@@ -107,7 +107,7 @@ bool JSI_GUISize::toString(JSContext* cx, uint argc, JS::Value* vp)
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	CStr buffer;
 
-	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+	ScriptRequest rq(cx);
 	double val, valr;
 
 #define SIDE(side) \

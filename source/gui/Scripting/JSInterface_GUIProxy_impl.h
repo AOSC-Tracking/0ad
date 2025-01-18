@@ -166,7 +166,7 @@ std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptReq
 template <typename T>
 bool JSI_GUIProxy<T>::get(JSContext* cx, JS::HandleObject proxy, JS::HandleValue UNUSED(receiver), JS::HandleId id, JS::MutableHandleValue vp) const
 {
-	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+	ScriptRequest rq(cx);
 
 	T* e = IGUIProxyObject::FromPrivateSlot<T>(proxy.get());
 	if (!e)
@@ -243,7 +243,7 @@ bool JSI_GUIProxy<T>::set(JSContext* cx, JS::HandleObject proxy, JS::HandleId id
 		return result.fail(JSMSG_OBJECT_REQUIRED);
 	}
 
-	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+	ScriptRequest rq(cx);
 
 	JS::RootedValue idval(rq.cx);
 	if (!JS_IdToValue(rq.cx, id, &idval))
@@ -298,7 +298,7 @@ bool JSI_GUIProxy<T>::delete_(JSContext* cx, JS::HandleObject proxy, JS::HandleI
 		return result.fail(JSMSG_OBJECT_REQUIRED);
 	}
 
-	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+	ScriptRequest rq(cx);
 
 	JS::RootedValue idval(rq.cx);
 	if (!JS_IdToValue(rq.cx, id, &idval))

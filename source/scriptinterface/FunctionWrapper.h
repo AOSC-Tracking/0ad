@@ -173,7 +173,7 @@ private:
 	static std::tuple<const ScriptInterface&, Types...> ConvertFromJS(const ScriptRequest& rq,
 		JS::CallArgs& args, bool& wentOk, std::tuple<const ScriptInterface&, Types...>*)
 	{
-		return std::tuple_cat(std::tie(rq.GetCurrentScriptInterface()),
+		return std::tuple_cat(std::tie(rq.GetScriptInterface()),
 			DoConvertFromJS<Types...>(std::index_sequence_for<Types...>(), rq, args, wentOk));
 	}
 
@@ -287,7 +287,7 @@ public:
 		using ObjType = typename args_info<decltype(callable)>::object_type;
 
 		JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-		ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
+		ScriptRequest rq(cx);
 
 		// If the callable is an object method, we must specify how to fetch the object.
 		static_assert(std::is_same_v<typename args_info<decltype(callable)>::object_type, void> || thisGetter != nullptr,
@@ -439,7 +439,7 @@ public:
 	static void Register(const ScriptRequest& rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
-		JS_DefineFunction(rq.cx, rq.GetNativeScope(), name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
+		JS_DefineFunction(rq.cx, rq.nativeScope, name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
 	}
 
 	/**
