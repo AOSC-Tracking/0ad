@@ -60,19 +60,20 @@ static u8 GetArrayType(js::Scalar::Type arrayType)
 CBinarySerializerScriptImpl::CBinarySerializerScriptImpl(const ScriptInterface& scriptInterface, ISerializer& serializer) :
 	m_ScriptInterface(scriptInterface), m_Serializer(serializer), m_ScriptBackrefsNext(0)
 {
-	ScriptRequest rq(m_ScriptInterface);
-	JS_AddExtraGCRootsTracer(rq.cx, Trace, this);
+	ScriptRequestGuard rq(m_ScriptInterface);
+	JS_AddExtraGCRootsTracer(rq.cx(), Trace, this);
 }
 
 CBinarySerializerScriptImpl::~CBinarySerializerScriptImpl()
 {
-	ScriptRequest rq(m_ScriptInterface);
-	JS_RemoveExtraGCRootsTracer(rq.cx, Trace, this);
+	ScriptRequestGuard rq(m_ScriptInterface);
+	JS_RemoveExtraGCRootsTracer(rq.cx(), Trace, this);
 }
 
 void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rqg(m_ScriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	switch (JS_TypeOfValue(rq.cx, val))
 	{
@@ -427,7 +428,7 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 
 void CBinarySerializerScriptImpl::ScriptString(const char* name, JS::HandleString string)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 #if BYTE_ORDER != LITTLE_ENDIAN
 #error TODO: probably need to convert JS strings to little-endian
@@ -440,7 +441,7 @@ void CBinarySerializerScriptImpl::ScriptString(const char* name, JS::HandleStrin
 	m_Serializer.Bool("isLatin1", isLatin1);
 	if (isLatin1)
 	{
-		const JS::Latin1Char* chars = JS_GetLatin1StringCharsAndLength(rq.cx, nogc, string, &length);
+		const JS::Latin1Char* chars = JS_GetLatin1StringCharsAndLength(rq.cx(), nogc, string, &length);
 		if (!chars)
 			throw PSERROR_Serialize_ScriptError("JS_GetLatin1StringCharsAndLength failed");
 		m_Serializer.NumberU32_Unbounded("string length", (u32)length);
@@ -448,7 +449,7 @@ void CBinarySerializerScriptImpl::ScriptString(const char* name, JS::HandleStrin
 	}
 	else
 	{
-		const char16_t* chars = JS_GetTwoByteStringCharsAndLength(rq.cx, nogc, string, &length);
+		const char16_t* chars = JS_GetTwoByteStringCharsAndLength(rq.cx(), nogc, string, &length);
 
 		if (!chars)
 			throw PSERROR_Serialize_ScriptError("JS_GetTwoByteStringCharsAndLength failed");
@@ -470,14 +471,14 @@ u32 CBinarySerializerScriptImpl::GetScriptBackrefTag(JS::HandleObject obj)
 	// new object, we give it a new tag; when we serialize it a second time we just refer
 	// to that tag.
 
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	ObjectTagMap::Ptr ptr = m_ScriptBackrefTags.lookup(JS::Heap<JSObject*>(obj.get()));
 	if (!ptr.found())
 	{
 		if (!m_ScriptBackrefTags.put(JS::Heap<JSObject*>(obj.get()), ++m_ScriptBackrefsNext))
 		{
-			JS::RootedValue objval(rq.cx, JS::ObjectValue(*obj.get()));
+			JS::RootedValue objval(rq.cx(), JS::ObjectValue(*obj.get()));
 			LOGERROR("BinarySerializer: error at insertion. Object was %s", Script::ToString(rq, &objval));
 			return 0;
 		}

@@ -220,11 +220,11 @@ JS::Value ReadFileLines(const ScriptRequest& rq, const std::wstring& filename)
 template<auto& restriction>
 JS::Value ReadJSONFile(const ScriptInterface& scriptInterface, const std::wstring& filePath)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 	if (!PathRestrictionMet<restriction>(rq, filePath))
 		return JS::NullValue();
 
-	JS::RootedValue out(rq.cx);
+	JS::RootedValue out(rq.cx());
 	Script::ReadJSONFile(rq, filePath, &out);
 	return out;
 }
@@ -234,12 +234,12 @@ template<auto& restriction>
 void WriteJSONFile(const ScriptInterface& scriptInterface, const std::wstring& filePath,
 	JS::HandleValue val1)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 	if (!PathRestrictionMet<restriction>(rq, filePath))
 		return;
 
 	// TODO: This is a workaround because we need to pass a MutableHandle to StringifyJSON.
-	JS::RootedValue val(rq.cx, val1);
+	JS::RootedValue val(rq.cx(), val1);
 
 	std::string str(Script::StringifyJSON(rq, &val, false));
 

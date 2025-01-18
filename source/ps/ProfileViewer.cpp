@@ -429,8 +429,8 @@ namespace
 		DumpTable(const ScriptInterface& scriptInterface, JS::HandleValue root) :
 			m_ScriptInterface(scriptInterface)
 		{
-			ScriptRequest rq(scriptInterface);
-			m_Root.init(rq.cx, root);
+			ScriptRequestGuard rq(scriptInterface);
+			m_Root.init(rq.cx(), root);
 		}
 
 		// std::for_each requires a move constructor and the use of JS::PersistentRooted<T> apparently breaks a requirement for an
@@ -438,15 +438,15 @@ namespace
 		DumpTable(DumpTable && original) :
 			m_ScriptInterface(original.m_ScriptInterface)
 		{
-			ScriptRequest rq(m_ScriptInterface);
-			m_Root.init(rq.cx, original.m_Root.get());
+			ScriptRequestGuard rq(m_ScriptInterface);
+			m_Root.init(rq.cx(), original.m_Root.get());
 		}
 
 		void operator() (AbstractProfileTable* table)
 		{
-			ScriptRequest rq(m_ScriptInterface);
+			ScriptRequestGuard rq(m_ScriptInterface);
 
-			JS::RootedValue t(rq.cx);
+			JS::RootedValue t(rq.cx());
 			Script::CreateObject(
 				rq,
 				&t,
@@ -470,23 +470,23 @@ namespace
 
 		JS::Value DumpRows(AbstractProfileTable* table)
 		{
-			ScriptRequest rq(m_ScriptInterface);
+			ScriptRequestGuard rq(m_ScriptInterface);
 
-			JS::RootedValue data(rq.cx);
+			JS::RootedValue data(rq.cx());
 			Script::CreateObject(rq, &data);
 
 			const std::vector<ProfileColumn>& columns = table->GetColumns();
 
 			for (size_t r = 0; r < table->GetNumberRows(); ++r)
 			{
-				JS::RootedValue row(rq.cx);
+				JS::RootedValue row(rq.cx());
 				Script::CreateArray(rq, &row);
 
 				Script::SetProperty(rq, data, table->GetCellText(r, 0).c_str(), row);
 
 				if (table->GetChild(r))
 				{
-					JS::RootedValue childRows(rq.cx, DumpRows(table->GetChild(r)));
+					JS::RootedValue childRows(rq.cx(), DumpRows(table->GetChild(r)));
 					Script::SetPropertyInt(rq, row, 0, childRows);
 				}
 

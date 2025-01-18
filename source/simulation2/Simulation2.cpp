@@ -167,12 +167,12 @@ public:
 		std::vector<SimulationCommand> newCommands;
 		newCommands.reserve(commands.size());
 
-		ScriptRequest rqNew(newScript);
+		ScriptRequestGuard rqNew(newScript);
 		for (const SimulationCommand& command : commands)
 		{
-			JS::RootedValue tmpCommand(rqNew.cx, Script::CloneValueFromOtherCompartment(newScript, oldScript, command.data));
+			JS::RootedValue tmpCommand(rqNew.cx(), Script::CloneValueFromOtherCompartment(newScript, oldScript, command.data));
 			Script::DeepFreezeObject(rqNew, tmpCommand);
-			SimulationCommand cmd(command.player, rqNew.cx, tmpCommand);
+			SimulationCommand cmd(command.player, rqNew.cx(), tmpCommand);
 			newCommands.emplace_back(std::move(cmd));
 		}
 		return newCommands;
@@ -209,7 +209,7 @@ bool CSimulation2Impl::LoadScripts(CComponentManager& componentManager, std::set
 bool CSimulation2Impl::LoadTriggerScripts(CComponentManager& componentManager, JS::HandleValue mapSettings, std::set<VfsPath>* loadedScripts)
 {
 	bool ok = true;
-	ScriptRequest rq(componentManager.GetScriptInterface());
+	ScriptRequestGuard rq(componentManager.GetScriptInterface());
 	if (Script::HasProperty(rq, mapSettings, "TriggerScripts"))
 	{
 		std::vector<std::string> scriptNames;
@@ -335,7 +335,7 @@ void CSimulation2Impl::ReportSerializationFailure(
 void CSimulation2Impl::InitRNGSeedSimulation()
 {
 	u32 seed = 0;
-	ScriptRequest rq(m_ComponentManager.GetScriptInterface());
+	ScriptRequestGuard rq(m_ComponentManager.GetScriptInterface());
 	if (!Script::HasProperty(rq, m_MapSettings, "Seed") ||
 		!Script::GetProperty(rq, m_MapSettings, "Seed", seed))
 		LOGWARNING("CSimulation2Impl::InitRNGSeedSimulation: No seed value specified - using %d", seed);
@@ -346,7 +346,7 @@ void CSimulation2Impl::InitRNGSeedSimulation()
 void CSimulation2Impl::InitRNGSeedAI()
 {
 	u32 seed = 0;
-	ScriptRequest rq(m_ComponentManager.GetScriptInterface());
+	ScriptRequestGuard rq(m_ComponentManager.GetScriptInterface());
 	if (!Script::HasProperty(rq, m_MapSettings, "AISeed") ||
 		!Script::GetProperty(rq, m_MapSettings, "AISeed", seed))
 		LOGWARNING("CSimulation2Impl::InitRNGSeedAI: No seed value specified - using %d", seed);
@@ -414,12 +414,12 @@ void CSimulation2Impl::Update(int turnLength, const std::vector<SimulationComman
 		ENSURE(LoadDefaultScripts(*m_SecondaryComponentManager, m_SecondaryLoadedScripts.get()));
 		ResetComponentState(*m_SecondaryComponentManager, false, false);
 
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 
 		// Load the trigger scripts after we have loaded the simulation.
 		{
-			ScriptRequest rq2(m_SecondaryComponentManager->GetScriptInterface());
-			JS::RootedValue mapSettingsCloned(rq2.cx, Script::CloneValueFromOtherCompartment(m_SecondaryComponentManager->GetScriptInterface(), scriptInterface, m_MapSettings));
+			ScriptRequestGuard rq2(m_SecondaryComponentManager->GetScriptInterface());
+			JS::RootedValue mapSettingsCloned(rq2.cx(), Script::CloneValueFromOtherCompartment(m_SecondaryComponentManager->GetScriptInterface(), scriptInterface, m_MapSettings));
 			ENSURE(LoadTriggerScripts(*m_SecondaryComponentManager, mapSettingsCloned, m_SecondaryLoadedScripts.get()));
 		}
 
@@ -729,14 +729,16 @@ ScriptInterface& CSimulation2::GetScriptInterface() const
 
 void CSimulation2::PreInitGame()
 {
-	ScriptRequest rq(GetScriptInterface());
+	ScriptRequestGuard rqg(GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 	JS::RootedValue global(rq.cx, rq.globalValue());
 	ScriptFunction::CallVoid(rq, global, "PreInitGame");
 }
 
 void CSimulation2::InitGame()
 {
-	ScriptRequest rq(GetScriptInterface());
+	ScriptRequestGuard rqg(GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 	JS::RootedValue global(rq.cx, rq.globalValue());
 
 	JS::RootedValue settings(rq.cx);
@@ -812,7 +814,7 @@ void CSimulation2::GetInitAttributes(JS::MutableHandleValue ret)
 
 void CSimulation2::SetMapSettings(const std::string& settings)
 {
-	Script::ParseJSON(ScriptRequest(m->m_ComponentManager.GetScriptInterface()), settings, &m->m_MapSettings);
+	Script::ParseJSON(ScriptRequestGuard(m->m_ComponentManager.GetScriptInterface()), settings, &m->m_MapSettings);
 }
 
 void CSimulation2::SetMapSettings(JS::HandleValue settings)
@@ -825,7 +827,7 @@ void CSimulation2::SetMapSettings(JS::HandleValue settings)
 
 std::string CSimulation2::GetMapSettingsString()
 {
-	return Script::StringifyJSON(ScriptRequest(m->m_ComponentManager.GetScriptInterface()), &m->m_MapSettings);
+	return Script::StringifyJSON(ScriptRequestGuard(m->m_ComponentManager.GetScriptInterface()), &m->m_MapSettings);
 }
 
 void CSimulation2::GetMapSettings(JS::MutableHandleValue ret)
@@ -835,14 +837,16 @@ void CSimulation2::GetMapSettings(JS::MutableHandleValue ret)
 
 void CSimulation2::LoadPlayerSettings(bool newPlayers)
 {
-	ScriptRequest rq(GetScriptInterface());
+	ScriptRequestGuard rqg(GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 	JS::RootedValue global(rq.cx, rq.globalValue());
 	ScriptFunction::CallVoid(rq, global, "LoadPlayerSettings", m->m_MapSettings, newPlayers);
 }
 
 void CSimulation2::LoadMapSettings()
 {
-	ScriptRequest rq(GetScriptInterface());
+	ScriptRequestGuard rqg(GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue global(rq.cx, rq.globalValue());
 
@@ -982,7 +986,8 @@ std::string CSimulation2::GetMapSizes()
 std::string CSimulation2::GetAIData()
 {
 	const ScriptInterface& scriptInterface = GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 	JS::RootedValue aiData(rq.cx, ICmpAIManager::GetAIs(scriptInterface));
 
 	// Build single JSON string with array of AI data

@@ -426,7 +426,7 @@ bool CNetServerWorker::RunStep()
 
 	m_ScriptInterface->GetContext().MaybeIncrementalGC(0.5f);
 
-	ScriptRequest rq(m_ScriptInterface);
+	const ScriptRequestGuard rq {m_ScriptInterface};
 
 	std::vector<bool> newStartGame;
 	std::vector<std::string> newGameAttributes;
@@ -451,7 +451,7 @@ bool CNetServerWorker::RunStep()
 			LOGERROR("NetServer: Init Attributes cannot be changed after the server starts loading.");
 		else
 		{
-			JS::RootedValue gameAttributesVal(rq.cx);
+			JS::RootedValue gameAttributesVal(rq.cx());
 			Script::ParseJSON(rq, newGameAttributes.back(), &gameAttributesVal);
 			m_InitAttributes = gameAttributesVal;
 		}
@@ -1171,7 +1171,7 @@ bool CNetServerWorker::OnAuthenticate(CNetServerSession* session, CFsmEvent* eve
 			// started.
 			CJoinSyncStartMessage message;
 			message.m_InitAttributes = Script::StringifyJSON(
-				ScriptRequest{server.GetScriptInterface()}, &server.m_InitAttributes);
+				ScriptRequestGuard{server.GetScriptInterface()}, &server.m_InitAttributes);
 			(*sessionIt)->SendMessage(&message);
 		});
 
@@ -1191,8 +1191,8 @@ bool CNetServerWorker::OnSimulationCommand(CNetServerSession* session, CFsmEvent
 	// unless cheating is enabled
 	bool cheatsEnabled = false;
 	const ScriptInterface& scriptInterface = server.GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue settings(rq.cx);
+	const ScriptRequestGuard rq {scriptInterface};
+	JS::RootedValue settings(rq.cx());
 	Script::GetProperty(rq, server.m_InitAttributes, "settings", &settings);
 	if (Script::HasProperty(rq, settings, "CheatsEnabled"))
 		Script::GetProperty(rq, settings, "CheatsEnabled", cheatsEnabled);
@@ -1597,7 +1597,7 @@ void CNetServerWorker::PreStartGame(const CStr& initAttribs)
 	SendPlayerAssignments();
 
 	// Update init attributes. They should no longer change.
-	Script::ParseJSON(ScriptRequest(m_ScriptInterface), initAttribs, &m_InitAttributes);
+	Script::ParseJSON(ScriptRequestGuard(m_ScriptInterface), initAttribs, &m_InitAttributes);
 }
 
 void CNetServerWorker::StartGame(const CStr& initAttribs)

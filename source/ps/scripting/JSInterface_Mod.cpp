@@ -112,11 +112,11 @@ Mod* ModGetter(const ScriptRequest&, JS::CallArgs&)
 
 JS::Value GetEngineInfo(const ScriptInterface& scriptInterface)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue mods(rq.cx);
+	JS::RootedValue mods(rq.cx());
 	Script::ToJSVal(rq, &mods, g_Mods.GetEnabledModsData());
-	JS::RootedValue metainfo(rq.cx);
+	JS::RootedValue metainfo(rq.cx());
 
 	Script::CreateObject(
 		 rq,

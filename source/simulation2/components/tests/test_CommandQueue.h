@@ -26,7 +26,7 @@ public:
 	{
 		CXeromycesEngine xeromycesEngine;
 		ComponentTestHelper test(*g_ScriptContext);
-		ScriptRequest rq(test.GetScriptInterface());
+		ScriptRequestGuard rq(test.GetScriptInterface());
 
 		std::vector<SimulationCommand> empty;
 

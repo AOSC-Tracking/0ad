@@ -72,8 +72,8 @@ CComponentManager::CComponentManager(CSimContext& context, ScriptContext& cx, bo
 	// these functions, so we skip registering them here in those cases
 	if (!skipScriptFunctions)
 	{
-		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulation(m_ScriptInterface);
-		ScriptRequest rq(m_ScriptInterface);
+		ScriptRequestGuard rq(m_ScriptInterface);
+		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulation(rq);
 		constexpr ScriptFunction::ObjectGetter<CComponentManager> Getter = &ScriptInterface::ObjectFromCBData<CComponentManager>;
 		ScriptFunction::Register<&CComponentManager::Script_RegisterComponentType, Getter>(rq, "RegisterComponentType");
 		ScriptFunction::Register<&CComponentManager::Script_RegisterSystemComponentType, Getter>(rq, "RegisterSystemComponentType");
@@ -160,7 +160,7 @@ bool CComponentManager::LoadScript(const VfsPath& filename, bool hotload)
 
 void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::string& cname, JS::HandleValue ctor, bool reRegister, bool systemComponent)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	// Find the C++ component that wraps the interface
 	int cidWrapper = GetScriptWrapper(iid);
@@ -238,7 +238,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		mustReloadComponents = true;
 	}
 
-	JS::RootedValue protoVal(rq.cx);
+	JS::RootedValue protoVal(rq.cx());
 	if (!Script::GetProperty(rq, ctor, "prototype", &protoVal))
 	{
 		ScriptException::Raise(rq, "Failed to get property 'prototype'");
@@ -262,7 +262,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		ctWrapper.dealloc,
 		cname,
 		schema,
-		std::make_unique<JS::PersistentRootedValue>(rq.cx, ctor)
+		std::make_unique<JS::PersistentRootedValue>(rq.cx(), ctor)
 	};
 	m_ComponentTypesById[cid] = std::move(ct);
 
@@ -327,7 +327,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		std::map<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
 		for (; eit != comps.end(); ++eit)
 		{
-			JS::RootedValue instance(rq.cx, eit->second->GetJSInstance());
+			JS::RootedValue instance(rq.cx(), eit->second->GetJSInstance());
 			if (!instance.isNull())
 				m_ScriptInterface.SetPrototype(instance, protoVal);
 		}
@@ -360,7 +360,7 @@ void CComponentManager::Script_RegisterInterface(const std::string& name)
 		// they're probably unintentional and should be reported
 		if (!m_CurrentlyHotloading)
 		{
-			ScriptRequest rq(m_ScriptInterface);
+			ScriptRequestGuard rq(m_ScriptInterface);
 			ScriptException::Raise(rq, "Registering interface with already-registered name '%s'", name.c_str());
 		}
 		return;
@@ -382,7 +382,7 @@ void CComponentManager::Script_RegisterMessageType(const std::string& name)
 		// they're probably unintentional and should be reported
 		if (!m_CurrentlyHotloading)
 		{
-			ScriptRequest rq(m_ScriptInterface);
+			ScriptRequestGuard rq(m_ScriptInterface);
 			ScriptException::Raise(rq, "Registering message type with already-registered name '%s'", name.c_str());
 		}
 		return;
@@ -441,7 +441,7 @@ CMessage* CComponentManager::ConstructMessage(int mtid, JS::HandleValue data)
 	if (mtid == MT__Invalid || mtid > (int)m_MessageTypeIdsByName.size()) // (IDs start at 1 so use '>' here)
 		LOGERROR("PostMessage with invalid message type ID '%d'", mtid);
 
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 	if (mtid < MT__LastNative)
 	{
 		return CMessageFromJSVal(mtid, rq, data);
@@ -742,7 +742,7 @@ void CComponentManager::AddSystemComponents(bool skipScriptedComponents, bool sk
 
 IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTypeId cid)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
 	if (it == m_ComponentTypesById.end())
@@ -765,7 +765,7 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 	std::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
 
 	// If this is a scripted component, construct the appropriate JS object first
-	JS::RootedValue obj(rq.cx);
+	JS::RootedValue obj(rq.cx());
 	if (ct.type == CT_Script)
 	{
 		m_ScriptInterface.CallConstructor(*ct.ctor, JS::HandleValueArray::empty(), &obj);

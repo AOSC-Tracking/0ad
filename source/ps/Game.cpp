@@ -196,9 +196,9 @@ bool CGame::StartVisualReplay(const OsPath& replayPath)
 	std::getline(*m_ReplayStream, line);
 
 	const ScriptInterface& scriptInterface = m_Simulation2->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue attribs(rq.cx);
+	JS::RootedValue attribs(rq.cx());
 	Script::ParseJSON(rq, line, &attribs);
 	StartGame(&attribs, "");
 
@@ -213,7 +213,7 @@ bool CGame::StartVisualReplay(const OsPath& replayPath)
 void CGame::RegisterInit(const JS::HandleValue attribs, const std::string& savedState)
 {
 	const ScriptInterface& scriptInterface = m_Simulation2->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
 	m_IsSavedGame = !savedState.empty();
 
@@ -222,7 +222,7 @@ void CGame::RegisterInit(const JS::HandleValue attribs, const std::string& saved
 	std::string mapType;
 	Script::GetProperty(rq, attribs, "mapType", mapType);
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	Script::GetProperty(rq, attribs, "settings", &settings);
 
 	if (Script::HasProperty(rq, attribs, "settings") &&
@@ -344,7 +344,8 @@ PSRETURN CGame::ReallyStartGame()
 	if (g_GUI && g_GUI->GetPageCount())
 	{
 		std::shared_ptr<ScriptInterface> scriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rqg(scriptInterface);
+		const ScriptRequest& rq = rqg;
 
 		JS::RootedValue global(rq.cx, rq.globalValue());
 		if (Script::HasProperty(rq, global, "reallyStartGame"))

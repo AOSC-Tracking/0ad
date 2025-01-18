@@ -76,14 +76,14 @@ std::wstring GetMatchID()
 
 JS::Value LoadMapSettings(const ScriptInterface& scriptInterface, const VfsPath& pathname)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
 	CMapSummaryReader reader;
 
 	if (reader.LoadMap(pathname) != PSRETURN_OK)
 		return JS::UndefinedValue();
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	reader.GetMapSettings(scriptInterface, &settings);
 	return settings;
 }

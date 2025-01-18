@@ -46,9 +46,9 @@ void StartGame(const ScriptInterface& guiInterface, JS::HandleValue attribs, int
 
 	// Convert from GUI script context to sim script context/
 	CSimulation2* sim = g_Game->GetSimulation2();
-	ScriptRequest rqSim(sim->GetScriptInterface());
+	ScriptRequestGuard rqSim(sim->GetScriptInterface());
 
-	JS::RootedValue gameAttribs(rqSim.cx, Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), guiInterface, attribs));
+	JS::RootedValue gameAttribs(rqSim.cx(), Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), guiInterface, attribs));
 
 	g_Game->SetPlayerID(playerID);
 	g_Game->StartGame(&gameAttribs, "");

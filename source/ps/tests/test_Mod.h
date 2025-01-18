@@ -88,7 +88,7 @@ public:
 	{
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 		JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
 
 		m_Mods.m_AvailableMods = {
@@ -138,7 +138,7 @@ public:
 	{
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 		JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
 
 		m_Mods.m_AvailableMods = {

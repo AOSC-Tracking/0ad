@@ -109,13 +109,13 @@ QUERYHANDLER(GenerateMap)
 
 		// Random map
 		const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 
-		JS::RootedValue settings(rq.cx);
+		JS::RootedValue settings(rq.cx());
 		Script::ParseJSON(rq, *msg->settings, &settings);
 		Script::SetProperty(rq, settings, "mapType", "random");
 
-		JS::RootedValue attrs(rq.cx);
+		JS::RootedValue attrs(rq.cx());
 		Script::CreateObject(
 			rq,
 			&attrs,
@@ -137,27 +137,27 @@ QUERYHANDLER(GenerateMap)
 		InitGame();
 
 		const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 
 		// Set up 8-element array of empty objects to satisfy init
-		JS::RootedValue playerData(rq.cx);
+		JS::RootedValue playerData(rq.cx());
 		Script::CreateArray(rq, &playerData);
 
 		for (int i = 0; i < 8; ++i)
 		{
-			JS::RootedValue player(rq.cx);
+			JS::RootedValue player(rq.cx());
 			Script::CreateObject(rq, &player);
 			Script::SetPropertyInt(rq, playerData, i, player);
 		}
 
-		JS::RootedValue settings(rq.cx);
+		JS::RootedValue settings(rq.cx());
 		Script::CreateObject(
 			rq,
 			&settings,
 			"mapType", "scenario",
 			"PlayerData", playerData);
 
-		JS::RootedValue attrs(rq.cx);
+		JS::RootedValue attrs(rq.cx());
 		Script::CreateObject(
 			rq,
 			&attrs,
@@ -176,13 +176,13 @@ MESSAGEHANDLER(LoadMap)
 	InitGame();
 
 	const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
 	// Scenario
 	CStrW map = *msg->filename;
 	CStrW mapBase = map.BeforeLast(L".pmp"); // strip the file extension, if any
 
-	JS::RootedValue attrs(rq.cx);
+	JS::RootedValue attrs(rq.cx());
 
 	Script::CreateObject(
 		rq,

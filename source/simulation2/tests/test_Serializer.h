@@ -297,7 +297,7 @@ public:
 	void helper_script_roundtrip(const char* msg, const char* input, const char* expected, size_t expstreamlen = 0, const char* expstream = NULL, const char* debug = NULL)
 	{
 		ScriptInterface script("Test", "Test", g_ScriptContext);
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 
 		JS::RootedValue obj(rq.cx);
 		TSM_ASSERT(msg, script.Eval(input, &obj));
@@ -813,7 +813,7 @@ public:
 	void test_script_exceptions()
 	{
 		ScriptInterface script("Test", "Test", g_ScriptContext);
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 
 		JS::RootedValue obj(rq.cx);
 
@@ -848,7 +848,7 @@ public:
 		const char* input = "var x = {}; for (var i=0;i<256;++i) x[i]=Math.pow(i, 2); x";
 
 		ScriptInterface script("Test", "Test", g_ScriptContext);
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 
 		JS::RootedValue obj(rq.cx);
 		TS_ASSERT(script.Eval(input, &obj));

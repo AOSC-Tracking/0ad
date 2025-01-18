@@ -670,8 +670,8 @@ void InitGraphics(const CmdLineArgs& args, int flags, const std::vector<CStr>& i
 		{
 			const bool setup_gui = ((flags & INIT_NO_GUI) == 0);
 
-			ScriptRequest rq{g_GUI->GetScriptInterface()};
-			JS::RootedValue data(rq.cx);
+			ScriptRequestGuard rq{g_GUI->GetScriptInterface()};
+			JS::RootedValue data(rq.cx());
 			Script::CreateObject(rq, &data, "isStartup", true);
 			if (!installedMods.empty())
 				Script::SetProperty(rq, data, "installedMods", installedMods);
@@ -785,7 +785,8 @@ bool Autostart(const CmdLineArgs& args)
 
 	// Create some scriptinterface to store the js values for the settings.
 	ScriptInterface scriptInterface("Engine", "Game Setup", g_ScriptContext);
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	// We use the javascript gameSettings to handle options, but that requires running JS.
 	// Since we don't want to use the full Gui manager, we load an entrypoint script
@@ -857,7 +858,9 @@ bool AutostartVisualReplay(const std::string& replayFile)
 	g_Game->StartVisualReplay(replayFile);
 
 	ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
+
 	JS::RootedValue attrs(rq.cx, g_Game->GetSimulation2()->GetInitAttributes());
 
 	JS::RootedValue playerAssignments(rq.cx);
@@ -882,7 +885,8 @@ bool AutostartVisualReplay(const std::string& replayFile)
 void CancelLoad(const CStrW& message)
 {
 	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
-	ScriptRequest rq(pScriptInterface);
+	ScriptRequestGuard rqg(pScriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue global(rq.cx, rq.globalValue());
 

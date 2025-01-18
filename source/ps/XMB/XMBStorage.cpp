@@ -153,7 +153,8 @@ public:
 	std::vector<std::pair<u32, JS::Heap<JS::Value>>> m_Children;
 
 	const ScriptInterface& scriptInterface;
-	const ScriptRequest rq;
+	// TODO: This isn't super safe - we might accidentally enter different realms
+	const ScriptRequestGuard rq;
 };
 
 template<>
@@ -198,7 +199,7 @@ bool XMBStorageWriter::OutputElements<JSNodeData&, const u32&, JS::HandleValue&&
 	std::vector<std::pair<u32, JS::Heap<JS::Value>>> children = data.m_Children;
 	for (const std::pair<u32, JS::Heap<JS::Value>>& child : children)
 	{
-		JS::RootedValue val(data.rq.cx, child.second);
+		JS::RootedValue val(data.rq.cx(), child.second);
 		if (!OutputElements<JSNodeData&, const u32&, JS::HandleValue&&>(writeBuffer, data, child.first, val))
 			return false;
 	}
@@ -214,7 +215,7 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 {
 	m_Attributes.clear();
 	m_Children.clear();
-	JSType valType = JS_TypeOfValue(rq.cx, value);
+	JSType valType = JS_TypeOfValue(rq.cx(), value);
 	if (valType != JSTYPE_OBJECT)
 		return true;
 
@@ -248,7 +249,7 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 		else if (attrib)
 			name = std::string_view(prop.c_str()+1, prop.length()-1);
 
-		JS::RootedValue child(rq.cx);
+		JS::RootedValue child(rq.cx());
 		if (!Script::GetProperty(rq, value, prop.c_str(), &child))
 			return false;
 
@@ -265,7 +266,7 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 		}
 
 		bool isArray = false;
-		if (!JS::IsArrayObject(rq.cx, child, &isArray))
+		if (!JS::IsArrayObject(rq.cx(), child, &isArray))
 			return false;
 		if (!isArray)
 		{
@@ -274,13 +275,13 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 		}
 
 		// Parse each array object as a child.
-		JS::RootedObject obj(rq.cx);
-		JS_ValueToObject(rq.cx, child, &obj);
+		JS::RootedObject obj(rq.cx());
+		JS_ValueToObject(rq.cx(), child, &obj);
 		u32 length;
-		JS::GetArrayLength(rq.cx, obj, &length);
+		JS::GetArrayLength(rq.cx(), obj, &length);
 		for (size_t i = 0; i < length; ++i)
 		{
-			JS::RootedValue arrayChild(rq.cx);
+			JS::RootedValue arrayChild(rq.cx());
 			Script::GetPropertyInt(rq, child, i, &arrayChild);
 			m_Children.emplace_back(xmb.GetElementName(std::string(name)), arrayChild);
 		}
@@ -290,7 +291,7 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 
 bool JSNodeData::Output(WriteBuffer& writeBuffer, JS::HandleValue value) const
 {
-	switch (JS_TypeOfValue(rq.cx, value))
+	switch (JS_TypeOfValue(rq.cx(), value))
 	{
 		case JSTYPE_UNDEFINED:
 		{
@@ -304,7 +305,7 @@ bool JSNodeData::Output(WriteBuffer& writeBuffer, JS::HandleValue value) const
 				writeBuffer.Append("\0\0\0\0", 4);
 				break;
 			}
-			JS::RootedValue actualValue(rq.cx);
+			JS::RootedValue actualValue(rq.cx());
 			if (!Script::GetProperty(rq, value, "_string", &actualValue))
 				return false;
 			std::string strVal;

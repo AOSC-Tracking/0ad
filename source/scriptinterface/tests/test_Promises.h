@@ -37,7 +37,7 @@ public:
 		TS_ASSERT(script.LoadGlobalScriptFile(L"promises/simple.js"));
 		g_ScriptContext->RunJobs();
 
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 		JS::RootedValue global(rq.cx, rq.globalValue());
 		ScriptFunction::CallVoid(rq, global, "endTest");
 	}

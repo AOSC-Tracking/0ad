@@ -441,14 +441,14 @@ PSRETURN CMapSummaryReader::LoadMap(const VfsPath& pathname)
 
 void CMapSummaryReader::GetMapSettings(const ScriptInterface& scriptInterface, JS::MutableHandleValue ret)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
 	Script::CreateObject(rq, ret);
 
 	if (m_ScriptSettings.empty())
 		return;
 
-	JS::RootedValue scriptSettingsVal(rq.cx);
+	JS::RootedValue scriptSettingsVal(rq.cx());
 	Script::ParseJSON(rq, m_ScriptSettings, &scriptSettingsVal);
 	Script::SetProperty(rq, ret, "settings", scriptSettingsVal, false);
 }
@@ -1337,7 +1337,7 @@ struct CMapReader::GeneratorState
 
 int CMapReader::StartMapGeneration(const CStrW& scriptFile)
 {
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
+	ScriptRequestGuard rq(pSimulation2->GetScriptInterface());
 
 	m_GeneratorState = std::make_unique<GeneratorState>();
 
@@ -1384,14 +1384,14 @@ int CMapReader::PollMapGeneration()
 		ThrowMapGenerationError();
 
 	// Parse data into simulation context
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
-	JS::RootedValue data{rq.cx};
+	ScriptRequestGuard rq(pSimulation2->GetScriptInterface());
+	JS::RootedValue data{rq.cx()};
 	Script::ReadStructuredClone(rq, results, &data);
 
 	if (data.isUndefined())
 		ThrowMapGenerationError();
 
-	m_MapData.init(rq.cx, data);
+	m_MapData.init(rq.cx(), data);
 
 	return 0;
 };
@@ -1400,7 +1400,7 @@ int CMapReader::PollMapGeneration()
 int CMapReader::ParseTerrain()
 {
 	TIMER(L"ParseTerrain");
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
+	ScriptRequestGuard rq(pSimulation2->GetScriptInterface());
 
 	// parse terrain from map data
 	//	an error here should stop the loading process
@@ -1436,7 +1436,7 @@ if (!Script::GetProperty(rq, val, #prop, out))\
 	// build tile data
 	m_Tiles.resize(SQR(size));
 
-	JS::RootedValue tileData(rq.cx);
+	JS::RootedValue tileData(rq.cx());
 	GET_TERRAIN_PROPERTY(m_MapData, tileData, &tileData)
 
 	// parse tile data object into flat arrays
@@ -1477,7 +1477,7 @@ if (!Script::GetProperty(rq, val, #prop, out))\
 int CMapReader::ParseEntities()
 {
 	TIMER(L"ParseEntities");
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
+	ScriptRequestGuard rq(pSimulation2->GetScriptInterface());
 
 	// parse entities from map data
 	std::vector<Entity> entities;
@@ -1541,7 +1541,8 @@ int CMapReader::ParseEntities()
 int CMapReader::ParseEnvironment()
 {
 	// parse environment settings from map data
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
+	ScriptRequestGuard rqg(pSimulation2->GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 
 #define GET_ENVIRONMENT_PROPERTY(val, prop, out)\
 	if (!Script::GetProperty(rq, val, #prop, out))\
@@ -1636,7 +1637,7 @@ int CMapReader::ParseEnvironment()
 
 int CMapReader::ParseCamera()
 {
-	ScriptRequest rq(pSimulation2->GetScriptInterface());
+	ScriptRequestGuard rq(pSimulation2->GetScriptInterface());
 
 	// parse camera settings from map data
 	// defaults if we don't find player starting camera
@@ -1647,7 +1648,7 @@ int CMapReader::ParseCamera()
 	if (!Script::GetProperty(rq, val, #prop, out))\
 		LOGWARNING("CMapReader::ParseCamera() failed to get '%s' property", #prop);
 
-	JS::RootedValue cameraObj(rq.cx);
+	JS::RootedValue cameraObj(rq.cx());
 	GET_CAMERA_PROPERTY(m_MapData, Camera, &cameraObj)
 
 	if (!cameraObj.isUndefined())

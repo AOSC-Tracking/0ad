@@ -101,10 +101,7 @@ void CGUIManager::SwitchPage(const CStrW& pageName, const ScriptInterface* srcSc
 
 	Script::StructuredClone initDataClone;
 	if (!initData.isUndefined())
-	{
-		ScriptRequest rq(srcScriptInterface);
-		initDataClone = Script::WriteStructuredClone(rq, initData);
-	}
+		initDataClone = Script::WriteStructuredClone(ScriptRequestGuard{srcScriptInterface}, initData);
 
 	if (!m_PageStack.empty())
 	{
@@ -167,8 +164,8 @@ void CGUIManager::SGUIPage::LoadPage(ScriptContext& scriptContext)
 	if (gui)
 	{
 		std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
-		ScriptRequest rq(scriptInterface);
-
+		ScriptRequestGuard rqg(scriptInterface);
+		const ScriptRequest& rq = rqg;
 		JS::RootedValue global(rq.cx, rq.globalValue());
 		JS::RootedValue hotloadDataVal(rq.cx);
 		ScriptFunction::Call(rq, global, "getHotloadData", &hotloadDataVal);
@@ -233,7 +230,8 @@ void CGUIManager::SGUIPage::LoadPage(ScriptContext& scriptContext)
 	gui->LoadedXmlFiles();
 
 	std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue initDataVal(rq.cx);
 	JS::RootedValue hotloadDataVal(rq.cx);
@@ -264,7 +262,8 @@ void CGUIManager::SGUIPage::ResolvePromise(Script::StructuredClone args)
 		return;
 
 	std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedObject globalObj(rq.cx, rq.glob);
 
@@ -316,8 +315,8 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 
 	{
 		PROFILE("handleInputBeforeGui");
-		ScriptRequest rq(*top()->GetScriptInterface());
-
+		ScriptRequestGuard rqg(*top()->GetScriptInterface());
+		const ScriptRequest& rq = rqg;
 		JS::RootedValue global(rq.cx, rq.globalValue());
 		if (ScriptFunction::Call(rq, global, "handleInputBeforeGui", handled, *ev, top()->FindObjectUnderMouse()))
 			if (handled)
@@ -333,7 +332,8 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 
 	{
 		// We can't take the following lines out of this scope because top() may be another gui page than it was when calling handleInputBeforeGui!
-		ScriptRequest rq(*top()->GetScriptInterface());
+		ScriptRequestGuard rqg(*top()->GetScriptInterface());
+		const ScriptRequest& rq = rqg;
 		JS::RootedValue global(rq.cx, rq.globalValue());
 
 		PROFILE("handleInputAfterGui");
@@ -418,13 +418,13 @@ const CParamNode& CGUIManager::GetTemplate(const std::string& templateName)
 void CGUIManager::DisplayLoadProgress(int percent, const wchar_t* pending_task)
 {
 	const ScriptInterface& scriptInterface = *(GetActiveGUI()->GetScriptInterface());
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValueVector paramData(rq.cx);
+	JS::RootedValueVector paramData(rq.cx());
 
 	ignore_result(paramData.append(JS::NumberValue(percent)));
 
-	JS::RootedValue valPendingTask(rq.cx);
+	JS::RootedValue valPendingTask(rq.cx());
 	Script::ToJSVal(rq, &valPendingTask, pending_task);
 	ignore_result(paramData.append(valPendingTask));
 

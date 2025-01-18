@@ -208,8 +208,8 @@ JS::Value PollNetworkClient(const ScriptInterface& guiInterface)
 		return JS::UndefinedValue();
 
 	// Convert from net client context to GUI script context
-	ScriptRequest rqNet(g_NetClient->GetScriptInterface());
-	JS::RootedValue pollNet(rqNet.cx);
+	ScriptRequestGuard rqNet(g_NetClient->GetScriptInterface());
+	JS::RootedValue pollNet(rqNet.cx());
 	g_NetClient->GuiPoll(&pollNet);
 	return Script::CloneValueFromOtherCompartment(guiInterface, g_NetClient->GetScriptInterface(), pollNet);
 }
@@ -219,8 +219,8 @@ void SendGameSetupMessage(const ScriptInterface& scriptInterface, JS::HandleValu
 	ENSURE(g_NetClient);
 
 	// TODO: This is a workaround because we need to pass a MutableHandle to a JSAPI functions somewhere (with no obvious reason).
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue attribs(rq.cx, attribs1);
+	ScriptRequestGuard rq(scriptInterface);
+	JS::RootedValue attribs(rq.cx(), attribs1);
 
 	g_NetClient->SendGameSetupMessage(&attribs, scriptInterface);
 }
@@ -278,9 +278,9 @@ void StartNetworkGame(const ScriptInterface& scriptInterface, JS::HandleValue sa
 {
 	ENSURE(g_NetClient);
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue attribs(rq.cx, attribs1);
+	JS::RootedValue attribs(rq.cx(), attribs1);
 	std::string attributesAsString{Script::StringifyJSON(rq, &attribs)};
 
 	if (savegame.isUndefined())
@@ -311,15 +311,15 @@ void SendNetworkFlare(JS::HandleValue position)
 {
 	ENSURE(g_NetClient);
 
-	ScriptRequest rq(g_NetClient->GetScriptInterface());
+	ScriptRequestGuard rq(g_NetClient->GetScriptInterface());
 	ENSURE(position.isObject());
-	JS::RootedObject positionObj(rq.cx, &position.toObject());
-	JS::RootedValue positionX(rq.cx);
-	JS::RootedValue positionY(rq.cx);
-	JS::RootedValue positionZ(rq.cx);
-	ENSURE(JS_GetProperty(rq.cx, positionObj, "x", &positionX));
-	ENSURE(JS_GetProperty(rq.cx, positionObj, "y", &positionY));
-	ENSURE(JS_GetProperty(rq.cx, positionObj, "z", &positionZ));
+	JS::RootedObject positionObj(rq.cx(), &position.toObject());
+	JS::RootedValue positionX(rq.cx());
+	JS::RootedValue positionY(rq.cx());
+	JS::RootedValue positionZ(rq.cx());
+	ENSURE(JS_GetProperty(rq.cx(), positionObj, "x", &positionX));
+	ENSURE(JS_GetProperty(rq.cx(), positionObj, "y", &positionY));
+	ENSURE(JS_GetProperty(rq.cx(), positionObj, "z", &positionZ));
 
 	// (TODO?): Converting the doubles into strings here is a workaround because direct (de)serialisation of floating point numbers is not supported.
 	// It causes somewhat awkward message handling, but the resulting efficiency losses are negligible.

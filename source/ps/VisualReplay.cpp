@@ -83,14 +83,14 @@ bool VisualReplay::ReadCacheFile(const ScriptInterface& scriptInterface, JS::Mut
 	CStr cacheStr((std::istreambuf_iterator<char>(cacheStream)), std::istreambuf_iterator<char>());
 	cacheStream.close();
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue cachedReplays(rq.cx);
+	JS::RootedValue cachedReplays(rq.cx());
 	if (Script::ParseJSON(rq, cacheStr, &cachedReplays))
 	{
 		cachedReplaysObject.set(&cachedReplays.toObject());
 		bool isArray;
-		if (JS::IsArrayObject(rq.cx, cachedReplaysObject, &isArray) && isArray)
+		if (JS::IsArrayObject(rq.cx(), cachedReplaysObject, &isArray) && isArray)
 			return true;
 	}
 
@@ -101,9 +101,9 @@ bool VisualReplay::ReadCacheFile(const ScriptInterface& scriptInterface, JS::Mut
 
 void VisualReplay::StoreCacheFile(const ScriptInterface& scriptInterface, JS::HandleObject replays)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue replaysRooted(rq.cx, JS::ObjectValue(*replays));
+	JS::RootedValue replaysRooted(rq.cx(), JS::ObjectValue(*replays));
 	std::ofstream cacheStream(OsString(GetTempCacheFilePath()), std::ofstream::out | std::ofstream::trunc);
 	cacheStream << Script::StringifyJSON(rq, &replaysRooted);
 	cacheStream.close();
@@ -116,7 +116,8 @@ void VisualReplay::StoreCacheFile(const ScriptInterface& scriptInterface, JS::Ha
 JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptInterface, bool compareFiles)
 {
 	TIMER(L"ReloadReplayCache");
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	// Maps the filename onto the index, mtime and size
 	using replayCacheMap = std::map<OsPath, std::tuple<u32, u64, off_t>>;
@@ -237,7 +238,8 @@ JS::Value VisualReplay::GetReplays(const ScriptInterface& scriptInterface, bool 
 {
 	TIMER(L"GetReplays");
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 	JS::RootedObject replays(rq.cx, ReloadReplayCache(scriptInterface, compareFiles));
 	// Only take entries with data
 	JS::RootedValue replaysWithoutNullEntries(rq.cx);
@@ -374,8 +376,8 @@ JS::Value VisualReplay::LoadReplayData(const ScriptInterface& scriptInterface, c
 	// Parse header / first line
 	CStr header;
 	std::getline(*replayStream, header);
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue attribs(rq.cx);
+	ScriptRequestGuard rq(scriptInterface);
+	JS::RootedValue attribs(rq.cx());
 	if (!Script::ParseJSON(rq, header, &attribs))
 	{
 		LOGERROR("Couldn't parse replay header of %s", replayFile.string8().c_str());
@@ -408,7 +410,7 @@ JS::Value VisualReplay::LoadReplayData(const ScriptInterface& scriptInterface, c
 		return JS::NullValue();
 
 	// Return the actual data
-	JS::RootedValue replayData(rq.cx);
+	JS::RootedValue replayData(rq.cx());
 
 	Script::CreateObject(
 		rq,
@@ -435,8 +437,8 @@ bool VisualReplay::DeleteReplay(const OsPath& replayDirectory)
 JS::Value VisualReplay::GetReplayAttributes(const ScriptInterface& scriptInterface, const OsPath& directoryName)
 {
 	// Create empty JS object
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue attribs(rq.cx);
+	ScriptRequestGuard rq(scriptInterface);
+	JS::RootedValue attribs(rq.cx());
 	Script::CreateObject(rq, &attribs);
 
 	// Return empty object if file doesn't exist
@@ -459,7 +461,8 @@ JS::Value VisualReplay::GetReplayAttributes(const ScriptInterface& scriptInterfa
 void VisualReplay::AddReplayToCache(const ScriptInterface& scriptInterface, const CStrW& directoryName)
 {
 	TIMER(L"AddReplayToCache");
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue replayData(rq.cx, LoadReplayData(scriptInterface, OsPath(directoryName)));
 	if (replayData.isNull())
@@ -494,8 +497,8 @@ JS::Value VisualReplay::GetReplayMetadata(const ScriptInterface& scriptInterface
 	if (!HasReplayMetadata(directoryName))
 		return JS::NullValue();
 
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue metadata(rq.cx);
+	ScriptRequestGuard rq(scriptInterface);
+	JS::RootedValue metadata(rq.cx());
 
 	std::ifstream* stream = new std::ifstream(OsString(GetDirectoryPath() / directoryName / L"metadata.json"));
 	ENSURE(stream->good());

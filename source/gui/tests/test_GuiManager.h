@@ -69,7 +69,7 @@ public:
 	void test_EventObject()
 	{
 		// Load up a test page.
-		ScriptRequest rq{g_GUI->GetScriptInterface()};
+		ScriptRequestGuard rq{g_GUI->GetScriptInterface()};
 		JS::RootedValue val(rq.cx);
 		Script::CreateObject(rq, &val);
 
@@ -132,7 +132,7 @@ public:
 		LoadHotkeys(*configDB);
 
 		// Load up a test page.
-		ScriptRequest rq{g_GUI->GetScriptInterface()};
+		ScriptRequestGuard rq{g_GUI->GetScriptInterface()};
 		JS::RootedValue val(rq.cx);
 		Script::CreateObject(rq, &val);
 
@@ -206,7 +206,7 @@ public:
 	void test_PageRegainedFocusEvent()
 	{
 		// Load up a test page.
-		ScriptRequest rq{g_GUI->GetScriptInterface()};
+		ScriptRequestGuard rq{g_GUI->GetScriptInterface()};
 		JS::RootedValue val(rq.cx);
 		Script::CreateObject(rq, &val);
 

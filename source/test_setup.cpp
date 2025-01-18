@@ -144,7 +144,7 @@ namespace
 
 void ScriptTestSetup(const ScriptInterface& scriptInterface)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 	ScriptFunction::Register<script_TS_FAIL>(rq, "TS_FAIL");
 
 	// Load the TS_* function definitions

@@ -53,7 +53,7 @@ public:
 
 	void Serialize(ISerializer& serialize) override
 	{
-		ScriptRequest rq(GetSimContext().GetScriptInterface());
+		ScriptRequestGuard rq(GetSimContext().GetScriptInterface());
 
 		serialize.NumberU32_Unbounded("num commands", (u32)m_LocalQueue.size());
 		for (size_t i = 0; i < m_LocalQueue.size(); ++i)
@@ -65,32 +65,32 @@ public:
 
 	void Deserialize(const CParamNode& UNUSED(paramNode), IDeserializer& deserialize) override
 	{
-		ScriptRequest rq(GetSimContext().GetScriptInterface());
+		ScriptRequestGuard rq(GetSimContext().GetScriptInterface());
 
 		u32 numCmds;
 		deserialize.NumberU32_Unbounded("num commands", numCmds);
 		for (size_t i = 0; i < numCmds; ++i)
 		{
 			i32 player;
-			JS::RootedValue data(rq.cx);
+			JS::RootedValue data(rq.cx());
 			deserialize.NumberI32_Unbounded("player", player);
 			deserialize.ScriptVal("data", &data);
-			m_LocalQueue.emplace_back(SimulationCommand(player, rq.cx, data));
+			m_LocalQueue.emplace_back(SimulationCommand(player, rq.cx(), data));
 		}
 	}
 
 	void PushLocalCommand(player_id_t player, JS::HandleValue cmd) override
 	{
-		ScriptRequest rq(GetSimContext().GetScriptInterface());
-		m_LocalQueue.emplace_back(SimulationCommand(player, rq.cx, cmd));
+		ScriptRequestGuard rq(GetSimContext().GetScriptInterface());
+		m_LocalQueue.emplace_back(SimulationCommand(player, rq.cx(), cmd));
 	}
 
 	void PostNetworkCommand(JS::HandleValue cmd1) override
 	{
-		ScriptRequest rq(GetSimContext().GetScriptInterface());
+		ScriptRequestGuard rq(GetSimContext().GetScriptInterface());
 
 		// TODO: This is a workaround because we need to pass a MutableHandle to StringifyJSON.
-		JS::RootedValue cmd(rq.cx, cmd1.get());
+		JS::RootedValue cmd(rq.cx(), cmd1.get());
 
 		PROFILE2_EVENT("post net command");
 		PROFILE2_ATTR("command: %s", Script::StringifyJSON(rq, &cmd, false).c_str());
@@ -103,7 +103,8 @@ public:
 	void FlushTurn(const std::vector<SimulationCommand>& commands) override
 	{
 		const ScriptInterface& scriptInterface = GetSimContext().GetScriptInterface();
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rqg(scriptInterface);
+		const ScriptRequest& rq = rqg;
 
 		JS::RootedValue global(rq.cx, rq.globalValue());
 		std::vector<SimulationCommand> localCommands;

@@ -90,7 +90,7 @@ JS::Value StartSavedGame(const ScriptInterface& scriptInterface, const std::wstr
 	// The GUI calls this function from the GUI context and expects the return value in the same context.
 	// The game we start from here creates another context and expects data in this context.
 
-	ScriptRequest rqGui(scriptInterface);
+	ScriptRequestGuard rqGui(scriptInterface);
 
 	ENSURE(!g_NetServer);
 	ENSURE(!g_NetClient);
@@ -101,16 +101,16 @@ JS::Value StartSavedGame(const ScriptInterface& scriptInterface, const std::wstr
 	if (!data)
 		return JS::UndefinedValue();
 
-	JS::RootedValue guiContextMetadata{rqGui.cx, data->metadata};
+	JS::RootedValue guiContextMetadata{rqGui.cx(), data->metadata};
 
 	g_Game = new CGame(true);
 
 	{
 		CSimulation2* sim = g_Game->GetSimulation2();
-		ScriptRequest rqGame(sim->GetScriptInterface());
+		ScriptRequestGuard rqGame(sim->GetScriptInterface());
 
-		JS::RootedValue gameContextMetadata(rqGame.cx, Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, guiContextMetadata));
-		JS::RootedValue gameInitAttributes(rqGame.cx);
+		JS::RootedValue gameContextMetadata(rqGame.cx(), Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, guiContextMetadata));
+		JS::RootedValue gameInitAttributes(rqGame.cx());
 		Script::GetProperty(rqGame, gameContextMetadata, "initAttributes", &gameInitAttributes);
 
 		int playerID;

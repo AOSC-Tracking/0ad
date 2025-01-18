@@ -85,14 +85,14 @@ CModInstaller::ModInstallationResult CModInstaller::Install(
 	CStr modName;
 	{
 		ScriptInterface scriptInterface("Engine", "ModInstaller", scriptContext);
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 
-		JS::RootedValue json_val(rq.cx);
+		JS::RootedValue json_val(rq.cx());
 		if (!Script::ParseJSON(rq, modinfo.GetAsString(), &json_val))
 			return FAIL_ON_PARSE_JSON;
-		JS::RootedObject json_obj(rq.cx, json_val.toObjectOrNull());
-		JS::RootedValue name_val(rq.cx);
-		if (!JS_GetProperty(rq.cx, json_obj, "name", &name_val))
+		JS::RootedObject json_obj(rq.cx(), json_val.toObjectOrNull());
+		JS::RootedValue name_val(rq.cx());
+		if (!JS_GetProperty(rq.cx(), json_obj, "name", &name_val))
 			return FAIL_ON_EXTRACT_NAME;
 		Script::FromJSVal(rq, name_val, modName);
 		if (modName.empty())

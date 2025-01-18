@@ -48,7 +48,7 @@ void JSI_GUISize::RegisterScriptClass(ScriptInterface& scriptInterface)
 bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
 {
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-	ScriptRequest rq(cx);
+	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
 	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
 
 	JS::RootedObject obj(rq.cx, scriptInterface.CreateCustomObject("GUISize"));
@@ -107,7 +107,7 @@ bool JSI_GUISize::toString(JSContext* cx, uint argc, JS::Value* vp)
 	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
 	CStr buffer;
 
-	ScriptRequest rq(cx);
+	ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
 	double val, valr;
 
 #define SIDE(side) \

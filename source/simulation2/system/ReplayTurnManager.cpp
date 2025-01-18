@@ -90,17 +90,17 @@ void CReplayTurnManager::NotifyFinishedUpdate(u32 turn)
 	LOGERROR("Replay out of sync on turn %d", turn);
 
 	const ScriptInterface& scriptInterface = m_Simulation2.GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValueVector paramData(rq.cx);
+	JS::RootedValueVector paramData(rq.cx());
 
 	ignore_result(paramData.append(JS::NumberValue(turn)));
 
-	JS::RootedValue hashVal(rq.cx);
+	JS::RootedValue hashVal(rq.cx());
 	Script::ToJSVal(rq, &hashVal, hash);
 	ignore_result(paramData.append(hashVal));
 
-	JS::RootedValue expectedHashVal(rq.cx);
+	JS::RootedValue expectedHashVal(rq.cx());
 	Script::ToJSVal(rq, &expectedHashVal, expectedHash);
 	ignore_result(paramData.append(expectedHashVal));
 
@@ -113,12 +113,12 @@ void CReplayTurnManager::DoTurn(u32 turn)
 
 	m_TurnLength = m_ReplayTurnLengths[turn];
 
-	ScriptRequest rq(m_Simulation2.GetScriptInterface());
+	ScriptRequestGuard rq(m_Simulation2.GetScriptInterface());
 
 	// Simulate commands for that turn
 	for (const std::pair<player_id_t, std::string>& p : m_ReplayCommands[turn])
 	{
-		JS::RootedValue command(rq.cx);
+		JS::RootedValue command(rq.cx());
 		Script::ParseJSON(rq, p.second, &command);
 		AddCommand(m_ClientId, p.first, command, m_CurrentTurn + 1);
 	}

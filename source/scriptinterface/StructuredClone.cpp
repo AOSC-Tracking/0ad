@@ -66,11 +66,11 @@ JS::Value Script::CloneValueFromOtherCompartment(const ScriptInterface& to, cons
 	PROFILE("CloneValueFromOtherCompartment");
 	Script::StructuredClone structuredClone;
 	{
-		ScriptRequest fromRq(from);
+		ScriptRequestGuard fromRq(from);
 		structuredClone = WriteStructuredClone(fromRq, val);
 	}
-	ScriptRequest toRq(to);
-	JS::RootedValue out(toRq.cx);
+	ScriptRequestGuard toRq(to);
+	JS::RootedValue out(toRq.cx());
 	ReadStructuredClone(toRq, structuredClone, &out);
 	return out.get();
 }

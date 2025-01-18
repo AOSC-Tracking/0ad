@@ -245,18 +245,18 @@ CVector2D CMiniMap::WorldSpaceToMiniMapSpace(const CVector3D& worldPosition) con
 
 bool CMiniMap::FireWorldClickEvent(int button, int UNUSED(clicks))
 {
-	ScriptRequest rq(g_GUI->GetActiveGUI()->GetScriptInterface());
+	ScriptRequestGuard rq(g_GUI->GetActiveGUI()->GetScriptInterface());
 
 	float x, z;
 	GetMouseWorldCoordinates(x, z);
 
-	JS::RootedValue coords(rq.cx);
+	JS::RootedValue coords(rq.cx());
 	Script::CreateObject(rq, &coords, "x", x, "z", z);
 
-	JS::RootedValue buttonJs(rq.cx);
+	JS::RootedValue buttonJs(rq.cx());
 	Script::ToJSVal(rq, &buttonJs, button);
 
-	JS::RootedValueVector paramData(rq.cx);
+	JS::RootedValueVector paramData(rq.cx());
 	ignore_result(paramData.append(coords));
 	ignore_result(paramData.append(buttonJs));
 

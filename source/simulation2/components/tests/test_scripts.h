@@ -49,21 +49,21 @@ public:
 
 	static void Script_LoadComponentScript(const ScriptInterface& scriptInterface, const VfsPath& pathname)
 	{
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 		CComponentManager* componentManager = scriptInterface.ObjectFromCBData<CComponentManager>(rq);
 		TS_ASSERT(componentManager->LoadScript(VfsPath(L"simulation/components") / pathname));
 	}
 
 	static void Script_LoadHelperScript(const ScriptInterface& scriptInterface, const VfsPath& pathname)
 	{
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 		CComponentManager* componentManager = scriptInterface.ObjectFromCBData<CComponentManager>(rq);
 		TS_ASSERT(componentManager->LoadScript(VfsPath(L"simulation/helpers") / pathname));
 	}
 
 	static JS::Value Script_SerializationRoundTrip(const ScriptInterface& scriptInterface, JS::HandleValue value)
 	{
-		ScriptRequest rq(scriptInterface);
+		ScriptRequestGuard rq(scriptInterface);
 
 		JS::RootedValue val(rq.cx);
 		val = value;
@@ -92,7 +92,7 @@ public:
 			CComponentManager componentManager(context, *g_ScriptContext, true);
 			ScriptTestSetup(componentManager.GetScriptInterface());
 
-			ScriptRequest rq(componentManager.GetScriptInterface());
+			ScriptRequestGuard rq(componentManager.GetScriptInterface());
 			ScriptFunction::Register<Script_SerializationRoundTrip>(rq, "SerializationRoundTrip");
 
 			load_script(componentManager.GetScriptInterface(), path);
@@ -121,7 +121,7 @@ public:
 
 			ScriptTestSetup(componentManager.GetScriptInterface());
 
-			ScriptRequest rq(componentManager.GetScriptInterface());
+			ScriptRequestGuard rq(componentManager.GetScriptInterface());
 			ScriptFunction::Register<Script_LoadComponentScript>(rq, "LoadComponentScript");
 			ScriptFunction::Register<Script_LoadHelperScript>(rq, "LoadHelperScript");
 			ScriptFunction::Register<Script_SerializationRoundTrip>(rq, "SerializationRoundTrip");

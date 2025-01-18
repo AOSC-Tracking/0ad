@@ -279,10 +279,10 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 
 	ScriptInterface scriptInterface("Engine", "HWDetect", g_ScriptContext);
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JSI_Debug::RegisterScriptFunctions(scriptInterface); // Engine.DisplayErrorDialog
-	JSI_ConfigDB::RegisterScriptFunctions(scriptInterface);
+	JSI_Debug::RegisterScriptFunctions(rq); // Engine.DisplayErrorDialog
+	JSI_ConfigDB::RegisterScriptFunctions(rq);
 
 	ScriptFunction::Register<SetDisableAudio>(rq, "SetDisableAudio");
 
@@ -303,7 +303,7 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 	// (We'll use this same data for the opt-in online reporting system, so it
 	// includes some fields that aren't directly useful for the hwdetect script)
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	Script::CreateObject(rq, &settings);
 
 	Script::SetProperty(rq, settings, "os_unix", OS_UNIX);
@@ -347,7 +347,7 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 
 	ReportLibraries(rq, settings);
 
-	JS::RootedValue backendDeviceSettings(rq.cx);
+	JS::RootedValue backendDeviceSettings(rq.cx());
 	Script::CreateObject(rq, &backendDeviceSettings);
 
 	device->Report(rq, backendDeviceSettings);
@@ -416,6 +416,7 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 		Script::StringifyJSON(rq, &settings, true));
 
 	// Run the detection script:
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	const ScriptRequest& rq2 = rq;
+	JS::RootedValue global(rq.cx(), rq2.globalValue());
 	ScriptFunction::CallVoid(rq, global, "RunHardwareDetection", settings);
 }

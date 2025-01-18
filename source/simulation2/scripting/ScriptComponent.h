@@ -51,7 +51,7 @@ public:
 	R Call(const char* funcname, const Ts&... params) const
 	{
 		R ret;
-		ScriptRequest rq(m_ScriptInterface);
+		ScriptRequestGuard rq(m_ScriptInterface);
 		if (ScriptFunction::Call(rq, m_Instance, funcname, ret, params...))
 			return ret;
 		LOGERROR("Error calling component script function %s", funcname);
@@ -62,7 +62,7 @@ public:
 	template<typename R, typename... Ts>
 	void CallRef(const char* funcname, R ret, const Ts&... params) const
 	{
-		ScriptRequest rq(m_ScriptInterface);
+		ScriptRequestGuard rq(m_ScriptInterface);
 		if (!ScriptFunction::Call(rq, m_Instance, funcname, ret, params...))
 			LOGERROR("Error calling component script function %s", funcname);
 	}
@@ -70,7 +70,7 @@ public:
 	template<typename... Ts>
 	void CallVoid(const char* funcname, const Ts&... params) const
 	{
-		ScriptRequest rq(m_ScriptInterface);
+		ScriptRequestGuard rq(m_ScriptInterface);
 		if (!ScriptFunction::CallVoid(rq, m_Instance, funcname, params...))
 			LOGERROR("Error calling component script function %s", funcname);
 	}

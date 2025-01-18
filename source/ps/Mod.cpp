@@ -255,7 +255,7 @@ void Mod::UpdateAvailableMods(const ScriptInterface& scriptInterface)
 
 	PIVFS vfs = CreateVfs();
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 	for (DirectoryNames::iterator iter = modDirs.begin(); iter != modDirs.end(); ++iter)
 	{
 		ModData data;

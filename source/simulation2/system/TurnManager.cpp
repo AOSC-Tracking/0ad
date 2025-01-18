@@ -42,8 +42,8 @@ CTurnManager::CTurnManager(CSimulation2& simulation, u32 defaultTurnLength, u32 
 	m_PlayerId(-1), m_ClientId(clientId), m_DeltaSimTime(0), m_Replay(replay),
 	m_FinalTurn(std::numeric_limits<u32>::max()), m_TimeWarpNumTurns(0)
 {
-	ScriptRequest rq(m_Simulation2.GetScriptInterface());
-	m_QuickSaveMetadata.init(rq.cx);
+	ScriptRequestGuard rq(m_Simulation2.GetScriptInterface());
+	m_QuickSaveMetadata.init(rq.cx());
 	m_QueuedCommands.resize(1);
 }
 
@@ -221,14 +221,14 @@ void CTurnManager::AddCommand(int client, int player, JS::HandleValue data, u32 
 		return;
 	}
 
-	ScriptRequest rq(m_Simulation2.GetScriptInterface());
+	ScriptRequestGuard rq(m_Simulation2.GetScriptInterface());
 
 	Script::DeepFreezeObject(rq, data);
 
 	size_t command_in_turns = turn - (m_CurrentTurn+1);
 	if (m_QueuedCommands.size() <= command_in_turns)
 		m_QueuedCommands.resize(command_in_turns+1);
-	m_QueuedCommands[turn - (m_CurrentTurn+1)][client].emplace_back(player, rq.cx, data);
+	m_QueuedCommands[turn - (m_CurrentTurn+1)][client].emplace_back(player, rq.cx(), data);
 }
 
 void CTurnManager::FinishedAllCommands(u32 turn, u32 turnLength)
@@ -291,7 +291,7 @@ void CTurnManager::QuickSave(JS::HandleValue GUIMetadata)
 
 	m_QuickSaveState = stream.str();
 
-	ScriptRequest rq(m_Simulation2.GetScriptInterface());
+	ScriptRequestGuard rq(m_Simulation2.GetScriptInterface());
 
 	m_QuickSaveMetadata.set(Script::DeepCopy(rq, GUIMetadata));
 	// Freeze state to ensure that consectuvie loads don't modify the state
@@ -323,12 +323,12 @@ void CTurnManager::QuickLoad()
 	if (!g_GUI)
 		return;
 
-	ScriptRequest rq(m_Simulation2.GetScriptInterface());
+	ScriptRequestGuard rq(m_Simulation2.GetScriptInterface());
 
 	// Provide a copy, so that GUI components don't have to clone to get mutable objects
-	JS::RootedValue quickSaveMetadataClone(rq.cx, Script::DeepCopy(rq, m_QuickSaveMetadata));
+	JS::RootedValue quickSaveMetadataClone(rq.cx(), Script::DeepCopy(rq, m_QuickSaveMetadata));
 
-	JS::RootedValueArray<1> paramData(rq.cx);
+	JS::RootedValueArray<1> paramData(rq.cx());
 	paramData[0].set(quickSaveMetadataClone);
 	g_GUI->SendEventToAll(EventNameSavegameLoaded, paramData);
 

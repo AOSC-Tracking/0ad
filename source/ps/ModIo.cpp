@@ -603,7 +603,8 @@ bool ModIo::VerifyDownloadedFile(std::string& err)
 bool ModIo::ParseGameIdResponse(const ScriptInterface& scriptInterface, const std::string& responseData, int& id, std::string& err)
 {
 #define CLEANUP() id = -1;
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue gameResponse(rq.cx);
 
@@ -674,7 +675,8 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 // Make sure we don't end up passing partial results back
 #define CLEANUP() modData.clear();
 
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	JS::RootedValue modResponse(rq.cx);
 

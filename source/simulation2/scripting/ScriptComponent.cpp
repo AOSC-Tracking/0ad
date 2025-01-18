@@ -29,12 +29,13 @@
 CComponentTypeScript::CComponentTypeScript(const ScriptInterface& scriptInterface, JS::HandleValue instance) :
 	m_ScriptInterface(scriptInterface)
 {
-	m_Instance.init(ScriptRequest(m_ScriptInterface).cx, instance);
+	const ScriptRequestGuard rq{m_ScriptInterface};
+	m_Instance.init(rq.cx(), instance);
 }
 
 void CComponentTypeScript::Init(const CParamNode& paramNode, entity_id_t ent)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 	Script::SetProperty(rq, m_Instance, "entity", (int)ent, true, false);
 	Script::SetProperty(rq, m_Instance, "template", paramNode, true, false);
 	ScriptFunction::CallVoid(rq, m_Instance, "Init");
@@ -42,24 +43,24 @@ void CComponentTypeScript::Init(const CParamNode& paramNode, entity_id_t ent)
 
 void CComponentTypeScript::Deinit()
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 	ScriptFunction::CallVoid(rq, m_Instance, "Deinit");
 }
 
 bool CComponentTypeScript::HasMessageHandler(const CMessage& msg, const bool global)
 {
-	const ScriptRequest rq(m_ScriptInterface);
+	const ScriptRequestGuard rq(m_ScriptInterface);
 	return Script::HasProperty(rq, m_Instance, global ? msg.GetScriptGlobalHandlerName() :
 		msg.GetScriptHandlerName());
 }
 
 void CComponentTypeScript::HandleMessage(const CMessage& msg, bool global)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	const char* name = global ? msg.GetScriptGlobalHandlerName() : msg.GetScriptHandlerName();
 
-	JS::RootedValue msgVal(rq.cx, msg.ToJSValCached(rq));
+	JS::RootedValue msgVal(rq.cx(), msg.ToJSValCached(rq));
 
 	if (!ScriptFunction::CallVoid(rq, m_Instance, name, msgVal))
 		LOGERROR("Script message handler %s failed", name);
@@ -67,7 +68,7 @@ void CComponentTypeScript::HandleMessage(const CMessage& msg, bool global)
 
 void CComponentTypeScript::Serialize(ISerializer& serialize)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	try
 	{
@@ -87,7 +88,7 @@ void CComponentTypeScript::Serialize(ISerializer& serialize)
 
 void CComponentTypeScript::Deserialize(const CParamNode& paramNode, IDeserializer& deserialize, entity_id_t ent)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	Script::SetProperty(rq, m_Instance, "entity", (int)ent, true, false);
 	Script::SetProperty(rq, m_Instance, "template", paramNode, true, false);

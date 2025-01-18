@@ -58,26 +58,14 @@ class ScriptInterface;
  */
 class ScriptRequest
 {
+	friend class ScriptRequestGuard;
+
 	ScriptRequest() = delete;
 	ScriptRequest(const ScriptRequest& rq) = delete;
 	ScriptRequest& operator=(const ScriptRequest& rq) = delete;
 public:
-	/**
-	 * NB: the definitions are in scriptinterface.cpp, because these access members of the PImpled
-	 * implementation of ScriptInterface, and that seemed more convenient.
-	 */
-	ScriptRequest(const ScriptInterface& scriptInterface);
-	ScriptRequest(const ScriptInterface* scriptInterface) : ScriptRequest(*scriptInterface) {}
-	ScriptRequest(std::shared_ptr<ScriptInterface> scriptInterface) : ScriptRequest(*scriptInterface) {}
-	~ScriptRequest();
 
-	/**
-	 * Create a script request from a JSContext.
-	 * This can be used to get the script interface in a JSNative function.
-	 * In general, you shouldn't have to rely on this otherwise.
-	 */
-	ScriptRequest(JSContext* cx);
-
+	static ScriptRequest FromAlreadyEntered(JSContext* cx) { return ScriptRequest(cx); }
 	/**
 	 * Return the scriptInterface active when creating this ScriptRequest.
 	 * Note that this is multi-request safe: even if another ScriptRequest is created,
@@ -93,9 +81,36 @@ public:
 	JS::HandleObject glob;
 	JS::HandleObject nativeScope;
 private:
+	ScriptRequest(const ScriptInterface& scriptInterface);
+	ScriptRequest(JSContext* cx);
+
 	const ScriptInterface& m_ScriptInterface;
-	JS::Realm* m_FormerRealm;
 };
 
+class ScriptRequestGuard
+{
+	ScriptRequestGuard() = delete;
+	ScriptRequestGuard(const ScriptRequestGuard& rq) = delete;
+	ScriptRequestGuard& operator=(const ScriptRequestGuard& rq) = delete;
+	ScriptRequestGuard(ScriptRequestGuard&& rq) = delete;
+	ScriptRequestGuard& operator=(ScriptRequestGuard&& rq) = delete;
+public:
+	/**
+	 * NB: the definitions are in scriptinterface.cpp, because these access members of the PImpled
+	 * implementation of ScriptInterface, and that seemed more convenient.
+	 */
+	ScriptRequestGuard(const ScriptInterface& scriptInterface);
+	ScriptRequestGuard(const ScriptInterface* scriptInterface) : ScriptRequestGuard(*scriptInterface) {}
+	ScriptRequestGuard(std::shared_ptr<ScriptInterface> scriptInterface) : ScriptRequestGuard(*scriptInterface) {}
+	~ScriptRequestGuard();
+
+	operator const ScriptRequest&() const { return rq; }
+
+	JSContext* cx() const { return rq.cx; }
+
+private:
+	ScriptRequest rq;
+	JS::Realm* m_FormerRealm;
+};
 
 #endif // INCLUDED_SCRIPTREQUEST

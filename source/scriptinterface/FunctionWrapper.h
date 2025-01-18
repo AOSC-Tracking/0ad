@@ -287,7 +287,7 @@ public:
 		using ObjType = typename args_info<decltype(callable)>::object_type;
 
 		JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
-		ScriptRequest rq(cx);
+		ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
 
 		// If the callable is an object method, we must specify how to fetch the object.
 		static_assert(std::is_same_v<typename args_info<decltype(callable)>::object_type, void> || thisGetter != nullptr,

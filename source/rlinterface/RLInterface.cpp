@@ -343,7 +343,8 @@ void Interface::ApplyMessage(const GameMessage& msg)
 
 			g_Game = new CGame(m_ScenarioConfig.saveReplay);
 			ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-			ScriptRequest rq(scriptInterface);
+			ScriptRequestGuard rqg(scriptInterface);
+			const ScriptRequest& rq = rqg;
 			JS::RootedValue attrs(rq.cx);
 			Script::ParseJSON(rq, m_ScenarioConfig.content, &attrs);
 
@@ -388,8 +389,8 @@ void Interface::ApplyMessage(const GameMessage& msg)
 
 			for (const GameCommand& command : msg.commands)
 			{
-				ScriptRequest rq(scriptInterface);
-				JS::RootedValue commandJSON(rq.cx);
+				ScriptRequestGuard rq(scriptInterface);
+				JS::RootedValue commandJSON(rq.cx());
 				Script::ParseJSON(rq, command.json_cmd, &commandJSON);
 				turnMgr->PostCommand(command.playerID, commandJSON);
 			}
@@ -419,8 +420,8 @@ void Interface::ApplyMessage(const GameMessage& msg)
 				return;
 			}
 			const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
-			ScriptRequest rq(scriptInterface);
-			JS::RootedValue ret(rq.cx);
+			ScriptRequestGuard rq(scriptInterface);
+			JS::RootedValue ret(rq.cx());
 			scriptInterface.Eval(m_Code.c_str(), &ret);
 			m_ReturnValue = Script::StringifyJSON(rq, &ret, false);
 			m_MsgApplied.notify_one();
@@ -437,8 +438,8 @@ std::string Interface::GetGameState() const
 	const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
 	const CSimContext simContext = g_Game->GetSimulation2()->GetSimContext();
 	CmpPtr<ICmpAIInterface> cmpAIInterface(simContext.GetSystemEntity());
-	ScriptRequest rq(scriptInterface);
-	JS::RootedValue state(rq.cx);
+	ScriptRequestGuard rq(scriptInterface);
+	JS::RootedValue state(rq.cx());
 	cmpAIInterface->GetFullRepresentation(&state, true);
 	return Script::StringifyJSON(rq, &state, false);
 }

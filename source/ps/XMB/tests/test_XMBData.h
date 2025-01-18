@@ -46,7 +46,7 @@ private:
 
 	CXeromyces parseJS(const std::string rootName, const char* code)
 	{
-		ScriptRequest rq(*m_ScriptInterface);
+		ScriptRequestGuard rq(*m_ScriptInterface);
 		JS::RootedValue val(rq.cx);
 		m_ScriptInterface->Eval(code, &val);
 		CXeromyces xmb;

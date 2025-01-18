@@ -85,7 +85,7 @@ public:
 	void test_calling()
 	{
 		ScriptInterface script("Test", "Test", g_ScriptContext);
-		ScriptRequest rq(script);
+		ScriptRequestGuard rq(script);
 
 		ScriptFunction::Register<&TestFunctionWrapper::_1p_v>(script, "_1p_v");
 		{

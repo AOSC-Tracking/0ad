@@ -55,7 +55,8 @@ Status SavedGames::SavePrefix(const CStrW& prefix, const CStrW& description, CSi
 
 Status SavedGames::Save(const CStrW& name, const CStrW& description, CSimulation2& simulation, const Script::StructuredClone& guiMetadataClone)
 {
-	ScriptRequest rq(simulation.GetScriptInterface());
+	ScriptRequestGuard rqg(simulation.GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 
 	// Determine the filename to save under
 	const VfsPath basenameFormat(L"saves/" + name);
@@ -167,8 +168,8 @@ public:
 		m_ScriptInterface(scriptInterface),
 		m_SavedState(savedState)
 	{
-		ScriptRequest rq(scriptInterface);
-		m_Metadata.init(rq.cx);
+		ScriptRequestGuard rq(scriptInterface);
+		m_Metadata.init(rq.cx());
 	}
 
 	static void ReadEntryCallback(const VfsPath& pathname, const CFileInfo& fileInfo, PIArchiveFile archiveFile, uintptr_t cbData)
@@ -183,7 +184,7 @@ public:
 			std::string buffer;
 			buffer.resize(fileInfo.Size());
 			WARN_IF_ERR(archiveFile->Load("", DummySharedPtr((u8*)buffer.data()), buffer.size()));
-			Script::ParseJSON(ScriptRequest(m_ScriptInterface), buffer, &m_Metadata);
+			Script::ParseJSON(ScriptRequestGuard(m_ScriptInterface), buffer, &m_Metadata);
 		}
 		else if (pathname == L"simulation.dat" && m_SavedState)
 		{
@@ -243,8 +244,8 @@ std::optional<SavedGames::LoadResult> SavedGames::Load(const ScriptInterface& sc
 			return std::nullopt;
 		}
 	}
-	const ScriptRequest rq{scriptInterface};
-	JS::RootedValue metadata{rq.cx, loader.GetMetadata()};
+	const ScriptRequestGuard rq{scriptInterface};
+	JS::RootedValue metadata{rq.cx(), loader.GetMetadata()};
 
 	// `std::make_optional` can't be used since `LoadResult` doesn't have a constructor.
 	return {{metadata, std::move(savedState)}};
@@ -253,9 +254,9 @@ std::optional<SavedGames::LoadResult> SavedGames::Load(const ScriptInterface& sc
 JS::Value SavedGames::GetSavedGames(const ScriptInterface& scriptInterface)
 {
 	TIMER(L"GetSavedGames");
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rq(scriptInterface);
 
-	JS::RootedValue games(rq.cx);
+	JS::RootedValue games(rq.cx());
 	Script::CreateArray(rq, &games);
 
 	Status err;
@@ -289,9 +290,9 @@ JS::Value SavedGames::GetSavedGames(const ScriptInterface& scriptInterface)
 			DEBUG_WARN_ERR(err);
 			continue; // skip this file
 		}
-		JS::RootedValue metadata(rq.cx, loader.GetMetadata());
+		JS::RootedValue metadata(rq.cx(), loader.GetMetadata());
 
-		JS::RootedValue game(rq.cx);
+		JS::RootedValue game(rq.cx());
 		Script::CreateObject(
 			rq,
 			&game,

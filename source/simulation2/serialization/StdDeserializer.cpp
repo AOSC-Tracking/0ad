@@ -35,14 +35,16 @@
 CStdDeserializer::CStdDeserializer(const ScriptInterface& scriptInterface, std::istream& stream) :
 	m_ScriptInterface(scriptInterface), m_Stream(stream)
 {
-	JS_AddExtraGCRootsTracer(ScriptRequest(scriptInterface).cx, CStdDeserializer::Trace, this);
+	const ScriptRequestGuard rq {scriptInterface};
+	JS_AddExtraGCRootsTracer(rq.cx(), CStdDeserializer::Trace, this);
 	// Insert a dummy object in front, as valid tags start at 1.
 	m_ScriptBackrefs.emplace_back(nullptr);
 }
 
 CStdDeserializer::~CStdDeserializer()
 {
-	JS_RemoveExtraGCRootsTracer(ScriptRequest(m_ScriptInterface).cx, CStdDeserializer::Trace, this);
+	const ScriptRequestGuard rq {m_ScriptInterface};
+	JS_RemoveExtraGCRootsTracer(rq.cx(), CStdDeserializer::Trace, this);
 }
 
 void CStdDeserializer::Trace(JSTracer *trc, void *data)
@@ -119,7 +121,9 @@ void CStdDeserializer::GetScriptBackref(size_t tag, JS::MutableHandleObject ret)
 
 JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleObject preexistingObject)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rqg(m_ScriptInterface);
+	// As a convenience when updating the code.
+	const ScriptRequest& rq = rqg;
 
 	uint8_t type;
 	NumberU8_Unbounded("type", type);
@@ -459,7 +463,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 #error TODO: probably need to convert JS strings from little-endian
 #endif
 
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	bool isLatin1;
 	Bool("isLatin1", isLatin1);
@@ -468,7 +472,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 		std::vector<JS::Latin1Char> str;
 		ReadStringLatin1(name, str);
 
-		out.set(JS_NewStringCopyN(rq.cx, (const char*)str.data(), str.size()));
+		out.set(JS_NewStringCopyN(rq.cx(), (const char*)str.data(), str.size()));
 		if (!out)
 			throw PSERROR_Deserialize_ScriptError("JS_NewStringCopyN failed");
 	}
@@ -477,7 +481,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 		std::u16string str;
 		ReadStringUTF16(name, str);
 
-		out.set(JS_NewUCStringCopyN(rq.cx, (const char16_t*)str.data(), str.length()));
+		out.set(JS_NewUCStringCopyN(rq.cx(), (const char16_t*)str.data(), str.length()));
 		if (!out)
 			throw PSERROR_Deserialize_ScriptError("JS_NewUCStringCopyN failed");
 	}
@@ -490,11 +494,11 @@ void CStdDeserializer::ScriptVal(const char* name, JS::MutableHandleValue out)
 
 void CStdDeserializer::ScriptObjectAssign(const char* name, JS::HandleValue objVal)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	if (!objVal.isObject())
 		throw PSERROR_Deserialize_ScriptError();
 
-	JS::RootedObject obj(rq.cx, &objVal.toObject());
+	JS::RootedObject obj(rq.cx(), &objVal.toObject());
 	ReadScriptVal(name, obj);
 }

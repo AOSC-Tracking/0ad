@@ -179,9 +179,9 @@ public:
 	template<typename... Args>
 	void PushGuiMessage(Args const&... args)
 	{
-		ScriptRequest rq(GetScriptInterface());
+		ScriptRequestGuard rq(GetScriptInterface());
 
-		JS::RootedValue message(rq.cx);
+		JS::RootedValue message(rq.cx());
 		Script::CreateObject(rq, &message, args...);
 		m_GuiMessageQueue.push_back(JS::Heap<JS::Value>(message));
 	}

@@ -688,8 +688,8 @@ void XmppClient::CreateGUIMessage(
 {
 	if (!m_ScriptInterface)
 		return;
-	ScriptRequest rq(m_ScriptInterface);
-	JS::RootedValue message(rq.cx);
+	ScriptRequestGuard rq(m_ScriptInterface);
+	JS::RootedValue message(rq.cx());
 	Script::CreateObject(
 		rq,
 		&message,
@@ -698,7 +698,7 @@ void XmppClient::CreateGUIMessage(
 		"historic", false,
 		"time", static_cast<double>(time));
 
-	JS::RootedObject messageObj(rq.cx, message.toObjectOrNull());
+	JS::RootedObject messageObj(rq.cx(), message.toObjectOrNull());
 	SetGUIMessageProperty(rq, messageObj, args...);
 	Script::DeepFreezeObject(rq, message);
 	m_GuiMessageQueue.push_back(JS::Heap<JS::Value>(message));
@@ -721,11 +721,11 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 	if ((m_isConnected && !m_initialLoadComplete) || m_GuiMessageQueue.empty())
 		return JS::UndefinedValue();
 
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
 	// Optimize for batch message processing that is more
 	// performance demanding than processing a lone message.
-	JS::RootedValue messages(rq.cx);
+	JS::RootedValue messages(rq.cx());
 	Script::CreateArray(rq, &messages);
 
 	int j = 0;
@@ -736,7 +736,7 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 
 		// Store historic chat messages.
 		// Only store relevant messages to minimize memory footprint.
-		JS::RootedValue rootedMessage(rq.cx, message);
+		JS::RootedValue rootedMessage(rq.cx(), message);
 		std::string type;
 		Script::GetProperty(rq, rootedMessage, "type", type);
 		if (type != "chat")
@@ -747,7 +747,7 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 		if (level != "room-message" && level != "private-message")
 			continue;
 
-		JS::RootedValue historicMessage(rq.cx, Script::DeepCopy(rq, rootedMessage));
+		JS::RootedValue historicMessage(rq.cx(), Script::DeepCopy(rq, rootedMessage));
 		if (true)
 		{
 			Script::SetProperty(rq, historicMessage, "historic", true);
@@ -768,9 +768,9 @@ JS::Value XmppClient::GuiPollHistoricMessages(const ScriptInterface& guiInterfac
 	if (m_HistoricGuiMessages.empty())
 		return JS::UndefinedValue();
 
-	ScriptRequest rq(m_ScriptInterface);
+	ScriptRequestGuard rq(m_ScriptInterface);
 
-	JS::RootedValue messages(rq.cx);
+	JS::RootedValue messages(rq.cx());
 	Script::CreateArray(rq, &messages);
 
 	int j = 0;

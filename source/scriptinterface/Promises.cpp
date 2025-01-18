@@ -34,7 +34,7 @@ void UnhandledRejectedPromise(JSContext* cx, bool, JS::HandleObject promise,
 	if (state == JS::PromiseRejectionHandlingState::Handled)
 		return;
 
-	const ScriptRequest rq{cx};
+	const ScriptRequest rq = ScriptRequest::FromAlreadyEntered(cx);
 	JS::RootedValue reason(cx, JS::GetPromiseResult(promise));
 
 	std::string asString;
@@ -49,7 +49,8 @@ void JobQueue::runJobs(JSContext*)
 	while (!m_Jobs.empty())
 	{
 		QueueElement& element = m_Jobs.front();
-		ScriptRequest rq{element.scriptInterface};
+		ScriptRequestGuard rqg {element.scriptInterface};
+		const ScriptRequest& rq = rqg;
 		JS::RootedObject localJob{rq.cx, element.job};
 		m_Jobs.pop();
 
@@ -69,7 +70,7 @@ bool JobQueue::enqueuePromiseJob(JSContext* cx, JS::HandleObject, JS::HandleObje
 {
 	try
 	{
-		m_Jobs.push({ScriptRequest{cx}.GetScriptInterface(), JS::PersistentRootedObject{cx, job}});
+		m_Jobs.push({ScriptRequest::FromAlreadyEntered(cx).GetScriptInterface(), JS::PersistentRootedObject{cx, job}});
 		return true;
 	}
 	catch (...)

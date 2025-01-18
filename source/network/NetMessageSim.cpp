@@ -113,16 +113,16 @@ public:
 CSimulationMessage::CSimulationMessage(const ScriptInterface& scriptInterface) :
 	CNetMessage(NMT_SIMULATION_COMMAND), m_ScriptInterface(scriptInterface)
 {
-	ScriptRequest rq(scriptInterface);
-	m_Data.init(rq.cx);
+	ScriptRequestGuard rq(scriptInterface);
+	m_Data.init(rq.cx());
 }
 
 CSimulationMessage::CSimulationMessage(const ScriptInterface& scriptInterface, u32 client, i32 player, u32 turn, JS::HandleValue data) :
 	CNetMessage(NMT_SIMULATION_COMMAND), m_ScriptInterface(scriptInterface),
 	m_Client(client), m_Player(player), m_Turn(turn)
 {
-	ScriptRequest rq(scriptInterface);
-	m_Data.init(rq.cx, data);
+	ScriptRequestGuard rq(scriptInterface);
+	m_Data.init(rq.cx(), data);
 }
 
 CSimulationMessage::CSimulationMessage(const CSimulationMessage& orig) :
@@ -132,8 +132,8 @@ CSimulationMessage::CSimulationMessage(const CSimulationMessage& orig) :
 	m_Turn(orig.m_Turn),
 	CNetMessage(orig)
 {
-	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx, orig.m_Data);
+	ScriptRequestGuard rq(m_ScriptInterface);
+	m_Data.init(rq.cx(), orig.m_Data);
 }
 
 u8* CSimulationMessage::Serialize(u8* pBuffer) const
@@ -181,7 +181,8 @@ size_t CSimulationMessage::GetSerializedLength() const
 
 CStr CSimulationMessage::ToString() const
 {
-	std::string source = Script::ToString(ScriptRequest(m_ScriptInterface), const_cast<JS::PersistentRootedValue*>(&m_Data));
+	const ScriptRequestGuard rq {m_ScriptInterface};
+	std::string source = Script::ToString(rq, const_cast<JS::PersistentRootedValue*>(&m_Data));
 
 	std::stringstream stream;
 	stream << "CSimulationMessage { m_Client: " << m_Client << ", m_Player: " << m_Player << ", m_Turn: " << m_Turn << ", m_Data: " << source << " }";
@@ -192,15 +193,15 @@ CStr CSimulationMessage::ToString() const
 CGameSetupMessage::CGameSetupMessage(const ScriptInterface& scriptInterface) :
 	CNetMessage(NMT_GAME_SETUP), m_ScriptInterface(scriptInterface)
 {
-	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx);
+	const ScriptRequestGuard rq {m_ScriptInterface};
+	m_Data.init(rq.cx());
 }
 
 CGameSetupMessage::CGameSetupMessage(const ScriptInterface& scriptInterface, JS::HandleValue data) :
 	CNetMessage(NMT_GAME_SETUP), m_ScriptInterface(scriptInterface)
 {
-	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx, data);
+	const ScriptRequestGuard rq {m_ScriptInterface};
+	m_Data.init(rq.cx(), data);
 }
 
 u8* CGameSetupMessage::Serialize(u8* pBuffer) const
@@ -231,7 +232,8 @@ size_t CGameSetupMessage::GetSerializedLength() const
 
 CStr CGameSetupMessage::ToString() const
 {
-	std::string source = Script::ToString(ScriptRequest(m_ScriptInterface), const_cast<JS::PersistentRootedValue*>(&m_Data));
+	const ScriptRequestGuard rq {m_ScriptInterface};
+	std::string source = Script::ToString(rq, const_cast<JS::PersistentRootedValue*>(&m_Data));
 
 	std::stringstream stream;
 	stream << "CGameSetupMessage { m_Data: " << source << " }";

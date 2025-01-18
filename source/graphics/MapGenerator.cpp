@@ -77,14 +77,15 @@ public:
 	ScriptFunction::Register<&CMapGenerationCallbacks::func, \
 		ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>>(rq, #func, flags);
 
+		ScriptRequestGuard rq(m_ScriptInterface);
+
 		// VFS
-		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulationMaps(m_ScriptInterface, flags);
+		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulationMaps(rq, flags);
 
 		// Globalscripts may use VFS script functions
 		m_ScriptInterface.LoadGlobalScripts();
 
 		// File loading
-		ScriptRequest rq(m_ScriptInterface);
 		REGISTER_MAPGEN_FUNC(LoadLibrary);
 		REGISTER_MAPGEN_FUNC(LoadHeightmapImage);
 		REGISTER_MAPGEN_FUNC(LoadMapTerrain);
@@ -180,7 +181,7 @@ private:
 	void ExportMap(JS::HandleValue data)
 	{
 		// Copy results
-		m_MapData = Script::WriteStructuredClone(ScriptRequest(m_ScriptInterface), data);
+		m_MapData = Script::WriteStructuredClone(ScriptRequestGuard(m_ScriptInterface), data);
 	}
 
 	/**
@@ -195,8 +196,8 @@ private:
 			return JS::UndefinedValue();
 		}
 
-		ScriptRequest rq(m_ScriptInterface);
-		JS::RootedValue returnValue(rq.cx);
+		ScriptRequestGuard rq(m_ScriptInterface);
+		JS::RootedValue returnValue(rq.cx());
 		Script::ToJSVal(rq, &returnValue, heightmap);
 		return returnValue;
 	}
@@ -208,7 +209,7 @@ private:
 	 */
 	JS::Value LoadMapTerrain(const VfsPath& filename)
 	{
-		ScriptRequest rq(m_ScriptInterface);
+		ScriptRequestGuard rq(m_ScriptInterface);
 
 		if (!VfsFileExists(filename))
 		{
@@ -269,7 +270,7 @@ private:
 			}
 		}
 
-		JS::RootedValue returnValue(rq.cx);
+		JS::RootedValue returnValue(rq.cx());
 
 		Script::CreateObject(
 			rq,
@@ -369,15 +370,15 @@ private:
 
 bool MapGenerationInterruptCallback(JSContext* cx)
 {
-	return !ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>(
-		ScriptInterface::CmptPrivate::GetScriptInterface(cx))->m_StopToken.IsStopRequested();
+	return !ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>(ScriptRequest::FromAlreadyEntered(cx))->m_StopToken.IsStopRequested();
 }
 } // anonymous namespace
 
 Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::atomic<int>& progress,
 	ScriptInterface& scriptInterface, const VfsPath& script, const std::string& settings, const u16 flags)
 {
-	ScriptRequest rq(scriptInterface);
+	ScriptRequestGuard rqg(scriptInterface);
+	const ScriptRequest& rq = rqg;
 
 	// Parse settings
 	JS::RootedValue settingsVal(rq.cx);

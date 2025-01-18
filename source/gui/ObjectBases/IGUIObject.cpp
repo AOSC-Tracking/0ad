@@ -63,8 +63,10 @@ IGUIObject::IGUIObject(CGUI& pGUI)
 IGUIObject::~IGUIObject()
 {
 	if (!m_ScriptHandlers.empty())
-		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
-
+	{
+		const ScriptRequestGuard rq {m_pGUI.GetScriptInterface()};
+		JS_RemoveExtraGCRootsTracer(rq.cx(), Trace, this);
+	}
 	// m_Children is deleted along all other GUI Objects in the CGUI destructor
 }
 
@@ -298,7 +300,8 @@ float IGUIObject::GetBufferedZ() const
 
 void IGUIObject::RegisterScriptHandler(const CStr& eventName, const CStr& Code, CGUI& pGUI)
 {
-	ScriptRequest rq(pGUI.GetScriptInterface());
+	ScriptRequestGuard rqg(pGUI.GetScriptInterface());
+	const ScriptRequest& rq = rqg;
 
 	const int paramCount = 1;
 	const char* paramNames[paramCount] = { "mouse" };
@@ -333,7 +336,10 @@ void IGUIObject::RegisterScriptHandler(const CStr& eventName, const CStr& Code, 
 void IGUIObject::SetScriptHandler(const CStr& eventName, JS::HandleObject Function)
 {
 	if (m_ScriptHandlers.empty())
-		JS_AddExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
+	{
+		const ScriptRequestGuard rq {m_pGUI.GetScriptInterface()};
+		JS_AddExtraGCRootsTracer(rq.cx(), Trace, this);
+	}
 
 	m_ScriptHandlers[eventName] = JS::Heap<JSObject*>(Function);
 
@@ -351,7 +357,10 @@ void IGUIObject::UnsetScriptHandler(const CStr& eventName)
 	m_ScriptHandlers.erase(it);
 
 	if (m_ScriptHandlers.empty())
-		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
+	{
+		const ScriptRequestGuard rq {m_pGUI.GetScriptInterface()};
+		JS_RemoveExtraGCRootsTracer(rq.cx(), Trace, this);
+	}
 
 	std::unordered_map<CStr, std::vector<IGUIObject*>>::iterator it2 = m_pGUI.m_EventObjects.find(eventName);
 	if (it2 == m_pGUI.m_EventObjects.end())
@@ -389,10 +398,10 @@ InReaction IGUIObject::SendMouseEvent(EGUIMessageType type, const CStr& eventNam
 		msg.Skip();
 	HandleMessage(msg);
 
-	ScriptRequest rq(m_pGUI.GetScriptInterface());
+	ScriptRequestGuard rq(m_pGUI.GetScriptInterface());
 
 	// Set up the 'mouse' parameter
-	JS::RootedValue mouse(rq.cx);
+	JS::RootedValue mouse(rq.cx());
 
 	const CVector2D& mousePos = m_pGUI.GetMousePos();
 
@@ -405,7 +414,7 @@ InReaction IGUIObject::SendMouseEvent(EGUIMessageType type, const CStr& eventNam
 			"x", mousePos.X,
 			"y", mousePos.Y,
 			"buttons", m_pGUI.GetMouseButtons());
-		JS::RootedValueVector paramData(rq.cx);
+		JS::RootedValueVector paramData(rq.cx());
 		ignore_result(paramData.append(mouse));
 		ScriptEvent(eventName, paramData);
 
@@ -436,8 +445,8 @@ bool IGUIObject::ScriptEventWithReturn(const CStr& eventName)
 	if (m_ScriptHandlers.find(eventName) == m_ScriptHandlers.end())
 		return false;
 
-	ScriptRequest rq(m_pGUI.GetScriptInterface());
-	JS::RootedValueVector paramData(rq.cx);
+	ScriptRequestGuard rq(m_pGUI.GetScriptInterface());
+	JS::RootedValueVector paramData(rq.cx());
 	return ScriptEventWithReturn(eventName, paramData);
 }
 
@@ -452,12 +461,12 @@ bool IGUIObject::ScriptEventWithReturn(const CStr& eventName, const JS::HandleVa
 	if (it == m_ScriptHandlers.end())
 		return false;
 
-	ScriptRequest rq(m_pGUI.GetScriptInterface());
-	JS::RootedObject obj(rq.cx, GetJSObject());
-	JS::RootedValue handlerVal(rq.cx, JS::ObjectValue(*it->second));
-	JS::RootedValue result(rq.cx);
+	ScriptRequestGuard rq(m_pGUI.GetScriptInterface());
+	JS::RootedObject obj(rq.cx(), GetJSObject());
+	JS::RootedValue handlerVal(rq.cx(), JS::ObjectValue(*it->second));
+	JS::RootedValue result(rq.cx());
 
-	if (!JS_CallFunctionValue(rq.cx, obj, handlerVal, paramData, &result))
+	if (!JS_CallFunctionValue(rq.cx(), obj, handlerVal, paramData, &result))
 	{
 		LOGERROR("Errors executing script event \"%s\"", eventName.c_str());
 		ScriptException::CatchPending(rq);
