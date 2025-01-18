@@ -66,7 +66,7 @@ bool TextureExists(const std::wstring& filename)
 ScriptFunction::Register<&Get##NAME##Enabled>(rq, "Renderer_Get" #NAME "Enabled"); \
 ScriptFunction::Register<&Set##NAME##Enabled>(rq, "Renderer_Set" #NAME "Enabled");
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&GetRenderPath>(rq, "Renderer_GetRenderPath");
 	ScriptFunction::Register<&TextureExists>(rq, "TextureExists");

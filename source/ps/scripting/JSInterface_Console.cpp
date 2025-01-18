@@ -25,7 +25,7 @@
 
 namespace JSI_Console
 {
-CConsole* ConsoleGetter(const ScriptRequest&, JS::CallArgs&)
+CConsole* ConsoleGetter(const ScriptRequest, JS::CallArgs&)
 {
 	if (!g_Console)
 	{
@@ -35,7 +35,7 @@ CConsole* ConsoleGetter(const ScriptRequest&, JS::CallArgs&)
 	return g_Console;
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&CConsole::IsActive, ConsoleGetter>(rq, "Console_GetVisibleEnabled");
 	ScriptFunction::Register<&CConsole::SetVisible, ConsoleGetter>(rq, "Console_SetVisibleEnabled");

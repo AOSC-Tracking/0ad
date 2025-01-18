@@ -207,7 +207,7 @@ void SetGUIScale(float scale)
 	g_VideoMode.Rescale(scale);
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&HasChanges>(rq, "ConfigDB_HasChanges");
 	ScriptFunction::Register<&SetChanges>(rq, "ConfigDB_SetChanges");

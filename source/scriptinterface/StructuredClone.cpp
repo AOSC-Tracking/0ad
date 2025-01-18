@@ -40,7 +40,7 @@
 # pragma warning(pop)
 #endif
 
-Script::StructuredClone Script::WriteStructuredClone(const ScriptRequest& rq, JS::HandleValue v)
+Script::StructuredClone Script::WriteStructuredClone(const ScriptRequest rq, JS::HandleValue v)
 {
 	Script::StructuredClone ret(new JSStructuredCloneData(JS::StructuredCloneScope::SameProcess));
 	JS::CloneDataPolicy policy;
@@ -54,7 +54,7 @@ Script::StructuredClone Script::WriteStructuredClone(const ScriptRequest& rq, JS
 	return ret;
 }
 
-void Script::ReadStructuredClone(const ScriptRequest& rq, const Script::StructuredClone& ptr, JS::MutableHandleValue ret)
+void Script::ReadStructuredClone(const ScriptRequest rq, const Script::StructuredClone& ptr, JS::MutableHandleValue ret)
 {
 	JS::CloneDataPolicy policy;
 	if (!JS_ReadStructuredClone(rq.cx, *ptr, JS_STRUCTURED_CLONE_VERSION, ptr->scope(), ret, policy, nullptr, nullptr))
@@ -75,7 +75,7 @@ JS::Value Script::CloneValueFromOtherCompartment(const ScriptInterface& to, cons
 	return out.get();
 }
 
-JS::Value Script::DeepCopy(const ScriptRequest& rq, JS::HandleValue val)
+JS::Value Script::DeepCopy(const ScriptRequest rq, JS::HandleValue val)
 {
 	JS::RootedValue out(rq.cx);
 	ReadStructuredClone(rq, WriteStructuredClone(rq, val), &out);

@@ -74,7 +74,7 @@ public:
 		return m_Functions.at(name).get();
 	}
 
-	virtual bool setFunction(const ScriptRequest& rq, const std::string& name, JSFunction* function) override
+	virtual bool setFunction(const ScriptRequest rq, const std::string& name, JSFunction* function) override
 	{
 		m_Functions[name].init(rq.cx, JS_GetFunctionObject(function));
 		return true;
@@ -103,7 +103,7 @@ struct JSI_GUIProxy<T>::PropCache
 };
 
 template <typename T>
-T* JSI_GUIProxy<T>::FromPrivateSlot(const ScriptRequest&, JS::CallArgs& args)
+T* JSI_GUIProxy<T>::FromPrivateSlot(const ScriptRequest, JS::CallArgs& args)
 {
 	// Call the unsafe version - this is only ever called from actual proxy objects.
 	return IGUIProxyObject::UnsafeFromPrivateSlot<T>(args.thisv().toObjectOrNull());
@@ -141,13 +141,13 @@ std::pair<const js::BaseProxyHandler*, GUIProxyProps*> JSI_GUIProxy<T>::CreateDa
 
 template<typename T>
 template<auto callable>
-void JSI_GUIProxy<T>::CreateFunction(const ScriptRequest& rq, GUIProxyProps* cache, const std::string& name)
+void JSI_GUIProxy<T>::CreateFunction(const ScriptRequest rq, GUIProxyProps* cache, const std::string& name)
 {
 	cache->setFunction(rq, name, ScriptFunction::Create<callable, FromPrivateSlot>(rq, name.c_str()));
 }
 
 template<typename T>
-std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptRequest& rq, T* ptr, GUIProxyProps* dataPtr)
+std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptRequest rq, T* ptr, GUIProxyProps* dataPtr)
 {
 	js::ProxyOptions options;
 	options.setClass(&JSInterface_GUIProxy::ClassDefinition());

@@ -102,7 +102,7 @@ bool LoadModJSON(const PIVFS& vfs, OsPath modsPath, OsPath mod, std::string& tex
 	}
 }
 
-bool ParseModJSON(const ScriptRequest& rq, const PIVFS& vfs, OsPath modsPath, OsPath mod, Mod::ModData& data)
+bool ParseModJSON(const ScriptRequest rq, const PIVFS& vfs, OsPath modsPath, OsPath mod, Mod::ModData& data)
 {
 	std::string text;
 	if (!LoadModJSON(vfs, modsPath, mod, text))

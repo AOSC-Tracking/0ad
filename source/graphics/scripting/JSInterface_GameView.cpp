@@ -64,7 +64,7 @@ IMPLEMENT_BOOLEAN_SCRIPT_SETTING(ConstrainCamera);
 	ScriptFunction::Register<&Get##NAME##Enabled>(rq, "GameView_Get" #NAME "Enabled"); \
 	ScriptFunction::Register<&Set##NAME##Enabled>(rq, "GameView_Set" #NAME "Enabled");
 
-void RegisterScriptFunctions_Settings(const ScriptRequest& rq)
+void RegisterScriptFunctions_Settings(const ScriptRequest rq)
 {
 	REGISTER_BOOLEAN_SCRIPT_SETTING(Culling);
 	REGISTER_BOOLEAN_SCRIPT_SETTING(LockCullCamera);
@@ -73,7 +73,7 @@ void RegisterScriptFunctions_Settings(const ScriptRequest& rq)
 
 #undef REGISTER_BOOLEAN_SCRIPT_SETTING
 
-JS::Value GetCameraRotation(const ScriptRequest& rq)
+JS::Value GetCameraRotation(const ScriptRequest rq)
 {
 	if (!g_Game || !g_Game->GetView())
 		return JS::UndefinedValue();
@@ -91,7 +91,7 @@ JS::Value GetCameraZoom()
 	return JS::NumberValue(g_Game->GetView()->GetCameraZoom());
 }
 
-JS::Value GetCameraPivot(const ScriptRequest& rq)
+JS::Value GetCameraPivot(const ScriptRequest rq)
 {
 	if (!g_Game || !g_Game->GetView())
 		return JS::UndefinedValue();
@@ -102,7 +102,7 @@ JS::Value GetCameraPivot(const ScriptRequest& rq)
 	return pivotValue;
 }
 
-JS::Value GetCameraPosition(const ScriptRequest& rq)
+JS::Value GetCameraPosition(const ScriptRequest rq)
 {
 	if (!g_Game || !g_Game->GetView())
 		return JS::UndefinedValue();
@@ -192,7 +192,7 @@ CFixedVector3D GetTerrainAtScreenPoint(int x, int y)
 	return CFixedVector3D(fixed::FromFloat(pos.X), fixed::FromFloat(pos.Y), fixed::FromFloat(pos.Z));
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	RegisterScriptFunctions_Settings(rq);
 

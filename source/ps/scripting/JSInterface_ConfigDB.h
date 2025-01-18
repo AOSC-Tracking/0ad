@@ -23,7 +23,7 @@ class ScriptRequest;
 
 namespace JSI_ConfigDB
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const ScriptRequest rq);
 }
 
 #endif // INCLUDED_JSI_CONFIGDB

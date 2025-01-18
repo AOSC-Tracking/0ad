@@ -56,7 +56,7 @@ std::string GetUserReportConfigPath()
 	return configPath.string8();
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&IsUserReportEnabled>(rq, "IsUserReportEnabled");
 	ScriptFunction::Register<&SetUserReportEnabled>(rq, "SetUserReportEnabled");

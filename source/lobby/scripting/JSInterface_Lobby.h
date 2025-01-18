@@ -22,7 +22,7 @@ class ScriptRequest;
 
 namespace JSI_Lobby
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const ScriptRequest rq);
 }
 
 #endif // INCLUDED_JSI_LOBBY

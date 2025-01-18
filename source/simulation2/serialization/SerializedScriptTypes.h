@@ -63,7 +63,7 @@ struct SPrototypeSerialization
 	bool hasNullSerialize = false;
 };
 
-inline SPrototypeSerialization GetPrototypeInfo(const ScriptRequest& rq, JS::HandleObject prototype)
+inline SPrototypeSerialization GetPrototypeInfo(const ScriptRequest rq, JS::HandleObject prototype)
 {
 	SPrototypeSerialization ret;
 

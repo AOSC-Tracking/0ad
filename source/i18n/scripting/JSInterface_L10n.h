@@ -41,7 +41,7 @@ namespace JSI_L10n
 	 *
 	 * @sa GuiScriptingInit()
 	 */
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const ScriptRequest rq);
 }
 
 #endif // INCLUDED_JSINTERFACE_L10N

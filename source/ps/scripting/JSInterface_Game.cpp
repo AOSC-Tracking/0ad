@@ -67,7 +67,7 @@ int GetPlayerID()
 	return g_Game->GetPlayerID();
 }
 
-void SetPlayerID(const ScriptRequest& rq, int id)
+void SetPlayerID(const ScriptRequest rq, int id)
 {
 	if (!g_Game)
 		return;
@@ -82,7 +82,7 @@ void SetPlayerID(const ScriptRequest& rq, int id)
 		ScriptException::Raise(rq, "Changing player ID with cheats disabled is prohibited");
 }
 
-void SetViewedPlayer(const ScriptRequest& rq, int id)
+void SetViewedPlayer(const ScriptRequest rq, int id)
 {
 	if (!g_Game || g_Game->GetViewedPlayerID() == id)
 		return;
@@ -113,7 +113,7 @@ int GetPendingTurns()
 	return g_Game->GetTurnManager()->GetPendingTurns();
 }
 
-bool IsPaused(const ScriptRequest& rq)
+bool IsPaused(const ScriptRequest rq)
 {
 	if (!g_Game)
 	{
@@ -124,7 +124,7 @@ bool IsPaused(const ScriptRequest& rq)
 	return g_Game->m_Paused;
 }
 
-void SetPaused(const ScriptRequest& rq, bool pause, bool sendMessage)
+void SetPaused(const ScriptRequest rq, bool pause, bool sendMessage)
 {
 	if (!g_Game)
 	{
@@ -184,7 +184,7 @@ void DumpTerrainMipmap()
 	LOGMESSAGERENDER("Terrain mipmap written to '%s'", realPath.string8());
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&StartGame>(rq, "StartGame");
 	ScriptFunction::Register<&Script_EndGame>(rq, "EndGame");

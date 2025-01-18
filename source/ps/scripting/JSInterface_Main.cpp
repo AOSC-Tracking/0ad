@@ -124,7 +124,7 @@ std::string CalculateMD5(const std::string& input)
 	return Hexify(digest, MD5::DIGESTSIZE);
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&QuitEngine>(rq, "Exit");
 	ScriptFunction::Register<&StartAtlas>(rq, "RestartInAtlas");

@@ -38,7 +38,7 @@
  * TODO: this could be moved to ScriptConversions.cpp if the need arises.
  */
 template<typename T, typename U>
-static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<T, U>& val)
+static void ToJSVal_unordered_map(const ScriptRequest rq, JS::MutableHandleValue ret, const std::unordered_map<T, U>& val)
 {
 	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
 	if (!obj)
@@ -56,13 +56,13 @@ static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValu
 }
 
 template<>
-void Script::ToJSVal<std::unordered_map<std::string, std::vector<std::vector<std::string>>>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::vector<std::vector<std::string>>>& val)
+void Script::ToJSVal<std::unordered_map<std::string, std::vector<std::vector<std::string>>>>(const ScriptRequest rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::vector<std::vector<std::string>>>& val)
 {
 	ToJSVal_unordered_map(rq, ret, val);
 }
 
 template<>
-void Script::ToJSVal<std::unordered_map<std::string, std::string>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::string>& val)
+void Script::ToJSVal<std::unordered_map<std::string, std::string>>(const ScriptRequest rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::string>& val)
 {
 	ToJSVal_unordered_map(rq, ret, val);
 }
@@ -72,7 +72,7 @@ namespace
 /**
  * @return a (js) object mapping hotkey name (from cfg files) to a list ofscancode names
  */
-JS::Value GetHotkeyMap(const ScriptRequest& rq)
+JS::Value GetHotkeyMap(const ScriptRequest rq)
 {
 	JS::RootedValue hotkeyMap(rq.cx);
 
@@ -98,7 +98,7 @@ JS::Value GetHotkeyMap(const ScriptRequest& rq)
 /**
  * @return a (js) object mapping scancode names to their locale-dependent name.
  */
-JS::Value GetScancodeKeyNames(const ScriptRequest& rq)
+JS::Value GetScancodeKeyNames(const ScriptRequest rq)
 {
 	JS::RootedValue obj(rq.cx);
 	std::unordered_map<std::string, std::string> map;
@@ -118,7 +118,7 @@ void ReloadHotkeys()
 	LoadHotkeys(g_ConfigDB);
 }
 
-JS::Value GetConflicts(const ScriptRequest& rq, JS::HandleValue combination)
+JS::Value GetConflicts(const ScriptRequest rq, JS::HandleValue combination)
 {
 	std::vector<std::string> keys;
 	if (!Script::FromJSVal(rq, combination, keys))
@@ -162,7 +162,7 @@ JS::Value GetConflicts(const ScriptRequest& rq, JS::HandleValue combination)
 }
 }
 
-void JSI_Hotkey::RegisterScriptFunctions(const ScriptRequest& rq)
+void JSI_Hotkey::RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&HotkeyIsPressed>(rq, "HotkeyIsPressed");
 	ScriptFunction::Register<&GetHotkeyMap>(rq, "GetHotkeyMap");

@@ -22,7 +22,7 @@ class ScriptRequest;
 
 namespace JSI_Main
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const ScriptRequest rq);
 }
 
 #endif // INCLUDED_JSI_MAIN

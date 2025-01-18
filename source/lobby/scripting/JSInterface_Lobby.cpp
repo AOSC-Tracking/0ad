@@ -46,7 +46,7 @@ void SetRankedGame(bool isRanked)
 
 #if CONFIG2_LOBBY
 
-void StartXmppClient(const ScriptRequest& rq, const std::wstring& username, const std::wstring& password, const std::wstring& room, const std::wstring& nick, int historyRequestSize)
+void StartXmppClient(const ScriptRequest rq, const std::wstring& username, const std::wstring& password, const std::wstring& room, const std::wstring& nick, int historyRequestSize)
 {
 	if (g_XmppClient)
 	{
@@ -66,7 +66,7 @@ void StartXmppClient(const ScriptRequest& rq, const std::wstring& username, cons
 	g_rankedGame = true;
 }
 
-void StartRegisterXmppClient(const ScriptRequest& rq, const std::wstring& username, const std::wstring& password)
+void StartRegisterXmppClient(const ScriptRequest rq, const std::wstring& username, const std::wstring& password)
 {
 	if (g_XmppClient)
 	{
@@ -85,7 +85,7 @@ void StartRegisterXmppClient(const ScriptRequest& rq, const std::wstring& userna
 			true);
 }
 
-void StopXmppClient(const ScriptRequest& rq)
+void StopXmppClient(const ScriptRequest rq)
 {
 	if (!g_XmppClient)
 	{
@@ -100,7 +100,7 @@ void StopXmppClient(const ScriptRequest& rq)
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 
-IXmppClient* XmppGetter(const ScriptRequest&, JS::CallArgs&)
+IXmppClient* XmppGetter(const ScriptRequest, JS::CallArgs&)
 {
 	if (!g_XmppClient)
 	{
@@ -110,7 +110,7 @@ IXmppClient* XmppGetter(const ScriptRequest&, JS::CallArgs&)
 	return g_XmppClient;
 }
 
-void SendRegisterGame(const ScriptRequest& rq, JS::HandleValue data)
+void SendRegisterGame(const ScriptRequest rq, JS::HandleValue data)
 {
 	if (!g_XmppClient)
 	{
@@ -182,7 +182,7 @@ std::string EncryptPassword(const std::string& password, const std::string& user
 
 #endif
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	// Lobby functions
 	ScriptFunction::Register<&HasXmppClient>(rq, "HasXmppClient");

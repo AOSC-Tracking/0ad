@@ -43,12 +43,12 @@ public:
 	/**
 	 * Parses the given JS::Value using Script::FromJSVal and assigns it to the setting data.
 	 */
-	bool FromJSVal(const ScriptRequest& rq, JS::HandleValue value, const bool sendMessage);
+	bool FromJSVal(const ScriptRequest rq, JS::HandleValue value, const bool sendMessage);
 
 	/**
 	 * Converts the setting data to a JS::Value using Script::ToJSVal.
 	 */
-	virtual void ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue value) = 0;
+	virtual void ToJSVal(const ScriptRequest rq, JS::MutableHandleValue value) = 0;
 
 protected:
 	IGUISetting(IGUISetting&& other);
@@ -57,7 +57,7 @@ protected:
 	virtual ~IGUISetting() = default;
 
 	virtual bool DoFromString(const CStrW& value) = 0;
-	virtual bool DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value) = 0;
+	virtual bool DoFromJSVal(const ScriptRequest rq, JS::HandleValue value) = 0;
 
 	/**
 	 * Triggers the IGUIObject logic when a setting changes.
@@ -120,8 +120,8 @@ public:
 
 protected:
 	bool DoFromString(const CStrW& value) override;
-	bool DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value) override;
-	void ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue value) override;
+	bool DoFromJSVal(const ScriptRequest rq, JS::HandleValue value) override;
+	void ToJSVal(const ScriptRequest rq, JS::MutableHandleValue value) override;
 
 	T m_Setting;
 };

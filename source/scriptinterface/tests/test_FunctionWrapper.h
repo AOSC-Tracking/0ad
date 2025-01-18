@@ -48,8 +48,8 @@ public:
 	static void _script_interface(const ScriptInterface&) {};
 	static int _script_interface_2(const ScriptInterface&, int a, bool) { return a; };
 
-	static void _script_request(const ScriptRequest&) {};
-	static int _script_request_2(const ScriptRequest&, int a, bool) { return a; };
+	static void _script_request(const ScriptRequest) {};
+	static int _script_request_2(const ScriptRequest, int a, bool) { return a; };
 
 	void test_special_wrappers()
 	{

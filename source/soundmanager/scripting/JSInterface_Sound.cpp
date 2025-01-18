@@ -134,7 +134,7 @@ namespace JSI_Sound
 
 #endif
 
-	void RegisterScriptFunctions(const ScriptRequest& rq)
+	void RegisterScriptFunctions(const ScriptRequest rq)
 	{
 		ScriptFunction::Register<&StartMusic>(rq, "StartMusic");
 		ScriptFunction::Register<&StopMusic>(rq, "StopMusic");

@@ -79,8 +79,8 @@ public:
 	void recv() override;
 	void SendIqGetBoardList() override;
 	void SendIqGetProfile(const std::string& player) override;
-	void SendIqGameReport(const ScriptRequest& rq, JS::HandleValue data) override;
-	void SendIqRegisterGame(const ScriptRequest& rq, JS::HandleValue data) override;
+	void SendIqGameReport(const ScriptRequest rq, JS::HandleValue data) override;
+	void SendIqRegisterGame(const ScriptRequest rq, JS::HandleValue data) override;
 	void SendIqGetConnectionData(const std::string& jid, const std::string& password, const std::string& clientSalt, bool localIP) override;
 	void SendIqUnregisterGame() override;
 	void SendIqChangeStateGame(const std::string& nbp, const std::string& players) override;
@@ -97,10 +97,10 @@ public:
 	std::wstring GetRating(const std::string& nickname) override;
 	const std::wstring& GetSubject() override;
 
-	JS::Value GUIGetPlayerList(const ScriptRequest& rq) override;
-	JS::Value GUIGetGameList(const ScriptRequest& rq) override;
-	JS::Value GUIGetBoardList(const ScriptRequest& rq) override;
-	JS::Value GUIGetProfile(const ScriptRequest& rq) override;
+	JS::Value GUIGetPlayerList(const ScriptRequest rq) override;
+	JS::Value GUIGetGameList(const ScriptRequest rq) override;
+	JS::Value GUIGetBoardList(const ScriptRequest rq) override;
+	JS::Value GUIGetProfile(const ScriptRequest rq) override;
 
 	void SendStunEndpointToHost(const std::string& ip, u16 port, const std::string& hostJID) override;
 

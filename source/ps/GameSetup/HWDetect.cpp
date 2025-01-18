@@ -73,7 +73,7 @@ namespace
 class Reporter
 {
 public:
-	Reporter(const ScriptRequest& rq)
+	Reporter(const ScriptRequest rq)
 		: m_Rq(rq), m_LibrarySettings(rq.cx)
 	{
 		Script::CreateObject(m_Rq, &m_LibrarySettings);
@@ -92,21 +92,22 @@ public:
 	}
 
 private:
-	const ScriptRequest& m_Rq;
+	// NB: Need to ensure that we don't enter another realm or this becomes unsafe.
+	const ScriptRequest m_Rq;
 	JS::RootedValue m_LibrarySettings;
 };
 
 class LibraryReporter : public Reporter
 {
 public:
-	LibraryReporter(const ScriptRequest& rq, const char* name)
+	LibraryReporter(const ScriptRequest rq, const char* name)
 		: Reporter(rq)
 	{
 		Add("name", name);
 	}
 };
 
-JS::Value MakeSDLReport(const ScriptRequest& rq)
+JS::Value MakeSDLReport(const ScriptRequest rq)
 {
 	LibraryReporter reporter{rq, "sdl"};
 
@@ -133,7 +134,7 @@ JS::Value MakeSDLReport(const ScriptRequest& rq)
 	return reporter.MakeReport();
 }
 
-JS::Value MakeFreeTypeReport(const ScriptRequest& rq)
+JS::Value MakeFreeTypeReport(const ScriptRequest rq)
 {
 	FT_Library FTLibrary;
 
@@ -152,7 +153,7 @@ JS::Value MakeFreeTypeReport(const ScriptRequest& rq)
 	return libraryReporter.MakeReport();
 }
 
-void ReportLibraries(const ScriptRequest& rq, JS::HandleValue settings)
+void ReportLibraries(const ScriptRequest rq, JS::HandleValue settings)
 {
 	JS::RootedValue librariesSettings(rq.cx);
 	Script::CreateArray(rq, &librariesSettings);

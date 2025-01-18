@@ -25,12 +25,12 @@
 #include "scriptinterface/FunctionWrapper.h"
 #include "scriptinterface/ScriptRequest.h"
 
-bool ScriptException::IsPending(const ScriptRequest& rq)
+bool ScriptException::IsPending(const ScriptRequest rq)
 {
 	return JS_IsExceptionPending(rq.cx);
 }
 
-bool ScriptException::CatchPending(const ScriptRequest& rq)
+bool ScriptException::CatchPending(const ScriptRequest rq)
 {
 	if (!JS_IsExceptionPending(rq.cx))
 		return false;
@@ -92,7 +92,7 @@ bool ScriptException::CatchPending(const ScriptRequest& rq)
 	return true;
 }
 
-void ScriptException::Raise(const ScriptRequest& rq, const char* format, ...)
+void ScriptException::Raise(const ScriptRequest rq, const char* format, ...)
 {
 	va_list ap;
 	va_start(ap, format);

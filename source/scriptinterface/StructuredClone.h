@@ -35,8 +35,8 @@ namespace Script
  */
 using StructuredClone = std::shared_ptr<JSStructuredCloneData>;
 
-StructuredClone WriteStructuredClone(const ScriptRequest& rq, JS::HandleValue v);
-void ReadStructuredClone(const ScriptRequest& rq, const StructuredClone& ptr, JS::MutableHandleValue ret);
+StructuredClone WriteStructuredClone(const ScriptRequest rq, JS::HandleValue v);
+void ReadStructuredClone(const ScriptRequest rq, const StructuredClone& ptr, JS::MutableHandleValue ret);
 
 /**
  * Construct a new value by cloning a value (possibly from a different Compartment).
@@ -54,7 +54,7 @@ JS::Value CloneValueFromOtherCompartment(const ScriptInterface& to, const Script
  * won't affect the original value.
  * Works by cloning, so the same restrictions as CloneValueFromOtherCompartment apply.
  */
-JS::Value DeepCopy(const ScriptRequest& rq, JS::HandleValue val);
+JS::Value DeepCopy(const ScriptRequest rq, JS::HandleValue val);
 
 } // namespace Script
 

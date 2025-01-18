@@ -73,7 +73,7 @@ public:
 	virtual const std::string& GetDriverInformation() const = 0;
 	virtual const std::vector<std::string>& GetExtensions() const = 0;
 
-	virtual void Report(const ScriptRequest& rq, JS::HandleValue settings) = 0;
+	virtual void Report(const ScriptRequest rq, JS::HandleValue settings) = 0;
 
 	virtual std::unique_ptr<IDeviceCommandContext> CreateCommandContext() = 0;
 

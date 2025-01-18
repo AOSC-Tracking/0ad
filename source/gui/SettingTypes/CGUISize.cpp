@@ -143,7 +143,7 @@ bool CGUISize::FromString(const CStr& Value)
 	return true;
 }
 
-void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) const
+void CGUISize::ToJSVal(const ScriptRequest rq, JS::MutableHandleValue ret) const
 {
 	const ScriptInterface& scriptInterface = rq.GetCurrentScriptInterface();
 	ret.setObjectOrNull(scriptInterface.CreateCustomObject("GUISize"));
@@ -178,7 +178,7 @@ void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) cons
 #undef P
 }
 
-bool CGUISize::FromJSVal(const ScriptRequest& rq, JS::HandleValue v)
+bool CGUISize::FromJSVal(const ScriptRequest rq, JS::HandleValue v)
 {
 	if (v.isString())
 	{

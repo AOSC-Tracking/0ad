@@ -336,7 +336,7 @@ bool IsSurfaceFormatSupported(
 }
 
 void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
-	const ScriptRequest& rq, JS::HandleValue settings)
+	const ScriptRequest rq, JS::HandleValue settings)
 {
 	Script::SetProperty(rq, settings, "name", device.properties.deviceName);
 	Script::SetProperty(rq, settings, "version",

@@ -34,7 +34,7 @@ namespace Script
  * Get the named property on the given object.
  */
 template<typename PropType>
-inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, JS::MutableHandleValue out)
+inline bool GetProperty(const ScriptRequest rq, JS::HandleValue obj, PropType name, JS::MutableHandleValue out)
 {
 	if (!obj.isObject())
 		return false;
@@ -51,14 +51,14 @@ inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType n
 }
 
 template<typename T, typename PropType>
-inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, T& out)
+inline bool GetProperty(const ScriptRequest rq, JS::HandleValue obj, PropType name, T& out)
 {
 	JS::RootedValue val(rq.cx);
 	if (!GetProperty<PropType>(rq, obj, name, &val))
 		return false;
 	return FromJSVal(rq, val, out);
 }
-inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, const char* name, JS::MutableHandleObject out)
+inline bool GetProperty(const ScriptRequest rq, JS::HandleValue obj, const char* name, JS::MutableHandleObject out)
 {
 	JS::RootedValue val(rq.cx, JS::ObjectValue(*out.get()));
 	if (!GetProperty(rq, obj, name, &val))
@@ -68,18 +68,18 @@ inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, const char
 }
 
 template<typename T>
-inline bool GetPropertyInt(const ScriptRequest& rq, JS::HandleValue obj, int name, T& out)
+inline bool GetPropertyInt(const ScriptRequest rq, JS::HandleValue obj, int name, T& out)
 {
 	return GetProperty(rq, obj, name, out);
 }
-inline bool GetPropertyInt(const ScriptRequest& rq, JS::HandleValue obj, int name, JS::MutableHandleValue out)
+inline bool GetPropertyInt(const ScriptRequest rq, JS::HandleValue obj, int name, JS::MutableHandleValue out)
 {
 	return GetProperty(rq, obj, name, out);
 }
 /**
  * Check the named property has been defined on the given object.
  */
-inline bool HasProperty(const ScriptRequest& rq, JS::HandleValue obj, const char* name)
+inline bool HasProperty(const ScriptRequest rq, JS::HandleValue obj, const char* name)
 {
 	if (!obj.isObject())
 		return false;
@@ -95,7 +95,7 @@ inline bool HasProperty(const ScriptRequest& rq, JS::HandleValue obj, const char
  * Set the named property on the given object.
  */
 template<typename PropType>
-inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, JS::HandleValue value, bool constant = false, bool enumerable = true)
+inline bool SetProperty(const ScriptRequest rq, JS::HandleValue obj, PropType name, JS::HandleValue value, bool constant = false, bool enumerable = true)
 {
 	uint attrs = 0;
 	if (constant)
@@ -118,7 +118,7 @@ inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType n
 }
 
 template<typename T, typename PropType>
-inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, const T& value, bool constant = false, bool enumerable = true)
+inline bool SetProperty(const ScriptRequest rq, JS::HandleValue obj, PropType name, const T& value, bool constant = false, bool enumerable = true)
 {
 	JS::RootedValue val(rq.cx);
 	Script::ToJSVal(rq, &val, value);
@@ -126,13 +126,13 @@ inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType n
 }
 
 template<typename T>
-inline bool SetPropertyInt(const ScriptRequest& rq, JS::HandleValue obj, int name, const T& value, bool constant = false, bool enumerable = true)
+inline bool SetPropertyInt(const ScriptRequest rq, JS::HandleValue obj, int name, const T& value, bool constant = false, bool enumerable = true)
 {
 	return SetProperty<T, int>(rq, obj, name, value, constant, enumerable);
 }
 
 template<typename T>
-inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleObject obj, T& name)
+inline bool GetObjectClassName(const ScriptRequest rq, JS::HandleObject obj, T& name)
 {
 	JS::RootedValue constructor(rq.cx, JS::ObjectOrNullValue(JS_GetConstructor(rq.cx, obj)));
 	return constructor.isObject() && Script::HasProperty(rq, constructor, "name") && Script::GetProperty(rq, constructor, "name", name);
@@ -142,7 +142,7 @@ inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleObject obj, T&
  * Get the name of the object's class. Note that inheritance may lead to unexpected results.
  */
 template<typename T>
-inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleValue val, T& name)
+inline bool GetObjectClassName(const ScriptRequest rq, JS::HandleValue val, T& name)
 {
 	JS::RootedObject obj(rq.cx, val.toObjectOrNull());
 	if (!obj)
@@ -150,7 +150,7 @@ inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleValue val, T& 
 	return GetObjectClassName(rq, obj, name);
 }
 
-inline bool DeepFreezeObject(const ScriptRequest& rq, JS::HandleValue objVal)
+inline bool DeepFreezeObject(const ScriptRequest rq, JS::HandleValue objVal)
 {
 	if (!objVal.isObject())
 	{
@@ -188,7 +188,7 @@ inline bool DeepFreezeObject(const ScriptRequest& rq, JS::HandleValue objVal)
  * require a variant in the vector, and it's not useful for now.
  * @param enumerableOnly - only return enumerable properties.
  */
-inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objVal, bool enumerableOnly, std::vector<std::string>& out)
+inline bool EnumeratePropertyNames(const ScriptRequest rq, JS::HandleValue objVal, bool enumerableOnly, std::vector<std::string>& out)
 {
 	if (!objVal.isObjectOrNull())
 	{
@@ -227,7 +227,7 @@ inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objV
 /**
  * Create a plain object (i.e. {}). If it fails, returns undefined.
  */
-inline JS::Value CreateObject(const ScriptRequest& rq)
+inline JS::Value CreateObject(const ScriptRequest rq)
 {
 	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
 	if (!obj)
@@ -235,7 +235,7 @@ inline JS::Value CreateObject(const ScriptRequest& rq)
 	return JS::ObjectValue(*obj.get());
 }
 
-inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectValue)
+inline bool CreateObject(const ScriptRequest rq, JS::MutableHandleValue objectValue)
 {
 	objectValue.set(CreateObject(rq));
 	return !objectValue.isNullOrUndefined();
@@ -247,7 +247,7 @@ inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectV
  * Can throw an exception.
  */
 template<typename T, typename... Args>
-inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectValue, const char* propertyName, const T& propertyValue, Args const&... args)
+inline bool CreateObject(const ScriptRequest rq, JS::MutableHandleValue objectValue, const char* propertyName, const T& propertyValue, Args const&... args)
 {
 	JS::RootedValue val(rq.cx);
 	ToJSVal(rq, &val, propertyValue);
@@ -257,7 +257,7 @@ inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectV
 /**
  * Sets the given value to a new JS object or Null Value in case of out-of-memory.
  */
-inline bool CreateArray(const ScriptRequest& rq, JS::MutableHandleValue objectValue, size_t length = 0)
+inline bool CreateArray(const ScriptRequest rq, JS::MutableHandleValue objectValue, size_t length = 0)
 {
 	objectValue.setObjectOrNull(JS::NewArrayObject(rq.cx, length));
 	return !objectValue.isNullOrUndefined();

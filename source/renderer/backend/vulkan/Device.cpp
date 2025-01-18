@@ -683,7 +683,7 @@ CDevice::~CDevice()
 		vkDestroyInstance(m_Instance, nullptr);
 }
 
-void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
+void CDevice::Report(const ScriptRequest rq, JS::HandleValue settings)
 {
 	Script::SetProperty(rq, settings, "name", "vulkan");
 

@@ -50,13 +50,13 @@ private:
 	 * and this requires them to be default-constructible (as that function takes an out parameter)
 	 * thus constref needs to be removed when defining the tuple.
 	 * Exceptions are:
-	 *  - const ScriptRequest& (as the first argument only, for implementation simplicity).
+	 *  - (const) ScriptRequest (as the first argument only, for implementation simplicity).
 	 *  - const ScriptInterface& (as the first argument only, for implementation simplicity).
 	 *  - JS::HandleValue
 	 */
 	template<typename T>
 	using type_transform = std::conditional_t<
-		std::is_same_v<const ScriptRequest&, T> || std::is_same_v<const ScriptInterface&, T>,
+		std::is_same_v<ScriptRequest, T> || std::is_same_v<const ScriptInterface&, T>,
 		T,
 		std::remove_const_t<typename std::remove_reference_t<T>>
 	>;
@@ -103,7 +103,7 @@ private:
 	 * @param wentOk - true if the conversion succeeded and wentOk was true before, false otherwise.
 	 */
 	template<size_t idx, typename T>
-	static T DoConvertFromJS(const ScriptRequest& rq, JS::CallArgs& args, bool& wentOk)
+	static T DoConvertFromJS(ScriptRequest rq, JS::CallArgs& args, bool& wentOk)
 	{
 		// No need to convert JS values.
 		if constexpr (std::is_same_v<T, JS::HandleValue>)
@@ -138,7 +138,7 @@ private:
 	 * Wrapper: calls DoConvertFromJS for each element in T.
 	 */
 	template<typename... T, size_t... idx>
-	static std::tuple<T...> DoConvertFromJS(std::index_sequence<idx...>, const ScriptRequest& rq,
+	static std::tuple<T...> DoConvertFromJS(std::index_sequence<idx...>, ScriptRequest rq,
 		JS::CallArgs& args, bool& wentOk)
 	{
 		return {DoConvertFromJS<idx, T>(rq, args, wentOk)...};
@@ -153,16 +153,16 @@ private:
 	 * so we'll pass a nullptr that's static_cast to what we want.
 	 */
 	template<typename ...Types>
-	static std::tuple<Types...> ConvertFromJS(const ScriptRequest& rq, JS::CallArgs& args, bool& wentOk,
+	static std::tuple<Types...> ConvertFromJS(ScriptRequest rq, JS::CallArgs& args, bool& wentOk,
 		std::tuple<Types...>*)
 	{
 		return DoConvertFromJS<Types...>(std::index_sequence_for<Types...>(), rq, args, wentOk);
 	}
 
-	// Overloads for ScriptRequest& first argument.
+	// Overloads for ScriptRequest first argument.
 	template<typename ...Types>
-	static std::tuple<const ScriptRequest&, Types...> ConvertFromJS(const ScriptRequest& rq,
-		JS::CallArgs& args, bool& wentOk, std::tuple<const ScriptRequest&, Types...>*)
+	static std::tuple<ScriptRequest, Types...> ConvertFromJS(ScriptRequest rq,
+		JS::CallArgs& args, bool& wentOk, std::tuple<ScriptRequest, Types...>*)
 	{
 		return std::tuple_cat(std::tie(rq), DoConvertFromJS<Types...>(
 			std::index_sequence_for<Types...>(), rq, args, wentOk));
@@ -170,7 +170,7 @@ private:
 
 	// Overloads for ScriptInterface& first argument.
 	template<typename ...Types>
-	static std::tuple<const ScriptInterface&, Types...> ConvertFromJS(const ScriptRequest& rq,
+	static std::tuple<const ScriptInterface&, Types...> ConvertFromJS(const ScriptRequest rq,
 		JS::CallArgs& args, bool& wentOk, std::tuple<const ScriptInterface&, Types...>*)
 	{
 		return std::tuple_cat(std::tie(rq.GetCurrentScriptInterface()),
@@ -210,7 +210,7 @@ private:
 	 * For references like `rq` this warning isn't issued.
 	 */
 	template<typename... Types, size_t... idx>
-	static void ToJSValVector(std::index_sequence<idx...>, const ScriptRequest& rq,
+	static void ToJSValVector(std::index_sequence<idx...>, const ScriptRequest rq,
 		[[maybe_unused]] JS::MutableHandleValueVector argv, const Types&... params)
 	{
 		(Script::ToJSVal(rq, argv[idx], params), ...);
@@ -223,7 +223,7 @@ private:
 	 * This could be worked around with more templates, but it doesn't seem particularly worth doing.
 	 */
 	template<typename R, typename ...Args>
-	static bool Call_(const ScriptRequest& rq, JS::HandleValue val, const char* name, R& ret, const Args&... args)
+	static bool Call_(const ScriptRequest rq, JS::HandleValue val, const char* name, R& ret, const Args&... args)
 	{
 		JS::RootedObject obj(rq.cx);
 		if (!JS_ValueToObject(rq.cx, val, &obj) || !obj)
@@ -261,7 +261,7 @@ private:
 	///////////////////////////////////////////////////////////////////////////
 public:
 	template <typename T>
-	using ObjectGetter = T*(*)(const ScriptRequest&, JS::CallArgs&);
+	using ObjectGetter = T*(*)(const ScriptRequest, JS::CallArgs&);
 
 	// TODO: the fact that this takes class and not auto is to work around an odd VS17 bug.
 	// It can be removed with VS19.
@@ -273,7 +273,7 @@ public:
 	 * so that it can be called from JS and manipulated in Spidermonkey.
 	 * Most C++ functions can be directly wrapped, so long as their arguments are
 	 * convertible from JS::Value and their return value is convertible to JS::Value (or void)
-	 * The C++ function may optionally take const ScriptRequest& or ScriptInterface& as its first argument.
+	 * The C++ function may optionally take const ScriptRequest or ScriptInterface& as its first argument.
 	 * The function may be an object method, in which case you need to pass an appropriate getter
 	 *
 	 * Optimisation note: the ScriptRequest object is created even without arguments,
@@ -337,14 +337,14 @@ public:
 	 * @return the success (or failure) thereof.
 	 */
 	template<typename R, typename ...Args>
-	static bool Call(const ScriptRequest& rq, JS::HandleValue val, const char* name, R& ret, const Args&... args)
+	static bool Call(const ScriptRequest rq, JS::HandleValue val, const char* name, R& ret, const Args&... args)
 	{
 		return Call_(rq, val, name, ret, std::forward<const Args>(args)...);
 	}
 
 	// Specialisation for MutableHandleValue return.
 	template<typename ...Args>
-	static bool Call(const ScriptRequest& rq, JS::HandleValue val, const char* name, JS::MutableHandleValue ret, const Args&... args)
+	static bool Call(const ScriptRequest rq, JS::HandleValue val, const char* name, JS::MutableHandleValue ret, const Args&... args)
 	{
 		return Call_(rq, val, name, ret, std::forward<const Args>(args)...);
 	}
@@ -354,7 +354,7 @@ public:
 	 * @return the success (or failure) thereof.
 	 */
 	template<typename ...Args>
-	static bool CallVoid(const ScriptRequest& rq, JS::HandleValue val, const char* name, const Args&... args)
+	static bool CallVoid(const ScriptRequest rq, JS::HandleValue val, const char* name, const Args&... args)
 	{
 		return Call(rq, val, name, IgnoreResult, std::forward<const Args>(args)...);
 	}
@@ -365,7 +365,7 @@ public:
 	 * @return the final value of the generator.
 	 */
 	template<typename Callback>
-	static JS::Value RunGenerator(const ScriptRequest& rq, JS::HandleValue val, const char* name,
+	static JS::Value RunGenerator(const ScriptRequest rq, JS::HandleValue val, const char* name,
 		JS::HandleValue arg, Callback yieldCallback)
 	{
 		JS::RootedValue generator{rq.cx};
@@ -426,7 +426,7 @@ public:
 	 * Return a JSFunction from a C++ function.
 	 */
 	template <auto callable, GetterFor<decltype(callable)> thisGetter = nullptr>
-	static JSFunction* Create(const ScriptRequest& rq, const char* name,
+	static JSFunction* Create(const ScriptRequest rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
 		return JS_NewFunction(rq.cx, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags, name);
@@ -436,7 +436,7 @@ public:
 	 * Register a function on the native scope (usually 'Engine').
 	 */
 	template <auto callable, GetterFor<decltype(callable)> thisGetter = nullptr>
-	static void Register(const ScriptRequest& rq, const char* name,
+	static void Register(const ScriptRequest rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
 		JS_DefineFunction(rq.cx, Script::GetNativeScope(rq), name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);

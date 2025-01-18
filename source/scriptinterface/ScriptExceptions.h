@@ -27,7 +27,7 @@ namespace ScriptException
 /**
  * @return Whether there is a JS exception pending.
  */
-bool IsPending(const ScriptRequest& rq);
+bool IsPending(const ScriptRequest rq);
 
 /**
  * Log and then clear the current pending exception. This function should always be called after calling a
@@ -37,7 +37,7 @@ bool IsPending(const ScriptRequest& rq);
  * Note that JS code that wants to throw errors should throw new Error(...), otherwise the stack cannot be used.
  * @return Whether there was a pending exception.
  */
-bool CatchPending(const ScriptRequest& rq);
+bool CatchPending(const ScriptRequest rq);
 
 /**
  * Raise a JS exception from C++ code.
@@ -45,7 +45,7 @@ bool CatchPending(const ScriptRequest& rq);
  * as the latter overwrites the pending exception.
  * Prefer either simply logging an error if you know a stack-trace will be raised elsewhere.
  */
-void Raise(const ScriptRequest& rq, const char* format, ...);
+void Raise(const ScriptRequest rq, const char* format, ...);
 }
 
 #endif // INCLUDED_SCRIPTEXCEPTIONS

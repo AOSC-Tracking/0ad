@@ -46,9 +46,12 @@ class ScriptRequest
 	friend class ScriptRequestGuard;
 
 	ScriptRequest() = delete;
-	ScriptRequest(const ScriptRequest& rq) = delete;
-	ScriptRequest& operator=(const ScriptRequest& rq) = delete;
 public:
+	// Copy-constructible
+	ScriptRequest(const ScriptRequest& rq) = default;
+	ScriptRequest& operator=(const ScriptRequest& rq) = default;
+	ScriptRequest(ScriptRequest&& rq) = default;
+	ScriptRequest& operator=(ScriptRequest&& rq) = default;
 
 	static ScriptRequest FromAlreadyEntered(JSContext* cx) { return ScriptRequest(cx); }
 
@@ -71,8 +74,8 @@ private:
 // Defined in this file to avoid including ScriptInterface.h in a couple places.
 namespace Script
 {
-JS::Value GetGlobalValue(const ScriptRequest& rq);
-JS::HandleObject GetNativeScope(const ScriptRequest& rq);
+JS::Value GetGlobalValue(const ScriptRequest rq);
+JS::HandleObject GetNativeScope(const ScriptRequest rq);
 };
 
 /**

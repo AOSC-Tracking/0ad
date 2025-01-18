@@ -65,7 +65,7 @@ bool HasNetClient()
 	return !!g_NetClient;
 }
 
-void StartNetworkHost(const ScriptRequest& rq, const CStrW& playerName, const u16 serverPort, bool useSTUN,
+void StartNetworkHost(const ScriptRequest rq, const CStrW& playerName, const u16 serverPort, bool useSTUN,
 	const CStr& password, const bool continueSavedGame, bool storeReplay)
 {
 	ENSURE(!g_NetClient);
@@ -145,7 +145,7 @@ void StartNetworkHost(const ScriptRequest& rq, const CStrW& playerName, const u1
 	}
 }
 
-void StartNetworkJoin(const ScriptRequest& rq, const CStrW& playerName, const CStr& serverAddress, u16 serverPort, bool storeReplay)
+void StartNetworkJoin(const ScriptRequest rq, const CStrW& playerName, const CStr& serverAddress, u16 serverPort, bool storeReplay)
 {
 	ENSURE(!g_NetClient);
 	ENSURE(!g_NetServer);
@@ -239,7 +239,7 @@ void KickPlayer(const CStrW& playerName, bool ban)
 	g_NetClient->SendKickPlayerMessage(playerName, ban);
 }
 
-void SendNetworkChat(const ScriptRequest& rq, const CStrW& message, JS::HandleValue handle)
+void SendNetworkChat(const ScriptRequest rq, const CStrW& message, JS::HandleValue handle)
 {
 	ENSURE(g_NetClient);
 
@@ -330,7 +330,7 @@ void SendNetworkFlare(JS::HandleValue position)
 	);
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&GetDefaultPort>(rq, "GetDefaultPort");
 	ScriptFunction::Register<&IsNetController>(rq, "IsNetController");

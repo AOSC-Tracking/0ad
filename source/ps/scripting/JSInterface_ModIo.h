@@ -22,7 +22,7 @@ class ScriptRequest;
 
 namespace JSI_ModIo
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const ScriptRequest rq);
 }
 
 #endif // INCLUDED_JSI_MODIO

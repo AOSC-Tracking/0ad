@@ -44,7 +44,7 @@
 	}
 
 template <typename T>
-inline T* ComponentGetter(const ScriptRequest& rq, JS::CallArgs& args)
+inline T* ComponentGetter(const ScriptRequest rq, JS::CallArgs& args)
 {
 	return ScriptInterface::GetPrivate<T>(rq, args);
 }

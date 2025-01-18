@@ -122,7 +122,7 @@ std::vector<CStr> CmdLineArgs::GetArgsWithoutName() const
 	return m_ArgsWithoutName;
 }
 
-template<> void Script::ToJSVal<CmdLineArgs>(const ScriptRequest& rq, JS::MutableHandleValue ret, const CmdLineArgs& val)
+template<> void Script::ToJSVal<CmdLineArgs>(const ScriptRequest rq, JS::MutableHandleValue ret, const CmdLineArgs& val)
 {
 	if (!Script::CreateObject(rq, ret))
 		return;

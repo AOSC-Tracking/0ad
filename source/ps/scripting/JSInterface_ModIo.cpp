@@ -26,7 +26,7 @@
 
 namespace JSI_ModIo
 {
-ModIo* ModIoGetter(const ScriptRequest&, JS::CallArgs&)
+ModIo* ModIoGetter(const ScriptRequest, JS::CallArgs&)
 {
 	if (!g_ModIo)
 	{
@@ -47,7 +47,7 @@ void StartGetGameId()
 }
 
 // TODO: could provide a FromJSVal for ModIoModData
-JS::Value GetMods(const ScriptRequest& rq)
+JS::Value GetMods(const ScriptRequest rq)
 {
 	if (!g_ModIo)
 	{
@@ -91,7 +91,7 @@ const std::map<DownloadProgressStatus, std::string> statusStrings = {
 };
 
 // TODO: could provide a FromJSVal for DownloadProgressData
-JS::Value GetDownloadProgress(const ScriptRequest& rq)
+JS::Value GetDownloadProgress(const ScriptRequest rq)
 {
 	if (!g_ModIo)
 	{
@@ -111,7 +111,7 @@ JS::Value GetDownloadProgress(const ScriptRequest& rq)
 	return progressData;
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const ScriptRequest rq)
 {
 	ScriptFunction::Register<&StartGetGameId>(rq, "ModIoStartGetGameId");
 	ScriptFunction::Register<&ModIo::StartListMods, &ModIoGetter>(rq, "ModIoStartListMods");

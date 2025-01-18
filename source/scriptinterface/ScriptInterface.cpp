@@ -96,11 +96,11 @@ const ScriptInterface& ScriptRequest::GetCurrentScriptInterface() const
 	return ScriptInterface::CmptPrivate::GetScriptInterface(cx);
 }
 
-JS::Value globalValue(const ScriptRequest& rq) {
+JS::Value globalValue(const ScriptRequest rq) {
 	return rq.GetCurrentScriptInterface().GetGlobalValue();
 }
 
-JS::HandleObject nativeScope(const ScriptRequest& rq) {
+JS::HandleObject nativeScope(const ScriptRequest rq) {
 	return rq.GetCurrentScriptInterface().GetNativeScope();
 }
 
@@ -192,7 +192,7 @@ bool error(JSContext* cx, uint argc, JS::Value* vp)
 	return true;
 }
 
-JS::Value deepcopy(const ScriptRequest& rq, JS::HandleValue val)
+JS::Value deepcopy(const ScriptRequest rq, JS::HandleValue val)
 {
 	if (val.isNullOrUndefined())
 	{
@@ -415,7 +415,7 @@ void ScriptInterface::SetCallbackData(void* pCBData)
 }
 
 template <>
-void* ScriptInterface::ObjectFromCBData<void>(const ScriptRequest& rq)
+void* ScriptInterface::ObjectFromCBData<void>(const ScriptRequest rq)
 {
 	return ScriptInterface::CmptPrivate::GetCBData(rq.cx);
 }
@@ -487,11 +487,11 @@ JS::HandleObject ScriptInterface::GetNativeScope() const
 
 namespace Script
 {
-JS::Value GetGlobalValue(const ScriptRequest& rq)
+JS::Value GetGlobalValue(const ScriptRequest rq)
 {
 	return rq.GetCurrentScriptInterface().GetGlobalValue();
 }
-JS::HandleObject GetNativeScope(const ScriptRequest& rq)
+JS::HandleObject GetNativeScope(const ScriptRequest rq)
 {
 	return rq.GetCurrentScriptInterface().GetNativeScope();
 }
@@ -603,7 +603,7 @@ bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool r
 	return JS_DefineProperty(rq.cx, global, name, value, attrs);
 }
 
-bool ScriptInterface::GetGlobalProperty(const ScriptRequest& rq, const std::string& name, JS::MutableHandleValue out)
+bool ScriptInterface::GetGlobalProperty(const ScriptRequest rq, const std::string& name, JS::MutableHandleValue out)
 {
 	// Try to get the object as a property of the global object.
 	JS::RootedObject global(rq.cx, rq.GetCurrentScriptInterface().GetGlobalObject());

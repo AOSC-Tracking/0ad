@@ -372,7 +372,7 @@ void CParamNode::ToXMLString(std::ostream& strm) const
 	}
 }
 
-void CParamNode::ToJSVal(const ScriptRequest& rq, bool cacheValue, JS::MutableHandleValue ret) const
+void CParamNode::ToJSVal(const ScriptRequest rq, bool cacheValue, JS::MutableHandleValue ret) const
 {
 	if (cacheValue && m_ScriptVal != NULL)
 	{
@@ -391,7 +391,7 @@ void CParamNode::ToJSVal(const ScriptRequest& rq, bool cacheValue, JS::MutableHa
 	}
 }
 
-void CParamNode::ConstructJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) const
+void CParamNode::ConstructJSVal(const ScriptRequest rq, JS::MutableHandleValue ret) const
 {
 	if (m_Childs.empty())
 	{
