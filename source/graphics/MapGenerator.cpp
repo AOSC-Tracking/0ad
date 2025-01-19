@@ -196,7 +196,7 @@ private:
 		}
 
 		ScriptRequest rq(m_ScriptInterface);
-		JS::RootedValue returnValue(rq.cx);
+		JS::RootedValue returnValue(rq.cx());
 		Script::ToJSVal(rq, &returnValue, heightmap);
 		return returnValue;
 	}
@@ -269,7 +269,7 @@ private:
 			}
 		}
 
-		JS::RootedValue returnValue(rq.cx);
+		JS::RootedValue returnValue(rq.cx());
 
 		Script::CreateObject(
 			rq,
@@ -380,7 +380,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 	ScriptRequest rq(scriptInterface);
 
 	// Parse settings
-	JS::RootedValue settingsVal(rq.cx);
+	JS::RootedValue settingsVal(rq.cx());
 	if (!Script::ParseJSON(rq, settings, &settingsVal) && settingsVal.isUndefined())
 	{
 		LOGERROR("RunMapGenerationScript: Failed to parse settings");
@@ -407,7 +407,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 	CMapGenerationCallbacks callbackData{stopToken, progress, scriptInterface, mapData, flags};
 
 	// Copy settings to global variable
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	JS::RootedValue global(rq.cx(), rq.globalValue());
 	if (!Script::SetProperty(rq, global, "g_MapSettings", settingsVal, flags & JSPROP_READONLY,
 		flags & JSPROP_ENUMERATE))
 	{
@@ -425,8 +425,8 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 
 	LOGMESSAGE("Run RMS generator");
 	bool hasGenerator;
-	JS::RootedObject globalAsObject{rq.cx, &JS::HandleValue{global}.toObject()};
-	if (!JS_HasProperty(rq.cx, globalAsObject, GENERATOR_NAME, &hasGenerator))
+	JS::RootedObject globalAsObject{rq.cx(), &JS::HandleValue{global}.toObject()};
+	if (!JS_HasProperty(rq.cx(), globalAsObject, GENERATOR_NAME, &hasGenerator))
 	{
 		LOGERROR("RunMapGenerationScript: failed to search `%s`.", GENERATOR_NAME);
 		return nullptr;
@@ -443,7 +443,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 		return mapData;
 	}
 
-	JS::RootedValue map{rq.cx, ScriptFunction::RunGenerator(rq, global, GENERATOR_NAME, settingsVal,
+	JS::RootedValue map{rq.cx(), ScriptFunction::RunGenerator(rq, global, GENERATOR_NAME, settingsVal,
 		[&](const JS::HandleValue value)
 		{
 			int tempProgress;
@@ -453,7 +453,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 			progress.store(tempProgress);
 		})};
 
-	JS::RootedValue exportedMap{rq.cx};
+	JS::RootedValue exportedMap{rq.cx()};
 	const bool exportSuccess{ScriptFunction::Call(rq, map, "MakeExportable", &exportedMap)};
 	return Script::WriteStructuredClone(rq, exportSuccess ? exportedMap : map);
 }

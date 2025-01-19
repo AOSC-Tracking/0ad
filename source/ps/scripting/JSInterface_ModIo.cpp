@@ -57,13 +57,13 @@ JS::Value GetMods(const ScriptRequest& rq)
 
 	const std::vector<ModIoModData>& availableMods = g_ModIo->GetMods();
 
-	JS::RootedValue mods(rq.cx);
+	JS::RootedValue mods(rq.cx());
 	Script::CreateArray(rq, &mods, availableMods.size());
 
 	u32 i = 0;
 	for (const ModIoModData& mod : availableMods)
 	{
-		JS::RootedValue m(rq.cx);
+		JS::RootedValue m(rq.cx());
 		Script::CreateObject(rq, &m);
 
 		for (const std::pair<const std::string, std::string>& prop : mod.properties)
@@ -102,7 +102,7 @@ JS::Value GetDownloadProgress(const ScriptRequest& rq)
 
 	const DownloadProgressData& progress = g_ModIo->GetDownloadProgress();
 
-	JS::RootedValue progressData(rq.cx);
+	JS::RootedValue progressData(rq.cx());
 	Script::CreateObject(rq, &progressData);
 	Script::SetProperty(rq, progressData, "status", statusStrings.at(progress.status), true);
 	Script::SetProperty(rq, progressData, "progress", progress.progress, true);

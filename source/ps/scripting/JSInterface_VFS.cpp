@@ -95,10 +95,10 @@ struct BuildDirEntListState
 
 	BuildDirEntListState(const ScriptRequest& rq)
 		: rq(rq),
-		filename_array(rq.cx),
+		filename_array(rq.cx()),
 		cur_idx(0)
 	{
-		filename_array = JS::NewArrayObject(rq.cx, 0);
+		filename_array = JS::NewArrayObject(rq.cx(), 0);
 	}
 };
 
@@ -107,10 +107,10 @@ static Status BuildDirEntListCB(const VfsPath& pathname, const CFileInfo& UNUSED
 {
 	BuildDirEntListState* s = (BuildDirEntListState*)cbData;
 
-	JS::RootedObject filenameArrayObj(s->rq.cx, s->filename_array);
-	JS::RootedValue val(s->rq.cx);
+	JS::RootedObject filenameArrayObj(s->rq.cx(), s->filename_array);
+	JS::RootedValue val(s->rq.cx());
 	Script::ToJSVal(s->rq, &val, CStrW(pathname.string()) );
-	JS_SetElement(s->rq.cx, filenameArrayObj, s->cur_idx++, val);
+	JS_SetElement(s->rq.cx(), filenameArrayObj, s->cur_idx++, val);
 	return INFO::OK;
 }
 
@@ -175,7 +175,7 @@ JS::Value ReadFile(const ScriptRequest& rq, const std::wstring& filename)
 	contents.Replace("\r\n", "\n");
 
 	// Decode as UTF-8
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::ToJSVal(rq, &ret, contents.FromUTF8());
 	return ret;
 }
@@ -199,7 +199,7 @@ JS::Value ReadFileLines(const ScriptRequest& rq, const std::wstring& filename)
 	// split into array of strings (one per line)
 	std::stringstream ss(contents);
 
-	JS::RootedValue line_array(rq.cx);
+	JS::RootedValue line_array(rq.cx());
 	Script::CreateArray(rq, &line_array);
 
 	std::string line;
@@ -208,7 +208,7 @@ JS::Value ReadFileLines(const ScriptRequest& rq, const std::wstring& filename)
 	while (std::getline(ss, line))
 	{
 		// Decode each line as UTF-8
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::ToJSVal(rq, &val, CStr(line).FromUTF8());
 		Script::SetPropertyInt(rq, line_array, cur_line++, val);
 	}
@@ -224,7 +224,7 @@ JS::Value ReadJSONFile(const ScriptInterface& scriptInterface, const std::wstrin
 	if (!PathRestrictionMet<restriction>(rq, filePath))
 		return JS::NullValue();
 
-	JS::RootedValue out(rq.cx);
+	JS::RootedValue out(rq.cx());
 	Script::ReadJSONFile(rq, filePath, &out);
 	return out;
 }
@@ -239,7 +239,7 @@ void WriteJSONFile(const ScriptInterface& scriptInterface, const std::wstring& f
 		return;
 
 	// TODO: This is a workaround because we need to pass a MutableHandle to StringifyJSON.
-	JS::RootedValue val(rq.cx, val1);
+	JS::RootedValue val(rq.cx(), val1);
 
 	std::string str(Script::StringifyJSON(rq, &val, false));
 

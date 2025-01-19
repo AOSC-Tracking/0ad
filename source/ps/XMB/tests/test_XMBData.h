@@ -47,7 +47,7 @@ private:
 	CXeromyces parseJS(const std::string rootName, const char* code)
 	{
 		ScriptRequest rq(*m_ScriptInterface);
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		m_ScriptInterface->Eval(code, &val);
 		CXeromyces xmb;
 		bool ok = xmb.m_Data.LoadJSValue(*m_ScriptInterface, val, rootName);

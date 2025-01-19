@@ -105,9 +105,9 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 			ret = IN_HANDLED;
 
 			ScriptRequest rq(m_ScriptInterface);
-			JS::RootedObject globalObj(rq.cx, rq.glob);
-			JS::RootedValue result(rq.cx);
-			if (!JS_CallFunctionValue(rq.cx, globalObj, m_GlobalHotkeys[hotkey][eventName], JS::HandleValueArray::empty(), &result))
+			JS::RootedObject globalObj(rq.cx(), rq.glob);
+			JS::RootedValue result(rq.cx());
+			if (!JS_CallFunctionValue(rq.cx(), globalObj, m_GlobalHotkeys[hotkey][eventName], JS::HandleValueArray::empty(), &result))
 				ScriptException::CatchPending(rq);
 		}
 
@@ -477,7 +477,7 @@ void CGUI::SetGlobalHotkey(const CStr& hotkeyTag, const CStr& eventName, JS::Han
 	}
 
 	UnsetGlobalHotkey(hotkeyTag, eventName);
-	m_GlobalHotkeys[hotkeyTag][eventName].init(rq.cx, function);
+	m_GlobalHotkeys[hotkeyTag][eventName].init(rq.cx(), function);
 }
 
 void CGUI::UnsetGlobalHotkey(const CStr& hotkeyTag, const CStr& eventName)

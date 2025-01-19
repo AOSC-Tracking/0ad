@@ -181,7 +181,7 @@ public:
 	{
 		ScriptRequest rq(GetScriptInterface());
 
-		JS::RootedValue message(rq.cx);
+		JS::RootedValue message(rq.cx());
 		Script::CreateObject(rq, &message, args...);
 		m_GuiMessageQueue.push_back(JS::Heap<JS::Value>(message));
 	}

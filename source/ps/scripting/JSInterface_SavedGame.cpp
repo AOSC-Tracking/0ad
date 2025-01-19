@@ -101,7 +101,7 @@ JS::Value StartSavedGame(const ScriptInterface& scriptInterface, const std::wstr
 	if (!data)
 		return JS::UndefinedValue();
 
-	JS::RootedValue guiContextMetadata{rqGui.cx, data->metadata};
+	JS::RootedValue guiContextMetadata{rqGui.cx(), data->metadata};
 
 	g_Game = new CGame(true);
 
@@ -109,8 +109,8 @@ JS::Value StartSavedGame(const ScriptInterface& scriptInterface, const std::wstr
 		CSimulation2* sim = g_Game->GetSimulation2();
 		ScriptRequest rqGame(sim->GetScriptInterface());
 
-		JS::RootedValue gameContextMetadata(rqGame.cx, Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, guiContextMetadata));
-		JS::RootedValue gameInitAttributes(rqGame.cx);
+		JS::RootedValue gameContextMetadata(rqGame.cx(), Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, guiContextMetadata));
+		JS::RootedValue gameInitAttributes(rqGame.cx());
 		Script::GetProperty(rqGame, gameContextMetadata, "initAttributes", &gameInitAttributes);
 
 		int playerID;

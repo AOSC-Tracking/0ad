@@ -74,7 +74,7 @@ class Reporter
 {
 public:
 	Reporter(const ScriptRequest& rq)
-		: m_Rq(rq), m_LibrarySettings(rq.cx)
+		: m_Rq(rq), m_LibrarySettings(rq.cx())
 	{
 		Script::CreateObject(m_Rq, &m_LibrarySettings);
 	}
@@ -154,13 +154,13 @@ JS::Value MakeFreeTypeReport(const ScriptRequest& rq)
 
 void ReportLibraries(const ScriptRequest& rq, JS::HandleValue settings)
 {
-	JS::RootedValue librariesSettings(rq.cx);
+	JS::RootedValue librariesSettings(rq.cx());
 	Script::CreateArray(rq, &librariesSettings);
 	int libraryCount = 0;
 
 	auto appendLibrary = [&rq, &librariesSettings, &libraryCount](const JS::Value& librarySettings)
 	{
-		JS::RootedValue value(rq.cx, librarySettings);
+		JS::RootedValue value(rq.cx(), librarySettings);
 		Script::SetPropertyInt(rq, librariesSettings, libraryCount++, value);
 	};
 
@@ -303,7 +303,7 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 	// (We'll use this same data for the opt-in online reporting system, so it
 	// includes some fields that aren't directly useful for the hwdetect script)
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	Script::CreateObject(rq, &settings);
 
 	Script::SetProperty(rq, settings, "os_unix", OS_UNIX);
@@ -347,7 +347,7 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 
 	ReportLibraries(rq, settings);
 
-	JS::RootedValue backendDeviceSettings(rq.cx);
+	JS::RootedValue backendDeviceSettings(rq.cx());
 	Script::CreateObject(rq, &backendDeviceSettings);
 
 	device->Report(rq, backendDeviceSettings);
@@ -416,6 +416,6 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 		Script::StringifyJSON(rq, &settings, true));
 
 	// Run the detection script:
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	JS::RootedValue global(rq.cx(), rq.globalValue());
 	ScriptFunction::CallVoid(rq, global, "RunHardwareDetection", settings);
 }

@@ -109,7 +109,7 @@ public:
 		// This is testing some bugs in the template JS object caching
 
 		const CParamNode* inherit1 = tempMan->LoadTemplate(ent2, "inherit1");
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::ToJSVal(rq, &val, inherit1);
 		TS_ASSERT_STR_EQUALS(Script::ToString(rq, &val), "({Test1A:{'@a':\"a1\", '@b':\"b1\", '@c':\"c1\", d:\"d1\", e:\"e1\", f:\"f1\"}})");
 

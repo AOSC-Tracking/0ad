@@ -114,7 +114,7 @@ CSimulationMessage::CSimulationMessage(const ScriptInterface& scriptInterface) :
 	CNetMessage(NMT_SIMULATION_COMMAND), m_ScriptInterface(scriptInterface)
 {
 	ScriptRequest rq(scriptInterface);
-	m_Data.init(rq.cx);
+	m_Data.init(rq.cx());
 }
 
 CSimulationMessage::CSimulationMessage(const ScriptInterface& scriptInterface, u32 client, i32 player, u32 turn, JS::HandleValue data) :
@@ -122,7 +122,7 @@ CSimulationMessage::CSimulationMessage(const ScriptInterface& scriptInterface, u
 	m_Client(client), m_Player(player), m_Turn(turn)
 {
 	ScriptRequest rq(scriptInterface);
-	m_Data.init(rq.cx, data);
+	m_Data.init(rq.cx(), data);
 }
 
 CSimulationMessage::CSimulationMessage(const CSimulationMessage& orig) :
@@ -133,7 +133,7 @@ CSimulationMessage::CSimulationMessage(const CSimulationMessage& orig) :
 	CNetMessage(orig)
 {
 	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx, orig.m_Data);
+	m_Data.init(rq.cx(), orig.m_Data);
 }
 
 u8* CSimulationMessage::Serialize(u8* pBuffer) const
@@ -193,14 +193,14 @@ CGameSetupMessage::CGameSetupMessage(const ScriptInterface& scriptInterface) :
 	CNetMessage(NMT_GAME_SETUP), m_ScriptInterface(scriptInterface)
 {
 	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx);
+	m_Data.init(rq.cx());
 }
 
 CGameSetupMessage::CGameSetupMessage(const ScriptInterface& scriptInterface, JS::HandleValue data) :
 	CNetMessage(NMT_GAME_SETUP), m_ScriptInterface(scriptInterface)
 {
 	ScriptRequest rq(m_ScriptInterface);
-	m_Data.init(rq.cx, data);
+	m_Data.init(rq.cx(), data);
 }
 
 u8* CGameSetupMessage::Serialize(u8* pBuffer) const

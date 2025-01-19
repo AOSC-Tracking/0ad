@@ -70,13 +70,13 @@ public:
 		ScriptInterface script2("Test", "Test", g_ScriptContext);
 
 		ScriptRequest rq1(script1);
-		JS::RootedValue obj1(rq1.cx);
+		JS::RootedValue obj1(rq1.cx());
 		TS_ASSERT(script1.Eval("({'x': 123, 'y': [1, 1.5, '2', 'test', undefined, null, true, false]})", &obj1));
 
 		{
 			ScriptRequest rq2(script2);
 
-			JS::RootedValue obj2(rq2.cx, Script::CloneValueFromOtherCompartment(script2, script1, obj1));
+			JS::RootedValue obj2(rq2.cx(), Script::CloneValueFromOtherCompartment(script2, script1, obj1));
 
 			std::string source;
 			TS_ASSERT(ScriptFunction::Call(rq2, obj2, "toSource", source));
@@ -92,13 +92,13 @@ public:
 
 		ScriptRequest rq1(script1);
 
-		JS::RootedValue obj1(rq1.cx);
+		JS::RootedValue obj1(rq1.cx());
 		TS_ASSERT(script1.Eval("var s = '?'; var v = ({get x() { return 123 }, 'y': {'w':{get z() { delete v.y; delete v.n; v = null; s += s; return 4 }}}, 'n': 100}); v", &obj1));
 
 		{
 			ScriptRequest rq2(script2);
 
-			JS::RootedValue obj2(rq2.cx, Script::CloneValueFromOtherCompartment(script2, script1, obj1));
+			JS::RootedValue obj2(rq2.cx(), Script::CloneValueFromOtherCompartment(script2, script1, obj1));
 
 			std::string source;
 			TS_ASSERT(ScriptFunction::Call(rq2, obj2, "toSource", source));
@@ -113,17 +113,17 @@ public:
 
 		ScriptRequest rq1(script1);
 
-		JS::RootedValue obj1(rq1.cx);
+		JS::RootedValue obj1(rq1.cx());
 		TS_ASSERT(script1.Eval("var x = []; x[0] = x; ({'a': x, 'b': x})", &obj1));
 
 		{
 			ScriptRequest rq2(script2);
-			JS::RootedValue obj2(rq2.cx, Script::CloneValueFromOtherCompartment(script2, script1, obj1));
+			JS::RootedValue obj2(rq2.cx(), Script::CloneValueFromOtherCompartment(script2, script1, obj1));
 
 			// Use JSAPI function to check if the values of the properties "a", "b" are equals a.x[0]
-			JS::RootedValue prop_a(rq2.cx);
-			JS::RootedValue prop_b(rq2.cx);
-			JS::RootedValue prop_x1(rq2.cx);
+			JS::RootedValue prop_a(rq2.cx());
+			JS::RootedValue prop_b(rq2.cx());
+			JS::RootedValue prop_x1(rq2.cx());
 			TS_ASSERT(Script::GetProperty(rq2, obj2, "a", &prop_a));
 			TS_ASSERT(Script::GetProperty(rq2, obj2, "b", &prop_b));
 			TS_ASSERT(prop_a.isObject());
@@ -162,8 +162,8 @@ public:
 
 		ScriptRequest rq(script);
 
-		JS::RootedValue val(rq.cx);
-		JS::RootedValue out(rq.cx);
+		JS::RootedValue val(rq.cx());
+		JS::RootedValue out(rq.cx());
 		TS_ASSERT(script.Eval("({ "
 			"'0':0,"
 			"inc:function() { this[0]++; return this[0]; }, "
@@ -172,7 +172,7 @@ public:
 			"})"
 			, &val));
 
-		JS::RootedValue nbrVal(rq.cx, JS::NumberValue(3));
+		JS::RootedValue nbrVal(rq.cx(), JS::NumberValue(3));
 		int nbr = 0;
 
 		ScriptFunction::CallVoid(rq, val, "setTo", nbrVal);
@@ -255,7 +255,7 @@ public:
 		ScriptRequest rq(script);
 
 		std::string input = "({'x':1,'z':[2,'3\\u263A\\ud800'],\"y\":true})";
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		TS_ASSERT(script.Eval(input.c_str(), &val));
 
 		std::string stringified = Script::StringifyJSON(rq, &val);
@@ -279,7 +279,7 @@ public:
 			"})(f);"
 		));
 
-		JS::RootedValue out(rq.cx);
+		JS::RootedValue out(rq.cx());
 		TS_ASSERT(script.Eval("f()", &out));
 
 		int outNbr = 0;

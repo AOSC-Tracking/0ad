@@ -30,7 +30,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 		ScriptRequest rq(script);
 
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::CreateArray(rq, &val);
 		Script::SetPropertyInt(rq, val, 0, 4);
 

@@ -35,14 +35,14 @@
 CStdDeserializer::CStdDeserializer(const ScriptInterface& scriptInterface, std::istream& stream) :
 	m_ScriptInterface(scriptInterface), m_Stream(stream)
 {
-	JS_AddExtraGCRootsTracer(ScriptRequest(scriptInterface).cx, CStdDeserializer::Trace, this);
+	JS_AddExtraGCRootsTracer(ScriptRequest(scriptInterface).cx(), CStdDeserializer::Trace, this);
 	// Insert a dummy object in front, as valid tags start at 1.
 	m_ScriptBackrefs.emplace_back(nullptr);
 }
 
 CStdDeserializer::~CStdDeserializer()
 {
-	JS_RemoveExtraGCRootsTracer(ScriptRequest(m_ScriptInterface).cx, CStdDeserializer::Trace, this);
+	JS_RemoveExtraGCRootsTracer(ScriptRequest(m_ScriptInterface).cx(), CStdDeserializer::Trace, this);
 }
 
 void CStdDeserializer::Trace(JSTracer *trc, void *data)
@@ -135,16 +135,16 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	case SCRIPT_TYPE_OBJECT:
 	case SCRIPT_TYPE_OBJECT_PROTOTYPE:
 	{
-		JS::RootedObject obj(rq.cx);
+		JS::RootedObject obj(rq.cx());
 		if (type == SCRIPT_TYPE_ARRAY)
 		{
 			u32 length;
 			NumberU32_Unbounded("array length", length);
-			obj.set(JS::NewArrayObject(rq.cx, length));
+			obj.set(JS::NewArrayObject(rq.cx(), length));
 		}
 		else if (type == SCRIPT_TYPE_OBJECT)
 		{
-			obj.set(JS_NewPlainObject(rq.cx));
+			obj.set(JS_NewPlainObject(rq.cx()));
 		}
 		else // SCRIPT_TYPE_OBJECT_PROTOTYPE
 		{
@@ -156,18 +156,18 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 				obj.set(preexistingObject);
 			else
 			{
-				JS::RootedValue constructor(rq.cx);
+				JS::RootedValue constructor(rq.cx());
 				if (!ScriptInterface::GetGlobalProperty(rq, prototypeName.ToUTF8(), &constructor))
 					throw PSERROR_Deserialize_ScriptError("Deserializer failed to get constructor object");
 
-				JS::RootedObject newObj(rq.cx);
-				if (!JS::Construct(rq.cx, constructor, JS::HandleValueArray::empty(), &newObj))
+				JS::RootedObject newObj(rq.cx());
+				if (!JS::Construct(rq.cx(), constructor, JS::HandleValueArray::empty(), &newObj))
 					throw PSERROR_Deserialize_ScriptError("Deserializer failed to construct object");
 				obj.set(newObj);
 			}
 
-			JS::RootedObject prototype(rq.cx);
-			JS_GetPrototype(rq.cx, obj, &prototype);
+			JS::RootedObject prototype(rq.cx());
+			JS_GetPrototype(rq.cx(), obj, &prototype);
 			SPrototypeSerialization info = GetPrototypeInfo(rq, prototype);
 
 			if (preexistingObject != nullptr && prototypeName != wstring_from_utf8(info.name))
@@ -179,11 +179,11 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 				AddScriptBackref(obj);
 
 				// If Serialize is null, we'll still call Deserialize but with undefined argument
-				JS::RootedValue data(rq.cx);
+				JS::RootedValue data(rq.cx());
 				if (!info.hasNullSerialize)
 					ScriptVal("data", &data);
 
-				JS::RootedValue objVal(rq.cx, JS::ObjectValue(*obj));
+				JS::RootedValue objVal(rq.cx(), JS::ObjectValue(*obj));
 				ScriptFunction::CallVoid(rq, objVal, "Deserialize", data);
 
 				return JS::ObjectValue(*obj);
@@ -212,20 +212,20 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 			{
 				std::vector<JS::Latin1Char> propname;
 				ReadStringLatin1("prop name", propname);
-				JS::RootedValue propval(rq.cx, ReadScriptVal("prop value", nullptr));
+				JS::RootedValue propval(rq.cx(), ReadScriptVal("prop value", nullptr));
 
 				std::u16string prp(propname.begin(), propname.end());;
 // TODO: Should ask upstream about getting a variant of JS_SetProperty with a length param.
-				if (!JS_SetUCProperty(rq.cx, obj, (const char16_t*)prp.data(), prp.length(), propval))
+				if (!JS_SetUCProperty(rq.cx(), obj, (const char16_t*)prp.data(), prp.length(), propval))
 					throw PSERROR_Deserialize_ScriptError();
 			}
 			else
 			{
 				std::u16string propname;
 				ReadStringUTF16("prop name", propname);
-				JS::RootedValue propval(rq.cx, ReadScriptVal("prop value", nullptr));
+				JS::RootedValue propval(rq.cx(), ReadScriptVal("prop value", nullptr));
 
-				if (!JS_SetUCProperty(rq.cx, obj, (const char16_t*)propname.data(), propname.length(), propval))
+				if (!JS_SetUCProperty(rq.cx(), obj, (const char16_t*)propname.data(), propname.length(), propval))
 					throw PSERROR_Deserialize_ScriptError();
 			}
 		}
@@ -234,7 +234,7 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	}
 	case SCRIPT_TYPE_STRING:
 	{
-		JS::RootedString str(rq.cx);
+		JS::RootedString str(rq.cx());
 		ScriptString("string", &str);
 		return JS::StringValue(str);
 	}
@@ -248,7 +248,7 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	{
 		double value;
 		NumberDouble_Unbounded("value", value);
-		JS::RootedValue rval(rq.cx, JS::NumberValue(value));
+		JS::RootedValue rval(rq.cx(), JS::NumberValue(value));
 		if (rval.isNull())
 			throw PSERROR_Deserialize_ScriptError("JS_NewNumberValue failed");
 		return rval;
@@ -263,7 +263,7 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	{
 		i32 tag;
 		NumberI32("tag", tag, 0, JSVAL_INT_MAX);
-		JS::RootedObject obj(rq.cx);
+		JS::RootedObject obj(rq.cx());
 		GetScriptBackref(tag, &obj);
 		if (!obj)
 			throw PSERROR_Deserialize_ScriptError("Invalid backref tag");
@@ -273,34 +273,34 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	{
 		double value;
 		NumberDouble_Unbounded("value", value);
-		JS::RootedValue val(rq.cx, JS::NumberValue(value));
+		JS::RootedValue val(rq.cx(), JS::NumberValue(value));
 
-		JS::RootedObject ctorobj(rq.cx);
-		if (!JS_GetClassObject(rq.cx, JSProto_Number, &ctorobj))
+		JS::RootedObject ctorobj(rq.cx());
+		if (!JS_GetClassObject(rq.cx(), JSProto_Number, &ctorobj))
 			throw PSERROR_Deserialize_ScriptError("JS_GetClassObject failed");
-		JS::RootedValue protoval(rq.cx, JS::ObjectOrNullValue(ctorobj));
+		JS::RootedValue protoval(rq.cx(), JS::ObjectOrNullValue(ctorobj));
 
-		JS::RootedObject obj(rq.cx);
-		if (!JS::Construct(rq.cx, protoval, JS::HandleValueArray(val), &obj))
+		JS::RootedObject obj(rq.cx());
+		if (!JS::Construct(rq.cx(), protoval, JS::HandleValueArray(val), &obj))
 			throw PSERROR_Deserialize_ScriptError("JS_New failed");
 		AddScriptBackref(obj);
 		return JS::ObjectValue(*obj);
 	}
 	case SCRIPT_TYPE_OBJECT_STRING:
 	{
-		JS::RootedString str(rq.cx);
+		JS::RootedString str(rq.cx());
 		ScriptString("value", &str);
 		if (!str)
 			throw PSERROR_Deserialize_ScriptError();
-		JS::RootedValue val(rq.cx, JS::StringValue(str));
+		JS::RootedValue val(rq.cx(), JS::StringValue(str));
 
-		JS::RootedObject ctorobj(rq.cx);
-		if (!JS_GetClassObject(rq.cx, JSProto_String, &ctorobj))
+		JS::RootedObject ctorobj(rq.cx());
+		if (!JS_GetClassObject(rq.cx(), JSProto_String, &ctorobj))
 			throw PSERROR_Deserialize_ScriptError("JS_GetClassObject failed");
-		JS::RootedValue protoval(rq.cx, JS::ObjectOrNullValue(ctorobj));
+		JS::RootedValue protoval(rq.cx(), JS::ObjectOrNullValue(ctorobj));
 
-		JS::RootedObject obj(rq.cx);
-		if (!JS::Construct(rq.cx, protoval, JS::HandleValueArray(val), &obj))
+		JS::RootedObject obj(rq.cx());
+		if (!JS::Construct(rq.cx(), protoval, JS::HandleValueArray(val), &obj))
 			throw PSERROR_Deserialize_ScriptError("JS_New failed");
 		AddScriptBackref(obj);
 		return JS::ObjectValue(*obj);
@@ -309,15 +309,15 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	{
 		bool value;
 		Bool("value", value);
-		JS::RootedValue val(rq.cx, JS::BooleanValue(value));
+		JS::RootedValue val(rq.cx(), JS::BooleanValue(value));
 
-		JS::RootedObject ctorobj(rq.cx);
-		if (!JS_GetClassObject(rq.cx, JSProto_Boolean, &ctorobj))
+		JS::RootedObject ctorobj(rq.cx());
+		if (!JS_GetClassObject(rq.cx(), JSProto_Boolean, &ctorobj))
 			throw PSERROR_Deserialize_ScriptError("JS_GetClassObject failed");
-		JS::RootedValue protoval(rq.cx, JS::ObjectOrNullValue(ctorobj));
+		JS::RootedValue protoval(rq.cx(), JS::ObjectOrNullValue(ctorobj));
 
-		JS::RootedObject obj(rq.cx);
-		if (!JS::Construct(rq.cx, protoval, JS::HandleValueArray(val), &obj))
+		JS::RootedObject obj(rq.cx());
+		if (!JS::Construct(rq.cx(), protoval, JS::HandleValueArray(val), &obj))
 			throw PSERROR_Deserialize_ScriptError("JS_New failed");
 		AddScriptBackref(obj);
 		return JS::ObjectValue(*obj);
@@ -331,47 +331,47 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 		NumberU32_Unbounded("length", length);
 
 		// To match the serializer order, we reserve the typed array's backref tag here
-		JS::RootedObject arrayObj(rq.cx);
+		JS::RootedObject arrayObj(rq.cx());
 		AddScriptBackref(arrayObj);
 
 		// Get buffer object
-		JS::RootedValue bufferVal(rq.cx, ReadScriptVal("buffer", nullptr));
+		JS::RootedValue bufferVal(rq.cx(), ReadScriptVal("buffer", nullptr));
 
 		if (!bufferVal.isObject())
 			throw PSERROR_Deserialize_ScriptError();
 
-		JS::RootedObject bufferObj(rq.cx, &bufferVal.toObject());
+		JS::RootedObject bufferObj(rq.cx(), &bufferVal.toObject());
 		if (!JS::IsArrayBufferObject(bufferObj))
 			throw PSERROR_Deserialize_ScriptError("js_IsArrayBuffer failed");
 
 		switch(arrayType)
 		{
 		case SCRIPT_TYPED_ARRAY_INT8:
-			arrayObj = JS_NewInt8ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewInt8ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_UINT8:
-			arrayObj = JS_NewUint8ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewUint8ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_INT16:
-			arrayObj = JS_NewInt16ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewInt16ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_UINT16:
-			arrayObj = JS_NewUint16ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewUint16ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_INT32:
-			arrayObj = JS_NewInt32ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewInt32ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_UINT32:
-			arrayObj = JS_NewUint32ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewUint32ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_FLOAT32:
-			arrayObj = JS_NewFloat32ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewFloat32ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_FLOAT64:
-			arrayObj = JS_NewFloat64ArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewFloat64ArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		case SCRIPT_TYPED_ARRAY_UINT8_CLAMPED:
-			arrayObj = JS_NewUint8ClampedArrayWithBuffer(rq.cx, bufferObj, byteOffset, length);
+			arrayObj = JS_NewUint8ClampedArrayWithBuffer(rq.cx(), bufferObj, byteOffset, length);
 			break;
 		default:
 			throw PSERROR_Deserialize_ScriptError("Failed to deserialize unrecognized typed array view");
@@ -392,14 +392,14 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 		void* contents = malloc(length);
 		ENSURE(contents);
 		RawBytes("buffer data", (u8*)contents, length);
-		JS::RootedObject bufferObj(rq.cx, JS::NewArrayBufferWithContents(rq.cx, length, contents));
+		JS::RootedObject bufferObj(rq.cx(), JS::NewArrayBufferWithContents(rq.cx(), length, contents));
 		AddScriptBackref(bufferObj);
 
 		return JS::ObjectValue(*bufferObj);
 	}
 	case SCRIPT_TYPE_OBJECT_MAP:
 	{
-		JS::RootedObject obj(rq.cx, JS::NewMapObject(rq.cx));
+		JS::RootedObject obj(rq.cx(), JS::NewMapObject(rq.cx()));
 		AddScriptBackref(obj);
 
 		u32 mapSize;
@@ -407,16 +407,16 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 
 		for (u32 i=0; i<mapSize; ++i)
 		{
-			JS::RootedValue key(rq.cx, ReadScriptVal("map key", nullptr));
-			JS::RootedValue value(rq.cx, ReadScriptVal("map value", nullptr));
-			JS::MapSet(rq.cx, obj, key, value);
+			JS::RootedValue key(rq.cx(), ReadScriptVal("map key", nullptr));
+			JS::RootedValue value(rq.cx(), ReadScriptVal("map value", nullptr));
+			JS::MapSet(rq.cx(), obj, key, value);
 		}
 
 		return JS::ObjectValue(*obj);
 	}
 	case SCRIPT_TYPE_OBJECT_SET:
 	{
-		JS::RootedObject obj(rq.cx, JS::NewSetObject(rq.cx));
+		JS::RootedObject obj(rq.cx(), JS::NewSetObject(rq.cx()));
 		AddScriptBackref(obj);
 
 		u32 setSize;
@@ -424,8 +424,8 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 
 		for (u32 i=0; i<setSize; ++i)
 		{
-			JS::RootedValue value(rq.cx, ReadScriptVal("set value", nullptr));
-			JS::SetAdd(rq.cx, obj, value);
+			JS::RootedValue value(rq.cx(), ReadScriptVal("set value", nullptr));
+			JS::SetAdd(rq.cx(), obj, value);
 		}
 
 		return JS::ObjectValue(*obj);
@@ -468,7 +468,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 		std::vector<JS::Latin1Char> str;
 		ReadStringLatin1(name, str);
 
-		out.set(JS_NewStringCopyN(rq.cx, (const char*)str.data(), str.size()));
+		out.set(JS_NewStringCopyN(rq.cx(), (const char*)str.data(), str.size()));
 		if (!out)
 			throw PSERROR_Deserialize_ScriptError("JS_NewStringCopyN failed");
 	}
@@ -477,7 +477,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 		std::u16string str;
 		ReadStringUTF16(name, str);
 
-		out.set(JS_NewUCStringCopyN(rq.cx, (const char16_t*)str.data(), str.length()));
+		out.set(JS_NewUCStringCopyN(rq.cx(), (const char16_t*)str.data(), str.length()));
 		if (!out)
 			throw PSERROR_Deserialize_ScriptError("JS_NewUCStringCopyN failed");
 	}
@@ -495,6 +495,6 @@ void CStdDeserializer::ScriptObjectAssign(const char* name, JS::HandleValue objV
 	if (!objVal.isObject())
 		throw PSERROR_Deserialize_ScriptError();
 
-	JS::RootedObject obj(rq.cx, &objVal.toObject());
+	JS::RootedObject obj(rq.cx(), &objVal.toObject());
 	ReadScriptVal(name, obj);
 }

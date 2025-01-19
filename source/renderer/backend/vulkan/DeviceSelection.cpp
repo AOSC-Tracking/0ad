@@ -351,26 +351,26 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 	Script::SetProperty(rq, settings, "deviceType", static_cast<int32_t>(device.properties.deviceType));
 	Script::SetProperty(rq, settings, "index", device.index);
 
-	JS::RootedValue memory(rq.cx);
+	JS::RootedValue memory(rq.cx());
 	Script::CreateObject(rq, &memory);
 
-	JS::RootedValue memoryTypes(rq.cx);
+	JS::RootedValue memoryTypes(rq.cx());
 	Script::CreateArray(rq, &memoryTypes, device.memoryProperties.memoryTypeCount);
 	for (uint32_t memoryTypeIndex = 0; memoryTypeIndex < device.memoryProperties.memoryTypeCount; ++memoryTypeIndex)
 	{
 		const VkMemoryType& type = device.memoryProperties.memoryTypes[memoryTypeIndex];
-		JS::RootedValue memoryType(rq.cx);
+		JS::RootedValue memoryType(rq.cx());
 		Script::CreateObject(rq, &memoryType);
 		Script::SetProperty(rq, memoryType, "propertyFlags", static_cast<uint32_t>(type.propertyFlags));
 		Script::SetProperty(rq, memoryType, "heapIndex", type.heapIndex);
 		Script::SetPropertyInt(rq, memoryTypes, memoryTypeIndex, memoryType);
 	}
-	JS::RootedValue memoryHeaps(rq.cx);
+	JS::RootedValue memoryHeaps(rq.cx());
 	Script::CreateArray(rq, &memoryHeaps, device.memoryProperties.memoryHeapCount);
 	for (uint32_t memoryHeapIndex = 0; memoryHeapIndex < device.memoryProperties.memoryHeapCount; ++memoryHeapIndex)
 	{
 		const VkMemoryHeap& heap = device.memoryProperties.memoryHeaps[memoryHeapIndex];
-		JS::RootedValue memoryHeap(rq.cx);
+		JS::RootedValue memoryHeap(rq.cx());
 		Script::CreateObject(rq, &memoryHeap);
 		// We can't serialize uint64_t in JS, so put data in KiB.
 		Script::SetProperty(rq, memoryHeap, "size", static_cast<uint32_t>(heap.size / 1024));
@@ -382,10 +382,10 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 	Script::SetProperty(rq, memory, "heaps", memoryHeaps);
 	Script::SetProperty(rq, settings, "memory", memory);
 
-	JS::RootedValue constants(rq.cx);
+	JS::RootedValue constants(rq.cx());
 	Script::CreateObject(rq, &constants);
 
-	JS::RootedValue limitsConstants(rq.cx);
+	JS::RootedValue limitsConstants(rq.cx());
 	Script::CreateObject(rq, &limitsConstants);
 #define REPORT_LIMITS_CONSTANT(NAME) \
 	do \
@@ -452,7 +452,7 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 #undef REPORT_LIMITS_CONSTANT
 	Script::SetProperty(rq, constants, "limits", limitsConstants);
 
-	JS::RootedValue descriptorIndexingConstants(rq.cx);
+	JS::RootedValue descriptorIndexingConstants(rq.cx());
 	Script::CreateObject(rq, &descriptorIndexingConstants);
 #define REPORT_DESCRIPTOR_INDEXING_CONSTANT(NAME) \
 	do \
@@ -475,7 +475,7 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 
 	Script::SetProperty(rq, settings, "constants", constants);
 
-	JS::RootedValue features(rq.cx);
+	JS::RootedValue features(rq.cx());
 	Script::CreateObject(rq, &features);
 #define REPORT_FEATURE(NAME) \
 	Script::SetProperty(rq, features, #NAME, static_cast<bool>(device.features.NAME));
@@ -512,7 +512,7 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 
 	Script::SetProperty(rq, settings, "features", features);
 
-	JS::RootedValue presentModes(rq.cx);
+	JS::RootedValue presentModes(rq.cx());
 	Script::CreateArray(rq, &presentModes, device.presentModes.size());
 	for (size_t index = 0; index < device.presentModes.size(); ++index)
 	{
@@ -521,11 +521,11 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 	}
 	Script::SetProperty(rq, settings, "present_modes", presentModes);
 
-	JS::RootedValue surfaceFormats(rq.cx);
+	JS::RootedValue surfaceFormats(rq.cx());
 	Script::CreateArray(rq, &surfaceFormats, device.surfaceFormats.size());
 	for (size_t index = 0; index < device.surfaceFormats.size(); ++index)
 	{
-		JS::RootedValue surfaceFormat(rq.cx);
+		JS::RootedValue surfaceFormat(rq.cx());
 		Script::CreateObject(rq, &surfaceFormat);
 		Script::SetProperty(
 			rq, surfaceFormat, "format", static_cast<uint32_t>(device.surfaceFormats[index].format));
@@ -535,7 +535,7 @@ void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
 	}
 	Script::SetProperty(rq, settings, "surface_formats", surfaceFormats);
 
-	JS::RootedValue surfaceCapabilities(rq.cx);
+	JS::RootedValue surfaceCapabilities(rq.cx());
 	Script::CreateObject(rq, &surfaceCapabilities);
 #define REPORT_SURFACE_CAPABILITIES_CONSTANT(NAME) \
 	do \

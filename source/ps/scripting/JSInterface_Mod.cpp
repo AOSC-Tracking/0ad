@@ -67,9 +67,9 @@ bool Script::FromJSVal(const ScriptRequest& rq, const JS::HandleValue val, Mod::
 {
 	// To avoid errors & for convenience, some retro-compatibility when reading
 	// TODO: remove this once we hit A26.
-	JS::RootedObject obj(rq.cx, val.toObjectOrNull());
+	JS::RootedObject obj(rq.cx(), val.toObjectOrNull());
 	bool isArray = false;
-	if (JS::IsArray(rq.cx, obj, &isArray) && isArray)
+	if (JS::IsArray(rq.cx(), obj, &isArray) && isArray)
 	{
 		if (!Script::GetPropertyInt(rq, val, 0, data.m_Pathname))
 			return false;
@@ -114,9 +114,9 @@ JS::Value GetEngineInfo(const ScriptInterface& scriptInterface)
 {
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue mods(rq.cx);
+	JS::RootedValue mods(rq.cx());
 	Script::ToJSVal(rq, &mods, g_Mods.GetEnabledModsData());
-	JS::RootedValue metainfo(rq.cx);
+	JS::RootedValue metainfo(rq.cx());
 
 	Script::CreateObject(
 		 rq,
@@ -131,10 +131,10 @@ JS::Value GetEngineInfo(const ScriptInterface& scriptInterface)
 
 JS::Value GetAvailableMods(const ScriptRequest& rq)
 {
-	JS::RootedValue ret(rq.cx, Script::CreateObject(rq));
+	JS::RootedValue ret(rq.cx(), Script::CreateObject(rq));
 	for (const Mod::ModData& data : g_Mods.GetAvailableMods())
 	{
-		JS::RootedValue json(rq.cx);
+		JS::RootedValue json(rq.cx());
 		if (!Script::ParseJSON(rq, data.m_Text, &json))
 		{
 			ScriptException::Raise(rq, "Error parsing mod.json of '%s'", data.m_Pathname.c_str());

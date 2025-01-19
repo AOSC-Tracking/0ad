@@ -83,7 +83,7 @@ JS::Value LoadMapSettings(const ScriptInterface& scriptInterface, const VfsPath&
 	if (reader.LoadMap(pathname) != PSRETURN_OK)
 		return JS::UndefinedValue();
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	reader.GetMapSettings(scriptInterface, &settings);
 	return settings;
 }

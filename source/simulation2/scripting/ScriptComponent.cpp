@@ -29,7 +29,7 @@
 CComponentTypeScript::CComponentTypeScript(const ScriptInterface& scriptInterface, JS::HandleValue instance) :
 	m_ScriptInterface(scriptInterface)
 {
-	m_Instance.init(ScriptRequest(m_ScriptInterface).cx, instance);
+	m_Instance.init(ScriptRequest(m_ScriptInterface).cx(), instance);
 }
 
 void CComponentTypeScript::Init(const CParamNode& paramNode, entity_id_t ent)
@@ -59,7 +59,7 @@ void CComponentTypeScript::HandleMessage(const CMessage& msg, bool global)
 
 	const char* name = global ? msg.GetScriptGlobalHandlerName() : msg.GetScriptHandlerName();
 
-	JS::RootedValue msgVal(rq.cx, msg.ToJSValCached(rq));
+	JS::RootedValue msgVal(rq.cx(), msg.ToJSValCached(rq));
 
 	if (!ScriptFunction::CallVoid(rq, m_Instance, name, msgVal))
 		LOGERROR("Script message handler %s failed", name);

@@ -76,7 +76,7 @@ public:
 
 	virtual bool setFunction(const ScriptRequest& rq, const std::string& name, JSFunction* function) override
 	{
-		m_Functions[name].init(rq.cx, JS_GetFunctionObject(function));
+		m_Functions[name].init(rq.cx(), JS_GetFunctionObject(function));
 		return true;
 	}
 
@@ -155,10 +155,10 @@ std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptReq
 	auto ret = std::make_unique<IGUIProxyObject>();
 	ret->m_Ptr = static_cast<IGUIObject*>(ptr);
 
-	JS::RootedValue cppObj(rq.cx), data(rq.cx);
+	JS::RootedValue cppObj(rq.cx()), data(rq.cx());
 	cppObj.get().setPrivate(ret->m_Ptr);
 	data.get().setPrivate(static_cast<void*>(dataPtr));
-	ret->m_Object.init(rq.cx, js::NewProxyObject(rq.cx, &Singleton(), cppObj, nullptr, options));
+	ret->m_Object.init(rq.cx(), js::NewProxyObject(rq.cx(), &Singleton(), cppObj, nullptr, options));
 	js::SetProxyReservedSlot(ret->m_Object, 0, data);
 	return ret;
 }
@@ -172,8 +172,8 @@ bool JSI_GUIProxy<T>::get(JSContext* cx, JS::HandleObject proxy, JS::HandleValue
 	if (!e)
 		return false;
 
-	JS::RootedValue idval(rq.cx);
-	if (!JS_IdToValue(rq.cx, id, &idval))
+	JS::RootedValue idval(rq.cx());
+	if (!JS_IdToValue(rq.cx(), id, &idval))
 		return false;
 
 	std::string propName;
@@ -245,8 +245,8 @@ bool JSI_GUIProxy<T>::set(JSContext* cx, JS::HandleObject proxy, JS::HandleId id
 
 	ScriptRequest rq(cx);
 
-	JS::RootedValue idval(rq.cx);
-	if (!JS_IdToValue(rq.cx, id, &idval))
+	JS::RootedValue idval(rq.cx());
+	if (!JS_IdToValue(rq.cx(), id, &idval))
 		return result.fail(JSMSG_BAD_PROP_ID);
 
 	std::string propName;
@@ -300,8 +300,8 @@ bool JSI_GUIProxy<T>::delete_(JSContext* cx, JS::HandleObject proxy, JS::HandleI
 
 	ScriptRequest rq(cx);
 
-	JS::RootedValue idval(rq.cx);
-	if (!JS_IdToValue(rq.cx, id, &idval))
+	JS::RootedValue idval(rq.cx());
+	if (!JS_IdToValue(rq.cx(), id, &idval))
 		return result.fail(JSMSG_BAD_PROP_ID);
 
 	std::string propName;

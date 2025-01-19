@@ -264,7 +264,7 @@ public:
 			return nullptr;
 		}
 
-		JS::RootedObject thisObj(rq.cx, &callArgs.thisv().toObject());
+		JS::RootedObject thisObj(rq.cx(), &callArgs.thisv().toObject());
 		T* value = JS::GetMaybePtrFromReservedSlot<T>(thisObj, JSObjectReservedSlots::PRIVATE);
 
 		if (value == nullptr)
@@ -300,7 +300,7 @@ template<typename T>
 bool ScriptInterface::SetGlobal(const char* name, const T& value, bool replace, bool constant, bool enumerate)
 {
 	ScriptRequest rq(this);
-	JS::RootedValue val(rq.cx);
+	JS::RootedValue val(rq.cx());
 	Script::ToJSVal(rq, &val, value);
 	return SetGlobal_(name, val, replace, constant, enumerate);
 }
@@ -309,7 +309,7 @@ template<typename T>
 bool ScriptInterface::Eval(const char* code, T& ret) const
 {
 	ScriptRequest rq(this);
-	JS::RootedValue rval(rq.cx);
+	JS::RootedValue rval(rq.cx());
 	if (!Eval(code, &rval))
 		return false;
 	return Script::FromJSVal(rq, rval, ret);

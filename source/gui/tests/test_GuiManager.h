@@ -70,7 +70,7 @@ public:
 	{
 		// Load up a test page.
 		ScriptRequest rq{g_GUI->GetScriptInterface()};
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::CreateObject(rq, &val);
 
 		Script::StructuredClone data = Script::WriteStructuredClone(rq, JS::NullHandleValue);
@@ -78,10 +78,10 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx, prq.globalValue());
+		JS::RootedValue global(prq.cx(), prq.globalValue());
 
 		int called_value = 0;
-		JS::RootedValue js_called_value(prq.cx);
+		JS::RootedValue js_called_value(prq.cx());
 
 		// Ticking will call the onTick handlers of all object. The second
 		// onTick is configured to disable the onTick handlers of the first and
@@ -133,7 +133,7 @@ public:
 
 		// Load up a test page.
 		ScriptRequest rq{g_GUI->GetScriptInterface()};
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::CreateObject(rq, &val);
 
 		Script::StructuredClone data = Script::WriteStructuredClone(rq, JS::NullHandleValue);
@@ -154,11 +154,11 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx, prq.globalValue());
+		JS::RootedValue global(prq.cx(), prq.globalValue());
 
 		// Ensure that our hotkey state was synchronised with the event itself.
 		bool hotkey_pressed_value = false;
-		JS::RootedValue js_hotkey_pressed_value(prq.cx);
+		JS::RootedValue js_hotkey_pressed_value(prq.cx());
 
 		Script::GetProperty(prq, global, "state_before", &js_hotkey_pressed_value);
 		Script::FromJSVal(prq, js_hotkey_pressed_value, hotkey_pressed_value);
@@ -207,7 +207,7 @@ public:
 	{
 		// Load up a test page.
 		ScriptRequest rq{g_GUI->GetScriptInterface()};
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		Script::CreateObject(rq, &val);
 
 		TS_ASSERT_EQUALS(g_GUI->GetPageCount(), 0);
@@ -216,7 +216,7 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx, prq.globalValue());
+		JS::RootedValue global(prq.cx(), prq.globalValue());
 
 		TS_ASSERT_EQUALS(g_GUI->GetPageCount(), 1);
 		g_GUI->PushPage(L"regainFocus/page_emptyPage.xml", data);

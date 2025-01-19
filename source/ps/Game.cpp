@@ -198,7 +198,7 @@ bool CGame::StartVisualReplay(const OsPath& replayPath)
 	const ScriptInterface& scriptInterface = m_Simulation2->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue attribs(rq.cx);
+	JS::RootedValue attribs(rq.cx());
 	Script::ParseJSON(rq, line, &attribs);
 	StartGame(&attribs, "");
 
@@ -222,7 +222,7 @@ void CGame::RegisterInit(const JS::HandleValue attribs, const std::string& saved
 	std::string mapType;
 	Script::GetProperty(rq, attribs, "mapType", mapType);
 
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	Script::GetProperty(rq, attribs, "settings", &settings);
 
 	if (Script::HasProperty(rq, attribs, "settings") &&
@@ -346,7 +346,7 @@ PSRETURN CGame::ReallyStartGame()
 		std::shared_ptr<ScriptInterface> scriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
 		ScriptRequest rq(scriptInterface);
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		if (Script::HasProperty(rq, global, "reallyStartGame"))
 			ScriptFunction::CallVoid(rq, global, "reallyStartGame");
 	}

@@ -38,7 +38,7 @@ public:
 		g_ScriptContext->RunJobs();
 
 		ScriptRequest rq(script);
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		ScriptFunction::CallVoid(rq, global, "endTest");
 	}
 

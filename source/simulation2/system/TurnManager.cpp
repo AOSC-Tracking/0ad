@@ -43,7 +43,7 @@ CTurnManager::CTurnManager(CSimulation2& simulation, u32 defaultTurnLength, u32 
 	m_FinalTurn(std::numeric_limits<u32>::max()), m_TimeWarpNumTurns(0)
 {
 	ScriptRequest rq(m_Simulation2.GetScriptInterface());
-	m_QuickSaveMetadata.init(rq.cx);
+	m_QuickSaveMetadata.init(rq.cx());
 	m_QueuedCommands.resize(1);
 }
 
@@ -228,7 +228,7 @@ void CTurnManager::AddCommand(int client, int player, JS::HandleValue data, u32 
 	size_t command_in_turns = turn - (m_CurrentTurn+1);
 	if (m_QueuedCommands.size() <= command_in_turns)
 		m_QueuedCommands.resize(command_in_turns+1);
-	m_QueuedCommands[turn - (m_CurrentTurn+1)][client].emplace_back(player, rq.cx, data);
+	m_QueuedCommands[turn - (m_CurrentTurn+1)][client].emplace_back(player, rq.cx(), data);
 }
 
 void CTurnManager::FinishedAllCommands(u32 turn, u32 turnLength)
@@ -326,9 +326,9 @@ void CTurnManager::QuickLoad()
 	ScriptRequest rq(m_Simulation2.GetScriptInterface());
 
 	// Provide a copy, so that GUI components don't have to clone to get mutable objects
-	JS::RootedValue quickSaveMetadataClone(rq.cx, Script::DeepCopy(rq, m_QuickSaveMetadata));
+	JS::RootedValue quickSaveMetadataClone(rq.cx(), Script::DeepCopy(rq, m_QuickSaveMetadata));
 
-	JS::RootedValueArray<1> paramData(rq.cx);
+	JS::RootedValueArray<1> paramData(rq.cx());
 	paramData[0].set(quickSaveMetadataClone);
 	g_GUI->SendEventToAll(EventNameSavegameLoaded, paramData);
 

@@ -344,7 +344,7 @@ void Interface::ApplyMessage(const GameMessage& msg)
 			g_Game = new CGame(m_ScenarioConfig.saveReplay);
 			ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
 			ScriptRequest rq(scriptInterface);
-			JS::RootedValue attrs(rq.cx);
+			JS::RootedValue attrs(rq.cx());
 			Script::ParseJSON(rq, m_ScenarioConfig.content, &attrs);
 
 			g_Game->SetPlayerID(m_ScenarioConfig.playerID);
@@ -360,11 +360,11 @@ void Interface::ApplyMessage(const GameMessage& msg)
 			}
 			else
 			{
-				JS::RootedValue initData(rq.cx);
+				JS::RootedValue initData(rq.cx());
 				Script::CreateObject(rq, &initData);
 				Script::SetProperty(rq, initData, "attribs", attrs);
 
-				JS::RootedValue playerAssignments(rq.cx);
+				JS::RootedValue playerAssignments(rq.cx());
 				Script::CreateObject(rq, &playerAssignments);
 				Script::SetProperty(rq, initData, "playerAssignments", playerAssignments);
 
@@ -389,7 +389,7 @@ void Interface::ApplyMessage(const GameMessage& msg)
 			for (const GameCommand& command : msg.commands)
 			{
 				ScriptRequest rq(scriptInterface);
-				JS::RootedValue commandJSON(rq.cx);
+				JS::RootedValue commandJSON(rq.cx());
 				Script::ParseJSON(rq, command.json_cmd, &commandJSON);
 				turnMgr->PostCommand(command.playerID, commandJSON);
 			}
@@ -420,7 +420,7 @@ void Interface::ApplyMessage(const GameMessage& msg)
 			}
 			const ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
 			ScriptRequest rq(scriptInterface);
-			JS::RootedValue ret(rq.cx);
+			JS::RootedValue ret(rq.cx());
 			scriptInterface.Eval(m_Code.c_str(), &ret);
 			m_ReturnValue = Script::StringifyJSON(rq, &ret, false);
 			m_MsgApplied.notify_one();
@@ -438,7 +438,7 @@ std::string Interface::GetGameState() const
 	const CSimContext simContext = g_Game->GetSimulation2()->GetSimContext();
 	CmpPtr<ICmpAIInterface> cmpAIInterface(simContext.GetSystemEntity());
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue state(rq.cx);
+	JS::RootedValue state(rq.cx());
 	cmpAIInterface->GetFullRepresentation(&state, true);
 	return Script::StringifyJSON(rq, &state, false);
 }

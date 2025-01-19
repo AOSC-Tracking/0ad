@@ -38,29 +38,29 @@ inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType n
 {
 	if (!obj.isObject())
 		return false;
-	JS::RootedObject object(rq.cx, &obj.toObject());
+	JS::RootedObject object(rq.cx(), &obj.toObject());
 	if constexpr (std::is_same_v<int, PropType>)
 	{
-		JS::RootedId id(rq.cx, JS::PropertyKey::Int(name));
-		return JS_GetPropertyById(rq.cx, object, id, out);
+		JS::RootedId id(rq.cx(), JS::PropertyKey::Int(name));
+		return JS_GetPropertyById(rq.cx(), object, id, out);
 	}
 	else if constexpr (std::is_same_v<const char*, PropType>)
-		return JS_GetProperty(rq.cx, object, name, out);
+		return JS_GetProperty(rq.cx(), object, name, out);
 	else
-		return JS_GetUCProperty(rq.cx, object, name, wcslen(name), out);
+		return JS_GetUCProperty(rq.cx(), object, name, wcslen(name), out);
 }
 
 template<typename T, typename PropType>
 inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, T& out)
 {
-	JS::RootedValue val(rq.cx);
+	JS::RootedValue val(rq.cx());
 	if (!GetProperty<PropType>(rq, obj, name, &val))
 		return false;
 	return FromJSVal(rq, val, out);
 }
 inline bool GetProperty(const ScriptRequest& rq, JS::HandleValue obj, const char* name, JS::MutableHandleObject out)
 {
-	JS::RootedValue val(rq.cx, JS::ObjectValue(*out.get()));
+	JS::RootedValue val(rq.cx(), JS::ObjectValue(*out.get()));
 	if (!GetProperty(rq, obj, name, &val))
 		return false;
 	out.set(val.toObjectOrNull());
@@ -83,10 +83,10 @@ inline bool HasProperty(const ScriptRequest& rq, JS::HandleValue obj, const char
 {
 	if (!obj.isObject())
 		return false;
-	JS::RootedObject object(rq.cx, &obj.toObject());
+	JS::RootedObject object(rq.cx(), &obj.toObject());
 
 	bool found;
-	if (!JS_HasProperty(rq.cx, object, name, &found))
+	if (!JS_HasProperty(rq.cx(), object, name, &found))
 		return false;
 	return found;
 }
@@ -105,22 +105,22 @@ inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType n
 
 	if (!obj.isObject())
 		return false;
-	JS::RootedObject object(rq.cx, &obj.toObject());
+	JS::RootedObject object(rq.cx(), &obj.toObject());
 	if constexpr (std::is_same_v<int, PropType>)
 	{
-		JS::RootedId id(rq.cx, JS::PropertyKey::Int(name));
-		return JS_DefinePropertyById(rq.cx, object, id, value, attrs);
+		JS::RootedId id(rq.cx(), JS::PropertyKey::Int(name));
+		return JS_DefinePropertyById(rq.cx(), object, id, value, attrs);
 	}
 	else if constexpr (std::is_same_v<const char*, PropType>)
-		return JS_DefineProperty(rq.cx, object, name, value, attrs);
+		return JS_DefineProperty(rq.cx(), object, name, value, attrs);
 	else
-		return JS_DefineUCProperty(rq.cx, object, name, value, attrs);
+		return JS_DefineUCProperty(rq.cx(), object, name, value, attrs);
 }
 
 template<typename T, typename PropType>
 inline bool SetProperty(const ScriptRequest& rq, JS::HandleValue obj, PropType name, const T& value, bool constant = false, bool enumerable = true)
 {
-	JS::RootedValue val(rq.cx);
+	JS::RootedValue val(rq.cx());
 	Script::ToJSVal(rq, &val, value);
 	return SetProperty<PropType>(rq, obj, name, val, constant, enumerable);
 }
@@ -134,7 +134,7 @@ inline bool SetPropertyInt(const ScriptRequest& rq, JS::HandleValue obj, int nam
 template<typename T>
 inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleObject obj, T& name)
 {
-	JS::RootedValue constructor(rq.cx, JS::ObjectOrNullValue(JS_GetConstructor(rq.cx, obj)));
+	JS::RootedValue constructor(rq.cx(), JS::ObjectOrNullValue(JS_GetConstructor(rq.cx(), obj)));
 	return constructor.isObject() && Script::HasProperty(rq, constructor, "name") && Script::GetProperty(rq, constructor, "name", name);
 }
 
@@ -144,7 +144,7 @@ inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleObject obj, T&
 template<typename T>
 inline bool GetObjectClassName(const ScriptRequest& rq, JS::HandleValue val, T& name)
 {
-	JS::RootedObject obj(rq.cx, val.toObjectOrNull());
+	JS::RootedObject obj(rq.cx(), val.toObjectOrNull());
 	if (!obj)
 		return false;
 	return GetObjectClassName(rq, obj, name);
@@ -159,15 +159,15 @@ inline bool DeepFreezeObject(const ScriptRequest& rq, JS::HandleValue objVal)
 	}
 
 	// Get all properties and recursively freeze those that are objects
-	JS::RootedObject obj(rq.cx, &objVal.toObject());
-	JS::RootedIdVector props(rq.cx);
-	if (!js::GetPropertyKeys(rq.cx, obj, JSITER_HIDDEN, &props))
+	JS::RootedObject obj(rq.cx(), &objVal.toObject());
+	JS::RootedIdVector props(rq.cx());
+	if (!js::GetPropertyKeys(rq.cx(), obj, JSITER_HIDDEN, &props))
 		return false;
 
 	for (const JS::PropertyKey& id : props)
 	{
-		JS::RootedValue val(rq.cx);
-		if (!JS_IdToValue(rq.cx, id, &val))
+		JS::RootedValue val(rq.cx());
+		if (!JS_IdToValue(rq.cx(), id, &val))
 			return false;
 
 		if (!val.isObject())
@@ -177,7 +177,7 @@ inline bool DeepFreezeObject(const ScriptRequest& rq, JS::HandleValue objVal)
 			return false;
 	}
 
-	return JS_FreezeObject(rq.cx, obj);
+	return JS_FreezeObject(rq.cx(), obj);
 }
 
 /**
@@ -196,17 +196,17 @@ inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objV
 		return false;
 	}
 
-	JS::RootedObject obj(rq.cx, &objVal.toObject());
-	JS::RootedIdVector props(rq.cx);
+	JS::RootedObject obj(rq.cx(), &objVal.toObject());
+	JS::RootedIdVector props(rq.cx());
 	// This recurses up the prototype chain on its own.
-	if (!js::GetPropertyKeys(rq.cx, obj, enumerableOnly ? 0 : JSITER_HIDDEN, &props))
+	if (!js::GetPropertyKeys(rq.cx(), obj, enumerableOnly ? 0 : JSITER_HIDDEN, &props))
 		return false;
 
 	out.reserve(out.size() + props.length());
 	for (const JS::PropertyKey& id : props)
 	{
-		JS::RootedValue val(rq.cx);
-		if (!JS_IdToValue(rq.cx, id, &val))
+		JS::RootedValue val(rq.cx());
+		if (!JS_IdToValue(rq.cx(), id, &val))
 			return false;
 
 		// Ignore integer properties for now.
@@ -229,7 +229,7 @@ inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objV
  */
 inline JS::Value CreateObject(const ScriptRequest& rq)
 {
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 	if (!obj)
 		return JS::UndefinedValue();
 	return JS::ObjectValue(*obj.get());
@@ -249,7 +249,7 @@ inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectV
 template<typename T, typename... Args>
 inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectValue, const char* propertyName, const T& propertyValue, Args const&... args)
 {
-	JS::RootedValue val(rq.cx);
+	JS::RootedValue val(rq.cx());
 	ToJSVal(rq, &val, propertyValue);
 	return CreateObject(rq, objectValue, args...) && SetProperty(rq, objectValue, propertyName, val, false, true);
 }
@@ -259,7 +259,7 @@ inline bool CreateObject(const ScriptRequest& rq, JS::MutableHandleValue objectV
  */
 inline bool CreateArray(const ScriptRequest& rq, JS::MutableHandleValue objectValue, size_t length = 0)
 {
-	objectValue.setObjectOrNull(JS::NewArrayObject(rq.cx, length));
+	objectValue.setObjectOrNull(JS::NewArrayObject(rq.cx(), length));
 	return !objectValue.isNullOrUndefined();
 }
 

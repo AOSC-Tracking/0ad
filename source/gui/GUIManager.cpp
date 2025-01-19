@@ -169,8 +169,8 @@ void CGUIManager::SGUIPage::LoadPage(ScriptContext& scriptContext)
 		std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
 		ScriptRequest rq(scriptInterface);
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
-		JS::RootedValue hotloadDataVal(rq.cx);
+		JS::RootedValue global(rq.cx(), rq.globalValue());
+		JS::RootedValue hotloadDataVal(rq.cx());
 		ScriptFunction::Call(rq, global, "getHotloadData", &hotloadDataVal);
 		hotloadData = Script::WriteStructuredClone(rq, hotloadDataVal);
 	}
@@ -235,9 +235,9 @@ void CGUIManager::SGUIPage::LoadPage(ScriptContext& scriptContext)
 	std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue initDataVal(rq.cx);
-	JS::RootedValue hotloadDataVal(rq.cx);
-	JS::RootedValue global(rq.cx, rq.globalValue());
+	JS::RootedValue initDataVal(rq.cx());
+	JS::RootedValue hotloadDataVal(rq.cx());
+	JS::RootedValue global(rq.cx(), rq.globalValue());
 
 	if (initData)
 		Script::ReadStructuredClone(rq, initData, &initDataVal);
@@ -266,19 +266,19 @@ void CGUIManager::SGUIPage::ResolvePromise(Script::StructuredClone args)
 	std::shared_ptr<ScriptInterface> scriptInterface = gui->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedObject globalObj(rq.cx, rq.glob);
+	JS::RootedObject globalObj(rq.cx(), rq.glob);
 
-	JS::RootedObject funcVal(rq.cx, *callbackFunction);
+	JS::RootedObject funcVal(rq.cx(), *callbackFunction);
 
 	// Delete the callback function, so that it is not called again
 	callbackFunction.reset();
 
-	JS::RootedValue argVal(rq.cx);
+	JS::RootedValue argVal(rq.cx());
 	if (args)
 		Script::ReadStructuredClone(rq, args, &argVal);
 
 	// This only resolves the promise, it doesn't call the continuation.
-	JS::ResolvePromise(rq.cx, funcVal, argVal);
+	JS::ResolvePromise(rq.cx(), funcVal, argVal);
 }
 
 Status CGUIManager::ReloadChangedFile(const VfsPath& path)
@@ -318,7 +318,7 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 		PROFILE("handleInputBeforeGui");
 		ScriptRequest rq(*top()->GetScriptInterface());
 
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		if (ScriptFunction::Call(rq, global, "handleInputBeforeGui", handled, *ev, top()->FindObjectUnderMouse()))
 			if (handled)
 				return IN_HANDLED;
@@ -334,7 +334,7 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 	{
 		// We can't take the following lines out of this scope because top() may be another gui page than it was when calling handleInputBeforeGui!
 		ScriptRequest rq(*top()->GetScriptInterface());
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 
 		PROFILE("handleInputAfterGui");
 		if (ScriptFunction::Call(rq, global, "handleInputAfterGui", handled, *ev))
@@ -420,11 +420,11 @@ void CGUIManager::DisplayLoadProgress(int percent, const wchar_t* pending_task)
 	const ScriptInterface& scriptInterface = *(GetActiveGUI()->GetScriptInterface());
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValueVector paramData(rq.cx);
+	JS::RootedValueVector paramData(rq.cx());
 
 	ignore_result(paramData.append(JS::NumberValue(percent)));
 
-	JS::RootedValue valPendingTask(rq.cx);
+	JS::RootedValue valPendingTask(rq.cx());
 	Script::ToJSVal(rq, &valPendingTask, pending_task);
 	ignore_result(paramData.append(valPendingTask));
 

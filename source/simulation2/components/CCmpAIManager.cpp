@@ -100,7 +100,7 @@ private:
 			ScriptRequest rq(m_ScriptInterface);
 
 			OsPath path = L"simulation/ai/" + m_AIName + L"/data.json";
-			JS::RootedValue metadata(rq.cx);
+			JS::RootedValue metadata(rq.cx());
 			m_Worker.LoadMetadata(path, &metadata);
 			if (metadata.isUndefined())
 			{
@@ -111,9 +111,9 @@ private:
 			// Get the constructor name from the metadata
 			std::string moduleName;
 			std::string constructor;
-			JS::RootedValue objectWithConstructor(rq.cx); // object that should contain the constructor function
-			JS::RootedValue global(rq.cx, rq.globalValue());
-			JS::RootedValue ctor(rq.cx);
+			JS::RootedValue objectWithConstructor(rq.cx()); // object that should contain the constructor function
+			JS::RootedValue global(rq.cx(), rq.globalValue());
+			JS::RootedValue ctor(rq.cx());
 			if (!Script::HasProperty(rq, metadata, "moduleName"))
 			{
 				LOGERROR("Failed to create AI player: %s: missing 'moduleName'", path.string8());
@@ -145,7 +145,7 @@ private:
 			Script::GetProperty(rq, metadata, "useShared", m_UseSharedComponent);
 
 			// Set up the data to pass as the constructor argument
-			JS::RootedValue settings(rq.cx);
+			JS::RootedValue settings(rq.cx());
 			Script::CreateObject(
 				rq,
 				&settings,
@@ -159,7 +159,7 @@ private:
 				Script::SetProperty(rq, settings, "templates", m_Worker.m_EntityTemplates, false);
 			}
 
-			JS::RootedValueVector argv(rq.cx);
+			JS::RootedValueVector argv(rq.cx());
 			ignore_result(argv.append(settings.get()));
 			m_ScriptInterface->CallConstructor(ctor, argv, &m_Obj);
 
@@ -236,10 +236,10 @@ public:
 
 		ScriptRequest rq(m_ScriptInterface);
 
-		m_EntityTemplates.init(rq.cx);
-		m_SharedAIObj.init(rq.cx);
-		m_PassabilityMapVal.init(rq.cx);
-		m_TerritoryMapVal.init(rq.cx);
+		m_EntityTemplates.init(rq.cx());
+		m_SharedAIObj.init(rq.cx());
+		m_PassabilityMapVal.init(rq.cx());
+		m_TerritoryMapVal.init(rq.cx());
 
 
 		m_ScriptInterface->ReplaceNondeterministicRNG(m_RNG);
@@ -251,9 +251,9 @@ public:
 		{
 			ScriptRequest simrq(simInterface);
 			// Register the sim globals for easy & explicit access. Mark it replaceable for hotloading.
-			JS::RootedValue global(rq.cx, simrq.globalValue());
+			JS::RootedValue global(rq.cx(), simrq.globalValue());
 			m_ScriptInterface->SetGlobal("Sim", global, true);
-			JS::RootedValue scope(rq.cx, JS::ObjectValue(*simrq.nativeScope.get()));
+			JS::RootedValue scope(rq.cx(), JS::ObjectValue(*simrq.nativeScope.get()));
 			m_ScriptInterface->SetGlobal("SimEngine", scope, true);
 		}
 
@@ -330,7 +330,7 @@ public:
 
 		CFixedVector2D pos, goalPos;
 		std::vector<CFixedVector2D> waypoints;
-		JS::RootedValue retVal(rq.cx);
+		JS::RootedValue retVal(rq.cx());
 
 		Script::FromJSVal(rq, position, pos);
 		Script::FromJSVal(rq, goal, goalPos);
@@ -422,9 +422,9 @@ public:
 
 		// Constructor name is SharedScript, it's in the module API3
 		// TODO: Hardcoding this is bad, we need a smarter way.
-		JS::RootedValue AIModule(rq.cx);
-		JS::RootedValue global(rq.cx, rq.globalValue());
-		JS::RootedValue ctor(rq.cx);
+		JS::RootedValue AIModule(rq.cx());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
+		JS::RootedValue ctor(rq.cx());
 		if (!Script::GetProperty(rq, global, "API3", &AIModule) || AIModule.isUndefined())
 		{
 			LOGERROR("Failed to create shared AI component: %s: can't find module '%s'", path.string8(), "API3");
@@ -439,26 +439,26 @@ public:
 		}
 
 		// Set up the data to pass as the constructor argument
-		JS::RootedValue playersID(rq.cx);
+		JS::RootedValue playersID(rq.cx());
 		Script::CreateObject(rq, &playersID);
 
 		for (size_t i = 0; i < m_Players.size(); ++i)
 		{
-			JS::RootedValue val(rq.cx);
+			JS::RootedValue val(rq.cx());
 			Script::ToJSVal(rq, &val, m_Players[i]->m_Player);
 			Script::SetPropertyInt(rq, playersID, i, val, true);
 		}
 
 		ENSURE(m_HasLoadedEntityTemplates);
 
-		JS::RootedValue settings(rq.cx);
+		JS::RootedValue settings(rq.cx());
 		Script::CreateObject(
 			rq,
 			&settings,
 			"players", playersID,
 			"templates", m_EntityTemplates);
 
-		JS::RootedValueVector argv(rq.cx);
+		JS::RootedValueVector argv(rq.cx());
 		ignore_result(argv.append(settings));
 		m_ScriptInterface->CallConstructor(ctor, argv, &m_SharedAIObj);
 
@@ -494,7 +494,7 @@ public:
 		// This is NOT run during deserialization.
 		ScriptRequest rq(m_ScriptInterface);
 
-		JS::RootedValue state(rq.cx);
+		JS::RootedValue state(rq.cx());
 		Script::ReadStructuredClone(rq, gameState, &state);
 		Script::ToJSVal(rq, &m_PassabilityMapVal, passabilityMap);
 		Script::ToJSVal(rq, &m_TerritoryMapVal, territoryMap);
@@ -526,7 +526,7 @@ public:
 	{
 		ENSURE(m_CommandsComputed);
 		m_GameState.reset();
-		m_GameState.init(ScriptRequest(m_ScriptInterface).cx, gameState);
+		m_GameState.init(ScriptRequest(m_ScriptInterface).cx(), gameState);
 	}
 
 	void UpdatePathfinder(const Grid<NavcellData>& passabilityMap, bool globallyDirty, const Grid<u8>& dirtinessGrid, bool justDeserialized,
@@ -553,13 +553,13 @@ public:
 		else
 		{
 			// Avoid a useless memory reallocation followed by a garbage collection.
-			JS::RootedObject mapObj(rq.cx, &m_PassabilityMapVal.toObject());
-			JS::RootedValue mapData(rq.cx);
-			ENSURE(JS_GetProperty(rq.cx, mapObj, "data", &mapData));
-			JS::RootedObject dataObj(rq.cx, &mapData.toObject());
+			JS::RootedObject mapObj(rq.cx(), &m_PassabilityMapVal.toObject());
+			JS::RootedValue mapData(rq.cx());
+			ENSURE(JS_GetProperty(rq.cx(), mapObj, "data", &mapData));
+			JS::RootedObject dataObj(rq.cx(), &mapData.toObject());
 
 			u32 length = 0;
-			ENSURE(JS::GetArrayLength(rq.cx, dataObj, &length));
+			ENSURE(JS::GetArrayLength(rq.cx(), dataObj, &length));
 			u32 nbytes = (u32)(length * sizeof(NavcellData));
 
 			bool sharedMemory;
@@ -581,13 +581,13 @@ public:
 		else
 		{
 			// Avoid a useless memory reallocation followed by a garbage collection.
-			JS::RootedObject mapObj(rq.cx, &m_TerritoryMapVal.toObject());
-			JS::RootedValue mapData(rq.cx);
-			ENSURE(JS_GetProperty(rq.cx, mapObj, "data", &mapData));
-			JS::RootedObject dataObj(rq.cx, &mapData.toObject());
+			JS::RootedObject mapObj(rq.cx(), &m_TerritoryMapVal.toObject());
+			JS::RootedValue mapData(rq.cx());
+			ENSURE(JS_GetProperty(rq.cx(), mapObj, "data", &mapData));
+			JS::RootedObject dataObj(rq.cx(), &mapData.toObject());
 
 			u32 length = 0;
-			ENSURE(JS::GetArrayLength(rq.cx, dataObj, &length));
+			ENSURE(JS::GetArrayLength(rq.cx(), dataObj, &length));
 			u32 nbytes = (u32)(length * sizeof(u8));
 
 			bool sharedMemory;
@@ -631,7 +631,7 @@ public:
 
 		Script::CreateObject(rq, &m_EntityTemplates);
 
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		for (size_t i = 0; i < templates.size(); ++i)
 		{
 			templates[i].second->ToJSVal(rq, false, &val);
@@ -682,7 +682,7 @@ public:
 			serializer.NumberU32_Unbounded("num commands", (u32)m_Players[i]->m_Commands.size());
 			for (size_t j = 0; j < m_Players[i]->m_Commands.size(); ++j)
 			{
-				JS::RootedValue val(rq.cx);
+				JS::RootedValue val(rq.cx());
 				Script::ReadStructuredClone(rq, m_Players[i]->m_Commands[j], &val);
 				serializer.ScriptVal("command", &val);
 			}
@@ -746,7 +746,7 @@ public:
 			m_Players.back()->m_Commands.reserve(numCommands);
 			for (size_t j = 0; j < numCommands; ++j)
 			{
-				JS::RootedValue val(rq.cx);
+				JS::RootedValue val(rq.cx());
 				deserializer.ScriptVal("command", &val);
 				m_Players.back()->m_Commands.push_back(Script::WriteStructuredClone(rq, val));
 			}
@@ -954,7 +954,7 @@ public:
 
 		// Get the game state from AIInterface
 		// We flush events from the initialization so we get a clean state now.
-		JS::RootedValue state(rq.cx);
+		JS::RootedValue state(rq.cx());
 		cmpAIInterface->GetFullRepresentation(&state, true);
 
 		// Get the passability data
@@ -995,7 +995,7 @@ public:
 		ENSURE(cmpAIInterface);
 
 		// Get the game state from AIInterface
-		JS::RootedValue state(rq.cx);
+		JS::RootedValue state(rq.cx());
 		if (m_JustDeserialized)
 			cmpAIInterface->GetFullRepresentation(&state, false);
 		else
@@ -1051,7 +1051,7 @@ public:
 
 		const ScriptInterface& scriptInterface = GetSimContext().GetScriptInterface();
 		ScriptRequest rq(scriptInterface);
-		JS::RootedValue clonedCommandVal(rq.cx);
+		JS::RootedValue clonedCommandVal(rq.cx());
 
 		for (size_t i = 0; i < commands.size(); ++i)
 		{
@@ -1103,7 +1103,7 @@ private:
 		const ScriptInterface& scriptInterface = GetSimContext().GetScriptInterface();
 		ScriptRequest rq(scriptInterface);
 
-		JS::RootedValue classesVal(rq.cx);
+		JS::RootedValue classesVal(rq.cx());
 		Script::CreateObject(rq, &classesVal);
 
 		std::map<std::string, pass_class_t> classes;

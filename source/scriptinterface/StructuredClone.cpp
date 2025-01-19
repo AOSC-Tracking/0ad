@@ -44,7 +44,7 @@ Script::StructuredClone Script::WriteStructuredClone(const ScriptRequest& rq, JS
 {
 	Script::StructuredClone ret(new JSStructuredCloneData(JS::StructuredCloneScope::SameProcess));
 	JS::CloneDataPolicy policy;
-	if (!JS_WriteStructuredClone(rq.cx, v, ret.get(), JS::StructuredCloneScope::SameProcess, policy, nullptr, nullptr, JS::UndefinedHandleValue))
+	if (!JS_WriteStructuredClone(rq.cx(), v, ret.get(), JS::StructuredCloneScope::SameProcess, policy, nullptr, nullptr, JS::UndefinedHandleValue))
 	{
 		debug_warn(L"Writing a structured clone with JS_WriteStructuredClone failed!");
 		ScriptException::CatchPending(rq);
@@ -57,7 +57,7 @@ Script::StructuredClone Script::WriteStructuredClone(const ScriptRequest& rq, JS
 void Script::ReadStructuredClone(const ScriptRequest& rq, const Script::StructuredClone& ptr, JS::MutableHandleValue ret)
 {
 	JS::CloneDataPolicy policy;
-	if (!JS_ReadStructuredClone(rq.cx, *ptr, JS_STRUCTURED_CLONE_VERSION, ptr->scope(), ret, policy, nullptr, nullptr))
+	if (!JS_ReadStructuredClone(rq.cx(), *ptr, JS_STRUCTURED_CLONE_VERSION, ptr->scope(), ret, policy, nullptr, nullptr))
 		ScriptException::CatchPending(rq);
 }
 
@@ -70,14 +70,14 @@ JS::Value Script::CloneValueFromOtherCompartment(const ScriptInterface& to, cons
 		structuredClone = WriteStructuredClone(fromRq, val);
 	}
 	ScriptRequest toRq(to);
-	JS::RootedValue out(toRq.cx);
+	JS::RootedValue out(toRq.cx());
 	ReadStructuredClone(toRq, structuredClone, &out);
 	return out.get();
 }
 
 JS::Value Script::DeepCopy(const ScriptRequest& rq, JS::HandleValue val)
 {
-	JS::RootedValue out(rq.cx);
+	JS::RootedValue out(rq.cx());
 	ReadStructuredClone(rq, WriteStructuredClone(rq, val), &out);
 	return out.get();
 }

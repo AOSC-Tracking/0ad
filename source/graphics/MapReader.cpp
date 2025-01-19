@@ -448,7 +448,7 @@ void CMapSummaryReader::GetMapSettings(const ScriptInterface& scriptInterface, J
 	if (m_ScriptSettings.empty())
 		return;
 
-	JS::RootedValue scriptSettingsVal(rq.cx);
+	JS::RootedValue scriptSettingsVal(rq.cx());
 	Script::ParseJSON(rq, m_ScriptSettings, &scriptSettingsVal);
 	Script::SetProperty(rq, ret, "settings", scriptSettingsVal, false);
 }
@@ -1385,13 +1385,13 @@ int CMapReader::PollMapGeneration()
 
 	// Parse data into simulation context
 	ScriptRequest rq(pSimulation2->GetScriptInterface());
-	JS::RootedValue data{rq.cx};
+	JS::RootedValue data{rq.cx()};
 	Script::ReadStructuredClone(rq, results, &data);
 
 	if (data.isUndefined())
 		ThrowMapGenerationError();
 
-	m_MapData.init(rq.cx, data);
+	m_MapData.init(rq.cx(), data);
 
 	return 0;
 };
@@ -1436,7 +1436,7 @@ if (!Script::GetProperty(rq, val, #prop, out))\
 	// build tile data
 	m_Tiles.resize(SQR(size));
 
-	JS::RootedValue tileData(rq.cx);
+	JS::RootedValue tileData(rq.cx());
 	GET_TERRAIN_PROPERTY(m_MapData, tileData, &tileData)
 
 	// parse tile data object into flat arrays
@@ -1547,7 +1547,7 @@ int CMapReader::ParseEnvironment()
 	if (!Script::GetProperty(rq, val, #prop, out))\
 		LOGWARNING("CMapReader::ParseEnvironment() failed to get '%s' property", #prop);
 
-	JS::RootedValue envObj(rq.cx);
+	JS::RootedValue envObj(rq.cx());
 	GET_ENVIRONMENT_PROPERTY(m_MapData, Environment, &envObj)
 
 	if (envObj.isUndefined())
@@ -1576,10 +1576,10 @@ int CMapReader::ParseEnvironment()
 	m_LightEnv.m_AmbientColor = RGBColor(ambientColor.r, ambientColor.g, ambientColor.b);
 
 	// Water properties
-	JS::RootedValue waterObj(rq.cx);
+	JS::RootedValue waterObj(rq.cx());
 	GET_ENVIRONMENT_PROPERTY(envObj, Water, &waterObj)
 
-	JS::RootedValue waterBodyObj(rq.cx);
+	JS::RootedValue waterBodyObj(rq.cx());
 	GET_ENVIRONMENT_PROPERTY(waterObj, WaterBody, &waterBodyObj)
 
 	// Water level - necessary
@@ -1603,7 +1603,7 @@ int CMapReader::ParseEnvironment()
 		GET_ENVIRONMENT_PROPERTY(waterBodyObj, WindAngle, pWaterMan->m_WindAngle)
 	}
 
-	JS::RootedValue fogObject(rq.cx);
+	JS::RootedValue fogObject(rq.cx());
 	GET_ENVIRONMENT_PROPERTY(envObj, Fog, &fogObject);
 
 	GET_ENVIRONMENT_PROPERTY(fogObject, FogFactor, m_LightEnv.m_FogFactor);
@@ -1613,7 +1613,7 @@ int CMapReader::ParseEnvironment()
 	GET_ENVIRONMENT_PROPERTY(fogObject, FogColor, fogColor);
 	m_LightEnv.m_FogColor = RGBColor(fogColor.r, fogColor.g, fogColor.b);
 
-	JS::RootedValue postprocObject(rq.cx);
+	JS::RootedValue postprocObject(rq.cx());
 	GET_ENVIRONMENT_PROPERTY(envObj, Postproc, &postprocObject);
 
 	std::wstring postProcEffect;
@@ -1647,7 +1647,7 @@ int CMapReader::ParseCamera()
 	if (!Script::GetProperty(rq, val, #prop, out))\
 		LOGWARNING("CMapReader::ParseCamera() failed to get '%s' property", #prop);
 
-	JS::RootedValue cameraObj(rq.cx);
+	JS::RootedValue cameraObj(rq.cx());
 	GET_CAMERA_PROPERTY(m_MapData, Camera, &cameraObj)
 
 	if (!cameraObj.isUndefined())

@@ -27,17 +27,17 @@
 
 bool ScriptException::IsPending(const ScriptRequest& rq)
 {
-	return JS_IsExceptionPending(rq.cx);
+	return JS_IsExceptionPending(rq.cx());
 }
 
 bool ScriptException::CatchPending(const ScriptRequest& rq)
 {
-	if (!JS_IsExceptionPending(rq.cx))
+	if (!JS_IsExceptionPending(rq.cx()))
 		return false;
 
-	JS::RootedValue excn(rq.cx);
-	ENSURE(JS_GetPendingException(rq.cx, &excn));
-	JS_ClearPendingException(rq.cx);
+	JS::RootedValue excn(rq.cx());
+	ENSURE(JS_GetPendingException(rq.cx(), &excn));
+	JS_ClearPendingException(rq.cx());
 
 	if (excn.isUndefined())
 	{
@@ -54,8 +54,8 @@ bool ScriptException::CatchPending(const ScriptRequest& rq)
 		return true;
 	}
 
-	JS::RootedObject excnObj(rq.cx, &excn.toObject());
-	JSErrorReport* report = JS_ErrorFromException(rq.cx, excnObj);
+	JS::RootedObject excnObj(rq.cx(), &excn.toObject());
+	JSErrorReport* report = JS_ErrorFromException(rq.cx(), excnObj);
 
 	if (!report)
 	{
@@ -75,8 +75,8 @@ bool ScriptException::CatchPending(const ScriptRequest& rq)
 
 	msg << report->message().c_str();
 
-	JS::RootedObject stackObj(rq.cx, ExceptionStackOrNull(excnObj));
-	JS::RootedValue stackVal(rq.cx, JS::ObjectOrNullValue(stackObj));
+	JS::RootedObject stackObj(rq.cx(), ExceptionStackOrNull(excnObj));
+	JS::RootedValue stackVal(rq.cx(), JS::ObjectOrNullValue(stackObj));
 
 	if (!stackVal.isNull())
 	{
@@ -101,5 +101,5 @@ void ScriptException::Raise(const ScriptRequest& rq, const char* format, ...)
 	vsprintf_s(buffer, ARRAY_SIZE(buffer), format, ap);
 	va_end(ap);
 	// Rather annoyingly, there are no va_list versions of this function, hence the preformatting above.
-	JS_ReportErrorUTF8(rq.cx, "%s", buffer);
+	JS_ReportErrorUTF8(rq.cx(), "%s", buffer);
 }

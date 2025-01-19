@@ -44,7 +44,7 @@ template<> void Script::ToJSVal<IComponent*>(const ScriptRequest& rq,  JS::Mutab
 	}
 
 	// If this is a scripted component, just return the JS object directly
-	JS::RootedValue instance(rq.cx, val->GetJSInstance());
+	JS::RootedValue instance(rq.cx(), val->GetJSInstance());
 	if (!instance.isNull())
 	{
 		ret.set(instance);
@@ -53,7 +53,7 @@ template<> void Script::ToJSVal<IComponent*>(const ScriptRequest& rq,  JS::Mutab
 
 	// Otherwise we need to construct a wrapper object
 	// (TODO: cache wrapper objects?)
-	JS::RootedObject obj(rq.cx);
+	JS::RootedObject obj(rq.cx());
 	if (!val->NewJSObject(rq.GetScriptInterface(), &obj))
 	{
 		// Report as an error, since scripts really shouldn't try to use unscriptable interfaces
@@ -84,19 +84,19 @@ template<> bool Script::FromJSVal<CColor>(const ScriptRequest& rq,  JS::HandleVa
 	if (!v.isObject())
 		FAIL("CColor has to be an object");
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
+	JS::RootedObject obj(rq.cx(), &v.toObject());
 
-	JS::RootedValue r(rq.cx);
-	JS::RootedValue g(rq.cx);
-	JS::RootedValue b(rq.cx);
-	JS::RootedValue a(rq.cx);
-	if (!JS_GetProperty(rq.cx, obj, "r", &r) || !FromJSVal(rq, r, out.r))
+	JS::RootedValue r(rq.cx());
+	JS::RootedValue g(rq.cx());
+	JS::RootedValue b(rq.cx());
+	JS::RootedValue a(rq.cx());
+	if (!JS_GetProperty(rq.cx(), obj, "r", &r) || !FromJSVal(rq, r, out.r))
 		FAIL("Failed to get property CColor.r");
-	if (!JS_GetProperty(rq.cx, obj, "g", &g) || !FromJSVal(rq, g, out.g))
+	if (!JS_GetProperty(rq.cx(), obj, "g", &g) || !FromJSVal(rq, g, out.g))
 		FAIL("Failed to get property CColor.g");
-	if (!JS_GetProperty(rq.cx, obj, "b", &b) || !FromJSVal(rq, b, out.b))
+	if (!JS_GetProperty(rq.cx(), obj, "b", &b) || !FromJSVal(rq, b, out.b))
 		FAIL("Failed to get property CColor.b");
-	if (!JS_GetProperty(rq.cx, obj, "a", &a) || !FromJSVal(rq, a, out.a))
+	if (!JS_GetProperty(rq.cx(), obj, "a", &a) || !FromJSVal(rq, a, out.a))
 		FAIL("Failed to get property CColor.a");
 
 	return true;
@@ -116,7 +116,7 @@ template<> void Script::ToJSVal<CColor>(const ScriptRequest& rq,  JS::MutableHan
 template<> bool Script::FromJSVal<fixed>(const ScriptRequest& rq,  JS::HandleValue v, fixed& out)
 {
 	double ret;
-	if (!JS::ToNumber(rq.cx, v, &ret))
+	if (!JS::ToNumber(rq.cx(), v, &ret))
 		return false;
 	out = fixed::FromDouble(ret);
 	// double can precisely represent the full range of fixed, so this is a non-lossy conversion
@@ -134,16 +134,16 @@ template<> bool Script::FromJSVal<CFixedVector3D>(const ScriptRequest& rq,  JS::
 	if (!v.isObject())
 		return false; // TODO: report type error
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
-	JS::RootedValue p(rq.cx);
+	JS::RootedObject obj(rq.cx(), &v.toObject());
+	JS::RootedValue p(rq.cx());
 
-	if (!JS_GetProperty(rq.cx, obj, "x", &p)) return false; // TODO: report type errors
+	if (!JS_GetProperty(rq.cx(), obj, "x", &p)) return false; // TODO: report type errors
 	if (!FromJSVal(rq, p, out.X)) return false;
 
-	if (!JS_GetProperty(rq.cx, obj, "y", &p)) return false;
+	if (!JS_GetProperty(rq.cx(), obj, "y", &p)) return false;
 	if (!FromJSVal(rq, p, out.Y)) return false;
 
-	if (!JS_GetProperty(rq.cx, obj, "z", &p)) return false;
+	if (!JS_GetProperty(rq.cx(), obj, "z", &p)) return false;
 	if (!FromJSVal(rq, p, out.Z)) return false;
 
 	return true;
@@ -151,18 +151,18 @@ template<> bool Script::FromJSVal<CFixedVector3D>(const ScriptRequest& rq,  JS::
 
 template<> void Script::ToJSVal<CFixedVector3D>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const CFixedVector3D& val)
 {
-	JS::RootedObject global(rq.cx, rq.glob);
-	JS::RootedValue valueVector3D(rq.cx);
+	JS::RootedObject global(rq.cx(), rq.glob);
+	JS::RootedValue valueVector3D(rq.cx());
 	if (!ScriptInterface::GetGlobalProperty(rq, "Vector3D", &valueVector3D))
 		FAIL_VOID("Failed to get Vector3D constructor");
 
-	JS::RootedValueArray<3> args(rq.cx);
+	JS::RootedValueArray<3> args(rq.cx());
 	args[0].setNumber(val.X.ToDouble());
 	args[1].setNumber(val.Y.ToDouble());
 	args[2].setNumber(val.Z.ToDouble());
 
-	JS::RootedObject objVec(rq.cx);
-	if (!JS::Construct(rq.cx, valueVector3D, args, &objVec))
+	JS::RootedObject objVec(rq.cx());
+	if (!JS::Construct(rq.cx(), valueVector3D, args, &objVec))
 		FAIL_VOID("Failed to construct Vector3D object");
 
 	ret.setObject(*objVec);
@@ -172,14 +172,14 @@ template<> bool Script::FromJSVal<CFixedVector2D>(const ScriptRequest& rq,  JS::
 {
 	if (!v.isObject())
 		return false; // TODO: report type error
-	JS::RootedObject obj(rq.cx, &v.toObject());
+	JS::RootedObject obj(rq.cx(), &v.toObject());
 
-	JS::RootedValue p(rq.cx);
+	JS::RootedValue p(rq.cx());
 
-	if (!JS_GetProperty(rq.cx, obj, "x", &p)) return false; // TODO: report type errors
+	if (!JS_GetProperty(rq.cx(), obj, "x", &p)) return false; // TODO: report type errors
 	if (!FromJSVal(rq, p, out.X)) return false;
 
-	if (!JS_GetProperty(rq.cx, obj, "y", &p)) return false;
+	if (!JS_GetProperty(rq.cx(), obj, "y", &p)) return false;
 	if (!FromJSVal(rq, p, out.Y)) return false;
 
 	return true;
@@ -187,17 +187,17 @@ template<> bool Script::FromJSVal<CFixedVector2D>(const ScriptRequest& rq,  JS::
 
 template<> void Script::ToJSVal<CFixedVector2D>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const CFixedVector2D& val)
 {
-	JS::RootedObject global(rq.cx, rq.glob);
-	JS::RootedValue valueVector2D(rq.cx);
+	JS::RootedObject global(rq.cx(), rq.glob);
+	JS::RootedValue valueVector2D(rq.cx());
 	if (!ScriptInterface::GetGlobalProperty(rq, "Vector2D", &valueVector2D))
 		FAIL_VOID("Failed to get Vector2D constructor");
 
-	JS::RootedValueArray<2> args(rq.cx);
+	JS::RootedValueArray<2> args(rq.cx());
 	args[0].setNumber(val.X.ToDouble());
 	args[1].setNumber(val.Y.ToDouble());
 
-	JS::RootedObject objVec(rq.cx);
-	if (!JS::Construct(rq.cx, valueVector2D, args, &objVec))
+	JS::RootedObject objVec(rq.cx());
+	if (!JS::Construct(rq.cx(), valueVector2D, args, &objVec))
 		FAIL_VOID("Failed to construct Vector2D object");
 
 	ret.setObject(*objVec);
@@ -207,7 +207,7 @@ template<> void Script::ToJSVal<Grid<u8> >(const ScriptRequest& rq,  JS::Mutable
 {
 	u32 length = (u32)(val.m_W * val.m_H);
 	u32 nbytes = (u32)(length * sizeof(u8));
-	JS::RootedObject objArr(rq.cx, JS_NewUint8Array(rq.cx, length));
+	JS::RootedObject objArr(rq.cx(), JS_NewUint8Array(rq.cx(), length));
 	// Copy the array data and then remove the no-GC check to allow further changes to the JS data
 	{
 		JS::AutoCheckCannotGC nogc;
@@ -215,7 +215,7 @@ template<> void Script::ToJSVal<Grid<u8> >(const ScriptRequest& rq,  JS::Mutable
 		memcpy((void*)JS_GetUint8ArrayData(objArr, &sharedMemory, nogc), val.m_Data, nbytes);
 	}
 
-	JS::RootedValue data(rq.cx, JS::ObjectValue(*objArr));
+	JS::RootedValue data(rq.cx(), JS::ObjectValue(*objArr));
 	Script::CreateObject(
 		rq,
 		ret,
@@ -228,7 +228,7 @@ template<> void Script::ToJSVal<Grid<u16> >(const ScriptRequest& rq,  JS::Mutabl
  {
 	u32 length = (u32)(val.m_W * val.m_H);
 	u32 nbytes = (u32)(length * sizeof(u16));
-	JS::RootedObject objArr(rq.cx, JS_NewUint16Array(rq.cx, length));
+	JS::RootedObject objArr(rq.cx(), JS_NewUint16Array(rq.cx(), length));
 	// Copy the array data and then remove the no-GC check to allow further changes to the JS data
 	{
 		JS::AutoCheckCannotGC nogc;
@@ -236,7 +236,7 @@ template<> void Script::ToJSVal<Grid<u16> >(const ScriptRequest& rq,  JS::Mutabl
 		memcpy((void*)JS_GetUint16ArrayData(objArr, &sharedMemory, nogc), val.m_Data, nbytes);
 	}
 
-	JS::RootedValue data(rq.cx, JS::ObjectValue(*objArr));
+	JS::RootedValue data(rq.cx(), JS::ObjectValue(*objArr));
 	Script::CreateObject(
 		rq,
 		ret,
@@ -250,19 +250,19 @@ template<> bool Script::FromJSVal<TNSpline>(const ScriptRequest& rq,  JS::Handle
 	if (!v.isObject())
 		FAIL("Argument must be an object");
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
+	JS::RootedObject obj(rq.cx(), &v.toObject());
 	bool isArray;
-	if (!JS::IsArrayObject(rq.cx, obj, &isArray) || !isArray)
+	if (!JS::IsArrayObject(rq.cx(), obj, &isArray) || !isArray)
 		FAIL("Argument must be an array");
 
 	u32 numberOfNodes = 0;
-	if (!JS::GetArrayLength(rq.cx, obj, &numberOfNodes))
+	if (!JS::GetArrayLength(rq.cx(), obj, &numberOfNodes))
 		FAIL("Failed to get array length");
 
 	for (u32 i = 0; i < numberOfNodes; ++i)
 	{
-		JS::RootedValue node(rq.cx);
-		if (!JS_GetElement(rq.cx, obj, i, &node))
+		JS::RootedValue node(rq.cx());
+		if (!JS_GetElement(rq.cx(), obj, i, &node))
 			FAIL("Failed to read array element");
 
 		fixed deltaTime;
@@ -287,7 +287,7 @@ template<> bool Script::FromJSVal<CCinemaPath>(const ScriptRequest& rq,  JS::Han
 	if (!v.isObject())
 		FAIL("Argument must be an object");
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
+	JS::RootedObject obj(rq.cx(), &v.toObject());
 
 	CCinemaData pathData;
 	TNSpline positionSpline, targetSpline;

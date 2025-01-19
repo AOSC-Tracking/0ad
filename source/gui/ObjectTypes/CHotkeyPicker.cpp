@@ -59,8 +59,8 @@ void CHotkeyPicker::FireEvent(const CStr& event)
 {
 	ScriptRequest rq(*m_pGUI.GetScriptInterface());
 
-	JS::RootedValueArray<1> args(rq.cx);
-	JS::RootedValue keys(rq.cx);
+	JS::RootedValueArray<1> args(rq.cx());
+	JS::RootedValue keys(rq.cx());
 	Script::ToJSVal(rq, &keys, m_KeysPressed);
 	args[0].set(keys);
 	ScriptEvent(event, args);

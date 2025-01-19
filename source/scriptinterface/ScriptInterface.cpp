@@ -73,17 +73,17 @@ struct ScriptInterface_impl
  * Constructor for ScriptRequest - here because it needs access into ScriptInterface_impl.
  */
 ScriptRequest::ScriptRequest(const ScriptInterface& scriptInterface) :
-	cx(scriptInterface.m->m_cx),
+	m_Cx(scriptInterface.m->m_cx),
 	glob(scriptInterface.m->m_glob),
 	nativeScope(scriptInterface.m->m_nativeScope),
 	m_ScriptInterface(scriptInterface)
 {
-	m_FormerRealm = JS::EnterRealm(cx, scriptInterface.m->m_glob);
+	m_FormerRealm = JS::EnterRealm(m_Cx, scriptInterface.m->m_glob);
 }
 
 ScriptRequest::~ScriptRequest()
 {
-	JS::LeaveRealm(cx, m_FormerRealm);
+	JS::LeaveRealm(m_Cx, m_FormerRealm);
 }
 
 ScriptRequest::ScriptRequest(JSContext* cx) : ScriptRequest(ScriptInterface::CmptPrivate::GetScriptInterface(cx))
@@ -196,7 +196,7 @@ JS::Value deepcopy(const ScriptRequest& rq, JS::HandleValue val)
 		return JS::UndefinedValue();
 	}
 
-	JS::RootedValue ret(rq.cx, Script::DeepCopy(rq, val));
+	JS::RootedValue ret(rq.cx(), Script::DeepCopy(rq, val));
 	if (ret.isNullOrUndefined())
 	{
 		ScriptException::Raise(rq, "deepcopy StructureClone copy failed.");
@@ -367,7 +367,7 @@ ScriptInterface::ScriptInterface(const char* nativeScopeName, const char* debugN
 ScriptInterface::ScriptInterface(const char* nativeScopeName, const char* debugName, const ScriptInterface& neighbor)
 {
 	ScriptRequest nrq(neighbor);
-	JS::Compartment* comp = JS::GetCompartmentForRealm(JS::GetCurrentRealmOrNull(nrq.cx));
+	JS::Compartment* comp = JS::GetCompartmentForRealm(JS::GetCurrentRealmOrNull(nrq.cx()));
 	m = std::make_unique<ScriptInterface_impl>(nativeScopeName, neighbor.GetContext(), comp);
 
 	// Profiler stats table isn't thread-safe, so only enable this on the main thread
@@ -413,7 +413,7 @@ void ScriptInterface::SetCallbackData(void* pCBData)
 template <>
 void* ScriptInterface::ObjectFromCBData<void>(const ScriptRequest& rq)
 {
-	return ScriptInterface::CmptPrivate::GetCBData(rq.cx);
+	return ScriptInterface::CmptPrivate::GetCBData(rq.cx());
 }
 
 bool ScriptInterface::LoadGlobalScripts()
@@ -438,12 +438,12 @@ bool ScriptInterface::LoadGlobalScripts()
 bool ScriptInterface::ReplaceNondeterministicRNG(boost::rand48& rng)
 {
 	ScriptRequest rq(this);
-	JS::RootedValue math(rq.cx);
-	JS::RootedObject global(rq.cx, rq.glob);
-	if (JS_GetProperty(rq.cx, global, "Math", &math) && math.isObject())
+	JS::RootedValue math(rq.cx());
+	JS::RootedObject global(rq.cx(), rq.glob);
+	if (JS_GetProperty(rq.cx(), global, "Math", &math) && math.isObject())
 	{
-		JS::RootedObject mathObj(rq.cx, &math.toObject());
-		JS::RootedFunction random(rq.cx, JS_DefineFunction(rq.cx, mathObj, "random", Math_random, 0,
+		JS::RootedObject mathObj(rq.cx(), &math.toObject());
+		JS::RootedFunction random(rq.cx(), JS_DefineFunction(rq.cx(), mathObj, "random", Math_random, 0,
 			JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT));
 		if (random)
 		{
@@ -477,8 +477,8 @@ void ScriptInterface::CallConstructor(JS::HandleValue ctor, JS::HandleValueArray
 		return;
 	}
 
-	JS::RootedObject objOut(rq.cx);
-	if (!JS::Construct(rq.cx, ctor, argv, &objOut))
+	JS::RootedObject objOut(rq.cx());
+	if (!JS::Construct(rq.cx(), ctor, argv, &objOut))
 		out.setNull();
 	else
 		out.setObjectOrNull(objOut);
@@ -495,8 +495,8 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 		throw PSERROR_Scripting_DefineType_AlreadyExists();
 	}
 
-	JS::RootedObject global(rq.cx, rq.glob);
-	JS::RootedObject obj(rq.cx, JS_InitClass(rq.cx, global,
+	JS::RootedObject global(rq.cx(), rq.glob);
+	JS::RootedObject obj(rq.cx(), JS_InitClass(rq.cx(), global,
 	                                           clasp, nullptr, clasp->name,
 	                                           constructor, minArgs,     // Constructor, min args
 	                                           ps, fs,                   // Properties, methods
@@ -510,7 +510,7 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 
 	CustomType& type = m_CustomObjectTypes[typeName];
 
-	type.m_Prototype.init(rq.cx, obj);
+	type.m_Prototype.init(rq.cx(), obj);
 	type.m_Class = clasp;
 	type.m_Constructor = constructor;
 }
@@ -523,22 +523,22 @@ JSObject* ScriptInterface::CreateCustomObject(const std::string& typeName) const
 		throw PSERROR_Scripting_TypeDoesNotExist();
 
 	ScriptRequest rq(this);
-	JS::RootedObject prototype(rq.cx, it->second.m_Prototype.get());
-	return JS_NewObjectWithGivenProto(rq.cx, it->second.m_Class, prototype);
+	JS::RootedObject prototype(rq.cx(), it->second.m_Prototype.get());
+	return JS_NewObjectWithGivenProto(rq.cx(), it->second.m_Class, prototype);
 }
 
 bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool replace, bool constant, bool enumerate)
 {
 	ScriptRequest rq(this);
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx(), rq.glob);
 
 	bool found;
-	if (!JS_HasProperty(rq.cx, global, name, &found))
+	if (!JS_HasProperty(rq.cx(), global, name, &found))
 		return false;
 	if (found)
 	{
-		JS::Rooted<mozilla::Maybe<JS::PropertyDescriptor>> desc(rq.cx);
-		if (!JS_GetOwnPropertyDescriptor(rq.cx, global, name, &desc) || !desc.isSome())
+		JS::Rooted<mozilla::Maybe<JS::PropertyDescriptor>> desc(rq.cx());
+		if (!JS_GetOwnPropertyDescriptor(rq.cx(), global, name, &desc) || !desc.isSome())
 			return false;
 
 		if (!desc->writable())
@@ -558,7 +558,7 @@ bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool r
 			}
 
 			LOGMESSAGE("Hotloading new value for global \"%s\".", name);
-			ENSURE(JS_DeleteProperty(rq.cx, global, name));
+			ENSURE(JS_DeleteProperty(rq.cx(), global, name));
 		}
 	}
 
@@ -568,14 +568,14 @@ bool ScriptInterface::SetGlobal_(const char* name, JS::HandleValue value, bool r
 	if (enumerate)
 		attrs |= JSPROP_ENUMERATE;
 
-	return JS_DefineProperty(rq.cx, global, name, value, attrs);
+	return JS_DefineProperty(rq.cx(), global, name, value, attrs);
 }
 
 bool ScriptInterface::GetGlobalProperty(const ScriptRequest& rq, const std::string& name, JS::MutableHandleValue out)
 {
 	// Try to get the object as a property of the global object.
-	JS::RootedObject global(rq.cx, rq.glob);
-	if (!JS_GetProperty(rq.cx, global, name.c_str(), out))
+	JS::RootedObject global(rq.cx(), rq.glob);
+	if (!JS_GetProperty(rq.cx(), global, name.c_str(), out))
 	{
 		out.set(JS::NullHandleValue);
 		return false;
@@ -587,8 +587,8 @@ bool ScriptInterface::GetGlobalProperty(const ScriptRequest& rq, const std::stri
 	// Some objects, such as const definitions, or Class definitions, are hidden inside closures.
 	// We must fetch those from the correct lexical scope.
 	//JS::RootedValue glob(cx);
-	JS::RootedObject lexical_environment(rq.cx, JS_GlobalLexicalEnvironment(rq.glob));
-	if (!JS_GetProperty(rq.cx, lexical_environment, name.c_str(), out))
+	JS::RootedObject lexical_environment(rq.cx(), JS_GlobalLexicalEnvironment(rq.glob));
+	if (!JS_GetProperty(rq.cx(), lexical_environment, name.c_str(), out))
 	{
 		out.set(JS::NullHandleValue);
 		return false;
@@ -606,21 +606,21 @@ bool ScriptInterface::SetPrototype(JS::HandleValue objVal, JS::HandleValue proto
 	ScriptRequest rq(this);
 	if (!objVal.isObject() || !protoVal.isObject())
 		return false;
-	JS::RootedObject obj(rq.cx, &objVal.toObject());
-	JS::RootedObject proto(rq.cx, &protoVal.toObject());
-	return JS_SetPrototype(rq.cx, obj, proto);
+	JS::RootedObject obj(rq.cx(), &objVal.toObject());
+	JS::RootedObject proto(rq.cx(), &protoVal.toObject());
+	return JS_SetPrototype(rq.cx(), obj, proto);
 }
 
 bool ScriptInterface::LoadScript(const VfsPath& filename, const std::string& code) const
 {
 	ScriptRequest rq(this);
-	JS::RootedObject global(rq.cx, rq.glob);
+	JS::RootedObject global(rq.cx(), rq.glob);
 
 	// CompileOptions does not copy the contents of the filename string pointer.
 	// Passing a temporary string there will cause undefined behaviour, so we create a separate string to avoid the temporary.
 	std::string filenameStr = filename.string8();
 
-	JS::CompileOptions options(rq.cx);
+	JS::CompileOptions options(rq.cx());
 	// Set the line to 0 because CompileFunction silently adds a `(function() {` as the first line,
 	// and errors get misreported.
 	// TODO: it would probably be better to not implicitly introduce JS scopes.
@@ -628,17 +628,17 @@ bool ScriptInterface::LoadScript(const VfsPath& filename, const std::string& cod
 	options.setIsRunOnce(false);
 
 	JS::SourceText<mozilla::Utf8Unit> src;
-	ENSURE(src.init(rq.cx, code.c_str(), code.length(), JS::SourceOwnership::Borrowed));
-	JS::RootedObjectVector emptyScopeChain(rq.cx);
-	JS::RootedFunction func(rq.cx, JS::CompileFunction(rq.cx, emptyScopeChain, options, NULL, 0, NULL, src));
+	ENSURE(src.init(rq.cx(), code.c_str(), code.length(), JS::SourceOwnership::Borrowed));
+	JS::RootedObjectVector emptyScopeChain(rq.cx());
+	JS::RootedFunction func(rq.cx(), JS::CompileFunction(rq.cx(), emptyScopeChain, options, NULL, 0, NULL, src));
 	if (func == nullptr)
 	{
 		ScriptException::CatchPending(rq);
 		return false;
 	}
 
-	JS::RootedValue rval(rq.cx);
-	if (JS_CallFunction(rq.cx, nullptr, func, JS::HandleValueArray::empty(), &rval))
+	JS::RootedValue rval(rq.cx());
+	if (JS_CallFunction(rq.cx(), nullptr, func, JS::HandleValueArray::empty(), &rval))
 		return true;
 
 	ScriptException::CatchPending(rq);
@@ -652,13 +652,13 @@ bool ScriptInterface::LoadGlobalScript(const VfsPath& filename, const std::strin
 	// Passing a temporary string there will cause undefined behaviour, so we create a separate string to avoid the temporary.
 	std::string filenameStr = filename.string8();
 
-	JS::RootedValue rval(rq.cx);
-	JS::CompileOptions opts(rq.cx);
+	JS::RootedValue rval(rq.cx());
+	JS::CompileOptions opts(rq.cx());
 	opts.setFileAndLine(filenameStr.c_str(), 1);
 
 	JS::SourceText<mozilla::Utf8Unit> src;
-	ENSURE(src.init(rq.cx, code.c_str(), code.length(), JS::SourceOwnership::Borrowed));
-	if (JS::Evaluate(rq.cx, opts, src, &rval))
+	ENSURE(src.init(rq.cx(), code.c_str(), code.length(), JS::SourceOwnership::Borrowed));
+	if (JS::Evaluate(rq.cx(), opts, src, &rval))
 		return true;
 
 	ScriptException::CatchPending(rq);
@@ -691,13 +691,13 @@ bool ScriptInterface::LoadGlobalScriptFile(const VfsPath& path) const
 bool ScriptInterface::Eval(const char* code) const
 {
 	ScriptRequest rq(this);
-	JS::RootedValue rval(rq.cx);
+	JS::RootedValue rval(rq.cx());
 
-	JS::CompileOptions opts(rq.cx);
+	JS::CompileOptions opts(rq.cx());
 	opts.setFileAndLine("(eval)", 1);
 	JS::SourceText<mozilla::Utf8Unit> src;
-	ENSURE(src.init(rq.cx, code, strlen(code), JS::SourceOwnership::Borrowed));
-	if (JS::Evaluate(rq.cx, opts, src, &rval))
+	ENSURE(src.init(rq.cx(), code, strlen(code), JS::SourceOwnership::Borrowed));
+	if (JS::Evaluate(rq.cx(), opts, src, &rval))
 		return true;
 
 	ScriptException::CatchPending(rq);
@@ -708,11 +708,11 @@ bool ScriptInterface::Eval(const char* code, JS::MutableHandleValue rval) const
 {
 	ScriptRequest rq(this);
 
-	JS::CompileOptions opts(rq.cx);
+	JS::CompileOptions opts(rq.cx());
 	opts.setFileAndLine("(eval)", 1);
 	JS::SourceText<mozilla::Utf8Unit> src;
-	ENSURE(src.init(rq.cx, code, strlen(code), JS::SourceOwnership::Borrowed));
-	if (JS::Evaluate(rq.cx, opts, src, rval))
+	ENSURE(src.init(rq.cx(), code, strlen(code), JS::SourceOwnership::Borrowed));
+	if (JS::Evaluate(rq.cx(), opts, src, rval))
 		return true;
 
 	ScriptException::CatchPending(rq);

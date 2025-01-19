@@ -561,13 +561,13 @@ void XmppClient::handleOOB(const gloox::JID&, const gloox::OOB&)
  */
 JS::Value XmppClient::GUIGetPlayerList(const ScriptRequest& rq)
 {
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
 	int j = 0;
 
 	for (const std::pair<const std::string, SPlayer>& p : m_PlayerMap)
 	{
-		JS::RootedValue player(rq.cx);
+		JS::RootedValue player(rq.cx());
 
 		Script::CreateObject(
 			rq,
@@ -589,7 +589,7 @@ JS::Value XmppClient::GUIGetPlayerList(const ScriptRequest& rq)
  */
 JS::Value XmppClient::GUIGetGameList(const ScriptRequest& rq)
 {
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
 	int j = 0;
 
@@ -599,7 +599,7 @@ JS::Value XmppClient::GUIGetGameList(const ScriptRequest& rq)
 
 	for(const gloox::Tag* const& t : m_GameList)
 	{
-		JS::RootedValue game(rq.cx);
+		JS::RootedValue game(rq.cx());
 		Script::CreateObject(rq, &game);
 
 		for (size_t i = 0; i < ARRAY_SIZE(stats); ++i)
@@ -617,7 +617,7 @@ JS::Value XmppClient::GUIGetGameList(const ScriptRequest& rq)
  */
 JS::Value XmppClient::GUIGetBoardList(const ScriptRequest& rq)
 {
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
 	int j = 0;
 
@@ -625,7 +625,7 @@ JS::Value XmppClient::GUIGetBoardList(const ScriptRequest& rq)
 
 	for(const gloox::Tag* const& t : m_BoardList)
 	{
-		JS::RootedValue board(rq.cx);
+		JS::RootedValue board(rq.cx());
 		Script::CreateObject(rq, &board);
 
 		for (size_t i = 0; i < ARRAY_SIZE(attributes); ++i)
@@ -643,7 +643,7 @@ JS::Value XmppClient::GUIGetBoardList(const ScriptRequest& rq)
  */
 JS::Value XmppClient::GUIGetProfile(const ScriptRequest& rq)
 {
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
 	int j = 0;
 
@@ -651,7 +651,7 @@ JS::Value XmppClient::GUIGetProfile(const ScriptRequest& rq)
 
 	for (const gloox::Tag* const& t : m_Profile)
 	{
-		JS::RootedValue profile(rq.cx);
+		JS::RootedValue profile(rq.cx());
 		Script::CreateObject(rq, &profile);
 
 		for (size_t i = 0; i < ARRAY_SIZE(stats); ++i)
@@ -673,9 +673,9 @@ void SetGUIMessageProperty(const ScriptRequest& UNUSED(rq), JS::HandleObject UNU
 template<typename T, typename... Args>
 void SetGUIMessageProperty(const ScriptRequest& rq, JS::HandleObject messageObj, const std::string& propertyName, const T& propertyValue, Args const&... args)
 {
-	JS::RootedValue scriptPropertyValue(rq.cx);
+	JS::RootedValue scriptPropertyValue(rq.cx());
 	Script::ToJSVal(rq, &scriptPropertyValue, propertyValue);
-	JS_DefineProperty(rq.cx, messageObj, propertyName.c_str(), scriptPropertyValue, JSPROP_ENUMERATE);
+	JS_DefineProperty(rq.cx(), messageObj, propertyName.c_str(), scriptPropertyValue, JSPROP_ENUMERATE);
 	SetGUIMessageProperty(rq, messageObj, args...);
 }
 
@@ -689,7 +689,7 @@ void XmppClient::CreateGUIMessage(
 	if (!m_ScriptInterface)
 		return;
 	ScriptRequest rq(m_ScriptInterface);
-	JS::RootedValue message(rq.cx);
+	JS::RootedValue message(rq.cx());
 	Script::CreateObject(
 		rq,
 		&message,
@@ -698,7 +698,7 @@ void XmppClient::CreateGUIMessage(
 		"historic", false,
 		"time", static_cast<double>(time));
 
-	JS::RootedObject messageObj(rq.cx, message.toObjectOrNull());
+	JS::RootedObject messageObj(rq.cx(), message.toObjectOrNull());
 	SetGUIMessageProperty(rq, messageObj, args...);
 	Script::DeepFreezeObject(rq, message);
 	m_GuiMessageQueue.push_back(JS::Heap<JS::Value>(message));
@@ -725,7 +725,7 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 
 	// Optimize for batch message processing that is more
 	// performance demanding than processing a lone message.
-	JS::RootedValue messages(rq.cx);
+	JS::RootedValue messages(rq.cx());
 	Script::CreateArray(rq, &messages);
 
 	int j = 0;
@@ -736,7 +736,7 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 
 		// Store historic chat messages.
 		// Only store relevant messages to minimize memory footprint.
-		JS::RootedValue rootedMessage(rq.cx, message);
+		JS::RootedValue rootedMessage(rq.cx(), message);
 		std::string type;
 		Script::GetProperty(rq, rootedMessage, "type", type);
 		if (type != "chat")
@@ -747,7 +747,7 @@ JS::Value XmppClient::GuiPollNewMessages(const ScriptInterface& guiInterface)
 		if (level != "room-message" && level != "private-message")
 			continue;
 
-		JS::RootedValue historicMessage(rq.cx, Script::DeepCopy(rq, rootedMessage));
+		JS::RootedValue historicMessage(rq.cx(), Script::DeepCopy(rq, rootedMessage));
 		if (true)
 		{
 			Script::SetProperty(rq, historicMessage, "historic", true);
@@ -770,7 +770,7 @@ JS::Value XmppClient::GuiPollHistoricMessages(const ScriptInterface& guiInterfac
 
 	ScriptRequest rq(m_ScriptInterface);
 
-	JS::RootedValue messages(rq.cx);
+	JS::RootedValue messages(rq.cx());
 	Script::CreateArray(rq, &messages);
 
 	int j = 0;

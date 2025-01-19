@@ -74,14 +74,14 @@ inline SPrototypeSerialization GetPrototypeInfo(const ScriptRequest& rq, JS::Han
 	if (ret.name == "Object")
 		return ret;
 
-	if (!JS_HasProperty(rq.cx, prototype, "Serialize", &ret.hasCustomSerialize) ||
-	     !JS_HasProperty(rq.cx, prototype, "Deserialize", &ret.hasCustomDeserialize))
+	if (!JS_HasProperty(rq.cx(), prototype, "Serialize", &ret.hasCustomSerialize) ||
+	     !JS_HasProperty(rq.cx(), prototype, "Deserialize", &ret.hasCustomDeserialize))
 		throw PSERROR_Serialize_ScriptError("JS_HasProperty failed");
 
 	if (ret.hasCustomSerialize)
 	{
-		JS::RootedValue serialize(rq.cx);
-		if (!JS_GetProperty(rq.cx, prototype, "Serialize", &serialize))
+		JS::RootedValue serialize(rq.cx());
+		if (!JS_GetProperty(rq.cx(), prototype, "Serialize", &serialize))
 			throw PSERROR_Serialize_ScriptError("JS_GetProperty failed");
 
 		if (serialize.isNull())

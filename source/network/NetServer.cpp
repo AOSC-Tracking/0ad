@@ -451,7 +451,7 @@ bool CNetServerWorker::RunStep()
 			LOGERROR("NetServer: Init Attributes cannot be changed after the server starts loading.");
 		else
 		{
-			JS::RootedValue gameAttributesVal(rq.cx);
+			JS::RootedValue gameAttributesVal(rq.cx());
 			Script::ParseJSON(rq, newGameAttributes.back(), &gameAttributesVal);
 			m_InitAttributes = gameAttributesVal;
 		}
@@ -1192,7 +1192,7 @@ bool CNetServerWorker::OnSimulationCommand(CNetServerSession* session, CFsmEvent
 	bool cheatsEnabled = false;
 	const ScriptInterface& scriptInterface = server.GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue settings(rq.cx);
+	JS::RootedValue settings(rq.cx());
 	Script::GetProperty(rq, server.m_InitAttributes, "settings", &settings);
 	if (Script::HasProperty(rq, settings, "CheatsEnabled"))
 		Script::GetProperty(rq, settings, "CheatsEnabled", cheatsEnabled);

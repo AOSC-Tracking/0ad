@@ -264,7 +264,7 @@ static void PumpEvents()
 		PROFILE2("event");
 		if (g_GUI)
 		{
-			JS::RootedValue tmpVal(rq.cx);
+			JS::RootedValue tmpVal(rq.cx());
 			Script::ToJSVal(rq, &tmpVal, ev);
 			std::string data = Script::StringifyJSON(rq, &tmpVal);
 			PROFILE2_ATTR("%s", data.c_str());

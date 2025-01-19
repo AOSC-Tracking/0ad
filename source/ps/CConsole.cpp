@@ -587,7 +587,7 @@ void CConsole::ProcessBuffer(const wchar_t* szLine)
 	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
 	ScriptRequest rq(*pScriptInterface);
 
-	JS::RootedValue rval(rq.cx);
+	JS::RootedValue rval(rq.cx());
 	pScriptInterface->Eval(CStrW(szLine).ToUTF8().c_str(), &rval);
 	if (!rval.isUndefined())
 		InsertMessage(Script::ToString(rq, &rval));

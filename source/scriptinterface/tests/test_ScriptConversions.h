@@ -38,13 +38,13 @@ class TestScriptConversions : public CxxTest::TestSuite
 		TS_ASSERT(script.LoadGlobalScripts());
 		ScriptRequest rq(script);
 
-		JS::RootedValue v1(rq.cx);
+		JS::RootedValue v1(rq.cx());
 		Script::ToJSVal(rq, &v1, value);
 
 		// We want to convert values to strings, but can't just call toSource() on them
 		// since they might not be objects. So just use uneval.
 		std::string source;
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		TS_ASSERT(ScriptFunction::Call(rq, global, "uneval", source, v1));
 
 		TS_ASSERT_STR_EQUALS(source, expected);
@@ -57,11 +57,11 @@ class TestScriptConversions : public CxxTest::TestSuite
 		TS_ASSERT(script.LoadGlobalScripts());
 		ScriptRequest rq(script);
 
-		JS::RootedValue v1(rq.cx);
+		JS::RootedValue v1(rq.cx());
 		Script::ToJSVal(rq, &v1, value);
 
 		std::string source;
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		TS_ASSERT(ScriptFunction::Call(rq, global, "uneval", source, v1));
 
 		if (expected)
@@ -79,19 +79,19 @@ class TestScriptConversions : public CxxTest::TestSuite
 		TS_ASSERT(script.LoadGlobalScripts());
 		ScriptRequest rq(script);
 
-		JS::RootedValue v1(rq.cx);
+		JS::RootedValue v1(rq.cx());
 		Script::ToJSVal(rq, &v1, v);
-		JS::RootedValue u1(rq.cx);
+		JS::RootedValue u1(rq.cx());
 		Script::ToJSVal(rq, &u1, u);
 
 		T r;
-		JS::RootedValue r1(rq.cx);
+		JS::RootedValue r1(rq.cx());
 
 		TS_ASSERT(ScriptFunction::Call(rq, u1, func.c_str(), r, v1));
 		Script::ToJSVal(rq, &r1, r);
 
 		std::string source;
-		JS::RootedValue global(rq.cx, rq.globalValue());
+		JS::RootedValue global(rq.cx(), rq.globalValue());
 		TS_ASSERT(ScriptFunction::Call(rq, global, "uneval", source, r1));
 
 		TS_ASSERT_STR_EQUALS(source, expected);
@@ -173,7 +173,7 @@ public:
 		ScriptRequest rq(script);
 
 		// using new uninitialized variables each time to be sure the test doesn't succeeed if ToJSVal doesn't touch the value at all.
-		JS::RootedValue val0(rq.cx), val1(rq.cx), val2(rq.cx), val3(rq.cx), val4(rq.cx), val5(rq.cx), val6(rq.cx), val7(rq.cx), val8(rq.cx);
+		JS::RootedValue val0(rq.cx()), val1(rq.cx()), val2(rq.cx()), val3(rq.cx()), val4(rq.cx()), val5(rq.cx()), val6(rq.cx()), val7(rq.cx()), val8(rq.cx());
 		Script::ToJSVal<i32>(rq, &val0, 0);
 		Script::ToJSVal<i32>(rq, &val1, JSVAL_INT_MAX - 1);
 		Script::ToJSVal<i32>(rq, &val2, JSVAL_INT_MAX);
@@ -205,7 +205,7 @@ public:
 		ScriptRequest rq(script);
 
 		float f = 0;
-		JS::RootedValue testNANVal(rq.cx);
+		JS::RootedValue testNANVal(rq.cx());
 		Script::ToJSVal(rq, &testNANVal, NAN);
 		TS_ASSERT(Script::FromJSVal(rq, testNANVal, f));
 		TS_ASSERT(isnan(f));
@@ -258,13 +258,13 @@ public:
 		std::string in_utf8("éè!§$-aezi134900°°©©¢¢ÇÇ'{¶«¡Ç'[å»ÛÁØ");
 		std::wstring in_utf16(L"éè!§$-aezi134900°°©©¢¢ÇÇ'{¶«¡Ç'[å»ÛÁØ");
 
-		JS::RootedValue v1(rq.cx);
+		JS::RootedValue v1(rq.cx());
 		Script::ToJSVal(rq, &v1, in_utf8);
 		std::wstring test_out_utf16;
 		TS_ASSERT(Script::FromJSVal(rq, v1, test_out_utf16));
 		TS_ASSERT_EQUALS(test_out_utf16, in_utf16);
 
-		JS::RootedValue v2(rq.cx);
+		JS::RootedValue v2(rq.cx());
 		Script::ToJSVal(rq, &v2, in_utf16);
 		std::string test_out_utf8;
 		TS_ASSERT(Script::FromJSVal(rq, v2, test_out_utf8));

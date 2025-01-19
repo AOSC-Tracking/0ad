@@ -77,7 +77,7 @@ void CReplayLogger::StartGame(JS::MutableHandleValue attribs)
 
 	// Add engine version and currently loaded mods for sanity checks when replaying
 	Script::SetProperty(rq, attribs, "engine_version", engine_version);
-	JS::RootedValue mods(rq.cx);
+	JS::RootedValue mods(rq.cx());
 	Script::ToJSVal(rq, &mods, g_Mods.GetEnabledModsData());
 	Script::SetProperty(rq, attribs, "mods", mods);
 
@@ -121,8 +121,8 @@ void CReplayLogger::SaveMetadata(const CSimulation2& simulation)
 	ScriptInterface& scriptInterface = simulation.GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue arg(rq.cx);
-	JS::RootedValue metadata(rq.cx);
+	JS::RootedValue arg(rq.cx());
+	JS::RootedValue metadata(rq.cx());
 	cmpGuiInterface->ScriptCall(INVALID_PLAYER, L"GetReplayMetadata", arg, &metadata);
 
 	const OsPath fileName = g_Game->GetReplayLogger().GetDirectory() / L"metadata.json";
@@ -216,7 +216,7 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 				ScriptInterface scriptInterface("Engine", "Replay", g_ScriptContext);
 				ScriptRequest rq(scriptInterface);
 				std::getline(*m_Stream, attribsStr);
-				JS::RootedValue attribs(rq.cx);
+				JS::RootedValue attribs(rq.cx());
 				if (!Script::ParseJSON(rq, attribsStr, &attribs))
 				{
 					LOGERROR("Error parsing JSON attributes: %s", attribsStr);
@@ -254,7 +254,7 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 				g_Game->GetSimulation2()->EnableOOSLog();
 
 			ScriptRequest rq(g_Game->GetSimulation2()->GetScriptInterface());
-			JS::RootedValue attribs(rq.cx);
+			JS::RootedValue attribs(rq.cx());
 			ENSURE(Script::ParseJSON(rq, attribsStr, &attribs));
 			g_Game->StartGame(&attribs, "");
 
@@ -277,10 +277,10 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 			std::string line;
 			std::getline(*m_Stream, line);
 			ScriptRequest rq(g_Game->GetSimulation2()->GetScriptInterface());
-			JS::RootedValue data(rq.cx);
+			JS::RootedValue data(rq.cx());
 			Script::ParseJSON(rq, line, &data);
 			Script::DeepFreezeObject(rq, data);
-			commands.emplace_back(SimulationCommand(player, rq.cx, data));
+			commands.emplace_back(SimulationCommand(player, rq.cx(), data));
 		}
 		else if (type == "hash" || type == "hash-quick")
 		{

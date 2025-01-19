@@ -50,7 +50,7 @@ template<> bool Script::FromJSVal<float>(const ScriptRequest& rq, JS::HandleValu
 {
 	double tmp;
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToNumber(rq.cx, v, &tmp))
+	if (!JS::ToNumber(rq.cx(), v, &tmp))
 		return false;
 	out = tmp;
 	return true;
@@ -59,7 +59,7 @@ template<> bool Script::FromJSVal<float>(const ScriptRequest& rq, JS::HandleValu
 template<> bool Script::FromJSVal<double>(const ScriptRequest& rq,  JS::HandleValue v, double& out)
 {
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToNumber(rq.cx, v, &out))
+	if (!JS::ToNumber(rq.cx(), v, &out))
 		return false;
 	return true;
 }
@@ -67,7 +67,7 @@ template<> bool Script::FromJSVal<double>(const ScriptRequest& rq,  JS::HandleVa
 template<> bool Script::FromJSVal<i32>(const ScriptRequest& rq,  JS::HandleValue v, i32& out)
 {
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToInt32(rq.cx, v, &out))
+	if (!JS::ToInt32(rq.cx(), v, &out))
 		return false;
 	return true;
 }
@@ -75,7 +75,7 @@ template<> bool Script::FromJSVal<i32>(const ScriptRequest& rq,  JS::HandleValue
 template<> bool Script::FromJSVal<u32>(const ScriptRequest& rq,  JS::HandleValue v, u32& out)
 {
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToUint32(rq.cx, v, &out))
+	if (!JS::ToUint32(rq.cx(), v, &out))
 		return false;
 	return true;
 }
@@ -83,7 +83,7 @@ template<> bool Script::FromJSVal<u32>(const ScriptRequest& rq,  JS::HandleValue
 template<> bool Script::FromJSVal<u16>(const ScriptRequest& rq,  JS::HandleValue v, u16& out)
 {
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToUint16(rq.cx, v, &out))
+	if (!JS::ToUint16(rq.cx(), v, &out))
 		return false;
 	return true;
 }
@@ -92,7 +92,7 @@ template<> bool Script::FromJSVal<u8>(const ScriptRequest& rq,  JS::HandleValue 
 {
 	u16 tmp;
 	FAIL_IF_NOT(v.isNumber(), v);
-	if (!JS::ToUint16(rq.cx, v, &tmp))
+	if (!JS::ToUint16(rq.cx(), v, &tmp))
 		return false;
 	out = (u8)tmp;
 	return true;
@@ -101,7 +101,7 @@ template<> bool Script::FromJSVal<u8>(const ScriptRequest& rq,  JS::HandleValue 
 template<> bool Script::FromJSVal<std::wstring>(const ScriptRequest& rq,  JS::HandleValue v, std::wstring& out)
 {
 	FAIL_IF_NOT(v.isString() || v.isNumber() || v.isBoolean(), v); // allow implicit boolean/number conversions
-	JS::RootedString str(rq.cx, JS::ToString(rq.cx, v));
+	JS::RootedString str(rq.cx(), JS::ToString(rq.cx(), v));
 	if (!str)
 		FAIL("Argument must be convertible to a string");
 
@@ -109,7 +109,7 @@ template<> bool Script::FromJSVal<std::wstring>(const ScriptRequest& rq,  JS::Ha
 	{
 		size_t length;
 		JS::AutoCheckCannotGC nogc;
-		const JS::Latin1Char* ch = JS_GetLatin1StringCharsAndLength(rq.cx, nogc, str, &length);
+		const JS::Latin1Char* ch = JS_GetLatin1StringCharsAndLength(rq.cx(), nogc, str, &length);
 		if (!ch)
 			FAIL("JS_GetLatin1StringCharsAndLength failed");
 
@@ -119,7 +119,7 @@ template<> bool Script::FromJSVal<std::wstring>(const ScriptRequest& rq,  JS::Ha
 	{
 		size_t length;
 		JS::AutoCheckCannotGC nogc;
-		const char16_t* ch = JS_GetTwoByteStringCharsAndLength(rq.cx, nogc, str, &length);
+		const char16_t* ch = JS_GetTwoByteStringCharsAndLength(rq.cx(), nogc, str, &length);
 		if (!ch)
 			FAIL("JS_GetTwoByteStringsCharsAndLength failed"); // out of memory
 
@@ -161,23 +161,23 @@ template<> bool Script::FromJSVal<Entity>(const ScriptRequest& rq,  JS::HandleVa
 	if (!v.isObject())
 		FAIL("Argument must be an object");
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
-	JS::RootedValue templateName(rq.cx);
-	JS::RootedValue id(rq.cx);
-	JS::RootedValue player(rq.cx);
-	JS::RootedValue position(rq.cx);
-	JS::RootedValue rotation(rq.cx);
+	JS::RootedObject obj(rq.cx(), &v.toObject());
+	JS::RootedValue templateName(rq.cx());
+	JS::RootedValue id(rq.cx());
+	JS::RootedValue player(rq.cx());
+	JS::RootedValue position(rq.cx());
+	JS::RootedValue rotation(rq.cx());
 
 	// TODO: Report type errors
-	if (!JS_GetProperty(rq.cx, obj, "player", &player) || !FromJSVal(rq, player, out.playerID))
+	if (!JS_GetProperty(rq.cx(), obj, "player", &player) || !FromJSVal(rq, player, out.playerID))
 		FAIL("Failed to read Entity.player property");
-	if (!JS_GetProperty(rq.cx, obj, "templateName", &templateName) || !FromJSVal(rq, templateName, out.templateName))
+	if (!JS_GetProperty(rq.cx(), obj, "templateName", &templateName) || !FromJSVal(rq, templateName, out.templateName))
 		FAIL("Failed to read Entity.templateName property");
-	if (!JS_GetProperty(rq.cx, obj, "id", &id) || !FromJSVal(rq, id, out.entityID))
+	if (!JS_GetProperty(rq.cx(), obj, "id", &id) || !FromJSVal(rq, id, out.entityID))
 		FAIL("Failed to read Entity.id property");
-	if (!JS_GetProperty(rq.cx, obj, "position", &position) || !FromJSVal(rq, position, out.position))
+	if (!JS_GetProperty(rq.cx(), obj, "position", &position) || !FromJSVal(rq, position, out.position))
 		FAIL("Failed to read Entity.position property");
-	if (!JS_GetProperty(rq.cx, obj, "rotation", &rotation) || !FromJSVal(rq, rotation, out.rotation))
+	if (!JS_GetProperty(rq.cx(), obj, "rotation", &rotation) || !FromJSVal(rq, rotation, out.rotation))
 		FAIL("Failed to read Entity.rotation property");
 
 	return true;
@@ -224,7 +224,7 @@ template<> void Script::ToJSVal<u32>(const ScriptRequest& UNUSED(rq), JS::Mutabl
 template<> void Script::ToJSVal<std::wstring>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const std::wstring& val)
 {
 	std::u16string utf16(val.begin(), val.end());
-	JS::RootedString str(rq.cx, JS_NewUCStringCopyN(rq.cx, utf16.c_str(), utf16.length()));
+	JS::RootedString str(rq.cx(), JS_NewUCStringCopyN(rq.cx(), utf16.c_str(), utf16.length()));
 	if (str)
 		ret.setString(str);
 	else
@@ -248,7 +248,7 @@ template<> void Script::ToJSVal<const wchar_t*>(const ScriptRequest& rq,  JS::Mu
 
 template<> void Script::ToJSVal<const char*>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const char* const& val)
 {
-	JS::RootedString str(rq.cx, JS_NewStringCopyZ(rq.cx, val));
+	JS::RootedString str(rq.cx(), JS_NewStringCopyZ(rq.cx(), val));
 	if (str)
 		ret.setString(str);
 	else

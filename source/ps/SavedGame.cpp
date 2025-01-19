@@ -80,11 +80,11 @@ Status SavedGames::Save(const CStrW& name, const CStrW& description, CSimulation
 	if (!simulation.SerializeState(simStateStream))
 		WARN_RETURN(ERR::FAIL);
 
-	JS::RootedValue initAttributes(rq.cx, simulation.GetInitAttributes());
-	JS::RootedValue mods(rq.cx);
+	JS::RootedValue initAttributes(rq.cx(), simulation.GetInitAttributes());
+	JS::RootedValue mods(rq.cx());
 	Script::ToJSVal(rq, &mods, g_Mods.GetEnabledModsData());
 
-	JS::RootedValue metadata(rq.cx);
+	JS::RootedValue metadata(rq.cx());
 
 	Script::CreateObject(
 		rq,
@@ -95,14 +95,14 @@ Status SavedGames::Save(const CStrW& name, const CStrW& description, CSimulation
 		"mods", mods,
 		"initAttributes", initAttributes);
 
-	JS::RootedValue guiMetadata(rq.cx);
+	JS::RootedValue guiMetadata(rq.cx());
 	Script::ReadStructuredClone(rq, guiMetadataClone, &guiMetadata);
 
 	// get some camera data
 	const CVector3D cameraPosition = g_Game->GetView()->GetCameraPosition();
 	const CVector3D cameraRotation = g_Game->GetView()->GetCameraRotation();
 
-	JS::RootedValue cameraMetadata(rq.cx);
+	JS::RootedValue cameraMetadata(rq.cx());
 
 	Script::CreateObject(
 		rq,
@@ -168,7 +168,7 @@ public:
 		m_SavedState(savedState)
 	{
 		ScriptRequest rq(scriptInterface);
-		m_Metadata.init(rq.cx);
+		m_Metadata.init(rq.cx());
 	}
 
 	static void ReadEntryCallback(const VfsPath& pathname, const CFileInfo& fileInfo, PIArchiveFile archiveFile, uintptr_t cbData)
@@ -244,7 +244,7 @@ std::optional<SavedGames::LoadResult> SavedGames::Load(const ScriptInterface& sc
 		}
 	}
 	const ScriptRequest rq{scriptInterface};
-	JS::RootedValue metadata{rq.cx, loader.GetMetadata()};
+	JS::RootedValue metadata{rq.cx(), loader.GetMetadata()};
 
 	// `std::make_optional` can't be used since `LoadResult` doesn't have a constructor.
 	return {{metadata, std::move(savedState)}};
@@ -255,7 +255,7 @@ JS::Value SavedGames::GetSavedGames(const ScriptInterface& scriptInterface)
 	TIMER(L"GetSavedGames");
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue games(rq.cx);
+	JS::RootedValue games(rq.cx());
 	Script::CreateArray(rq, &games);
 
 	Status err;
@@ -289,9 +289,9 @@ JS::Value SavedGames::GetSavedGames(const ScriptInterface& scriptInterface)
 			DEBUG_WARN_ERR(err);
 			continue; // skip this file
 		}
-		JS::RootedValue metadata(rq.cx, loader.GetMetadata());
+		JS::RootedValue metadata(rq.cx(), loader.GetMetadata());
 
-		JS::RootedValue game(rq.cx);
+		JS::RootedValue game(rq.cx());
 		Script::CreateObject(
 			rq,
 			&game,

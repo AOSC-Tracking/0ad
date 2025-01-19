@@ -85,12 +85,12 @@ bool VisualReplay::ReadCacheFile(const ScriptInterface& scriptInterface, JS::Mut
 
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue cachedReplays(rq.cx);
+	JS::RootedValue cachedReplays(rq.cx());
 	if (Script::ParseJSON(rq, cacheStr, &cachedReplays))
 	{
 		cachedReplaysObject.set(&cachedReplays.toObject());
 		bool isArray;
-		if (JS::IsArrayObject(rq.cx, cachedReplaysObject, &isArray) && isArray)
+		if (JS::IsArrayObject(rq.cx(), cachedReplaysObject, &isArray) && isArray)
 			return true;
 	}
 
@@ -103,7 +103,7 @@ void VisualReplay::StoreCacheFile(const ScriptInterface& scriptInterface, JS::Ha
 {
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue replaysRooted(rq.cx, JS::ObjectValue(*replays));
+	JS::RootedValue replaysRooted(rq.cx(), JS::ObjectValue(*replays));
 	std::ofstream cacheStream(OsString(GetTempCacheFilePath()), std::ofstream::out | std::ofstream::trunc);
 	cacheStream << Script::StringifyJSON(rq, &replaysRooted);
 	cacheStream.close();
@@ -123,18 +123,18 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 
 	replayCacheMap fileList;
 
-	JS::RootedObject cachedReplaysObject(rq.cx);
+	JS::RootedObject cachedReplaysObject(rq.cx());
 	if (ReadCacheFile(scriptInterface, &cachedReplaysObject))
 	{
 		// Create list of files included in the cache
 		u32 cacheLength = 0;
-		JS::GetArrayLength(rq.cx, cachedReplaysObject, &cacheLength);
+		JS::GetArrayLength(rq.cx(), cachedReplaysObject, &cacheLength);
 		for (u32 j = 0; j < cacheLength; ++j)
 		{
-			JS::RootedValue replay(rq.cx);
-			JS_GetElement(rq.cx, cachedReplaysObject, j, &replay);
+			JS::RootedValue replay(rq.cx());
+			JS_GetElement(rq.cx(), cachedReplaysObject, j, &replay);
 
-			JS::RootedValue file(rq.cx);
+			JS::RootedValue file(rq.cx());
 			OsPath fileName;
 			double fileSize;
 			double fileMtime;
@@ -146,7 +146,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 		}
 	}
 
-	JS::RootedObject replays(rq.cx, JS::NewArrayObject(rq.cx, 0));
+	JS::RootedObject replays(rq.cx(), JS::NewArrayObject(rq.cx(), 0));
 	DirectoryNames directories;
 
 	if (GetDirectoryEntries(GetDirectoryPath(), nullptr, &directories) != INFO::OK)
@@ -186,7 +186,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 
 		if (isNew)
 		{
-			JS::RootedValue replayData(rq.cx, LoadReplayData(scriptInterface, directory));
+			JS::RootedValue replayData(rq.cx(), LoadReplayData(scriptInterface, directory));
 			if (replayData.isNull())
 			{
 				if (!FileExists(replayFile))
@@ -201,7 +201,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 					"fileMTime", static_cast<double>(fileInfo.MTime()),
 					"fileSize", static_cast<double>(fileInfo.Size()));
 			}
-			JS_SetElement(rq.cx, replays, i++, replayData);
+			JS_SetElement(rq.cx(), replays, i++, replayData);
 			newReplays = true;
 		}
 		else
@@ -224,9 +224,9 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 		if (!copyFromOldCache.empty())
 			for (u32 j : copyFromOldCache)
 			{
-				JS::RootedValue replay(rq.cx);
-				JS_GetElement(rq.cx, cachedReplaysObject, j, &replay);
-				JS_SetElement(rq.cx, replays, i++, replay);
+				JS::RootedValue replay(rq.cx());
+				JS_GetElement(rq.cx(), cachedReplaysObject, j, &replay);
+				JS_SetElement(rq.cx(), replays, i++, replay);
 			}
 	}
 	StoreCacheFile(scriptInterface, replays);
@@ -238,17 +238,17 @@ JS::Value VisualReplay::GetReplays(const ScriptInterface& scriptInterface, bool 
 	TIMER(L"GetReplays");
 
 	ScriptRequest rq(scriptInterface);
-	JS::RootedObject replays(rq.cx, ReloadReplayCache(scriptInterface, compareFiles));
+	JS::RootedObject replays(rq.cx(), ReloadReplayCache(scriptInterface, compareFiles));
 	// Only take entries with data
-	JS::RootedValue replaysWithoutNullEntries(rq.cx);
+	JS::RootedValue replaysWithoutNullEntries(rq.cx());
 	Script::CreateArray(rq, &replaysWithoutNullEntries);
 
 	u32 replaysLength = 0;
-	JS::GetArrayLength(rq.cx, replays, &replaysLength);
+	JS::GetArrayLength(rq.cx(), replays, &replaysLength);
 	for (u32 j = 0, i = 0; j < replaysLength; ++j)
 	{
-		JS::RootedValue replay(rq.cx);
-		JS_GetElement(rq.cx, replays, j, &replay);
+		JS::RootedValue replay(rq.cx());
+		JS_GetElement(rq.cx(), replays, j, &replay);
 		if (Script::HasProperty(rq, replay, "attribs"))
 			Script::SetPropertyInt(rq, replaysWithoutNullEntries, i++, replay);
 	}
@@ -375,7 +375,7 @@ JS::Value VisualReplay::LoadReplayData(const ScriptInterface& scriptInterface, c
 	CStr header;
 	std::getline(*replayStream, header);
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue attribs(rq.cx);
+	JS::RootedValue attribs(rq.cx());
 	if (!Script::ParseJSON(rq, header, &attribs))
 	{
 		LOGERROR("Couldn't parse replay header of %s", replayFile.string8().c_str());
@@ -408,7 +408,7 @@ JS::Value VisualReplay::LoadReplayData(const ScriptInterface& scriptInterface, c
 		return JS::NullValue();
 
 	// Return the actual data
-	JS::RootedValue replayData(rq.cx);
+	JS::RootedValue replayData(rq.cx());
 
 	Script::CreateObject(
 		rq,
@@ -436,7 +436,7 @@ JS::Value VisualReplay::GetReplayAttributes(const ScriptInterface& scriptInterfa
 {
 	// Create empty JS object
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue attribs(rq.cx);
+	JS::RootedValue attribs(rq.cx());
 	Script::CreateObject(rq, &attribs);
 
 	// Return empty object if file doesn't exist
@@ -461,17 +461,17 @@ void VisualReplay::AddReplayToCache(const ScriptInterface& scriptInterface, cons
 	TIMER(L"AddReplayToCache");
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue replayData(rq.cx, LoadReplayData(scriptInterface, OsPath(directoryName)));
+	JS::RootedValue replayData(rq.cx(), LoadReplayData(scriptInterface, OsPath(directoryName)));
 	if (replayData.isNull())
 		return;
 
-	JS::RootedObject cachedReplaysObject(rq.cx);
+	JS::RootedObject cachedReplaysObject(rq.cx());
 	if (!ReadCacheFile(scriptInterface, &cachedReplaysObject))
-		cachedReplaysObject = JS::NewArrayObject(rq.cx, 0);
+		cachedReplaysObject = JS::NewArrayObject(rq.cx(), 0);
 
 	u32 cacheLength = 0;
-	JS::GetArrayLength(rq.cx, cachedReplaysObject, &cacheLength);
-	JS_SetElement(rq.cx, cachedReplaysObject, cacheLength, replayData);
+	JS::GetArrayLength(rq.cx(), cachedReplaysObject, &cacheLength);
+	JS_SetElement(rq.cx(), cachedReplaysObject, cacheLength, replayData);
 
 	StoreCacheFile(scriptInterface, cachedReplaysObject);
 }
@@ -495,7 +495,7 @@ JS::Value VisualReplay::GetReplayMetadata(const ScriptInterface& scriptInterface
 		return JS::NullValue();
 
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue metadata(rq.cx);
+	JS::RootedValue metadata(rq.cx());
 
 	std::ifstream* stream = new std::ifstream(OsString(GetDirectoryPath() / directoryName / L"metadata.json"));
 	ENSURE(stream->good());

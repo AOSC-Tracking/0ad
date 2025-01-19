@@ -108,7 +108,7 @@ bool ParseModJSON(const ScriptRequest& rq, const PIVFS& vfs, OsPath modsPath, Os
 	if (!LoadModJSON(vfs, modsPath, mod, text))
 		return false;
 
-	JS::RootedValue json(rq.cx);
+	JS::RootedValue json(rq.cx());
 	if (!Script::ParseJSON(rq, text, &json))
 		return false;
 

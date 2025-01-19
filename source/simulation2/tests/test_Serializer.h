@@ -299,7 +299,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 		ScriptRequest rq(script);
 
-		JS::RootedValue obj(rq.cx);
+		JS::RootedValue obj(rq.cx());
 		TSM_ASSERT(msg, script.Eval(input, &obj));
 
 		if (debug)
@@ -322,7 +322,7 @@ public:
 
 		CStdDeserializer deserialize(script, stream);
 
-		JS::RootedValue newobj(rq.cx);
+		JS::RootedValue newobj(rq.cx());
 		deserialize.ScriptVal("script", &newobj);
 		// NOTE: Don't use good() here - it fails due to a bug in older libc++ versions
 		TSM_ASSERT(msg, !stream.bad() && !stream.fail());
@@ -815,7 +815,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 		ScriptRequest rq(script);
 
-		JS::RootedValue obj(rq.cx);
+		JS::RootedValue obj(rq.cx());
 
 		std::stringstream stream;
 		CStdSerializer serialize(script, stream);
@@ -850,7 +850,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 		ScriptRequest rq(script);
 
-		JS::RootedValue obj(rq.cx);
+		JS::RootedValue obj(rq.cx());
 		TS_ASSERT(script.Eval(input, &obj));
 
 		for (size_t i = 0; i < 256; ++i)
@@ -862,7 +862,7 @@ public:
 
 			CStdDeserializer deserialize(script, stream);
 
-			JS::RootedValue newobj(rq.cx);
+			JS::RootedValue newobj(rq.cx());
 			deserialize.ScriptVal("script", &newobj);
 			// NOTE: Don't use good() here - it fails due to a bug in older libc++ versions
 			TS_ASSERT(!stream.bad() && !stream.fail());

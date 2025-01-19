@@ -89,7 +89,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 
 		ScriptRequest rq(script);
-		JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+		JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 
 		m_Mods.m_AvailableMods = {
 			Mod::ModData{ "public", "0ad", "0.0.25", {}, false, "" },
@@ -139,7 +139,7 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 
 		ScriptRequest rq(script);
-		JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+		JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 
 		m_Mods.m_AvailableMods = {
 			Mod::ModData{ "public", "0ad", "0.0.25", {}, false, "" },

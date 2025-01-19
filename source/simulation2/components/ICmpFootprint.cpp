@@ -32,36 +32,36 @@ JS::Value ICmpFootprint::GetShape_wrapper() const
 
 	ScriptRequest rq(GetSimContext().GetScriptInterface());
 
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 	if (!obj)
 		return JS::UndefinedValue();
 
 	if (shape == CIRCLE)
 	{
-		JS::RootedValue ptype(rq.cx);
-		JS::RootedValue pradius(rq.cx);
-		JS::RootedValue pheight(rq.cx);
+		JS::RootedValue ptype(rq.cx());
+		JS::RootedValue pradius(rq.cx());
+		JS::RootedValue pheight(rq.cx());
 		Script::ToJSVal<std::string>(rq, &ptype, "circle");
 		Script::ToJSVal(rq, &pradius, size0);
 		Script::ToJSVal(rq, &pheight, height);
-		JS_SetProperty(rq.cx, obj, "type", ptype);
-		JS_SetProperty(rq.cx, obj, "radius", pradius);
-		JS_SetProperty(rq.cx, obj, "height", pheight);
+		JS_SetProperty(rq.cx(), obj, "type", ptype);
+		JS_SetProperty(rq.cx(), obj, "radius", pradius);
+		JS_SetProperty(rq.cx(), obj, "height", pheight);
 	}
 	else
 	{
-		JS::RootedValue ptype(rq.cx);
-		JS::RootedValue pwidth(rq.cx);
-		JS::RootedValue pdepth(rq.cx);
-		JS::RootedValue pheight(rq.cx);
+		JS::RootedValue ptype(rq.cx());
+		JS::RootedValue pwidth(rq.cx());
+		JS::RootedValue pdepth(rq.cx());
+		JS::RootedValue pheight(rq.cx());
 		Script::ToJSVal<std::string>(rq, &ptype, "square");
 		Script::ToJSVal(rq, &pwidth, size0);
 		Script::ToJSVal(rq, &pdepth, size1);
 		Script::ToJSVal(rq, &pheight, height);
-		JS_SetProperty(rq.cx, obj, "type", ptype);
-		JS_SetProperty(rq.cx, obj, "width", pwidth);
-		JS_SetProperty(rq.cx, obj, "depth", pdepth);
-		JS_SetProperty(rq.cx, obj, "height", pheight);
+		JS_SetProperty(rq.cx(), obj, "type", ptype);
+		JS_SetProperty(rq.cx(), obj, "width", pwidth);
+		JS_SetProperty(rq.cx(), obj, "depth", pdepth);
+		JS_SetProperty(rq.cx(), obj, "height", pheight);
 	}
 
 	return JS::ObjectValue(*obj);

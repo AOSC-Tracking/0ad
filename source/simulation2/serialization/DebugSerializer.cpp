@@ -154,7 +154,7 @@ void CDebugSerializer::PutScriptVal(const char* name, JS::MutableHandleValue val
 {
 	ScriptRequest rq(m_ScriptInterface);
 
-	JS::RootedValue serialize(rq.cx);
+	JS::RootedValue serialize(rq.cx());
 	if (Script::GetProperty(rq, value, "Serialize", &serialize) && !serialize.isNullOrUndefined())
 	{
 		// If the value has a Serialize property, pretty-parse that instead.

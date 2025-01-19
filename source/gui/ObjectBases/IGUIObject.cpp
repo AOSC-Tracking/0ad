@@ -63,7 +63,7 @@ IGUIObject::IGUIObject(CGUI& pGUI)
 IGUIObject::~IGUIObject()
 {
 	if (!m_ScriptHandlers.empty())
-		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
+		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx(), Trace, this);
 
 	// m_Children is deleted along all other GUI Objects in the CGUI destructor
 }
@@ -312,28 +312,28 @@ void IGUIObject::RegisterScriptHandler(const CStr& eventName, const CStr& Code, 
 	sprintf_s(buf, ARRAY_SIZE(buf), "__eventhandler%d (%s)", x++, eventName.c_str());
 
 	// TODO: this is essentially the same code as ScriptInterface::LoadScript (with a tweak for the argument).
-	JS::CompileOptions options(rq.cx);
+	JS::CompileOptions options(rq.cx());
 	options.setFileAndLine(CodeName.c_str(), 0);
 	options.setIsRunOnce(false);
 
 	JS::SourceText<mozilla::Utf8Unit> src;
-	ENSURE(src.init(rq.cx, Code.c_str(), Code.length(), JS::SourceOwnership::Borrowed));
-	JS::RootedObjectVector emptyScopeChain(rq.cx);
-	JS::RootedFunction func(rq.cx, JS::CompileFunction(rq.cx, emptyScopeChain, options, buf, paramCount, paramNames, src));
+	ENSURE(src.init(rq.cx(), Code.c_str(), Code.length(), JS::SourceOwnership::Borrowed));
+	JS::RootedObjectVector emptyScopeChain(rq.cx());
+	JS::RootedFunction func(rq.cx(), JS::CompileFunction(rq.cx(), emptyScopeChain, options, buf, paramCount, paramNames, src));
 	if (func == nullptr)
 	{
 		LOGERROR("RegisterScriptHandler: Failed to compile the script for %s", eventName.c_str());
 		return;
 	}
 
-	JS::RootedObject funcObj(rq.cx, JS_GetFunctionObject(func));
+	JS::RootedObject funcObj(rq.cx(), JS_GetFunctionObject(func));
 	SetScriptHandler(eventName, funcObj);
 }
 
 void IGUIObject::SetScriptHandler(const CStr& eventName, JS::HandleObject Function)
 {
 	if (m_ScriptHandlers.empty())
-		JS_AddExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
+		JS_AddExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx(), Trace, this);
 
 	m_ScriptHandlers[eventName] = JS::Heap<JSObject*>(Function);
 
@@ -351,7 +351,7 @@ void IGUIObject::UnsetScriptHandler(const CStr& eventName)
 	m_ScriptHandlers.erase(it);
 
 	if (m_ScriptHandlers.empty())
-		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
+		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx(), Trace, this);
 
 	std::unordered_map<CStr, std::vector<IGUIObject*>>::iterator it2 = m_pGUI.m_EventObjects.find(eventName);
 	if (it2 == m_pGUI.m_EventObjects.end())
@@ -392,7 +392,7 @@ InReaction IGUIObject::SendMouseEvent(EGUIMessageType type, const CStr& eventNam
 	ScriptRequest rq(m_pGUI.GetScriptInterface());
 
 	// Set up the 'mouse' parameter
-	JS::RootedValue mouse(rq.cx);
+	JS::RootedValue mouse(rq.cx());
 
 	const CVector2D& mousePos = m_pGUI.GetMousePos();
 
@@ -405,7 +405,7 @@ InReaction IGUIObject::SendMouseEvent(EGUIMessageType type, const CStr& eventNam
 			"x", mousePos.X,
 			"y", mousePos.Y,
 			"buttons", m_pGUI.GetMouseButtons());
-		JS::RootedValueVector paramData(rq.cx);
+		JS::RootedValueVector paramData(rq.cx());
 		ignore_result(paramData.append(mouse));
 		ScriptEvent(eventName, paramData);
 
@@ -437,7 +437,7 @@ bool IGUIObject::ScriptEventWithReturn(const CStr& eventName)
 		return false;
 
 	ScriptRequest rq(m_pGUI.GetScriptInterface());
-	JS::RootedValueVector paramData(rq.cx);
+	JS::RootedValueVector paramData(rq.cx());
 	return ScriptEventWithReturn(eventName, paramData);
 }
 
@@ -453,11 +453,11 @@ bool IGUIObject::ScriptEventWithReturn(const CStr& eventName, const JS::HandleVa
 		return false;
 
 	ScriptRequest rq(m_pGUI.GetScriptInterface());
-	JS::RootedObject obj(rq.cx, GetJSObject());
-	JS::RootedValue handlerVal(rq.cx, JS::ObjectValue(*it->second));
-	JS::RootedValue result(rq.cx);
+	JS::RootedObject obj(rq.cx(), GetJSObject());
+	JS::RootedValue handlerVal(rq.cx(), JS::ObjectValue(*it->second));
+	JS::RootedValue result(rq.cx());
 
-	if (!JS_CallFunctionValue(rq.cx, obj, handlerVal, paramData, &result))
+	if (!JS_CallFunctionValue(rq.cx(), obj, handlerVal, paramData, &result))
 	{
 		LOGERROR("Errors executing script event \"%s\"", eventName.c_str());
 		ScriptException::CatchPending(rq);

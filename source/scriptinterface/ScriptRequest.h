@@ -85,14 +85,17 @@ public:
 	 */
 	const ScriptInterface& GetScriptInterface() const;
 
+	JSContext* cx() const { return m_Cx; }
+
 	JS::Value globalValue() const;
 
-	// Note that JSContext actually changes behind the scenes when creating another ScriptRequest for another realm,
-	// so be _very_ careful when juggling between different realms.
-	JSContext* cx;
 	JS::HandleObject glob;
 	JS::HandleObject nativeScope;
 private:
+	// Note that JSContext actually changes behind the scenes when creating another ScriptRequest for another realm,
+	// so be _very_ careful when juggling between different realms.
+	JSContext* m_Cx;
+
 	const ScriptInterface& m_ScriptInterface;
 	JS::Realm* m_FormerRealm;
 };

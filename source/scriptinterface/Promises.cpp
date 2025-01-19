@@ -50,12 +50,12 @@ void JobQueue::runJobs(JSContext*)
 	{
 		QueueElement& element = m_Jobs.front();
 		ScriptRequest rq{element.scriptInterface};
-		JS::RootedObject localJob{rq.cx, element.job};
+		JS::RootedObject localJob{rq.cx(), element.job};
 		m_Jobs.pop();
 
-		JS::RootedValue globV{rq.cx, rq.globalValue()};
-		JS::RootedValue rval{rq.cx};
-		JS::Call(rq.cx, globV, localJob, JS::HandleValueArray::empty(), &rval);
+		JS::RootedValue globV{rq.cx(), rq.globalValue()};
+		JS::RootedValue rval{rq.cx()};
+		JS::Call(rq.cx(), globV, localJob, JS::HandleValueArray::empty(), &rval);
 	}
 }
 

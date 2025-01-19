@@ -46,7 +46,7 @@ public:
 		m_AIs(scriptInterface.GetGeneralJSContext())
 	{
 		ScriptRequest rq(m_ScriptInterface);
-		m_AIs = JS::NewArrayObject(rq.cx, 0);
+		m_AIs = JS::NewArrayObject(rq.cx(), 0);
 	}
 
 	void Run()
@@ -65,16 +65,16 @@ public:
 		std::advance(it, 2);
 		std::wstring dirname = GetWstringFromWpath(*it);
 
-		JS::RootedValue ai(rq.cx);
+		JS::RootedValue ai(rq.cx());
 		Script::CreateObject(rq, &ai);
 
-		JS::RootedValue data(rq.cx);
+		JS::RootedValue data(rq.cx());
 		Script::ReadJSONFile(rq, pathname, &data);
 		Script::SetProperty(rq, ai, "id", dirname, true);
 		Script::SetProperty(rq, ai, "data", data, true);
 		u32 length;
-		JS::GetArrayLength(rq.cx, self->m_AIs, &length);
-		JS_SetElement(rq.cx, self->m_AIs, length, ai);
+		JS::GetArrayLength(rq.cx(), self->m_AIs, &length);
+		JS_SetElement(rq.cx(), self->m_AIs, length, ai);
 
 		return INFO::OK;
 	}

@@ -154,8 +154,8 @@ void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) cons
 		return;
 	}
 
-	JS::RootedObject obj(rq.cx, &ret.toObject());
-	if (!JS_InstanceOf(rq.cx, obj, &JSI_GUISize::JSI_class, nullptr))
+	JS::RootedObject obj(rq.cx(), &ret.toObject());
+	if (!JS_InstanceOf(rq.cx(), obj, &JSI_GUISize::JSI_class, nullptr))
 	{
 		ScriptException::Raise(rq, "CGUISize value is not a CGUISize class instance");
 		return;
@@ -203,8 +203,8 @@ bool CGUISize::FromJSVal(const ScriptRequest& rq, JS::HandleValue v)
 		return false;
 	}
 
-	JS::RootedObject obj(rq.cx, &v.toObject());
-	if (!JS_InstanceOf(rq.cx, obj, &JSI_GUISize::JSI_class, nullptr))
+	JS::RootedObject obj(rq.cx(), &v.toObject());
+	if (!JS_InstanceOf(rq.cx(), obj, &JSI_GUISize::JSI_class, nullptr))
 	{
 		LOGERROR("CGUISize value is not a CGUISize class instance");
 		return false;

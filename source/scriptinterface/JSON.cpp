@@ -50,7 +50,7 @@ bool Script::ParseJSON(const ScriptRequest& rq, const std::string& string_utf8, 
 {
 	std::wstring attrsW = wstring_from_utf8(string_utf8);
 	std::u16string string(attrsW.begin(), attrsW.end());
-	if (JS_ParseJSON(rq.cx, string.c_str(), (u32)string.size(), out))
+	if (JS_ParseJSON(rq.cx(), string.c_str(), (u32)string.size(), out))
 		return true;
 
 	ScriptException::CatchPending(rq);
@@ -104,8 +104,8 @@ struct Stringifier
 std::string Script::StringifyJSON(const ScriptRequest& rq, JS::MutableHandleValue obj, bool indent)
 {
 	Stringifier str;
-	JS::RootedValue indentVal(rq.cx, indent ? JS::Int32Value(2) : JS::UndefinedValue());
-	if (!JS_Stringify(rq.cx, obj, nullptr, indentVal, &Stringifier::callback, &str))
+	JS::RootedValue indentVal(rq.cx(), indent ? JS::Int32Value(2) : JS::UndefinedValue());
+	if (!JS_Stringify(rq.cx(), obj, nullptr, indentVal, &Stringifier::callback, &str))
 	{
 		ScriptException::CatchPending(rq);
 		return std::string();
@@ -125,13 +125,13 @@ std::string Script::ToString(const ScriptRequest& rq, JS::MutableHandleValue obj
 	if (pretty)
 	{
 		Stringifier str;
-		JS::RootedValue indentVal(rq.cx, JS::Int32Value(2));
+		JS::RootedValue indentVal(rq.cx(), JS::Int32Value(2));
 
-		if (JS_Stringify(rq.cx, obj, nullptr, indentVal, &Stringifier::callback, &str))
+		if (JS_Stringify(rq.cx(), obj, nullptr, indentVal, &Stringifier::callback, &str))
 			return str.stream.str();
 
 		// Drop exceptions raised by cyclic values before trying something else
-		JS_ClearPendingException(rq.cx);
+		JS_ClearPendingException(rq.cx());
 	}
 
 	// Caller didn't want pretty output, or JSON conversion failed (e.g. due to cycles),

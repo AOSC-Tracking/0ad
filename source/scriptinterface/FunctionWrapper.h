@@ -225,26 +225,26 @@ private:
 	template<typename R, typename ...Args>
 	static bool Call_(const ScriptRequest& rq, JS::HandleValue val, const char* name, R& ret, const Args&... args)
 	{
-		JS::RootedObject obj(rq.cx);
-		if (!JS_ValueToObject(rq.cx, val, &obj) || !obj)
+		JS::RootedObject obj(rq.cx());
+		if (!JS_ValueToObject(rq.cx(), val, &obj) || !obj)
 			return false;
 
 		// Fetch the property explicitly - this avoids converting the arguments if it doesn't exist.
-		JS::RootedValue func(rq.cx);
-		if (!JS_GetProperty(rq.cx, obj, name, &func) || func.isUndefined())
+		JS::RootedValue func(rq.cx());
+		if (!JS_GetProperty(rq.cx(), obj, name, &func) || func.isUndefined())
 			return false;
 
-		JS::RootedValueVector argv(rq.cx);
+		JS::RootedValueVector argv(rq.cx());
 		ignore_result(argv.resize(sizeof...(Args)));
 		ToJSValVector(std::index_sequence_for<Args...>{}, rq, &argv, args...);
 
 		bool success;
 		if constexpr (std::is_same_v<R, JS::MutableHandleValue>)
-			success = JS_CallFunctionValue(rq.cx, obj, func, argv, ret);
+			success = JS_CallFunctionValue(rq.cx(), obj, func, argv, ret);
 		else
 		{
-			JS::RootedValue jsRet(rq.cx);
-			success = JS_CallFunctionValue(rq.cx, obj, func, argv, &jsRet);
+			JS::RootedValue jsRet(rq.cx());
+			success = JS_CallFunctionValue(rq.cx(), obj, func, argv, &jsRet);
 			if constexpr (!std::is_same_v<R, IgnoreResult_t>)
 			{
 				if (success)
@@ -368,34 +368,34 @@ public:
 	static JS::Value RunGenerator(const ScriptRequest& rq, JS::HandleValue val, const char* name,
 		JS::HandleValue arg, Callback yieldCallback)
 	{
-		JS::RootedValue generator{rq.cx};
+		JS::RootedValue generator{rq.cx()};
 		if (!ScriptFunction::Call(rq, val, name, &generator, arg))
 			throw std::runtime_error{fmt::format("Failed to call the generator `{}`.", name)};
 
 		const auto continueGenerator = [&](const char* property, auto... args) -> JS::Value
 			{
-				JS::RootedValue iteratorResult{rq.cx};
+				JS::RootedValue iteratorResult{rq.cx()};
 				if (!ScriptFunction::Call(rq, generator, property, &iteratorResult, args...))
 					throw std::runtime_error{fmt::format("Failed to call `{}`.", name)};
 				return iteratorResult;
 			};
 
-		JS::PersistentRootedValue error{rq.cx, JS::UndefinedValue()};
+		JS::PersistentRootedValue error{rq.cx(), JS::UndefinedValue()};
 		while (true)
 		{
-			JS::RootedValue iteratorResult{rq.cx, error.isUndefined() ? continueGenerator("next") :
+			JS::RootedValue iteratorResult{rq.cx(), error.isUndefined() ? continueGenerator("next") :
 				continueGenerator("throw", std::exchange(error, JS::UndefinedValue()))};
 
 			try
 			{
-				JS::RootedObject iteratorResultObject{rq.cx, &iteratorResult.toObject()};
+				JS::RootedObject iteratorResultObject{rq.cx(), &iteratorResult.toObject()};
 
 				bool done;
 				if (!Script::FromJSProperty(rq, iteratorResult, "done", done, true))
 					throw IteratorResultError{"done"};
 
-				JS::RootedValue value{rq.cx};
-				if (!JS_GetProperty(rq.cx, iteratorResultObject, "value", &value))
+				JS::RootedValue value{rq.cx()};
+				if (!JS_GetProperty(rq.cx(), iteratorResultObject, "value", &value))
 					throw IteratorResultError{"value"};
 
 				if (done)
@@ -405,7 +405,7 @@ public:
 			}
 			catch (const std::exception& e)
 			{
-				JS::RootedValue global{rq.cx, rq.globalValue()};
+				JS::RootedValue global{rq.cx(), rq.globalValue()};
 				if (!ScriptFunction::Call(rq, global, "Error", &error, e.what()))
 					throw std::runtime_error{"Failed to construct `Error`."};
 			}
@@ -429,7 +429,7 @@ public:
 	static JSFunction* Create(const ScriptRequest& rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
-		return JS_NewFunction(rq.cx, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags, name);
+		return JS_NewFunction(rq.cx(), &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags, name);
 	}
 
 	/**
@@ -439,7 +439,7 @@ public:
 	static void Register(const ScriptRequest& rq, const char* name,
 		const u16 flags = JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT)
 	{
-		JS_DefineFunction(rq.cx, rq.nativeScope, name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
+		JS_DefineFunction(rq.cx(), rq.nativeScope, name, &ToJSNative<callable, thisGetter>, args_info<decltype(callable)>::nb_args, flags);
 	}
 
 	/**

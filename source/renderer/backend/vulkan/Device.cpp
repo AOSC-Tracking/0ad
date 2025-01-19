@@ -689,16 +689,16 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 
 	Script::SetProperty(rq, settings, "extensions", m_Extensions);
 
-	JS::RootedValue device(rq.cx);
+	JS::RootedValue device(rq.cx());
 	Script::CreateObject(rq, &device);
 	ReportAvailablePhysicalDevice(m_ChoosenDevice, rq, device);
 	Script::SetProperty(rq, settings, "choosen_device", device);
 
-	JS::RootedValue availableDevices(rq.cx);
+	JS::RootedValue availableDevices(rq.cx());
 	Script::CreateArray(rq, &availableDevices, m_AvailablePhysicalDevices.size());
 	for (size_t index = 0; index < m_AvailablePhysicalDevices.size(); ++index)
 	{
-		JS::RootedValue device(rq.cx);
+		JS::RootedValue device(rq.cx());
 		Script::CreateObject(rq, &device);
 		ReportAvailablePhysicalDevice(m_AvailablePhysicalDevices[index], rq, device);
 		Script::SetPropertyInt(rq, availableDevices, index, device);

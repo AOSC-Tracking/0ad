@@ -131,7 +131,7 @@ template<> void Script::ToJSVal<CmdLineArgs>(const ScriptRequest& rq, JS::Mutabl
 	for (const std::pair<CStr, CStr>& arg : val.GetArgs())
 		args.emplace(arg.first, std::vector<CStr>{}).first->second.emplace_back(arg.second);
 
-	JS::RootedValue argVal(rq.cx);
+	JS::RootedValue argVal(rq.cx());
 	for (const auto& arg : args)
 	{
 		if (arg.second.size() == 1)

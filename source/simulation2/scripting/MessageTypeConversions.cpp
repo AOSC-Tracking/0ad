@@ -21,28 +21,28 @@
 #include "simulation2/MessageTypes.h"
 
 #define TOJSVAL_SETUP() \
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx)); \
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx())); \
 	if (!obj) \
 		return JS::UndefinedValue();
 
 #define SET_MSG_PROPERTY(name) \
 	do { \
-		JS::RootedValue prop(rq.cx);\
+		JS::RootedValue prop(rq.cx());\
 		Script::ToJSVal(rq, &prop, this->name); \
-		if (! JS_SetProperty(rq.cx, obj, #name, prop)) \
+		if (! JS_SetProperty(rq.cx(), obj, #name, prop)) \
 			return JS::UndefinedValue(); \
 	} while (0);
 
 #define FROMJSVAL_SETUP() \
 	if (val.isPrimitive()) \
 		return NULL; \
-	JS::RootedObject obj(rq.cx, &val.toObject()); \
-	JS::RootedValue prop(rq.cx);
+	JS::RootedObject obj(rq.cx(), &val.toObject()); \
+	JS::RootedValue prop(rq.cx());
 
 #define GET_MSG_PROPERTY(type, name) \
 	type name; \
 	{ \
-	if (! JS_GetProperty(rq.cx, obj, #name, &prop)) \
+	if (! JS_GetProperty(rq.cx(), obj, #name, &prop)) \
 		return NULL; \
 	if (! Script::FromJSVal(rq, prop, name)) \
 		return NULL; \
@@ -51,7 +51,7 @@
 JS::Value CMessage::ToJSValCached(const ScriptRequest& rq) const
 {
 	if (!m_Cached)
-		m_Cached.reset(new JS::PersistentRootedValue(rq.cx, ToJSVal(rq)));
+		m_Cached.reset(new JS::PersistentRootedValue(rq.cx(), ToJSVal(rq)));
 
 	return m_Cached->get();
 }
@@ -251,9 +251,9 @@ const std::array<const char*, CMessageMotionUpdate::UpdateType::LENGTH> CMessage
 JS::Value CMessageMotionUpdate::ToJSVal(const ScriptRequest& rq) const
 {
 	TOJSVAL_SETUP();
-	JS::RootedValue prop(rq.cx);
+	JS::RootedValue prop(rq.cx());
 
-	if (!JS_SetProperty(rq.cx, obj, UpdateTypeStr[updateType], JS::TrueHandleValue))
+	if (!JS_SetProperty(rq.cx(), obj, UpdateTypeStr[updateType], JS::TrueHandleValue))
 		return JS::UndefinedValue();
 
 	return JS::ObjectValue(*obj);

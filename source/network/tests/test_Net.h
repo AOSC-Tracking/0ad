@@ -152,7 +152,7 @@ public:
 
 		CNetServer server{false};
 
-		JS::RootedValue attrs(rq.cx);
+		JS::RootedValue attrs(rq.cx());
 		Script::CreateObject(
 			rq,
 			&attrs,
@@ -186,7 +186,7 @@ public:
 		wait(clients, 100);
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,
@@ -196,7 +196,7 @@ public:
 		}
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,
@@ -231,7 +231,7 @@ public:
 
 		CNetServer server{false};
 
-		JS::RootedValue attrs(rq.cx);
+		JS::RootedValue attrs(rq.cx());
 		Script::CreateObject(
 			rq,
 			&attrs,
@@ -269,7 +269,7 @@ public:
 		wait(clients, 100);
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,
@@ -286,7 +286,7 @@ public:
 		wait(clients, 100);
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,
@@ -346,7 +346,7 @@ public:
 		// CTurnManager::TurnNeedsFullHash to always return true)
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,
@@ -363,7 +363,7 @@ public:
 		wait(clients, 100);
 
 		{
-			JS::RootedValue cmd(rq.cx);
+			JS::RootedValue cmd(rq.cx());
 			Script::CreateObject(
 				rq,
 				&cmd,

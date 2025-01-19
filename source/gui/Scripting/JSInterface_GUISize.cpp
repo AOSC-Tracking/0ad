@@ -51,42 +51,42 @@ bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
 	ScriptRequest rq(cx);
 	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
 
-	JS::RootedObject obj(rq.cx, scriptInterface.CreateCustomObject("GUISize"));
+	JS::RootedObject obj(rq.cx(), scriptInterface.CreateCustomObject("GUISize"));
 
 	if (args.length() == 8)
 	{
-		JS_SetProperty(rq.cx, obj, "left",		args[0]);
-		JS_SetProperty(rq.cx, obj, "top",		args[1]);
-		JS_SetProperty(rq.cx, obj, "right",	args[2]);
-		JS_SetProperty(rq.cx, obj, "bottom",	args[3]);
-		JS_SetProperty(rq.cx, obj, "rleft",	args[4]);
-		JS_SetProperty(rq.cx, obj, "rtop",		args[5]);
-		JS_SetProperty(rq.cx, obj, "rright",	args[6]);
-		JS_SetProperty(rq.cx, obj, "rbottom",	args[7]);
+		JS_SetProperty(rq.cx(), obj, "left",		args[0]);
+		JS_SetProperty(rq.cx(), obj, "top",		args[1]);
+		JS_SetProperty(rq.cx(), obj, "right",	args[2]);
+		JS_SetProperty(rq.cx(), obj, "bottom",	args[3]);
+		JS_SetProperty(rq.cx(), obj, "rleft",	args[4]);
+		JS_SetProperty(rq.cx(), obj, "rtop",		args[5]);
+		JS_SetProperty(rq.cx(), obj, "rright",	args[6]);
+		JS_SetProperty(rq.cx(), obj, "rbottom",	args[7]);
 	}
 	else if (args.length() == 4)
 	{
-		JS::RootedValue zero(rq.cx, JS::NumberValue(0));
-		JS_SetProperty(rq.cx, obj, "left",		args[0]);
-		JS_SetProperty(rq.cx, obj, "top",		args[1]);
-		JS_SetProperty(rq.cx, obj, "right",	args[2]);
-		JS_SetProperty(rq.cx, obj, "bottom",	args[3]);
-		JS_SetProperty(rq.cx, obj, "rleft",	zero);
-		JS_SetProperty(rq.cx, obj, "rtop",		zero);
-		JS_SetProperty(rq.cx, obj, "rright",	zero);
-		JS_SetProperty(rq.cx, obj, "rbottom",	zero);
+		JS::RootedValue zero(rq.cx(), JS::NumberValue(0));
+		JS_SetProperty(rq.cx(), obj, "left",		args[0]);
+		JS_SetProperty(rq.cx(), obj, "top",		args[1]);
+		JS_SetProperty(rq.cx(), obj, "right",	args[2]);
+		JS_SetProperty(rq.cx(), obj, "bottom",	args[3]);
+		JS_SetProperty(rq.cx(), obj, "rleft",	zero);
+		JS_SetProperty(rq.cx(), obj, "rtop",		zero);
+		JS_SetProperty(rq.cx(), obj, "rright",	zero);
+		JS_SetProperty(rq.cx(), obj, "rbottom",	zero);
 	}
 	else
 	{
-		JS::RootedValue zero(rq.cx, JS::NumberValue(0));
-		JS_SetProperty(rq.cx, obj, "left",		zero);
-		JS_SetProperty(rq.cx, obj, "top",		zero);
-		JS_SetProperty(rq.cx, obj, "right",	zero);
-		JS_SetProperty(rq.cx, obj, "bottom",	zero);
-		JS_SetProperty(rq.cx, obj, "rleft",	zero);
-		JS_SetProperty(rq.cx, obj, "rtop",		zero);
-		JS_SetProperty(rq.cx, obj, "rright",	zero);
-		JS_SetProperty(rq.cx, obj, "rbottom",	zero);
+		JS::RootedValue zero(rq.cx(), JS::NumberValue(0));
+		JS_SetProperty(rq.cx(), obj, "left",		zero);
+		JS_SetProperty(rq.cx(), obj, "top",		zero);
+		JS_SetProperty(rq.cx(), obj, "right",	zero);
+		JS_SetProperty(rq.cx(), obj, "bottom",	zero);
+		JS_SetProperty(rq.cx(), obj, "rleft",	zero);
+		JS_SetProperty(rq.cx(), obj, "rtop",		zero);
+		JS_SetProperty(rq.cx(), obj, "rright",	zero);
+		JS_SetProperty(rq.cx(), obj, "rbottom",	zero);
 	}
 
 	args.rval().setObject(*obj);

@@ -34,7 +34,7 @@ public:
 
 		TS_ASSERT(test.GetScriptInterface().Eval("var cmds = []; function ProcessCommand(player, cmd) { cmds.push([player, cmd]); }"));
 
-		JS::RootedValue cmd(rq.cx);
+		JS::RootedValue cmd(rq.cx());
 
 		TS_ASSERT(test.GetScriptInterface().Eval("([1,2,3])", &cmd));
 		cmp->PushLocalCommand(1, cmd);

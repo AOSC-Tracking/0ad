@@ -79,7 +79,7 @@ JS::Value GetCameraRotation(const ScriptRequest& rq)
 		return JS::UndefinedValue();
 
 	const CVector3D rotation = g_Game->GetView()->GetCameraRotation();
-	JS::RootedValue val(rq.cx);
+	JS::RootedValue val(rq.cx());
 	Script::CreateObject(rq, &val, "x", rotation.X, "y", rotation.Y);
 	return val;
 }
@@ -97,7 +97,7 @@ JS::Value GetCameraPivot(const ScriptRequest& rq)
 		return JS::UndefinedValue();
 
 	const CVector3D pivot = g_Game->GetView()->GetCameraPivot();
-	JS::RootedValue pivotValue(rq.cx);
+	JS::RootedValue pivotValue(rq.cx());
 	Script::CreateObject(rq, &pivotValue, "x", pivot.X, "z", pivot.Z);
 	return pivotValue;
 }
@@ -108,7 +108,7 @@ JS::Value GetCameraPosition(const ScriptRequest& rq)
 		return JS::UndefinedValue();
 
 	const CVector3D position = g_Game->GetView()->GetCameraPosition();
-	JS::RootedValue positionValue(rq.cx);
+	JS::RootedValue positionValue(rq.cx());
 	Script::CreateObject(rq, &positionValue, "x", position.X, "y", position.Y, "z", position.Z);
 	return positionValue;
 }

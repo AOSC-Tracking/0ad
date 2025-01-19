@@ -381,7 +381,7 @@ std::string CNetClient::TestReadGuiMessages()
 	ScriptRequest rq(GetScriptInterface());
 
 	std::string r;
-	JS::RootedValue msg(rq.cx);
+	JS::RootedValue msg(rq.cx());
 	while (true)
 	{
 		GuiPoll(&msg);
@@ -401,12 +401,12 @@ void CNetClient::PostPlayerAssignmentsToScript()
 {
 	ScriptRequest rq(GetScriptInterface());
 
-	JS::RootedValue newAssignments(rq.cx);
+	JS::RootedValue newAssignments(rq.cx());
 	Script::CreateObject(rq, &newAssignments);
 
 	for (const std::pair<const CStr, PlayerAssignment>& p : m_PlayerAssignments)
 	{
-		JS::RootedValue assignment(rq.cx);
+		JS::RootedValue assignment(rq.cx());
 
 		Script::CreateObject(
 			rq,
@@ -807,7 +807,7 @@ bool CNetClient::OnGameStart(CNetClient* client, CFsmEvent* event)
 
 	const ScriptInterface& scriptInterface{client->m_Game->GetSimulation2()->GetScriptInterface()};
 	ScriptRequest rq{scriptInterface};
-	JS::RootedValue initAttribs{rq.cx};
+	JS::RootedValue initAttribs{rq.cx()};
 	Script::ParseJSON(rq, message->m_InitAttributes, &initAttribs);
 
 	client->PushGuiMessage("type", "start", "initAttributes", initAttribs);
@@ -822,7 +822,7 @@ bool CNetClient::OnSavedGameStart(CNetClient* client, CFsmEvent* event)
 
 	const ScriptInterface& scriptInterface{client->m_Game->GetSimulation2()->GetScriptInterface()};
 	ScriptRequest rq{scriptInterface};
-	const std::shared_ptr<JS::RootedValue> initAttribs{std::make_shared<JS::RootedValue>(rq.cx)};
+	const std::shared_ptr<JS::RootedValue> initAttribs{std::make_shared<JS::RootedValue>(rq.cx())};
 	Script::ParseJSON(rq, message->m_InitAttributes, &*initAttribs);
 
 	client->PushGuiMessage("type", "start", "initAttributes", *initAttribs);
@@ -1032,7 +1032,7 @@ bool CNetClient::OnFlare(CNetClient* client, CFsmEvent* event)
 
 	const ScriptInterface& scriptInterface = client->m_Game->GetSimulation2()->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue position(rq.cx);
+	JS::RootedValue position(rq.cx());
 	Script::CreateObject(
 		rq, &position,
 		// The coordinates are transmitted as strings (because because direct (de)serialisation of floating point numbers is not supported).

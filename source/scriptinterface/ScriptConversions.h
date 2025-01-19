@@ -73,14 +73,14 @@ template<typename T> inline bool FromJSProperty(const ScriptRequest& rq, const J
 	if (!val.isObject())
 		return false;
 
-	JS::RootedObject obj(rq.cx, &val.toObject());
+	JS::RootedObject obj(rq.cx(), &val.toObject());
 
 	bool hasProperty;
-	if (!JS_HasProperty(rq.cx, obj, name, &hasProperty) || !hasProperty)
+	if (!JS_HasProperty(rq.cx(), obj, name, &hasProperty) || !hasProperty)
 		return false;
 
-	JS::RootedValue value(rq.cx);
-	if (!JS_GetProperty(rq.cx, obj, name, &value))
+	JS::RootedValue value(rq.cx());
+	if (!JS_GetProperty(rq.cx(), obj, name, &value))
 		return false;
 
 	if (strict && value.isNull())
@@ -91,7 +91,7 @@ template<typename T> inline bool FromJSProperty(const ScriptRequest& rq, const J
 
 template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::vector<T>& val)
 {
-	JS::RootedObject obj(rq.cx, JS::NewArrayObject(rq.cx, 0));
+	JS::RootedObject obj(rq.cx(), JS::NewArrayObject(rq.cx(), 0));
 	if (!obj)
 	{
 		ret.setUndefined();
@@ -101,9 +101,9 @@ template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::Mut
 	ENSURE(val.size() <= std::numeric_limits<u32>::max());
 	for (u32 i = 0; i < val.size(); ++i)
 	{
-		JS::RootedValue el(rq.cx);
+		JS::RootedValue el(rq.cx());
 		Script::ToJSVal<T>(rq, &el, val[i]);
-		JS_SetElement(rq.cx, obj, i, el);
+		JS_SetElement(rq.cx(), obj, i, el);
 	}
 	ret.setObject(*obj);
 }
@@ -112,25 +112,25 @@ template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::Mut
 
 template<typename T> inline bool FromJSVal_vector(const ScriptRequest& rq, JS::HandleValue v, std::vector<T>& out)
 {
-	JS::RootedObject obj(rq.cx);
+	JS::RootedObject obj(rq.cx());
 	if (!v.isObject())
 		FAIL("Argument must be an array");
 
 	bool isArray;
 	obj = &v.toObject();
-	if ((!JS::IsArrayObject(rq.cx, obj, &isArray) || !isArray) && !JS_IsTypedArrayObject(obj))
+	if ((!JS::IsArrayObject(rq.cx(), obj, &isArray) || !isArray) && !JS_IsTypedArrayObject(obj))
 		FAIL("Argument must be an array");
 
 	u32 length;
-	if (!JS::GetArrayLength(rq.cx, obj, &length))
+	if (!JS::GetArrayLength(rq.cx(), obj, &length))
 		FAIL("Failed to get array length");
 
 	out.clear();
 	out.reserve(length);
 	for (u32 i = 0; i < length; ++i)
 	{
-		JS::RootedValue el(rq.cx);
-		if (!JS_GetElement(rq.cx, obj, i, &el))
+		JS::RootedValue el(rq.cx());
+		if (!JS_GetElement(rq.cx(), obj, i, &el))
 			FAIL("Failed to read array element");
 		T el2;
 		if (!Script::FromJSVal<T>(rq, el, el2))

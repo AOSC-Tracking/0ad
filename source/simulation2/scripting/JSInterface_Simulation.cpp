@@ -56,8 +56,8 @@ JS::Value GuiInterfaceCall(const ScriptInterface& scriptInterface, const std::ws
 		return JS::UndefinedValue();
 
 	ScriptRequest rqSim(sim->GetScriptInterface());
-	JS::RootedValue arg(rqSim.cx, Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, data));
-	JS::RootedValue ret(rqSim.cx);
+	JS::RootedValue arg(rqSim.cx(), Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, data));
+	JS::RootedValue ret(rqSim.cx());
 	cmpGuiInterface->ScriptCall(g_Game->GetViewedPlayerID(), name, arg, &ret);
 
 	return Script::CloneValueFromOtherCompartment(scriptInterface, sim->GetScriptInterface(), ret);
@@ -76,7 +76,7 @@ void PostNetworkCommand(const ScriptInterface& scriptInterface, JS::HandleValue 
 		return;
 
 	ScriptRequest rqSim(sim->GetScriptInterface());
-	JS::RootedValue cmd2(rqSim.cx, Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, cmd));
+	JS::RootedValue cmd2(rqSim.cx(), Script::CloneValueFromOtherCompartment(sim->GetScriptInterface(), scriptInterface, cmd));
 
 	cmpCommandQueue->PostNetworkCommand(cmd2);
 }
@@ -130,7 +130,7 @@ JS::Value GetEdgesOfStaticObstructionsOnScreenNearTo(const ScriptInterface& scri
 	ENSURE(sim);
 
 	ScriptRequest rq(scriptInterface);
-	JS::RootedValue edgeList(rq.cx);
+	JS::RootedValue edgeList(rq.cx());
 	Script::CreateArray(rq, &edgeList);
 	int edgeListIndex = 0;
 
@@ -165,7 +165,7 @@ JS::Value GetEdgesOfStaticObstructionsOnScreenNearTo(const ScriptInterface& scri
 
 		for (size_t i = 0; i < corners.size(); ++i)
 		{
-			JS::RootedValue edge(rq.cx);
+			JS::RootedValue edge(rq.cx());
 			const CFixedVector2D& corner = corners[i];
 			const CFixedVector2D& nextCorner = corners[(i + 1) % corners.size()];
 

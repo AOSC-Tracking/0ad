@@ -48,7 +48,7 @@ public:
 	virtual JS::Value ToJSVal(const ScriptRequest& UNUSED(rq)) const { return msg.get(); }
 
 	CMessageScripted(const ScriptRequest& rq, int mtid, const std::string& name, JS::HandleValue msg) :
-		mtid(mtid), handlerName("On" + name), globalHandlerName("OnGlobal" + name), msg(rq.cx, msg)
+		mtid(mtid), handlerName("On" + name), globalHandlerName("OnGlobal" + name), msg(rq.cx(), msg)
 	{
 	}
 
@@ -238,7 +238,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		mustReloadComponents = true;
 	}
 
-	JS::RootedValue protoVal(rq.cx);
+	JS::RootedValue protoVal(rq.cx());
 	if (!Script::GetProperty(rq, ctor, "prototype", &protoVal))
 	{
 		ScriptException::Raise(rq, "Failed to get property 'prototype'");
@@ -262,7 +262,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		ctWrapper.dealloc,
 		cname,
 		schema,
-		std::make_unique<JS::PersistentRootedValue>(rq.cx, ctor)
+		std::make_unique<JS::PersistentRootedValue>(rq.cx(), ctor)
 	};
 	m_ComponentTypesById[cid] = std::move(ct);
 
@@ -327,7 +327,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		std::map<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
 		for (; eit != comps.end(); ++eit)
 		{
-			JS::RootedValue instance(rq.cx, eit->second->GetJSInstance());
+			JS::RootedValue instance(rq.cx(), eit->second->GetJSInstance());
 			if (!instance.isNull())
 				m_ScriptInterface.SetPrototype(instance, protoVal);
 		}
@@ -765,7 +765,7 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 	std::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
 
 	// If this is a scripted component, construct the appropriate JS object first
-	JS::RootedValue obj(rq.cx);
+	JS::RootedValue obj(rq.cx());
 	if (ct.type == CT_Script)
 	{
 		m_ScriptInterface.CallConstructor(*ct.ctor, JS::HandleValueArray::empty(), &obj);

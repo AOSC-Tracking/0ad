@@ -605,7 +605,7 @@ bool ModIo::ParseGameIdResponse(const ScriptInterface& scriptInterface, const st
 #define CLEANUP() id = -1;
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue gameResponse(rq.cx);
+	JS::RootedValue gameResponse(rq.cx());
 
 	if (!Script::ParseJSON(rq, responseData, &gameResponse))
 		FAIL("Failed to parse response as JSON.");
@@ -613,35 +613,35 @@ bool ModIo::ParseGameIdResponse(const ScriptInterface& scriptInterface, const st
 	if (!gameResponse.isObject())
 		FAIL("response not an object.");
 
-	JS::RootedObject gameResponseObj(rq.cx, gameResponse.toObjectOrNull());
-	JS::RootedValue dataVal(rq.cx);
-	if (!JS_GetProperty(rq.cx, gameResponseObj, "data", &dataVal))
+	JS::RootedObject gameResponseObj(rq.cx(), gameResponse.toObjectOrNull());
+	JS::RootedValue dataVal(rq.cx());
+	if (!JS_GetProperty(rq.cx(), gameResponseObj, "data", &dataVal))
 		FAIL("data property not in response.");
 
 	// [{"id": 42, ...}, ...]
 	if (!dataVal.isObject())
 		FAIL("data property not an object.");
 
-	JS::RootedObject data(rq.cx, dataVal.toObjectOrNull());
+	JS::RootedObject data(rq.cx(), dataVal.toObjectOrNull());
 	u32 length;
 	bool isArray;
-	if (!JS::IsArrayObject(rq.cx, data, &isArray) || !isArray || !JS::GetArrayLength(rq.cx, data, &length) || !length)
+	if (!JS::IsArrayObject(rq.cx(), data, &isArray) || !isArray || !JS::GetArrayLength(rq.cx(), data, &length) || !length)
 		FAIL("data property not an array with at least one element.");
 
 	// {"id": 42, ...}
-	JS::RootedValue first(rq.cx);
-	if (!JS_GetElement(rq.cx, data, 0, &first))
+	JS::RootedValue first(rq.cx());
+	if (!JS_GetElement(rq.cx(), data, 0, &first))
 		FAIL("Couldn't get first element.");
 	if (!first.isObject())
 		FAIL("First element not an object.");
 
-	JS::RootedObject firstObj(rq.cx, &first.toObject());
+	JS::RootedObject firstObj(rq.cx(), &first.toObject());
 	bool hasIdProperty;
-	if (!JS_HasProperty(rq.cx, firstObj, "id", &hasIdProperty) || !hasIdProperty)
+	if (!JS_HasProperty(rq.cx(), firstObj, "id", &hasIdProperty) || !hasIdProperty)
 		FAIL("No id property in first element.");
 
-	JS::RootedValue idProperty(rq.cx);
-	ENSURE(JS_GetProperty(rq.cx, firstObj, "id", &idProperty));
+	JS::RootedValue idProperty(rq.cx());
+	ENSURE(JS_GetProperty(rq.cx(), firstObj, "id", &idProperty));
 
 	// Make sure the property is not set to something that could be converted to a bogus value
 	// TODO: We should be able to convert JS::Values to C++ variables in a way that actually
@@ -676,7 +676,7 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 
 	ScriptRequest rq(scriptInterface);
 
-	JS::RootedValue modResponse(rq.cx);
+	JS::RootedValue modResponse(rq.cx());
 
 	if (!Script::ParseJSON(rq, responseData, &modResponse))
 		FAIL("Failed to parse response as JSON.");
@@ -684,19 +684,19 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 	if (!modResponse.isObject())
 		FAIL("response not an object.");
 
-	JS::RootedObject modResponseObj(rq.cx, modResponse.toObjectOrNull());
-	JS::RootedValue dataVal(rq.cx);
-	if (!JS_GetProperty(rq.cx, modResponseObj, "data", &dataVal))
+	JS::RootedObject modResponseObj(rq.cx(), modResponse.toObjectOrNull());
+	JS::RootedValue dataVal(rq.cx());
+	if (!JS_GetProperty(rq.cx(), modResponseObj, "data", &dataVal))
 		FAIL("data property not in response.");
 
 	// [modobj1, modobj2, ... ]
 	if (!dataVal.isObject())
 		FAIL("data property not an object.");
 
-	JS::RootedObject rData(rq.cx, dataVal.toObjectOrNull());
+	JS::RootedObject rData(rq.cx(), dataVal.toObjectOrNull());
 	u32 length;
 	bool isArray;
-	if (!JS::IsArrayObject(rq.cx, rData, &isArray) || !isArray || !JS::GetArrayLength(rq.cx, rData, &length) || !length)
+	if (!JS::IsArrayObject(rq.cx(), rData, &isArray) || !isArray || !JS::GetArrayLength(rq.cx(), rData, &length) || !length)
 		FAIL("data property not an array with at least one element.");
 
 	modData.clear();
@@ -713,8 +713,8 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 	{
 		modData.emplace_back();
 		ModIoModData& data = modData.back();
-		JS::RootedValue el(rq.cx);
-		if (!JS_GetElement(rq.cx, rData, i, &el) || !el.isObject())
+		JS::RootedValue el(rq.cx());
+		if (!JS_GetElement(rq.cx(), rData, i, &el) || !el.isObject())
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get array element object.")
 
 		bool ok = true;
@@ -738,9 +738,9 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 		COPY_STRINGS_ELSE_CONTINUE("", el, "name", "name_id", "summary")
 
 		// Now copy over the modfile part, but without the pointless substructure
-		JS::RootedObject elObj(rq.cx, el.toObjectOrNull());
-		JS::RootedValue modFile(rq.cx);
-		if (!JS_GetProperty(rq.cx, elObj, "modfile", &modFile))
+		JS::RootedObject elObj(rq.cx(), el.toObjectOrNull());
+		JS::RootedValue modFile(rq.cx());
+		if (!JS_GetProperty(rq.cx(), elObj, "modfile", &modFile))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get modfile data.");
 
 		if (!modFile.isObject())
@@ -748,15 +748,15 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 
 		COPY_STRINGS_ELSE_CONTINUE("", modFile, "version", "filesize");
 
-		JS::RootedObject modFileObj(rq.cx, modFile.toObjectOrNull());
-		JS::RootedValue filehash(rq.cx);
-		if (!JS_GetProperty(rq.cx, modFileObj, "filehash", &filehash))
+		JS::RootedObject modFileObj(rq.cx(), modFile.toObjectOrNull());
+		JS::RootedValue filehash(rq.cx());
+		if (!JS_GetProperty(rq.cx(), modFileObj, "filehash", &filehash))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get filehash data.");
 
 		COPY_STRINGS_ELSE_CONTINUE("filehash_", filehash, "md5");
 
-		JS::RootedValue download(rq.cx);
-		if (!JS_GetProperty(rq.cx, modFileObj, "download", &download))
+		JS::RootedValue download(rq.cx());
+		if (!JS_GetProperty(rq.cx(), modFileObj, "download", &download))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get download data.");
 
 		COPY_STRINGS_ELSE_CONTINUE("", download, "binary_url");
@@ -766,7 +766,7 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 		if (!Script::FromJSProperty(rq, modFile, "metadata_blob", metadata_blob, true))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get metadata_blob from modFile.");
 
-		JS::RootedValue metadata(rq.cx);
+		JS::RootedValue metadata(rq.cx());
 		if (!Script::ParseJSON(rq, metadata_blob, &metadata))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to parse metadata_blob as JSON.");
 

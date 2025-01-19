@@ -34,7 +34,7 @@
 
 #include <string>
 
-#define SET(obj, name, value) STMT(JS::RootedValue v_(rq.cx); Script::ToJSVal(rq, &v_, (value)); JS_SetProperty(rq.cx, obj, (name), v_))
+#define SET(obj, name, value) STMT(JS::RootedValue v_(rq.cx()); Script::ToJSVal(rq, &v_, (value)); JS_SetProperty(rq.cx(), obj, (name), v_))
 	// ignore JS_SetProperty return value, because errors should be impossible
 	// and we can't do anything useful in the case of errors anyway
 
@@ -59,7 +59,7 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 	default: typeName = "(unknown)"; break;
 	}
 
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 	if (!obj)
 	{
 		ret.setUndefined();
@@ -76,14 +76,14 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 		// SET(obj, "which", (int)val.ev.key.which); // (not in wsdl.h)
 		// SET(obj, "state", (int)val.ev.key.state); // (not in wsdl.h)
 
-		JS::RootedObject keysym(rq.cx, JS_NewPlainObject(rq.cx));
+		JS::RootedObject keysym(rq.cx(), JS_NewPlainObject(rq.cx()));
 		if (!keysym)
 		{
 			ret.setUndefined();
 			return;
 		}
-		JS::RootedValue keysymVal(rq.cx, JS::ObjectValue(*keysym));
-		JS_SetProperty(rq.cx, obj, "keysym", keysymVal);
+		JS::RootedValue keysymVal(rq.cx(), JS::ObjectValue(*keysym));
+		JS_SetProperty(rq.cx(), obj, "keysym", keysymVal);
 
 		// SET(keysym, "scancode", (int)val.ev.key.keysym.scancode); // (not in wsdl.h)
 		SET(keysym, "sym", (int)val.ev.key.keysym.sym);

@@ -40,7 +40,7 @@
 template<typename T, typename U>
 static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<T, U>& val)
 {
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 	if (!obj)
 	{
 		ret.setUndefined();
@@ -48,9 +48,9 @@ static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValu
 	}
 	for (const std::pair<const T, U>& item : val)
 	{
-		JS::RootedValue el(rq.cx);
+		JS::RootedValue el(rq.cx());
 		Script::ToJSVal<U>(rq, &el, item.second);
-		JS_SetProperty(rq.cx, obj, item.first.c_str(), el);
+		JS_SetProperty(rq.cx(), obj, item.first.c_str(), el);
 	}
 	ret.setObject(*obj);
 }
@@ -74,7 +74,7 @@ namespace
  */
 JS::Value GetHotkeyMap(const ScriptRequest& rq)
 {
-	JS::RootedValue hotkeyMap(rq.cx);
+	JS::RootedValue hotkeyMap(rq.cx());
 
 	std::unordered_map<std::string, std::vector<std::vector<std::string>>> hotkeys;
 	for (const std::pair<const SDL_Scancode_, KeyMapping>& key : g_HotkeyMap)
@@ -100,7 +100,7 @@ JS::Value GetHotkeyMap(const ScriptRequest& rq)
  */
 JS::Value GetScancodeKeyNames(const ScriptRequest& rq)
 {
-	JS::RootedValue obj(rq.cx);
+	JS::RootedValue obj(rq.cx());
 	std::unordered_map<std::string, std::string> map;
 
 	// Get the name of all scancodes.
@@ -156,7 +156,7 @@ JS::Value GetConflicts(const ScriptRequest& rq, JS::HandleValue combination)
 	if (conflicts.empty())
 		return JS::NullValue();
 
-	JS::RootedValue ret(rq.cx);
+	JS::RootedValue ret(rq.cx());
 	Script::ToJSVal(rq, &ret, conflicts);
 	return ret;
 }

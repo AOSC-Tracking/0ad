@@ -65,7 +65,7 @@ public:
 	{
 		ScriptRequest rq(scriptInterface);
 
-		JS::RootedValue val(rq.cx);
+		JS::RootedValue val(rq.cx());
 		val = value;
 		std::stringstream stream;
 		CStdSerializer serializer(scriptInterface, stream);

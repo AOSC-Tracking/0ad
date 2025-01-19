@@ -387,7 +387,7 @@ void CParamNode::ToJSVal(const ScriptRequest& rq, bool cacheValue, JS::MutableHa
 		if (ret.isObject())
 			Script::DeepFreezeObject(rq, ret);
 
-		m_ScriptVal.reset(new JS::PersistentRootedValue(rq.cx, ret));
+		m_ScriptVal.reset(new JS::PersistentRootedValue(rq.cx(), ret));
 	}
 }
 
@@ -403,7 +403,7 @@ void CParamNode::ConstructJSVal(const ScriptRequest& rq, JS::MutableHandleValue 
 		}
 
 		// Just a string
-		JS::RootedString str(rq.cx, JS_NewStringCopyUTF8Z(rq.cx, JS::ConstUTF8CharsZ(m_Value.data(), m_Value.size())));
+		JS::RootedString str(rq.cx(), JS_NewStringCopyUTF8Z(rq.cx(), JS::ConstUTF8CharsZ(m_Value.data(), m_Value.size())));
 		if (str)
 		{
 			ret.setString(str);
@@ -416,18 +416,18 @@ void CParamNode::ConstructJSVal(const ScriptRequest& rq, JS::MutableHandleValue 
 
 	// Got child nodes - convert this node into a hash-table-style object:
 
-	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
+	JS::RootedObject obj(rq.cx(), JS_NewPlainObject(rq.cx()));
 	if (!obj)
 	{
 		ret.setUndefined();
 		return; // TODO: report error
 	}
 
-	JS::RootedValue childVal(rq.cx);
+	JS::RootedValue childVal(rq.cx());
 	for (std::map<std::string, CParamNode>::const_iterator it = m_Childs.begin(); it != m_Childs.end(); ++it)
 	{
 		it->second.ConstructJSVal(rq, &childVal);
-		if (!JS_SetProperty(rq.cx, obj, it->first.c_str(), childVal))
+		if (!JS_SetProperty(rq.cx(), obj, it->first.c_str(), childVal))
 		{
 			ret.setUndefined();
 			return; // TODO: report error
@@ -437,15 +437,15 @@ void CParamNode::ConstructJSVal(const ScriptRequest& rq, JS::MutableHandleValue 
 	// If the node has a string too, add that as an extra property
 	if (!m_Value.empty())
 	{
-		JS::RootedString str(rq.cx, JS_NewStringCopyUTF8Z(rq.cx, JS::ConstUTF8CharsZ(m_Value.data(), m_Value.size())));
+		JS::RootedString str(rq.cx(), JS_NewStringCopyUTF8Z(rq.cx(), JS::ConstUTF8CharsZ(m_Value.data(), m_Value.size())));
 		if (!str)
 		{
 			ret.setUndefined();
 			return; // TODO: report error
 		}
 
-		JS::RootedValue subChildVal(rq.cx, JS::StringValue(str));
-		if (!JS_SetProperty(rq.cx, obj, "_string", subChildVal))
+		JS::RootedValue subChildVal(rq.cx(), JS::StringValue(str));
+		if (!JS_SetProperty(rq.cx(), obj, "_string", subChildVal))
 		{
 			ret.setUndefined();
 			return; // TODO: report error
