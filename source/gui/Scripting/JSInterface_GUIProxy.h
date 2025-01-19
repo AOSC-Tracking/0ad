@@ -25,7 +25,7 @@
 #include <utility>
 
 class ScriptInterface;
-class ScriptRequest;
+class WithRequest;
 
 template <typename T>
 class JSI_GUIProxy;
@@ -91,7 +91,7 @@ public:
 	virtual bool has(const std::string& name) const = 0;
 	// @return the JSFunction matching @param name. Must call has() first as it can assume existence.
 	virtual JSObject* get(const std::string& name) const = 0;
-	virtual bool setFunction(const ScriptRequest& rq, const std::string& name, JSFunction* function) = 0;
+	virtual bool setFunction(const WithRequest& rq, const std::string& name, JSFunction* function) = 0;
 };
 
 /**
@@ -130,7 +130,7 @@ public:
 	static std::pair<const js::BaseProxyHandler*, GUIProxyProps*> CreateData(ScriptInterface& scriptInterface);
 
 	// Create the JS object, the proxy, the data and wrap it in a convenient unique_ptr.
-	static std::unique_ptr<IGUIProxyObject> CreateJSObject(const ScriptRequest& rq, GUIObjectType* ptr, GUIProxyProps* data);
+	static std::unique_ptr<IGUIProxyObject> CreateJSObject(const WithRequest& rq, GUIObjectType* ptr, GUIProxyProps* data);
 protected:
 	// @param family can't be nullptr because that's used for some DOM object and it crashes.
 	JSI_GUIProxy() : BaseProxyHandler(this, false, false) {};
@@ -139,18 +139,18 @@ protected:
 	// This also enforces making proxy handlers dataless static variables.
 	~JSI_GUIProxy() {};
 
-	static GUIObjectType* FromPrivateSlot(const ScriptRequest&, JS::CallArgs& args);
+	static GUIObjectType* FromPrivateSlot(const WithRequest&, JS::CallArgs& args);
 
 	// The default implementations need to know the type of the GUIProxyProps for this proxy type.
 	// This is done by specializing this struct's alias type.
 	struct PropCache;
 
 	// Specialize this to define the custom properties of this type.
-	static void CreateFunctions(const ScriptRequest& rq, GUIProxyProps* cache);
+	static void CreateFunctions(const WithRequest& rq, GUIProxyProps* cache);
 
 	// Convenience helper for the above.
 	template<auto callable>
-	static void CreateFunction(const ScriptRequest& rq, GUIProxyProps* cache, const std::string& name);
+	static void CreateFunction(const WithRequest& rq, GUIProxyProps* cache, const std::string& name);
 
 	// This handles returning custom properties. Specialize this if needed.
 	bool PropGetter(JS::HandleObject proxy, const std::string& propName, JS::MutableHandleValue vp) const;

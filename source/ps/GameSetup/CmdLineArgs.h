@@ -25,7 +25,7 @@
 #include <utility>
 #include <vector>
 
-class ScriptRequest;
+class WithRequest;
 
 
 class CmdLineArgs

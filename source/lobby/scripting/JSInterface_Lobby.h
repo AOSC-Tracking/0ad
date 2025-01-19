@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_LOBBY
 #define INCLUDED_JSI_LOBBY
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Lobby
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_LOBBY

@@ -48,8 +48,8 @@ public:
 	static void _script_interface(const ScriptInterface&) {};
 	static int _script_interface_2(const ScriptInterface&, int a, bool) { return a; };
 
-	static void _script_request(const ScriptRequest&) {};
-	static int _script_request_2(const ScriptRequest&, int a, bool) { return a; };
+	static void _script_request(const WithRequest&) {};
+	static int _script_request_2(const WithRequest&, int a, bool) { return a; };
 
 	void test_special_wrappers()
 	{
@@ -87,14 +87,14 @@ public:
 		ScriptInterface script("Test", "Test", g_ScriptContext);
 		ScriptRequest rq(script);
 
-		ScriptFunction::Register<&TestFunctionWrapper::_1p_v>(script, "_1p_v");
+		ScriptFunction::Register<&TestFunctionWrapper::_1p_v>(rq, "_1p_v");
 		{
 			std::string input = "Test._1p_v(0);";
 			JS::RootedValue val(rq.cx());
 			TS_ASSERT(script.Eval(input.c_str(), &val));
 		}
 
-		ScriptFunction::Register<&TestFunctionWrapper::_3p_r>(script, "_3p_r");
+		ScriptFunction::Register<&TestFunctionWrapper::_3p_r>(rq, "_3p_r");
 		{
 			std::string input = "Test._3p_r(4, false, 'test');";
 			int ret = 0;
@@ -102,7 +102,7 @@ public:
 			TS_ASSERT_EQUALS(ret, 4);
 		}
 
-		ScriptFunction::Register<&TestFunctionWrapper::_script_interface_2>(script, "_cmpt_private_2");
+		ScriptFunction::Register<&TestFunctionWrapper::_script_interface_2>(rq, "_cmpt_private_2");
 		{
 			std::string input = "Test._cmpt_private_2(4);";
 			int ret = 0;

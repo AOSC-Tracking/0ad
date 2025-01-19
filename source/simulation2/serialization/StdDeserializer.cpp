@@ -35,14 +35,16 @@
 CStdDeserializer::CStdDeserializer(const ScriptInterface& scriptInterface, std::istream& stream) :
 	m_ScriptInterface(scriptInterface), m_Stream(stream)
 {
-	JS_AddExtraGCRootsTracer(ScriptRequest(scriptInterface).cx(), CStdDeserializer::Trace, this);
+	const ScriptRequest rq {scriptInterface};
+	JS_AddExtraGCRootsTracer(rq.cx(), CStdDeserializer::Trace, this);
 	// Insert a dummy object in front, as valid tags start at 1.
 	m_ScriptBackrefs.emplace_back(nullptr);
 }
 
 CStdDeserializer::~CStdDeserializer()
 {
-	JS_RemoveExtraGCRootsTracer(ScriptRequest(m_ScriptInterface).cx(), CStdDeserializer::Trace, this);
+	const ScriptRequest rq {m_ScriptInterface};
+	JS_RemoveExtraGCRootsTracer(rq.cx(), CStdDeserializer::Trace, this);
 }
 
 void CStdDeserializer::Trace(JSTracer *trc, void *data)

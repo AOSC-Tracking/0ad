@@ -23,32 +23,32 @@
 #include "lobby/XmppClient.h"
 #include "scriptinterface/ScriptConversions.h"
 
-template<> void Script::ToJSVal<gloox::Presence::PresenceType>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::Presence::PresenceType& val)
+template<> void Script::ToJSVal<gloox::Presence::PresenceType>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::Presence::PresenceType& val)
 {
 	ToJSVal(rq, ret, XmppClient::GetPresenceString(val));
 }
 
-template<> void Script::ToJSVal<gloox::MUCRoomRole>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::MUCRoomRole& val)
+template<> void Script::ToJSVal<gloox::MUCRoomRole>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::MUCRoomRole& val)
 {
 	ToJSVal(rq, ret, XmppClient::GetRoleString(val));
 }
 
-template<> void Script::ToJSVal<gloox::StanzaError>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::StanzaError& val)
+template<> void Script::ToJSVal<gloox::StanzaError>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::StanzaError& val)
 {
 	ToJSVal(rq, ret, wstring_from_utf8(XmppClient::StanzaErrorToString(val)));
 }
 
-template<> void Script::ToJSVal<gloox::ConnectionError>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::ConnectionError& val)
+template<> void Script::ToJSVal<gloox::ConnectionError>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::ConnectionError& val)
 {
 	ToJSVal(rq, ret, wstring_from_utf8(XmppClient::ConnectionErrorToString(val)));
 }
 
-template<> void Script::ToJSVal<gloox::RegistrationResult>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::RegistrationResult& val)
+template<> void Script::ToJSVal<gloox::RegistrationResult>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::RegistrationResult& val)
 {
 	ToJSVal(rq, ret, wstring_from_utf8(XmppClient::RegistrationResultToString(val)));
 }
 
-template<> void Script::ToJSVal<gloox::CertStatus>(const ScriptRequest& rq, JS::MutableHandleValue ret, const gloox::CertStatus& val)
+template<> void Script::ToJSVal<gloox::CertStatus>(const WithRequest& rq, JS::MutableHandleValue ret, const gloox::CertStatus& val)
 {
 	ToJSVal(rq, ret, wstring_from_utf8(XmppClient::CertificateErrorToString(val)));
 }

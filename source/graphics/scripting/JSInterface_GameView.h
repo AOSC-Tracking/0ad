@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSINTERFACE_GAMEVIEW
 #define INCLUDED_JSINTERFACE_GAMEVIEW
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_GameView
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSINTERFACE_GAMEVIEW

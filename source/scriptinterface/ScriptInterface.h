@@ -72,6 +72,7 @@ class ScriptInterface
 {
 	NONCOPYABLE(ScriptInterface);
 
+	friend class WithRequest;
 	friend class ScriptRequest;
 
 public:
@@ -122,7 +123,7 @@ public:
 	 * Convert the CmptPrivate callback data to T*
 	 */
 	template <typename T>
-	static T* ObjectFromCBData(const ScriptRequest& rq)
+	static T* ObjectFromCBData(const WithRequest& rq)
 	{
 		static_assert(!std::is_same_v<void, T>);
 		return static_cast<T*>(ObjectFromCBData<void>(rq));
@@ -132,7 +133,7 @@ public:
 	 * Variant for the function wrapper.
 	 */
 	template <typename T>
-	static T* ObjectFromCBData(const ScriptRequest& rq, JS::CallArgs&)
+	static T* ObjectFromCBData(const WithRequest& rq, JS::CallArgs&)
 	{
 		return ObjectFromCBData<T>(rq);
 	}
@@ -146,6 +147,10 @@ public:
 	 */
 	JSContext* GetGeneralJSContext() const;
 	ScriptContext& GetContext() const;
+
+	JS::Value GetGlobalValue() const;
+	JS::HandleObject GetGlobalObject() const;
+	JS::HandleObject GetNativeScope() const;
 
 	/**
 	 * Load global scripts that most script interfaces need,
@@ -184,7 +189,7 @@ public:
 	 * @param name - Name of the property.
 	 * @param out The object or null.
 	 */
-	static bool GetGlobalProperty(const ScriptRequest& rq, const std::string& name, JS::MutableHandleValue out);
+	static bool GetGlobalProperty(const WithRequest& rq, const std::string& name, JS::MutableHandleValue out);
 
 	bool SetPrototype(JS::HandleValue obj, JS::HandleValue proto);
 
@@ -241,7 +246,7 @@ public:
 	 * Retrieve the private data field of a JSObject.
 	 */
 	template <typename T>
-	static T* GetPrivate(const ScriptRequest& rq, JS::HandleObject thisobj)
+	static T* GetPrivate(const WithRequest& rq, JS::HandleObject thisobj)
 	{
 		T* value = JS::GetMaybePtrFromReservedSlot<T>(thisobj, JSObjectReservedSlots::PRIVATE);
 
@@ -256,7 +261,7 @@ public:
 	 * If an error occurs, GetPrivate will report it with the according stack.
 	 */
 	template <typename T>
-	static T* GetPrivate(const ScriptRequest& rq, JS::CallArgs& callArgs)
+	static T* GetPrivate(const WithRequest& rq, JS::CallArgs& callArgs)
 	{
 		if (!callArgs.thisv().isObject())
 		{
@@ -294,7 +299,7 @@ private:
 
 // Explicitly instantiate void* as that is used for the generic template,
 // and we want to define it in the .cpp file.
-template <> void* ScriptInterface::ObjectFromCBData(const ScriptRequest& rq);
+template <> void* ScriptInterface::ObjectFromCBData(const WithRequest& rq);
 
 template<typename T>
 bool ScriptInterface::SetGlobal(const char* name, const T& value, bool replace, bool constant, bool enumerate)

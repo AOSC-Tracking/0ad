@@ -31,7 +31,7 @@ bool CGUIHotkey::DoFromString(const CStrW& value)
 	return true;
 }
 
-bool CGUIHotkey::DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value)
+bool CGUIHotkey::DoFromJSVal(const WithRequest& rq, JS::HandleValue value)
 {
 	m_Object.GetGUI().UnsetObjectHotkey(&m_Object, m_Setting);
 	if (!Script::FromJSVal(rq, value, m_Setting))

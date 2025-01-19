@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_USERREPORT
 #define INCLUDED_JSI_USERREPORT
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_UserReport
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_USERREPORT

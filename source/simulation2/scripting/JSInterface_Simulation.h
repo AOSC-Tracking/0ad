@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_SIMULATION
 #define INCLUDED_JSI_SIMULATION
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Simulation
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_SIMULATION

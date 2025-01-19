@@ -45,9 +45,9 @@ public:
 	virtual int GetType() const { return mtid; }
 	virtual const char* GetScriptHandlerName() const { return handlerName.c_str(); }
 	virtual const char* GetScriptGlobalHandlerName() const { return globalHandlerName.c_str(); }
-	virtual JS::Value ToJSVal(const ScriptRequest& UNUSED(rq)) const { return msg.get(); }
+	virtual JS::Value ToJSVal(const WithRequest& UNUSED(rq)) const { return msg.get(); }
 
-	CMessageScripted(const ScriptRequest& rq, int mtid, const std::string& name, JS::HandleValue msg) :
+	CMessageScripted(const WithRequest& rq, int mtid, const std::string& name, JS::HandleValue msg) :
 		mtid(mtid), handlerName("On" + name), globalHandlerName("OnGlobal" + name), msg(rq.cx(), msg)
 	{
 	}
@@ -72,8 +72,8 @@ CComponentManager::CComponentManager(CSimContext& context, ScriptContext& cx, bo
 	// these functions, so we skip registering them here in those cases
 	if (!skipScriptFunctions)
 	{
-		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulation(m_ScriptInterface);
 		ScriptRequest rq(m_ScriptInterface);
+		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulation(rq);
 		constexpr ScriptFunction::ObjectGetter<CComponentManager> Getter = &ScriptInterface::ObjectFromCBData<CComponentManager>;
 		ScriptFunction::Register<&CComponentManager::Script_RegisterComponentType, Getter>(rq, "RegisterComponentType");
 		ScriptFunction::Register<&CComponentManager::Script_RegisterSystemComponentType, Getter>(rq, "RegisterSystemComponentType");

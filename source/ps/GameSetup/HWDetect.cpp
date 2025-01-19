@@ -73,7 +73,7 @@ namespace
 class Reporter
 {
 public:
-	Reporter(const ScriptRequest& rq)
+	Reporter(const WithRequest& rq)
 		: m_Rq(rq), m_LibrarySettings(rq.cx())
 	{
 		Script::CreateObject(m_Rq, &m_LibrarySettings);
@@ -92,21 +92,21 @@ public:
 	}
 
 private:
-	const ScriptRequest& m_Rq;
+	const WithRequest& m_Rq;
 	JS::RootedValue m_LibrarySettings;
 };
 
 class LibraryReporter : public Reporter
 {
 public:
-	LibraryReporter(const ScriptRequest& rq, const char* name)
+	LibraryReporter(const WithRequest& rq, const char* name)
 		: Reporter(rq)
 	{
 		Add("name", name);
 	}
 };
 
-JS::Value MakeSDLReport(const ScriptRequest& rq)
+JS::Value MakeSDLReport(const WithRequest& rq)
 {
 	LibraryReporter reporter{rq, "sdl"};
 
@@ -133,7 +133,7 @@ JS::Value MakeSDLReport(const ScriptRequest& rq)
 	return reporter.MakeReport();
 }
 
-JS::Value MakeFreeTypeReport(const ScriptRequest& rq)
+JS::Value MakeFreeTypeReport(const WithRequest& rq)
 {
 	FT_Library FTLibrary;
 
@@ -152,7 +152,7 @@ JS::Value MakeFreeTypeReport(const ScriptRequest& rq)
 	return libraryReporter.MakeReport();
 }
 
-void ReportLibraries(const ScriptRequest& rq, JS::HandleValue settings)
+void ReportLibraries(const WithRequest& rq, JS::HandleValue settings)
 {
 	JS::RootedValue librariesSettings(rq.cx());
 	Script::CreateArray(rq, &librariesSettings);
@@ -281,8 +281,8 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 
 	ScriptRequest rq(scriptInterface);
 
-	JSI_Debug::RegisterScriptFunctions(scriptInterface); // Engine.DisplayErrorDialog
-	JSI_ConfigDB::RegisterScriptFunctions(scriptInterface);
+	JSI_Debug::RegisterScriptFunctions(rq); // Engine.DisplayErrorDialog
+	JSI_ConfigDB::RegisterScriptFunctions(rq);
 
 	ScriptFunction::Register<SetDisableAudio>(rq, "SetDisableAudio");
 
@@ -416,6 +416,6 @@ void RunHardwareDetection(bool writeSystemInfoBeforeDetection, Renderer::Backend
 		Script::StringifyJSON(rq, &settings, true));
 
 	// Run the detection script:
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), scriptInterface.GetGlobalValue());
 	ScriptFunction::CallVoid(rq, global, "RunHardwareDetection", settings);
 }

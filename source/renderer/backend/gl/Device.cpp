@@ -471,7 +471,7 @@ CDevice::~CDevice()
 		SDL_GL_DeleteContext(m_Context);
 }
 
-void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
+void CDevice::Report(const WithRequest& rq, JS::HandleValue settings)
 {
 	const char* errstr = "(error)";
 

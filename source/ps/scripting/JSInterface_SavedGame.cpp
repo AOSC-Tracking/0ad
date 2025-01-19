@@ -43,14 +43,14 @@ bool DeleteSavedGame(const std::wstring& name)
 	return SavedGames::DeleteSavedGame(name);
 }
 
-void SaveGame(const ScriptRequest& rq, const std::wstring& filename, const std::wstring& description, JS::HandleValue GUIMetadata)
+void SaveGame(const WithRequest& rq, const std::wstring& filename, const std::wstring& description, JS::HandleValue GUIMetadata)
 {
 	Script::StructuredClone GUIMetadataClone = Script::WriteStructuredClone(rq, GUIMetadata);
 	if (SavedGames::Save(filename, description, *g_Game->GetSimulation2(), GUIMetadataClone) < 0)
 		LOGERROR("Failed to save game");
 }
 
-void SaveGamePrefix(const ScriptRequest& rq, const std::wstring& prefix, const std::wstring& description, JS::HandleValue GUIMetadata)
+void SaveGamePrefix(const WithRequest& rq, const std::wstring& prefix, const std::wstring& description, JS::HandleValue GUIMetadata)
 {
 	Script::StructuredClone GUIMetadataClone = Script::WriteStructuredClone(rq, GUIMetadata);
 	if (SavedGames::SavePrefix(prefix, description, *g_Game->GetSimulation2(), GUIMetadataClone) < 0)
@@ -130,7 +130,7 @@ void ActivateRejoinTest()
 	g_Game->GetSimulation2()->ActivateRejoinTest(g_Game->GetTurnManager()->GetCurrentTurn() + 1);
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const WithRequest& rq)
 {
 	ScriptFunction::Register<&GetSavedGames>(rq, "GetSavedGames");
 	ScriptFunction::Register<&DeleteSavedGame>(rq, "DeleteSavedGame");

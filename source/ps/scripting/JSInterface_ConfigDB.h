@@ -19,11 +19,11 @@
 #define INCLUDED_JSI_CONFIGDB
 
 extern bool g_PauseOnFocusLoss;
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_ConfigDB
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_CONFIGDB

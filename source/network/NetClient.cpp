@@ -806,7 +806,7 @@ bool CNetClient::OnGameStart(CNetClient* client, CFsmEvent* event)
 	CGameStartMessage* message = static_cast<CGameStartMessage*>(event->GetParamRef());
 
 	const ScriptInterface& scriptInterface{client->m_Game->GetSimulation2()->GetScriptInterface()};
-	ScriptRequest rq{scriptInterface};
+	const ScriptRequest rq {scriptInterface};
 	JS::RootedValue initAttribs{rq.cx()};
 	Script::ParseJSON(rq, message->m_InitAttributes, &initAttribs);
 
@@ -821,7 +821,7 @@ bool CNetClient::OnSavedGameStart(CNetClient* client, CFsmEvent* event)
 	CGameSavedStartMessage* message{static_cast<CGameSavedStartMessage*>(event->GetParamRef())};
 
 	const ScriptInterface& scriptInterface{client->m_Game->GetSimulation2()->GetScriptInterface()};
-	ScriptRequest rq{scriptInterface};
+	const ScriptRequest rq {scriptInterface};
 	const std::shared_ptr<JS::RootedValue> initAttribs{std::make_shared<JS::RootedValue>(rq.cx())};
 	Script::ParseJSON(rq, message->m_InitAttributes, &*initAttribs);
 
@@ -1031,7 +1031,7 @@ bool CNetClient::OnFlare(CNetClient* client, CFsmEvent* event)
 	CFlareMessage* message = static_cast<CFlareMessage*>(event->GetParamRef());
 
 	const ScriptInterface& scriptInterface = client->m_Game->GetSimulation2()->GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	const ScriptRequest rq {scriptInterface};
 	JS::RootedValue position(rq.cx());
 	Script::CreateObject(
 		rq, &position,

@@ -78,7 +78,7 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx(), prq.globalValue());
+		JS::RootedValue global(prq.cx(), pageScriptInterface.GetGlobalValue());
 
 		int called_value = 0;
 		JS::RootedValue js_called_value(prq.cx());
@@ -154,7 +154,7 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx(), prq.globalValue());
+		JS::RootedValue global(prq.cx(), pageScriptInterface.GetGlobalValue());
 
 		// Ensure that our hotkey state was synchronised with the event itself.
 		bool hotkey_pressed_value = false;
@@ -216,7 +216,7 @@ public:
 
 		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
-		JS::RootedValue global(prq.cx(), prq.globalValue());
+		JS::RootedValue global(prq.cx(), pageScriptInterface.GetGlobalValue());
 
 		TS_ASSERT_EQUALS(g_GUI->GetPageCount(), 1);
 		g_GUI->PushPage(L"regainFocus/page_emptyPage.xml", data);

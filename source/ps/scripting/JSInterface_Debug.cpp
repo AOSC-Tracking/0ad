@@ -96,7 +96,7 @@ std::wstring GetBuildVersion(bool longerHash = false)
 	return buildVersion;
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const WithRequest& rq)
 {
 	ScriptFunction::Register<&GetMicroseconds>(rq, "GetMicroseconds");
 	ScriptFunction::Register<&Crash>(rq, "Crash");

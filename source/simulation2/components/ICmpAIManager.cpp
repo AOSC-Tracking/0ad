@@ -45,7 +45,7 @@ public:
 		m_ScriptInterface(scriptInterface),
 		m_AIs(scriptInterface.GetGeneralJSContext())
 	{
-		ScriptRequest rq(m_ScriptInterface);
+			ScriptRequest rq(m_ScriptInterface);
 		m_AIs = JS::NewArrayObject(rq.cx(), 0);
 	}
 

@@ -34,7 +34,7 @@ void UnhandledRejectedPromise(JSContext* cx, bool, JS::HandleObject promise,
 	if (state == JS::PromiseRejectionHandlingState::Handled)
 		return;
 
-	const ScriptRequest rq{cx};
+	const WithRequest rq = WithRequest::FromAlreadyEntered(cx);
 	JS::RootedValue reason(cx, JS::GetPromiseResult(promise));
 
 	std::string asString;
@@ -49,11 +49,11 @@ void JobQueue::runJobs(JSContext*)
 	while (!m_Jobs.empty())
 	{
 		QueueElement& element = m_Jobs.front();
-		ScriptRequest rq{element.scriptInterface};
+		ScriptRequest rq {element.scriptInterface};
 		JS::RootedObject localJob{rq.cx(), element.job};
 		m_Jobs.pop();
 
-		JS::RootedValue globV{rq.cx(), rq.globalValue()};
+		JS::RootedValue globV{rq.cx(), Script::GetGlobalValue(rq)};
 		JS::RootedValue rval{rq.cx()};
 		JS::Call(rq.cx(), globV, localJob, JS::HandleValueArray::empty(), &rval);
 	}
@@ -69,7 +69,9 @@ bool JobQueue::enqueuePromiseJob(JSContext* cx, JS::HandleObject, JS::HandleObje
 {
 	try
 	{
-		m_Jobs.push({ScriptRequest{cx}.GetScriptInterface(), JS::PersistentRootedObject{cx, job}});
+		// We need to store the script-interface associated with the current JSContext,
+		// so we can re-enter the correct compartment in runJobs.
+		m_Jobs.push({ScriptInterface::CmptPrivate::GetScriptInterface(cx), JS::PersistentRootedObject{cx, job}});
 		return true;
 	}
 	catch (...)

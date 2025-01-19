@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_GAME
 #define INCLUDED_JSI_GAME
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Game
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_GAME

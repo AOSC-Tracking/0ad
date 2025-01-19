@@ -74,7 +74,7 @@ public:
 		return m_Functions.at(name).get();
 	}
 
-	virtual bool setFunction(const ScriptRequest& rq, const std::string& name, JSFunction* function) override
+	virtual bool setFunction(const WithRequest& rq, const std::string& name, JSFunction* function) override
 	{
 		m_Functions[name].init(rq.cx(), JS_GetFunctionObject(function));
 		return true;
@@ -103,7 +103,7 @@ struct JSI_GUIProxy<T>::PropCache
 };
 
 template <typename T>
-T* JSI_GUIProxy<T>::FromPrivateSlot(const ScriptRequest&, JS::CallArgs& args)
+T* JSI_GUIProxy<T>::FromPrivateSlot(const WithRequest&, JS::CallArgs& args)
 {
 	// Call the unsafe version - this is only ever called from actual proxy objects.
 	return IGUIProxyObject::UnsafeFromPrivateSlot<T>(args.thisv().toObjectOrNull());
@@ -128,7 +128,7 @@ std::pair<const js::BaseProxyHandler*, GUIProxyProps*> JSI_GUIProxy<T>::CreateDa
 {
 	using PropertyCache = typename PropCache::type;
 	PropertyCache* data = new PropertyCache();
-	ScriptRequest rq(scriptInterface);
+	const ScriptRequest rq {scriptInterface};
 
 	// Functions common to all children of IGUIObject.
 	JSI_GUIProxy<IGUIObject>::CreateFunctions(rq, data);
@@ -141,13 +141,13 @@ std::pair<const js::BaseProxyHandler*, GUIProxyProps*> JSI_GUIProxy<T>::CreateDa
 
 template<typename T>
 template<auto callable>
-void JSI_GUIProxy<T>::CreateFunction(const ScriptRequest& rq, GUIProxyProps* cache, const std::string& name)
+void JSI_GUIProxy<T>::CreateFunction(const WithRequest& rq, GUIProxyProps* cache, const std::string& name)
 {
 	cache->setFunction(rq, name, ScriptFunction::Create<callable, FromPrivateSlot>(rq, name.c_str()));
 }
 
 template<typename T>
-std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptRequest& rq, T* ptr, GUIProxyProps* dataPtr)
+std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const WithRequest& rq, T* ptr, GUIProxyProps* dataPtr)
 {
 	js::ProxyOptions options;
 	options.setClass(&JSInterface_GUIProxy::ClassDefinition());
@@ -166,7 +166,7 @@ std::unique_ptr<IGUIProxyObject> JSI_GUIProxy<T>::CreateJSObject(const ScriptReq
 template <typename T>
 bool JSI_GUIProxy<T>::get(JSContext* cx, JS::HandleObject proxy, JS::HandleValue UNUSED(receiver), JS::HandleId id, JS::MutableHandleValue vp) const
 {
-	ScriptRequest rq(cx);
+	WithRequest rq = WithRequest::FromAlreadyEntered(cx);
 
 	T* e = IGUIProxyObject::FromPrivateSlot<T>(proxy.get());
 	if (!e)
@@ -243,7 +243,7 @@ bool JSI_GUIProxy<T>::set(JSContext* cx, JS::HandleObject proxy, JS::HandleId id
 		return result.fail(JSMSG_OBJECT_REQUIRED);
 	}
 
-	ScriptRequest rq(cx);
+	WithRequest rq = WithRequest::FromAlreadyEntered(cx);
 
 	JS::RootedValue idval(rq.cx());
 	if (!JS_IdToValue(rq.cx(), id, &idval))
@@ -298,7 +298,7 @@ bool JSI_GUIProxy<T>::delete_(JSContext* cx, JS::HandleObject proxy, JS::HandleI
 		return result.fail(JSMSG_OBJECT_REQUIRED);
 	}
 
-	ScriptRequest rq(cx);
+	WithRequest rq = WithRequest::FromAlreadyEntered(cx);
 
 	JS::RootedValue idval(rq.cx());
 	if (!JS_IdToValue(rq.cx(), id, &idval))

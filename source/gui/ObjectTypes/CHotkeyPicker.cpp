@@ -31,13 +31,13 @@ const CStr CHotkeyPicker::EventNameCombination = "Combination";
 const CStr CHotkeyPicker::EventNameKeyChange = "KeyChange";
 
 // Don't send the scancode, JS doesn't care.
-template<> void Script::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret, const CHotkeyPicker::Key& val)
+template<> void Script::ToJSVal(const WithRequest& rq, JS::MutableHandleValue ret, const CHotkeyPicker::Key& val)
 {
 	Script::ToJSVal(rq, ret, val.scancodeName);
 }
 
 // Unused, but JSVAL_VECTOR requires it.
-template<> bool Script::FromJSVal(const ScriptRequest&, const JS::HandleValue, CHotkeyPicker::Key&)
+template<> bool Script::FromJSVal(const WithRequest&, const JS::HandleValue, CHotkeyPicker::Key&)
 {
 	LOGWARNING("FromJSVal<CHotkeyPicker>: Not implemented");
 	return false;

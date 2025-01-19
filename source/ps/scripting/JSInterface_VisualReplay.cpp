@@ -32,7 +32,7 @@ CStrW GetReplayDirectoryName(const CStrW& directoryName)
 	return wstring_from_utf8(OsPath(VisualReplay::GetDirectoryPath() / directoryName).string8());
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const WithRequest& rq)
 {
 	ScriptFunction::Register<&VisualReplay::GetReplays>(rq, "GetReplays");
 	ScriptFunction::Register<&VisualReplay::DeleteReplay>(rq, "DeleteReplay");

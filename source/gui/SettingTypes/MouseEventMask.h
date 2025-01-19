@@ -27,7 +27,7 @@
 class CRect;
 class CVector2D;
 class IGUIObject;
-class ScriptRequest;
+class WithRequest;
 
 /**
  * A custom shape that changes the object's "over-ability", and thus where one can click on it.
@@ -58,12 +58,12 @@ public:
 	 */
 	bool IsMouseOver(const CVector2D& mousePos, const CRect& objectSize) const;
 
-	void ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue value) override;
+	void ToJSVal(const WithRequest& rq, JS::MutableHandleValue value) override;
 
 	class Impl;
 protected:
 	bool DoFromString(const CStrW& value) override;
-	bool DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value) override;
+	bool DoFromJSVal(const WithRequest& rq, JS::HandleValue value) override;
 
 	std::string m_Spec;
 	std::unique_ptr<Impl> m_Impl;

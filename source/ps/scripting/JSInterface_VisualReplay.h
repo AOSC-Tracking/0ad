@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_VISUALREPLAY
 #define INCLUDED_JSI_VISUALREPLAY
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_VisualReplay
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_VISUALREPLAY

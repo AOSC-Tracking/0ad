@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_HOTKEY
 #define INCLUDED_JSI_HOTKEY
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Hotkey
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_HOTKEY

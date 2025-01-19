@@ -77,14 +77,15 @@ public:
 	ScriptFunction::Register<&CMapGenerationCallbacks::func, \
 		ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>>(rq, #func, flags);
 
+		ScriptRequest rq(m_ScriptInterface);
+
 		// VFS
-		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulationMaps(m_ScriptInterface, flags);
+		JSI_VFS::RegisterScriptFunctions_ReadOnlySimulationMaps(rq, flags);
 
 		// Globalscripts may use VFS script functions
 		m_ScriptInterface.LoadGlobalScripts();
 
 		// File loading
-		ScriptRequest rq(m_ScriptInterface);
 		REGISTER_MAPGEN_FUNC(LoadLibrary);
 		REGISTER_MAPGEN_FUNC(LoadHeightmapImage);
 		REGISTER_MAPGEN_FUNC(LoadMapTerrain);
@@ -369,8 +370,7 @@ private:
 
 bool MapGenerationInterruptCallback(JSContext* cx)
 {
-	return !ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>(
-		ScriptInterface::CmptPrivate::GetScriptInterface(cx))->m_StopToken.IsStopRequested();
+	return !ScriptInterface::ObjectFromCBData<CMapGenerationCallbacks>(WithRequest::FromAlreadyEntered(cx))->m_StopToken.IsStopRequested();
 }
 } // anonymous namespace
 
@@ -407,7 +407,7 @@ Script::StructuredClone RunMapGenerationScript(const StopToken stopToken, std::a
 	CMapGenerationCallbacks callbackData{stopToken, progress, scriptInterface, mapData, flags};
 
 	// Copy settings to global variable
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), scriptInterface.GetGlobalValue());
 	if (!Script::SetProperty(rq, global, "g_MapSettings", settingsVal, flags & JSPROP_READONLY,
 		flags & JSPROP_ENUMERATE))
 	{

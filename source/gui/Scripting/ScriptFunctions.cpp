@@ -50,7 +50,7 @@
  */
 void GuiScriptingInit(ScriptInterface& scriptInterface)
 {
-	ScriptRequest rq(scriptInterface);
+	const ScriptRequest rq {scriptInterface};
 
 	JSI_GUISize::RegisterScriptClass(scriptInterface);
 	JSI_ConfigDB::RegisterScriptFunctions(rq);

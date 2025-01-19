@@ -61,7 +61,7 @@ constexpr std::array<std::wstring_view, 2> MAPS{L"simulation/"sv, L"maps/"sv};
 
 // Tests whether the current script context is allowed to read from the given directory
 template<auto& restriction>
-bool PathRestrictionMet(const ScriptRequest& rq, const std::wstring& filePath)
+bool PathRestrictionMet(const WithRequest& rq, const std::wstring& filePath)
 {
 	if (std::any_of(restriction.begin(), restriction.end(), [&](const std::wstring_view allowedPath)
 		{
@@ -89,11 +89,11 @@ bool PathRestrictionMet(const ScriptRequest& rq, const std::wstring& filePath)
 // state held across multiple BuildDirEntListCB calls; init by BuildDirEntList.
 struct BuildDirEntListState
 {
-	const ScriptRequest& rq;
+	const WithRequest& rq;
 	JS::PersistentRootedObject filename_array;
 	int cur_idx;
 
-	BuildDirEntListState(const ScriptRequest& rq)
+	BuildDirEntListState(const WithRequest& rq)
 		: rq(rq),
 		filename_array(rq.cx()),
 		cur_idx(0)
@@ -120,7 +120,7 @@ static Status BuildDirEntListCB(const VfsPath& pathname, const CFileInfo& UNUSED
 //   filter_string: default "" matches everything; otherwise, see vfs_next_dirent.
 //   recurse: should subdirectories be included in the search? default false.
 template<auto& restriction>
-JS::Value BuildDirEntList(const ScriptRequest& rq, const std::wstring& path, const std::wstring& filterStr,
+JS::Value BuildDirEntList(const WithRequest& rq, const std::wstring& path, const std::wstring& filterStr,
 	bool recurse)
 {
 	if (!PathRestrictionMet<restriction>(rq, path))
@@ -143,7 +143,7 @@ JS::Value BuildDirEntList(const ScriptRequest& rq, const std::wstring& path, con
 
 // Return true iff the file exits
 template<auto& restriction>
-bool FileExists(const ScriptRequest& rq, const std::wstring& filename)
+bool FileExists(const WithRequest& rq, const std::wstring& filename)
 {
 	return PathRestrictionMet<restriction>(rq, filename) && g_VFS->GetFileInfo(filename, 0) == INFO::OK;
 }
@@ -160,7 +160,7 @@ unsigned int GetFileSize(const std::wstring& filename)
 
 // Return file contents in a string. Assume file is UTF-8 encoded text.
 template<auto& restriction>
-JS::Value ReadFile(const ScriptRequest& rq, const std::wstring& filename)
+JS::Value ReadFile(const WithRequest& rq, const std::wstring& filename)
 {
 	if (!PathRestrictionMet<restriction>(rq, filename))
 		return JS::NullValue();
@@ -182,7 +182,7 @@ JS::Value ReadFile(const ScriptRequest& rq, const std::wstring& filename)
 
 // Return file contents as an array of lines. Assume file is UTF-8 encoded text.
 template<auto& restriction>
-JS::Value ReadFileLines(const ScriptRequest& rq, const std::wstring& filename)
+JS::Value ReadFileLines(const WithRequest& rq, const std::wstring& filename)
 {
 	if (!PathRestrictionMet<restriction>(rq, filename))
 		return JS::NullValue();
@@ -268,7 +268,7 @@ bool DeleteCampaignSave(const CStrW& filePath)
 		wunlink(realPath) == 0;
 }
 
-void RegisterScriptFunctions_ReadWriteAnywhere(const ScriptRequest& rq,
+void RegisterScriptFunctions_ReadWriteAnywhere(const WithRequest& rq,
 	const u16 flags /*= JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT */)
 {
 	ScriptFunction::Register<&BuildDirEntList<PathRestriction::GUI>>(rq, "ListDirectoryFiles", flags);
@@ -281,7 +281,7 @@ void RegisterScriptFunctions_ReadWriteAnywhere(const ScriptRequest& rq,
 	ScriptFunction::Register<&DeleteCampaignSave>(rq, "DeleteCampaignSave", flags);
 }
 
-void RegisterScriptFunctions_ReadOnlySimulation(const ScriptRequest& rq,
+void RegisterScriptFunctions_ReadOnlySimulation(const WithRequest& rq,
 	const u16 flags /*= JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT */)
 {
 	ScriptFunction::Register<&BuildDirEntList<PathRestriction::SIMULATION>>(rq, "ListDirectoryFiles", flags);
@@ -289,7 +289,7 @@ void RegisterScriptFunctions_ReadOnlySimulation(const ScriptRequest& rq,
 	ScriptFunction::Register<&ReadJSONFile<PathRestriction::SIMULATION>>(rq, "ReadJSONFile", flags);
 }
 
-void RegisterScriptFunctions_ReadOnlySimulationMaps(const ScriptRequest& rq,
+void RegisterScriptFunctions_ReadOnlySimulationMaps(const WithRequest& rq,
 	const u16 flags /*= JSPROP_ENUMERATE | JSPROP_READONLY | JSPROP_PERMANENT */)
 {
 	ScriptFunction::Register<&BuildDirEntList<PathRestriction::MAPS>>(rq, "ListDirectoryFiles", flags);

@@ -377,7 +377,7 @@ void XmppClient::SendIqGetConnectionData(const std::string& jid, const std::stri
  *
  * @param data A JS array of game statistics
  */
-void XmppClient::SendIqGameReport(const ScriptRequest& rq, JS::HandleValue data)
+void XmppClient::SendIqGameReport(const WithRequest& rq, JS::HandleValue data)
 {
 	gloox::JID echelonJid(m_echelonId);
 
@@ -410,7 +410,7 @@ void XmppClient::SendIqGameReport(const ScriptRequest& rq, JS::HandleValue data)
  *
  * @param data A JS array of game attributes
  */
-void XmppClient::SendIqRegisterGame(const ScriptRequest& rq, JS::HandleValue data)
+void XmppClient::SendIqRegisterGame(const WithRequest& rq, JS::HandleValue data)
 {
 	gloox::JID xpartamuppJid(m_xpartamuppId);
 
@@ -559,7 +559,7 @@ void XmppClient::handleOOB(const gloox::JID&, const gloox::OOB&)
  *
  * @return A JS array containing all known players and their presences
  */
-JS::Value XmppClient::GUIGetPlayerList(const ScriptRequest& rq)
+JS::Value XmppClient::GUIGetPlayerList(const WithRequest& rq)
 {
 	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
@@ -587,7 +587,7 @@ JS::Value XmppClient::GUIGetPlayerList(const ScriptRequest& rq)
  *
  * @return A JS array containing all known games
  */
-JS::Value XmppClient::GUIGetGameList(const ScriptRequest& rq)
+JS::Value XmppClient::GUIGetGameList(const WithRequest& rq)
 {
 	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
@@ -615,7 +615,7 @@ JS::Value XmppClient::GUIGetGameList(const ScriptRequest& rq)
  *
  * @return A JS array containing all known leaderboard data
  */
-JS::Value XmppClient::GUIGetBoardList(const ScriptRequest& rq)
+JS::Value XmppClient::GUIGetBoardList(const WithRequest& rq)
 {
 	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
@@ -641,7 +641,7 @@ JS::Value XmppClient::GUIGetBoardList(const ScriptRequest& rq)
  *
  * @return A JS array containing the specific user's profile data
  */
-JS::Value XmppClient::GUIGetProfile(const ScriptRequest& rq)
+JS::Value XmppClient::GUIGetProfile(const WithRequest& rq)
 {
 	JS::RootedValue ret(rq.cx());
 	Script::CreateArray(rq, &ret);
@@ -666,12 +666,12 @@ JS::Value XmppClient::GUIGetProfile(const ScriptRequest& rq)
  * Message interfaces                                *
  *****************************************************/
 
-void SetGUIMessageProperty(const ScriptRequest& UNUSED(rq), JS::HandleObject UNUSED(messageObj))
+void SetGUIMessageProperty(const WithRequest& UNUSED(rq), JS::HandleObject UNUSED(messageObj))
 {
 }
 
 template<typename T, typename... Args>
-void SetGUIMessageProperty(const ScriptRequest& rq, JS::HandleObject messageObj, const std::string& propertyName, const T& propertyValue, Args const&... args)
+void SetGUIMessageProperty(const WithRequest& rq, JS::HandleObject messageObj, const std::string& propertyName, const T& propertyValue, Args const&... args)
 {
 	JS::RootedValue scriptPropertyValue(rq.cx());
 	Script::ToJSVal(rq, &scriptPropertyValue, propertyValue);

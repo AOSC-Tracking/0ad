@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_MOD
 #define INCLUDED_JSI_MOD
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Mod
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_MOD

@@ -18,7 +18,7 @@
 #ifndef INCLUDED_JSINTERFACE_L10N
 #define INCLUDED_JSINTERFACE_L10N
 
-class ScriptRequest;
+class WithRequest;
 
 /**
  * Namespace for the functions of the JavaScript interface for
@@ -36,12 +36,12 @@ namespace JSI_L10n
 	 * internationalization and localization into the specified JavaScript
 	 * context.
 	 *
-	 * @param ScriptRequest Script Request where RegisterScriptFunctions()
+	 * @param rq Script Request where RegisterScriptFunctions()
 	 *        registers the functions.
 	 *
 	 * @sa GuiScriptingInit()
 	 */
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSINTERFACE_L10N

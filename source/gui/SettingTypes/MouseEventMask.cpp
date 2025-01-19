@@ -54,12 +54,12 @@ CGUIMouseEventMask::~CGUIMouseEventMask()
 {
 }
 
-void CGUIMouseEventMask::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue Value)
+void CGUIMouseEventMask::ToJSVal(const WithRequest& rq, JS::MutableHandleValue Value)
 {
 	Script::ToJSVal(rq, Value, m_Spec);
 }
 
-bool CGUIMouseEventMask::DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value)
+bool CGUIMouseEventMask::DoFromJSVal(const WithRequest& rq, JS::HandleValue value)
 {
 	CStrW spec;
 	if (!Script::FromJSVal(rq, value, spec))

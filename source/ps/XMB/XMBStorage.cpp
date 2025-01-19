@@ -153,6 +153,7 @@ public:
 	std::vector<std::pair<u32, JS::Heap<JS::Value>>> m_Children;
 
 	const ScriptInterface& scriptInterface;
+	// TODO: This isn't super safe - we might accidentally enter different realms
 	const ScriptRequest rq;
 };
 

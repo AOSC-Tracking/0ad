@@ -206,7 +206,7 @@ void SetBoundingBoxDebugOverlay(bool enabled)
 	ICmpSelectable::ms_EnableDebugOverlays = enabled;
 }
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const WithRequest& rq)
 {
 	ScriptFunction::Register<&GuiInterfaceCall>(rq, "GuiInterfaceCall");
 	ScriptFunction::Register<&PostNetworkCommand>(rq, "PostNetworkCommand");

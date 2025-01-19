@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_DEBUG
 #define INCLUDED_JSI_DEBUG
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Debug
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_DEBUG

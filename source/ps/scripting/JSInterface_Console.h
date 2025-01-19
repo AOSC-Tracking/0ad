@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_CONSOLE
 #define INCLUDED_JSI_CONSOLE
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Console
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_CONSOLE

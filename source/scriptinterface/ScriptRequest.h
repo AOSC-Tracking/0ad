@@ -20,26 +20,38 @@
 
 #include "scriptinterface/ScriptForward.h"
 
-// Ignore warnings in SM headers.
-#if GCC_VERSION || CLANG_VERSION
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wunused-parameter"
-# pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
-#elif MSC_VERSION
-# pragma warning(push, 1)
-#endif
-
-#include "js/RootingAPI.h"
-
-#if GCC_VERSION || CLANG_VERSION
-# pragma GCC diagnostic pop
-#elif MSC_VERSION
-# pragma warning(pop)
-#endif
-
 #include <memory>
 
 class ScriptInterface;
+
+class WithRequest
+{
+	friend class ScriptRequest;
+
+	WithRequest() = delete;
+	WithRequest(const WithRequest& rq) = delete;
+	WithRequest& operator=(const WithRequest& rq) = delete;
+public:
+
+	static WithRequest FromAlreadyEntered(JSContext* cx) { return WithRequest(cx); }
+	/**
+	 * Returns the script interface of the currently entered realm.
+	 * NB: if the JS context changes, this will return a different script interface,
+	 * so be _very_ careful when juggling between different realms.
+	 */
+	const ScriptInterface& GetCurrentScriptInterface() const;
+
+	JSContext* cx() const { return m_Cx; }
+
+private:
+	WithRequest(JSContext* cx): m_Cx(cx) {}
+	// Implemented in ScriptInterface.cpp
+	WithRequest(const ScriptInterface& scriptInterface);
+
+	// Note that JSContext actually changes behind the scenes when creating another ScriptRequest for another realm,
+	// so be _very_ careful when juggling between different realms.
+	JSContext* m_Cx;
+};
 
 /**
  * Spidermonkey maintains some 'local' state via the JSContext* object.
@@ -51,7 +63,9 @@ class ScriptInterface;
  *
  * ScriptRequest combines both of the above in a single convenient package,
  * providing safe access to the JSContext*, the global object, and ensuring that the proper realm has been entered.
- * Most scriptinterface/ functions will take a ScriptRequest, to ensure proper rooting. You may sometimes
+ * ScriptRequest will enter the realm, where WithRequest assumes you have entered it somewhere before.
+ * ScriptRequest is implicitly convertible to WithRequest for convenience.
+ * Most scriptinterface/ functions will take a WithRequest, to ensure proper rooting. You may sometimes
  * have to create one from a ScriptInterface.
  *
  * Be particularly careful when manipulating several script interfaces.
@@ -61,6 +75,8 @@ class ScriptRequest
 	ScriptRequest() = delete;
 	ScriptRequest(const ScriptRequest& rq) = delete;
 	ScriptRequest& operator=(const ScriptRequest& rq) = delete;
+	ScriptRequest(ScriptRequest&& rq) = delete;
+	ScriptRequest& operator=(ScriptRequest&& rq) = delete;
 public:
 	/**
 	 * NB: the definitions are in scriptinterface.cpp, because these access members of the PImpled
@@ -69,36 +85,16 @@ public:
 	ScriptRequest(const ScriptInterface& scriptInterface);
 	ScriptRequest(const ScriptInterface* scriptInterface) : ScriptRequest(*scriptInterface) {}
 	ScriptRequest(std::shared_ptr<ScriptInterface> scriptInterface) : ScriptRequest(*scriptInterface) {}
+	ScriptRequest(JSContext* cx);
 	~ScriptRequest();
 
-	/**
-	 * Create a script request from a JSContext.
-	 * This can be used to get the script interface in a JSNative function.
-	 * In general, you shouldn't have to rely on this otherwise.
-	 */
-	ScriptRequest(JSContext* cx);
+	operator const WithRequest&() const { return rq; }
 
-	/**
-	 * Return the scriptInterface active when creating this ScriptRequest.
-	 * Note that this is multi-request safe: even if another ScriptRequest is created,
-	 * it will point to the original scriptInterface, and thus can be used to re-enter the realm.
-	 */
-	const ScriptInterface& GetScriptInterface() const;
+	JSContext* cx() const { return rq.cx(); }
 
-	JSContext* cx() const { return m_Cx; }
-
-	JS::Value globalValue() const;
-
-	JS::HandleObject glob;
-	JS::HandleObject nativeScope;
 private:
-	// Note that JSContext actually changes behind the scenes when creating another ScriptRequest for another realm,
-	// so be _very_ careful when juggling between different realms.
-	JSContext* m_Cx;
-
-	const ScriptInterface& m_ScriptInterface;
+	WithRequest rq;
 	JS::Realm* m_FormerRealm;
 };
-
 
 #endif // INCLUDED_SCRIPTREQUEST

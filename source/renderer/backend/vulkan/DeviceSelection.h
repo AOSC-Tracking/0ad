@@ -93,7 +93,7 @@ bool IsSurfaceFormatSupported(
  * Report all desired information about the available physical device.
  */
 void ReportAvailablePhysicalDevice(const SAvailablePhysicalDevice& device,
-	const ScriptRequest& rq, JS::HandleValue settings);
+	const WithRequest& rq, JS::HandleValue settings);
 
 } // namespace Vulkan
 

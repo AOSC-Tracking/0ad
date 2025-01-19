@@ -67,8 +67,8 @@ public:
 		return pixel == other.pixel && percent == other.percent;
 	}
 
-	void ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) const;
-	bool FromJSVal(const ScriptRequest& rq, JS::HandleValue v);
+	void ToJSVal(const WithRequest& rq, JS::MutableHandleValue ret) const;
+	bool FromJSVal(const WithRequest& rq, JS::HandleValue v);
 };
 
 #endif // INCLUDED_CGUISIZE

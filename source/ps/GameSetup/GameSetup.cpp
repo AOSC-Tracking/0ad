@@ -819,7 +819,7 @@ bool Autostart(const CmdLineArgs& args)
 		if (!Script::HasProperty(rq, cmdLineArgs, "autostart-port"))
 			Script::SetProperty(rq, cmdLineArgs, "autostart-port", PS_DEFAULT_PORT);
 
-		JS::RootedValue global(rq.cx(), rq.globalValue());
+		JS::RootedValue global(rq.cx(), scriptInterface.GetGlobalValue());
 		if (!ScriptFunction::CallVoid(rq, global, args.Has("autostart-client") ? "autostartClient" : "autostartHost", cmdLineArgs, true))
 			return false;
 
@@ -833,7 +833,7 @@ bool Autostart(const CmdLineArgs& args)
 	}
 	else
 	{
-		JS::RootedValue global(rq.cx(), rq.globalValue());
+		JS::RootedValue global(rq.cx(), scriptInterface.GetGlobalValue());
 		if (!ScriptFunction::CallVoid(rq, global, "autostartHost", cmdLineArgs, false))
 			return false;
 	}
@@ -858,6 +858,7 @@ bool AutostartVisualReplay(const std::string& replayFile)
 
 	ScriptInterface& scriptInterface = g_Game->GetSimulation2()->GetScriptInterface();
 	ScriptRequest rq(scriptInterface);
+
 	JS::RootedValue attrs(rq.cx(), g_Game->GetSimulation2()->GetInitAttributes());
 
 	JS::RootedValue playerAssignments(rq.cx());
@@ -884,7 +885,7 @@ void CancelLoad(const CStrW& message)
 	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
 	ScriptRequest rq(pScriptInterface);
 
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), pScriptInterface->GetGlobalValue());
 
 	LDR_Cancel();
 

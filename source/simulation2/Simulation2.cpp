@@ -730,14 +730,14 @@ ScriptInterface& CSimulation2::GetScriptInterface() const
 void CSimulation2::PreInitGame()
 {
 	ScriptRequest rq(GetScriptInterface());
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), GetScriptInterface().GetGlobalValue());
 	ScriptFunction::CallVoid(rq, global, "PreInitGame");
 }
 
 void CSimulation2::InitGame()
 {
 	ScriptRequest rq(GetScriptInterface());
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), GetScriptInterface().GetGlobalValue());
 
 	JS::RootedValue settings(rq.cx());
 	JS::RootedValue tmpInitAttributes(rq.cx(), GetInitAttributes());
@@ -836,7 +836,7 @@ void CSimulation2::GetMapSettings(JS::MutableHandleValue ret)
 void CSimulation2::LoadPlayerSettings(bool newPlayers)
 {
 	ScriptRequest rq(GetScriptInterface());
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), GetScriptInterface().GetGlobalValue());
 	ScriptFunction::CallVoid(rq, global, "LoadPlayerSettings", m->m_MapSettings, newPlayers);
 }
 
@@ -844,7 +844,7 @@ void CSimulation2::LoadMapSettings()
 {
 	ScriptRequest rq(GetScriptInterface());
 
-	JS::RootedValue global(rq.cx(), rq.globalValue());
+	JS::RootedValue global(rq.cx(), GetScriptInterface().GetGlobalValue());
 
 	// Initialize here instead of in Update()
 	ScriptFunction::CallVoid(rq, global, "LoadMapSettings", m->m_MapSettings);

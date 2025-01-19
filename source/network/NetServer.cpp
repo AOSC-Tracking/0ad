@@ -426,7 +426,7 @@ bool CNetServerWorker::RunStep()
 
 	m_ScriptInterface->GetContext().MaybeIncrementalGC(0.5f);
 
-	ScriptRequest rq(m_ScriptInterface);
+	const ScriptRequest rq {m_ScriptInterface};
 
 	std::vector<bool> newStartGame;
 	std::vector<std::string> newGameAttributes;
@@ -1191,7 +1191,7 @@ bool CNetServerWorker::OnSimulationCommand(CNetServerSession* session, CFsmEvent
 	// unless cheating is enabled
 	bool cheatsEnabled = false;
 	const ScriptInterface& scriptInterface = server.GetScriptInterface();
-	ScriptRequest rq(scriptInterface);
+	const ScriptRequest rq {scriptInterface};
 	JS::RootedValue settings(rq.cx());
 	Script::GetProperty(rq, server.m_InitAttributes, "settings", &settings);
 	if (Script::HasProperty(rq, settings, "CheatsEnabled"))
@@ -1775,7 +1775,7 @@ void CNetServer::StartGame()
 	m_Worker->m_StartGameQueue.push_back(true);
 }
 
-void CNetServer::UpdateInitAttributes(JS::MutableHandleValue attrs, const ScriptRequest& rq)
+void CNetServer::UpdateInitAttributes(JS::MutableHandleValue attrs, const WithRequest& rq)
 {
 	// Pass the attributes as JSON, since that's the easiest safe
 	// cross-thread way of passing script data

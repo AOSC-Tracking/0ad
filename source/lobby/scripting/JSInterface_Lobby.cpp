@@ -46,7 +46,7 @@ void SetRankedGame(bool isRanked)
 
 #if CONFIG2_LOBBY
 
-void StartXmppClient(const ScriptRequest& rq, const std::wstring& username, const std::wstring& password, const std::wstring& room, const std::wstring& nick, int historyRequestSize)
+void StartXmppClient(const WithRequest& rq, const std::wstring& username, const std::wstring& password, const std::wstring& room, const std::wstring& nick, int historyRequestSize)
 {
 	if (g_XmppClient)
 	{
@@ -66,7 +66,7 @@ void StartXmppClient(const ScriptRequest& rq, const std::wstring& username, cons
 	g_rankedGame = true;
 }
 
-void StartRegisterXmppClient(const ScriptRequest& rq, const std::wstring& username, const std::wstring& password)
+void StartRegisterXmppClient(const WithRequest& rq, const std::wstring& username, const std::wstring& password)
 {
 	if (g_XmppClient)
 	{
@@ -85,7 +85,7 @@ void StartRegisterXmppClient(const ScriptRequest& rq, const std::wstring& userna
 			true);
 }
 
-void StopXmppClient(const ScriptRequest& rq)
+void StopXmppClient(const WithRequest& rq)
 {
 	if (!g_XmppClient)
 	{
@@ -100,7 +100,7 @@ void StopXmppClient(const ScriptRequest& rq)
 ////////////////////////////////////////////////
 ////////////////////////////////////////////////
 
-IXmppClient* XmppGetter(const ScriptRequest&, JS::CallArgs&)
+IXmppClient* XmppGetter(const WithRequest&, JS::CallArgs&)
 {
 	if (!g_XmppClient)
 	{
@@ -110,11 +110,10 @@ IXmppClient* XmppGetter(const ScriptRequest&, JS::CallArgs&)
 	return g_XmppClient;
 }
 
-void SendRegisterGame(const ScriptInterface& scriptInterface, JS::HandleValue data)
+void SendRegisterGame(const WithRequest& rq, JS::HandleValue data)
 {
 	if (!g_XmppClient)
 	{
-		ScriptRequest rq(scriptInterface);
 		ScriptException::Raise(rq, "Cannot call SendRegisterGame without an initialized XmppClient!");
 		return;
 	}
@@ -126,7 +125,7 @@ void SendRegisterGame(const ScriptInterface& scriptInterface, JS::HandleValue da
 		return;
 	}
 
-	g_XmppClient->SendIqRegisterGame(scriptInterface, data);
+	g_XmppClient->SendIqRegisterGame(rq, data);
 }
 
 // Unlike other functions, this one just returns Undefined if XmppClient isn't initialised.
@@ -183,7 +182,7 @@ std::string EncryptPassword(const std::string& password, const std::string& user
 
 #endif
 
-void RegisterScriptFunctions(const ScriptRequest& rq)
+void RegisterScriptFunctions(const WithRequest& rq)
 {
 	// Lobby functions
 	ScriptFunction::Register<&HasXmppClient>(rq, "HasXmppClient");

@@ -23,7 +23,7 @@
 #include "ps/CStr.h"
 
 class IGUIObject;
-class ScriptRequest;
+class WithRequest;
 
 /**
  * Manages a hotkey setting for a GUI object.
@@ -38,7 +38,7 @@ public:
 	CGUIHotkey& operator=(CGUIHotkey&&) = delete;
 
 	bool DoFromString(const CStrW& value) override;
-	bool DoFromJSVal(const ScriptRequest& rq, JS::HandleValue value) override;
+	bool DoFromJSVal(const WithRequest& rq, JS::HandleValue value) override;
 	void OnSettingChange(const CStr& setting, bool sendMessage) override;
 };
 

@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSI_MAIN
 #define INCLUDED_JSI_MAIN
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Main
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSI_MAIN

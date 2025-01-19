@@ -161,7 +161,7 @@ public:
 			"mapPath", "maps/scenarios/",
 			"thing", "example");
 
-		server.UpdateInitAttributes(&attrs, scriptInterface);
+		server.UpdateInitAttributes(&attrs, rq);
 
 		CNetClient client1(&client1Game);
 		CNetClient client2(&client2Game);
@@ -240,7 +240,7 @@ public:
 			"mapPath", "maps/scenarios/",
 			"thing", "example");
 
-		server.UpdateInitAttributes(&attrs, scriptInterface);
+		server.UpdateInitAttributes(&attrs, rq);
 
 		CNetClient client1(&client1Game);
 		CNetClient client2(&client2Game);

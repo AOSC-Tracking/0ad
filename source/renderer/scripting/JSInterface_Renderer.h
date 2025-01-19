@@ -18,11 +18,11 @@
 #ifndef INCLUDED_JSINTERFACE_RENDERER
 #define INCLUDED_JSINTERFACE_RENDERER
 
-class ScriptRequest;
+class WithRequest;
 
 namespace JSI_Renderer
 {
-	void RegisterScriptFunctions(const ScriptRequest& rq);
+	void RegisterScriptFunctions(const WithRequest& rq);
 }
 
 #endif // INCLUDED_JSINTERFACE_RENDERER

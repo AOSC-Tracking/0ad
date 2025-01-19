@@ -20,7 +20,7 @@
 
 #include "scriptinterface/ScriptTypes.h"
 
-class ScriptRequest;
+class WithRequest;
 
 class CMessage
 {
@@ -32,14 +32,14 @@ public:
 	virtual int GetType() const = 0;
 	virtual const char* GetScriptHandlerName() const = 0;
 	virtual const char* GetScriptGlobalHandlerName() const = 0;
-	virtual JS::Value ToJSVal(const ScriptRequest&) const = 0;
-	JS::Value ToJSValCached(const ScriptRequest&) const;
+	virtual JS::Value ToJSVal(const WithRequest&) const = 0;
+	JS::Value ToJSValCached(const WithRequest&) const;
 private:
 	mutable std::unique_ptr<JS::PersistentRootedValue> m_Cached;
 };
 // TODO: GetType could be replaced with a plain member variable to avoid some
 // virtual calls, if that turns out to be worthwhile
 
-CMessage* CMessageFromJSVal(int mtid, const ScriptRequest&, JS::HandleValue);
+CMessage* CMessageFromJSVal(int mtid, const WithRequest&, JS::HandleValue);
 
 #endif // INCLUDED_MESSAGE

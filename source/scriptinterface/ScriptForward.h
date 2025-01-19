@@ -49,7 +49,14 @@ class BaseProxyHandler;
 
 class ScriptContext;
 class ScriptInterface;
-class ScriptRequest;
+class WithRequest;
+
+namespace Script
+{
+// Defined in this file to avoid including ScriptInterface.h in a couple places.
+JS::Value GetGlobalValue(const WithRequest& rq);
+JS::HandleObject GetNativeScope(const WithRequest& rq);
+}
 
 #if GCC_VERSION
 # pragma GCC diagnostic pop
