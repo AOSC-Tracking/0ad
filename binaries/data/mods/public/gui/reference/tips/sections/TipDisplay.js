@@ -1,11 +1,12 @@
 /**
- * This class is concerned with chosing and displaying tips about how to play the game.
+ * This class is concerned with choosing and displaying tips about how to play the game.
  * This includes a text and one or more images.
  */
 class TipDisplay
 {
 	/**
 	 * @param {boolean} initData.tipScrolling - Whether or not to enable the player to scroll through the tips and the tip images.
+	 * @param {boolean} initData.isLoading - Whether or not tips are displayed during loading.
 	 * @param {Array|undefined} hotloadData.tipFilesData - Hotloaded value storing last time's tipFilesData.
 	 * @param {number|undefined} hotloadData.tipIndex - Hotloaded value pointing to a specific tip.
 	 * @param {number|undefined} hotloadData.tipImageIndex - Hotloaded value pointing to a specific tip image.
@@ -31,17 +32,12 @@ class TipDisplay
 		this.previousImageButton.tooltip = this.TooltipPreviousImage;
 		this.nextImageButton.tooltip = this.TooltipNextImage;
 
-		this.singlePlayerTipsChance = 0.5;
-
-		if (Engine.HasNetClient()) 
-			this.tipFilesData = this.getRandomMultiplayerTips();
+		if (initData.isLoading)
+			this.tipFilesData = this.getLoadingScreenTip();
 		else 
 			this.tipFilesData =
 				hotloadData?.tipFilesData ||
-				shuffleArray(
-					Engine.ReadJSONFile(this.TipFilesDataFile).singlePlayer
-				)
-				.map(tip => {
+				Engine.ReadJSONFile(this.TipFilesDataFile).map(category => category.files).flat().map(tip => {
 					tip.imageFiles = shuffleArray(tip.imageFiles);
 					return tip;
 				});
@@ -65,19 +61,37 @@ class TipDisplay
 			this.onTipImageIndexChange(hotloadData.tipImageIndex + 1);
 	}
 
-	getRandomMultiplayerTips() {
-		const tips = Engine.ReadJSONFile(this.TipFilesDataFile);
-		const multiPlayerTips = tips.multiPlayer;
-		const totalSinglePlayerTips = Math.floor(multiPlayerTips.length * this.singlePlayerTipsChance);
-		return shuffleArray(multiPlayerTips.concat(this.getRandomSinglePlayerTips(totalSinglePlayerTips)));
+	getLoadingScreenTip() {
+		const tipFiles = Engine.ReadJSONFile(this.TipFilesDataFile);
+		const category = this.getRandomWeightedCategory(tipFiles, Engine.HasNetClient());
+		return this.getRandomTipFromCategory(category);
 	}
 
-	getRandomSinglePlayerTips(amount) {
-		const tips = Engine.ReadJSONFile(this.TipFilesDataFile).singlePlayer;
-		const randomizedTips = [];
-		for (let i = 0; i < amount; i++)
-			randomizedTips.push(tips[Math.round(Math.random() * tips.length)]);
-		return randomizedTips;
+	// Returns an array with one element containing a randomized tip from a category.
+	getRandomTipFromCategory(category) {
+		const categoryTips = shuffleArray(category.files);
+		const chosenTip = categoryTips[0];
+		chosenTip.imageFiles = shuffleArray(chosenTip.imageFiles);
+		return [chosenTip];
+	}
+
+	/**
+	 * Returns a randomize tip category based on the weight of the category.
+	 * @param {boolean} isMultiplayer True if we want to include the multiplayer category.
+	 * @param {any[]} tipsFiles An array containing all categories from the TipFilesDataFile
+	 * @returns A tip object array.
+	 */
+	getRandomWeightedCategory(tipsFiles, isMultiplayer) {
+		const totalProbability = tipsFiles.reduce((sum, category) => sum + (isMultiplayer ? category.loadingScreenOccurrence_MP : category.loadingScreenOccurrence_SP), 0);
+		const random = Math.random() * totalProbability;
+
+		let cumulative = 0;
+		for (const category of tipsFiles) {
+			cumulative += (isMultiplayer ? category.loadingScreenOccurrence_MP : category.loadingScreenOccurrence_SP);
+			if (random <= cumulative) {
+				return category;
+			}
+		}
 	}
 
 	getHotloadData()
@@ -177,16 +191,6 @@ TipDisplay.prototype.TipFilesDataFile = "gui/reference/tips/tipfiles.json";
  * Directory storing .txt files containing the multi and single player tips.
  */
 TipDisplay.prototype.TextPath = "gui/reference/tips/texts/";
-
-/**
- * Directory storing all single player .txt tips. Contains gameplay tips.
- */
-TipDisplay.prototype.SinglePlayerTipsPath = TipDisplay.prototype.TextPath + "singleplayer";
-
-/**
- * Directory storing all multi player .txt tips. Contains community guidelines tips.
- */
-TipDisplay.prototype.MultiPlayerTipsPath = TipDisplay.prototype.TextPath + "multiplayer";
 
 /**
  * Subdirectory of art/textures/ui storing the .png images illustrating the tips.

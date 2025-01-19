@@ -6,7 +6,7 @@ function init(data)
 		"initData": data,
 		"progressBar": new ProgressBar(),
 		"quoteDisplay": new QuoteDisplay(),
-		"tipDisplay": new TipDisplay({ "tipScrolling": false }),
+		"tipDisplay": new TipDisplay({ "tipScrolling": false, "isLoading": true }),
 		"titleDisplay": new TitleDisplay(data)
 	};
 
