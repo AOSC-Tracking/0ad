@@ -6,7 +6,7 @@ class TipDisplay
 {
 	/**
 	 * @param {boolean} initData.tipScrolling - Whether or not to enable the player to scroll through the tips and the tip images.
-	 * @param {boolean} initData.isOnLoadingScreen - Whether or not tip display is initialized by the game loading screen.
+	 * @param {boolean} initData.isOnLoadingScreen - Whether or not the tip display is initialized by the game loading screen.
 	 * @param {Array|undefined} hotloadData.tipFilesData - Hotloaded value storing last time's tipFilesData.
 	 * @param {number|undefined} hotloadData.tipIndex - Hotloaded value pointing to a specific tip.
 	 * @param {number|undefined} hotloadData.tipImageIndex - Hotloaded value pointing to a specific tip image.
@@ -76,10 +76,10 @@ class TipDisplay
 	}
 
 	/**
-	 * Returns a randomize tip category based on the weight of the category.
+	 * Returns a randomize category from an array of categories based on the probability weight of the category.
 	 * @param {boolean} isMultiplayer - True if we want to include the multiplayer category.
 	 * @param {Array} tipFiles - An array containing all categories from the TipFilesDataFile.
-	 * @returns {any} - A tip object array.
+	 * @returns {any} - A randomized category object.
 	 */
 	getRandomWeightedCategory(tipFiles, isMultiplayer)
 	{
