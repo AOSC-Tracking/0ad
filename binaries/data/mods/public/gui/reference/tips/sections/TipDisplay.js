@@ -79,7 +79,7 @@ class TipDisplay
 	 * Returns a randomized category from an array of categories based on the probability weight.
 	 * @param {boolean} isMultiplayer - True if we want to include the multiplayer category.
 	 * @param {Array} tipFiles - An array containing all categories from the TipFilesDataFile.
-	 * @returns {any} - A randomized category object.
+	 * @returns {Object} - A randomized category object.
 	 */
 	getRandomWeightedCategory(tipFiles, isMultiplayer)
 	{
