@@ -2,7 +2,7 @@
   {
     "name": "Beginner",
     "loadingScreenOccurrence_SP": 0.33,
-    "loadingScreenOccurrence_MP": 0.1,
+    "loadingScreenOccurrence_MP": 0.0,
     "files": [
       {
         "textFile": "autoqueue.txt",
@@ -262,9 +262,9 @@
     ]
   },
   {
-    "name": "Advance",
+    "name": "Advanced",
     "loadingScreenOccurrence_SP": 0.33,
-    "loadingScreenOccurrence_MP": 0.1,
+    "loadingScreenOccurrence_MP": 0.3,
     "files": [
       {
         "textFile": "army_camp.txt",
@@ -339,6 +339,12 @@
         ]
       },
       {
+        "textFile": "nomad_mode.txt",
+        "imageFiles": [
+          "nomad_mode.png"
+        ]
+      },
+      {
         "textFile": "order_one_unit.txt",
         "imageFiles": [
           "order_one_unit.png"
@@ -379,19 +385,13 @@
         "imageFiles": [
           "whales.png"
         ]
-      },
-      {
-        "textFile": "nomad_mode.txt",
-        "imageFiles": [
-          "nomad_mode.png"
-        ]
       }
     ]
   },
   {
     "name": "Multiplayer",
     "loadingScreenOccurrence_SP": 0.0,
-    "loadingScreenOccurrence_MP": 0.7,
+    "loadingScreenOccurrence_MP": 0.6,
     "files": [
       {
         "textFile": "dont_cheat.txt",

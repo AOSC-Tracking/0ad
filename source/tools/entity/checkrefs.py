@@ -730,7 +730,9 @@ class CheckRefs:
                 categories = load(f)
                 for category in categories:
                     for tips_category in category["files"]:
-                        self.deps.append((fp, Path(f"gui/reference/tips/texts/{tips_category['textFile']}")))
+                        self.deps.append(
+                            (fp, Path(f"gui/reference/tips/texts/{tips_category['textFile']}"))
+                        )
                         for image in tips_category.get("imageFiles", []):
                             self.deps.append((fp, Path(f"art/textures/ui/tips/{image}")))
 

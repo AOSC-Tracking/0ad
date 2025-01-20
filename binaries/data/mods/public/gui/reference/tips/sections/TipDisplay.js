@@ -6,7 +6,7 @@ class TipDisplay
 {
 	/**
 	 * @param {boolean} initData.tipScrolling - Whether or not to enable the player to scroll through the tips and the tip images.
-	 * @param {boolean} initData.isLoading - Whether or not tips are displayed during loading.
+	 * @param {boolean} initData.isOnLoadingScreen - Whether or not tip display is initialized by the game loading screen.
 	 * @param {Array|undefined} hotloadData.tipFilesData - Hotloaded value storing last time's tipFilesData.
 	 * @param {number|undefined} hotloadData.tipIndex - Hotloaded value pointing to a specific tip.
 	 * @param {number|undefined} hotloadData.tipImageIndex - Hotloaded value pointing to a specific tip image.
@@ -32,15 +32,15 @@ class TipDisplay
 		this.previousImageButton.tooltip = this.TooltipPreviousImage;
 		this.nextImageButton.tooltip = this.TooltipNextImage;
 
-		if (initData.isLoading)
+		if (initData.isOnLoadingScreen)
 			this.tipFilesData = this.getLoadingScreenTip();
 		else 
 			this.tipFilesData =
 				hotloadData?.tipFilesData ||
-				Engine.ReadJSONFile(this.TipFilesDataFile).map(category => category.files).flat().map(tip => {
+				shuffleArray(Engine.ReadJSONFile(this.TipFilesDataFile).map(category => category.files).flat().map(tip => {
 					tip.imageFiles = shuffleArray(tip.imageFiles);
 					return tip;
-				});
+				}));
 
 		this.currentTip = {};
 		this.tipIndex = -1;
@@ -61,36 +61,36 @@ class TipDisplay
 			this.onTipImageIndexChange(hotloadData.tipImageIndex + 1);
 	}
 
-	getLoadingScreenTip() {
+	/**
+	 * Returns a randomized tip from a category.
+	 * Choosing a category is randomized based on it occurrence probability.
+	 * @returns {Array} - An array with a single element containing a tip object.
+	 */
+	getLoadingScreenTip()
+	{
 		const tipFiles = Engine.ReadJSONFile(this.TipFilesDataFile);
 		const category = this.getRandomWeightedCategory(tipFiles, Engine.HasNetClient());
-		return this.getRandomTipFromCategory(category);
-	}
-
-	// Returns an array with one element containing a randomized tip from a category.
-	getRandomTipFromCategory(category) {
-		const categoryTips = shuffleArray(category.files);
-		const chosenTip = categoryTips[0];
-		chosenTip.imageFiles = shuffleArray(chosenTip.imageFiles);
-		return [chosenTip];
+		const randomTip = pickRandom(category.files);
+		randomTip.imageFiles = shuffleArray(randomTip.imageFiles);
+		return [randomTip];
 	}
 
 	/**
 	 * Returns a randomize tip category based on the weight of the category.
-	 * @param {boolean} isMultiplayer True if we want to include the multiplayer category.
-	 * @param {any[]} tipsFiles An array containing all categories from the TipFilesDataFile
-	 * @returns A tip object array.
+	 * @param {boolean} isMultiplayer - True if we want to include the multiplayer category.
+	 * @param {Array} tipFiles - An array containing all categories from the TipFilesDataFile.
+	 * @returns {any} - A tip object array.
 	 */
-	getRandomWeightedCategory(tipsFiles, isMultiplayer) {
-		const totalProbability = tipsFiles.reduce((sum, category) => sum + (isMultiplayer ? category.loadingScreenOccurrence_MP : category.loadingScreenOccurrence_SP), 0);
+	getRandomWeightedCategory(tipFiles, isMultiplayer)
+	{
+		const totalProbability = tipFiles.reduce((sum, category) => sum + (isMultiplayer ? category.loadingScreenOccurrence_MP : category.loadingScreenOccurrence_SP), 0);
 		const random = Math.random() * totalProbability;
 
 		let cumulative = 0;
-		for (const category of tipsFiles) {
+		for (const category of tipFiles) {
 			cumulative += (isMultiplayer ? category.loadingScreenOccurrence_MP : category.loadingScreenOccurrence_SP);
-			if (random <= cumulative) {
+			if (random <= cumulative)
 				return category;
-			}
 		}
 	}
 
