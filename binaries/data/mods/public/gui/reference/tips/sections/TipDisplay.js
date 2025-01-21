@@ -33,7 +33,7 @@ class TipDisplay
 		this.nextImageButton.tooltip = this.TooltipNextImage;
 
 		if (initData.isOnLoadingScreen)
-			this.tipFilesData = this.getLoadingScreenTip();
+			this.tipFilesData = [this.getLoadingScreenTip()];
 		else 
 			this.tipFilesData =
 				hotloadData?.tipFilesData ||
@@ -64,7 +64,7 @@ class TipDisplay
 	/**
 	 * Returns a randomized tip from a category.
 	 * Choosing a category is randomized based on it occurrence probability.
-	 * @returns {Array} - An array with a single element containing a tip object.
+	 * @returns {Object} - A randomized tip object.
 	 */
 	getLoadingScreenTip()
 	{
@@ -72,7 +72,7 @@ class TipDisplay
 		const category = this.getRandomWeightedCategory(tipFiles, Engine.HasNetClient());
 		const randomTip = pickRandom(category.files);
 		randomTip.imageFiles = shuffleArray(randomTip.imageFiles);
-		return [randomTip];
+		return randomTip;
 	}
 
 	/**
