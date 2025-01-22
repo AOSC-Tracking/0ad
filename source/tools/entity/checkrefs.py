@@ -729,11 +729,11 @@ class CheckRefs:
             with open(ffp, encoding="utf-8") as f:
                 categories = load(f)
                 for category in categories:
-                    for tips_category in category["files"]:
+                    for tip in category["files"]:
                         self.deps.append(
-                            (fp, Path(f"gui/reference/tips/texts/{tips_category['textFile']}"))
+                            (fp, Path(f"gui/reference/tips/texts/{tip['textFile']}"))
                         )
-                        for image in tips_category.get("imageFiles", []):
+                        for image in tip.get("imageFiles", []):
                             self.deps.append((fp, Path(f"art/textures/ui/tips/{image}")))
 
     def add_rms(self):
