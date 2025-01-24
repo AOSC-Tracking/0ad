@@ -26,7 +26,7 @@ function distributeButtonsHorizontally(buttons)
 		return captionWidth > buttonWidth && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)
 	});
 
-	let buttonHeight = needsSecondLine ? multilineButtonHeight : regularButtonHeight;
+	const buttonHeight = needsSecondLine ? multilineButtonHeight : regularButtonHeight;
 
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
