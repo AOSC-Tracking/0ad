@@ -12,8 +12,6 @@ function distributeButtonsHorizontally(buttons)
 	const multilineButtonHeight = 42;
 	const numButtons = buttons.length;
 
-	let buttonHeight = regularButtonHeight;
-
 	const buttonParents = buttons.map((button) => { return button.parent; });
 	if (new Set(buttonParents).size !== 1) {
 		warn("Buttons need to have the same parent object to be distributed horizontally.");
@@ -23,12 +21,12 @@ function distributeButtonsHorizontally(buttons)
 	const parentWidth = buttons[0].parent.getComputedSize().right - buttons[0].parent.getComputedSize().left;
 	const buttonWidth = (parentWidth - betweenButtonMargin * (numButtons - 1)) / numButtons;
 
-	for (const button of buttons) {
+	const needsSecondLine = buttons.some(button => {
 		const captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
-		if (captionWidth > buttonWidth && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
-			buttonHeight = multilineButtonHeight;
-		}
-	}
+		return captionWidth > buttonWidth && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)
+	});
+
+	let buttonHeight = needsSecondLine ? multilineButtonHeight : regularButtonHeight;
 
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
