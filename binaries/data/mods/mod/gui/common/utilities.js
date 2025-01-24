@@ -1,8 +1,9 @@
 /**
 Distribute buttons equally across all available horizontal space.
 
-Also increases the buttons height equally if the caption of at least
-one button doesn't fit.
+Also increases the buttons height equally so they fit two lines of
+text, if the caption of at least one button doesn't fit in a single
+line.
 */
 function distributeButtonsHorizontally(buttons)
 {
