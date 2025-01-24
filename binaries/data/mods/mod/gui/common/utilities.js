@@ -23,12 +23,12 @@ function distributeButtonsHorizontally(buttons)
 	const parentWidth = buttons[0].parent.getComputedSize().right - buttons[0].parent.getComputedSize().left;
 	const buttonWidth = (parentWidth - betweenButtonMargin * (numButtons - 1)) / numButtons;
 
-	buttons.forEach((button, i) => {
+	for (const button of buttons) {
 		const captionWidth = Engine.GetTextWidth(button.font, button.caption) + 10;
-		if (captionWidth > (buttonWidth) && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
+		if (captionWidth > buttonWidth && (button.caption.indexOf(" ") !== -1 || button.caption.indexOf("-") !== -1)) {
 			buttonHeight = multilineButtonHeight;
 		}
-	});
+	}
 
 	buttons.forEach((button, i) => {
 		button.size = new GUISize(
