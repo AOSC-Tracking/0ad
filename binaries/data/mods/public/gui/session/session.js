@@ -519,7 +519,7 @@ function closeOpenDialogs()
 	g_TradeDialog.close();
 }
 
-function endGame(showSummary)
+function endGame(skipSummary = false)
 {
 	// Before ending the game
 	const replayDirectory = Engine.GetCurrentReplayDirectory();
@@ -559,6 +559,8 @@ function endGame(showSummary)
 		summaryData.campaignData = { "filename": g_InitAttributes.campaignData.run };
 		summaryData.nextPage = menu;
 	}
+
+	const showSummary = !skipSummary && Engine.ConfigDB_GetValue("user", "gui.session.showsummary") === "true";
 
 	if (showSummary)
 		Engine.SwitchGuiPage("page_summary.xml", summaryData);

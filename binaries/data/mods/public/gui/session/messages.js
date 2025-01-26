@@ -391,7 +391,7 @@ function updateTutorial(notification)
 		{
 			Engine.GetGUIObjectByName("tutorialWarning").caption = translate("Click to quit this tutorial.");
 			Engine.GetGUIObjectByName("tutorialReady").caption = translate("Quit");
-			Engine.GetGUIObjectByName("tutorialReady").onPress = () => { endGame(true); };
+			Engine.GetGUIObjectByName("tutorialReady").onPress = () => { endGame(); };
 		}
 		else
 			Engine.GetGUIObjectByName("tutorialWarning").caption = translate("Click when ready.");

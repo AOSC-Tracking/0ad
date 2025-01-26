@@ -874,6 +874,12 @@
 				"label": "Battalion-style formations",
 				"tooltip": "Whether formations are selected as a whole.",
 				"config": "gui.session.selectformationasone"
+			},
+			{
+				"type": "boolean",
+				"label": "Show match summary",
+				"tooltip": "When leaving a match, show a page with statistics about it.",
+				"config": "gui.session.showsummary"
 			}
 		]
 	}

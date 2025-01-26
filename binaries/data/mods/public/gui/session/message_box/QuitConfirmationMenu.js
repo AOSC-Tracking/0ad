@@ -6,7 +6,7 @@ ReturnQuestion.prototype.Caption = translate("Do you want to resign or will you 
 ReturnQuestion.prototype.Buttons = [
 	{
 		"caption": translate("I will return"),
-		"onPress": () => { endGame(false); }
+		"onPress": () => { endGame(true); }
 	},
 	{
 		"caption": translate("I resign"),

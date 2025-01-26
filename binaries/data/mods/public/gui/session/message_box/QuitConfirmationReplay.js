@@ -25,12 +25,7 @@ QuitConfirmationReplay.prototype.Buttons =
 	},
 	{
 		// Translation: Shown in the Dialog that shows up when a replay finishes
-		"caption": translate("Quit and View Summary"),
-		"onPress": () => { endGame(true); }
-	},
-	{
-		// Translation: Shown in the Dialog that shows up when a replay finishes
 		"caption": translate("Quit"),
-		"onPress": () => { endGame(false); }
+		"onPress": () => { endGame(); }
 	}
 ];
