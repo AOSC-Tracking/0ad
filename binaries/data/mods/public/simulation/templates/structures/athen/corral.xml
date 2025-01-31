@@ -2,7 +2,7 @@
 <Entity parent="template_structure_resource_corral">
   <Identity>
     <Civ>athen</Civ>
-    <SpecificName>Epaulos</SpecificName>
+    <SpecificName>Épaulos</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/hellenes/corral.xml</Actor>
