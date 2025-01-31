@@ -1,5 +1,8 @@
 {
 	"genericName": "Iron Arrowheads",
+	"specificName": {
+		"maur": "Śaraphalāṇi"
+	},
 	"description": "Projectile points made of iron enable missiles to penetrate deeper.",
 	"cost": {
 		"wood": 350,

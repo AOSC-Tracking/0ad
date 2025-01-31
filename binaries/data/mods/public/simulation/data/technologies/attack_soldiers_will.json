@@ -2,8 +2,17 @@
 	"genericName": "Will to Fight",
 	"specificName": {
 		"athen": "Dynamis",
+		"brit": "Brigos",
+		"cart": "ʿĒz",
+		"gaul": "Agronertos",
+		"han": "Lì",
+		"iber": "Briga",
+		"kush": "Ḫpš",
 		"mace": "Dynamis",
+		"maur": "Bala",
+		"pers": "Vašna",
 		"ptol": "Dynamis",
+		"rome": "Fortitūdō",
 		"sele": "Dynamis",
 		"spart": "Dynamis"
 	},

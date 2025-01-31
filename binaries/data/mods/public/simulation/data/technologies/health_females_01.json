@@ -1,5 +1,16 @@
 {
-	"genericName": "The Loom",
+	"genericName": "Loom",
+	"specificName": {
+		"athen": "Histos",
+		"han": "Zhījī",
+		"iber": "Ustai",
+		"mace": "Histos",
+		"maur": "Vāṇi",
+		"ptol": "Histos",
+		"rome": "Tēla",
+		"sele": "Histos",
+		"spart": "Histos"
+	},
 	"description": "The loom allowed the creation of finer clothing for settlers. Women of the household were taught from a young age how to weave on the loom, and subsequently spent a large share of their lives working with it.",
 	"cost": {
 		"food": 100

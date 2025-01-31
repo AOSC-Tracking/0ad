@@ -1,6 +1,16 @@
 {
 	"genericName": "Serfs",
 	"specificName": {
+		"athen": "Thêtes",
+		"brit": "Butacoi",
+		"cart": "ʿIbdim",
+		"gaul": "Butacoi",
+		"han": "Nú",
+		"kush": "Mrwt",
+		"mace": "Thêtes",
+		"maur": "Dāsaḥ",
+		"rome": "Anculi",
+		"pers": "Bandaka",
 		"spart": "Heilōtes"
 	},
 	"description": "Compel serfs to help your workers quarry stone. Increases stone gathering rates.",

@@ -2,7 +2,15 @@
 	"genericName": "Servants",
 	"specificName": {
 		"athen": "Douloi",
+		"brit": "Uassoi",
+		"cart": "Naʿarim",
+		"gaul": "Uassoi",
+		"han": "Pú",
+		"kush": "Bꜣkw",
 		"mace": "Douloi",
+		"maur": "Anucaraḥ",
+		"rome": "Lapicidae",
+		"pers": "Māniya",
 		"ptol": "Douloi",
 		"sele": "Douloi",
 		"spart": "Douloi"

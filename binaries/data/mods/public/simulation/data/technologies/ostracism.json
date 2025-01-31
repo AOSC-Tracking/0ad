@@ -1,5 +1,6 @@
 {
 	"genericName": "Ostracism",
+	"specificName": { "athen": "Ostrakismós"},
 	"description": "In ancient Athens, ostracism was the process by which any citizen, including political leaders, could be expelled from the city-state for 10 years.",
 	"cost": {
 		"food": 300,

@@ -1,13 +1,15 @@
 {
 	"genericName": "Home Garden",
 	"specificName": {
-		"athen": "Peristylon",
-		"mace": "Peristylon",
+		"athen": "Perístūlon",
+		"han": "Yuán",
+		"mace": "Perístūlon",
+		"maur": "Prasīdikā",
 		"pers": "Paradaidām",
-		"ptol": "Peristylon",
+		"ptol": "Peristulon",
 		"rome": "Peristylium",
-		"sele": "Peristylon",
-		"spart": "Peristylon"
+		"sele": "Peristulon",
+		"spart": "Perístūlon"
 	},
 	"description": "Home gardens ranged from simple fenced-in areas to large manicured and colonnaded enclosures.",
 	"cost": {

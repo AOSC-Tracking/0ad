@@ -1,5 +1,8 @@
 {
 	"genericName": "Fertilizer",
+	"specificName": {
+		"maur": "Pañcagavya"
+	},
 	"description": "Extra nutrients for farms.",
 	"cost": {
 		"wood": 400,

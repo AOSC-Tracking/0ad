@@ -1,5 +1,9 @@
 {
 	"genericName": "Iron Weapons",
+	"specificName": {
+		"maur": "Ayāṃsi",
+		"rome": "Sidērea Hopla"
+	},
 	"description": "Using iron instead of bronze gave weapons additional power.",
 	"cost": {
 		"food": 350,
