@@ -2,7 +2,7 @@
 <Entity parent="template_structure_military_arsenal">
   <Identity>
     <Civ>spart</Civ>
-    <SpecificName>Hoplothēkē</SpecificName>
+    <SpecificName>Hoplothēkā</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/spartans/workshop.xml</Actor>

@@ -9,7 +9,7 @@
     <Civ>spart</Civ>
     <Lang>greek</Lang>
     <GenericName>Spartan Hoplite</GenericName>
-    <SpecificName>Spartiátēs</SpecificName>
+    <SpecificName>Spartiātēs</SpecificName>
     <Icon>units/spart/champion_infantry_spear.png</Icon>
     <Requirements>
       <Techs datatype="tokens">-phase_city phase_village</Techs>

@@ -4,7 +4,7 @@
     <Civ>spart</Civ>
     <Lang>greek</Lang>
     <GenericName>Spartan Pikeman</GenericName>
-    <SpecificName>Phalangites Spartiatis</SpecificName>
+    <SpecificName>Phalangītēs Spartiātēs</SpecificName>
     <Icon>units/spart/champion_infantry_pike.png</Icon>
   </Identity>
   <VisualActor>

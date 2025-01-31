@@ -2,7 +2,7 @@
 <Entity parent="template_unit_siege_ram">
   <Identity>
     <Civ>spart</Civ>
-    <SpecificName>Krios</SpecificName>
+    <SpecificName>Krīos</SpecificName>
     <Icon>units/spart/siege_ram.png</Icon>
   </Identity>
   <VisualActor>

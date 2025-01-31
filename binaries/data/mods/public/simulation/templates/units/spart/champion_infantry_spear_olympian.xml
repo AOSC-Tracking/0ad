@@ -13,6 +13,7 @@
   </Health>
   <Identity>
     <GenericName>Spartan Olympic Hoplite</GenericName>
+    <SpecificName>Prostatēs Spartiātēs</SpecificName>
     <Icon>units/spart/champion_infantry_olympian.png</Icon>
   </Identity>
   <Promotion disable=""/>
