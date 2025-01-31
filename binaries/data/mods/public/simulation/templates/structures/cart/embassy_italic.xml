@@ -14,7 +14,8 @@
   </Health>
   <Identity>
     <Civ>cart</Civ>
-    <SpecificName>Italic Embassy</SpecificName>
+    <SpecificName>Šipār Romaḥ</SpecificName>
+    <GenericName>Italic Embassy</GenericName>
     <Tooltip>Train Italic Mercenaries.</Tooltip>
     <Classes datatype="tokens">CivSpecific</Classes>
     <Icon>structures/embassy_italic.png</Icon>

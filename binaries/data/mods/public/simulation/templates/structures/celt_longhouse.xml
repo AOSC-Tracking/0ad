@@ -17,7 +17,8 @@
     <Max>1000</Max>
   </Health>
   <Identity>
-    <SpecificName>Longhouse</SpecificName>
+    <GenericName>Longhouse</GenericName>
+    <SpecificName>Tegia</SpecificName>
   </Identity>
   <Obstruction>
     <Static width="10.0" depth="14.0"/>

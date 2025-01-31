@@ -5,7 +5,8 @@
     <Height>10.0</Height>
   </Footprint>
   <Identity>
-    <SpecificName>Stonehenge</SpecificName>
+    <SpecificName>Stānhencg</SpecificName>
+    <GenericName>Stonehenge</GenericName>
   </Identity>
   <Obstruction>
     <Static width="55.0" depth="55.0"/>

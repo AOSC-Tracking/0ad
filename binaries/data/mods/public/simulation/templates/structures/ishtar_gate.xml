@@ -23,6 +23,7 @@
   </Health>
   <Identity>
     <GenericName>Ishtar Gate of Babylon</GenericName>
+    <SpecificName>Ištar-šur</SpecificName>
     <Tooltip>Territory root.</Tooltip>
     <Icon>structures/pers_gate.png</Icon>
   </Identity>

@@ -6,7 +6,8 @@
   </Footprint>
   <Identity>
     <Civ>gaul</Civ>
-    <SpecificName>Celtic Tavern</SpecificName>
+    <GenericName>Celtic Tavern</GenericName>
+    <SpecificName>Taberna</SpecificName>
   </Identity>
   <Obstruction>
     <Static width="20.0" depth="20.0"/>

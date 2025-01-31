@@ -9,8 +9,8 @@
   </Health>
   <Identity>
     <Civ>sele</Civ>
-    <GenericName>Colonnade</GenericName>
-    <SpecificName>Corinthian Colonnade</SpecificName>
+    <GenericName>Corinthian Colonnade</GenericName>
+    <SpecificName>Stoa</SpecificName>
     <Icon>structures/stoa.png</Icon>
   </Identity>
   <Loot>

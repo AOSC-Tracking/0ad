@@ -2,6 +2,7 @@
 <Entity parent="template_structure_defensive_tower_sentry">
   <Identity>
     <Civ>maur</Civ>
+    <SpecificName>Aṭṭa</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/mauryas/wooden_tower.xml</Actor>

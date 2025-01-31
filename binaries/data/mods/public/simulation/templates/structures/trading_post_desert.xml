@@ -6,7 +6,8 @@
   </Footprint>
   <Identity>
     <Civ>pers</Civ>
-    <SpecificName>Desert Bazaar</SpecificName>
+    <GenericName>Desert Bazaar</GenericName>
+    <SpecificName>Wāzār</SpecificName>
   </Identity>
   <Obstruction>
     <Static width="24.0" depth="24.0"/>

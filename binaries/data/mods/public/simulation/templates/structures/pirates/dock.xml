@@ -5,7 +5,8 @@
     <Height>8.0</Height>
   </Footprint>
   <Identity>
-    <SpecificName>Pirate Port</SpecificName>
+    <GenericName>Pirate Port</GenericName>
+    <SpecificName>Limenion</SpecificName>
   </Identity>
   <Obstruction>
     <Static width="26.0" depth="26.0"/>

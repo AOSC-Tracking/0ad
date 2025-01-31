@@ -5,7 +5,8 @@
     <Height>10.0</Height>
   </Footprint>
   <Identity>
-    <SpecificName>Longship</SpecificName>
+    <GenericName>Longship</GenericName>
+    <SpecificName>Snekkja</SpecificName>
     <Icon>units/viking_longship.png</Icon>
   </Identity>
   <VisualActor>

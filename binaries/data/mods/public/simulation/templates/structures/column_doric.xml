@@ -9,8 +9,8 @@
     <Max>220</Max>
   </Health>
   <Identity>
-    <GenericName>Column</GenericName>
-    <SpecificName>Doric Column</SpecificName>
+    <GenericName>Doric Column</GenericName>
+    <SpecificName>Stȳlos</SpecificName>
     <Icon>structures/stoa.png</Icon>
   </Identity>
   <Loot>

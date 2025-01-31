@@ -21,7 +21,7 @@
   </Health>
   <Identity>
     <GenericName>Apartment Building</GenericName>
-    <SpecificName>Bet</SpecificName>
+    <SpecificName>Bētʾadr</SpecificName>
     <Classes datatype="tokens">CivSpecific</Classes>
     <Icon>structures/apartment.png</Icon>
   </Identity>
