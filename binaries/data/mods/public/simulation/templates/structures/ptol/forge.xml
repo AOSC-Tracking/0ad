@@ -2,7 +2,7 @@
 <Entity parent="template_structure_military_forge">
   <Identity>
     <Civ>ptol</Civ>
-    <SpecificName>Chalkeōn</SpecificName>
+    <SpecificName>Chalkeón</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/ptolemies/blacksmith.xml</Actor>

@@ -2,7 +2,7 @@
 <Entity parent="template_structure_military_arsenal">
   <Identity>
     <Civ>ptol</Civ>
-    <SpecificName>Hoplothēkē</SpecificName>
+    <SpecificName>Hoplotheke</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/ptolemies/workshop.xml</Actor>

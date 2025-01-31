@@ -25,7 +25,7 @@
   <Identity>
     <Civ>ptol</Civ>
     <GenericName>Mercenary Camp</GenericName>
-    <SpecificName>Stratopedeia Misthophorōn</SpecificName>
+    <SpecificName>Stratopedeia Misthophóron</SpecificName>
     <Classes datatype="tokens">MercenaryCamp</Classes>
     <Tooltip>Cheap Barracks-like structure that is buildable in neutral territory, but casts no territory influence. Train Mercenaries.</Tooltip>
     <Icon>structures/mercenary_camp.png</Icon>
