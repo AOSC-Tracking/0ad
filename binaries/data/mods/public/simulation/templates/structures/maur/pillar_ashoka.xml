@@ -30,7 +30,7 @@
   <Identity>
     <Civ>maur</Civ>
     <GenericName>Edict Pillar of Ashoka</GenericName>
-    <SpecificName>Śāsana Stambha Aśokā</SpecificName>
+    <SpecificName>Dharmastambha</SpecificName>
     <Classes datatype="tokens">CivSpecific</Classes>
     <VisibleClasses datatype="tokens">Pillar</VisibleClasses>
     <Icon>structures/ashoka_pillar.png</Icon>

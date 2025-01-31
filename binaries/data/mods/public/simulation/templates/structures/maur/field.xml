@@ -2,7 +2,7 @@
 <Entity parent="template_structure_resource_field">
   <Identity>
     <Civ>maur</Civ>
-    <SpecificName>Kshetra</SpecificName>
+    <SpecificName>Kṣetra</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/plot_field_temp.xml</Actor>

@@ -2,7 +2,7 @@
 <Entity parent="template_structure_military_fortress">
   <Identity>
     <Civ>maur</Civ>
-    <SpecificName>Durg</SpecificName>
+    <SpecificName>Durga</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/mauryas/fortress.xml</Actor>

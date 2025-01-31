@@ -3,7 +3,7 @@
   <Identity>
     <Civ>maur</Civ>
     <GenericName>Warrior</GenericName>
-    <SpecificName>Yōddha</SpecificName>
+    <SpecificName>Yoddhā</SpecificName>
     <SelectionGroupName>units/maur/champion_infantry</SelectionGroupName>
     <Icon>units/maur/champion_maceman.png</Icon>
     <Requirements>

@@ -2,7 +2,7 @@
 <Entity parent="template_structure_economic_storehouse">
   <Identity>
     <Civ>maur</Civ>
-    <SpecificName>Khalla</SpecificName>
+    <SpecificName>Bhāṇḍāra</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/mauryas/storehouse.xml</Actor>

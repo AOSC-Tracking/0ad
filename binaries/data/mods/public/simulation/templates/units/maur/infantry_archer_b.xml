@@ -10,7 +10,7 @@
     <Civ>maur</Civ>
     <SelectionGroupName>units/maur/infantry_archer_b</SelectionGroupName>
     <GenericName>Longbowman</GenericName>
-    <SpecificName>Dhanurdhar</SpecificName>
+    <SpecificName>Dhanurdharaḥ</SpecificName>
     <Icon>units/maur/infantry_archer.png</Icon>
   </Identity>
   <Promotion>

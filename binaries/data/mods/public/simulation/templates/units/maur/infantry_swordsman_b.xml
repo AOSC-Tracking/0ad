@@ -15,7 +15,7 @@
     <Civ>maur</Civ>
     <SelectionGroupName>units/maur/infantry_swordsman_b</SelectionGroupName>
     <GenericName>Indian Swordsman</GenericName>
-    <SpecificName>Khadagdhari</SpecificName>
+    <SpecificName>Khaḍgadharaḥ</SpecificName>
     <Icon>units/maur/infantry_swordsman.png</Icon>
     <Requirements>
       <Techs datatype="tokens">phase_town</Techs>
