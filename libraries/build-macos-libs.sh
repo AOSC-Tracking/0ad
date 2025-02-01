@@ -24,7 +24,6 @@ ZLIB_VERSION="zlib-1.3.1"
 CURL_VERSION="curl-7.71.0"
 ICONV_VERSION="libiconv-1.17"
 XML2_VERSION="libxml2-2.13.5"
-SDL2_VERSION="SDL2-2.24.0"
 # NOTE: remember to also update LIB_URL below when changing version
 BOOST_VERSION="boost_1_81_0"
 # NOTE: remember to also update LIB_URL below when changing version
@@ -372,54 +371,6 @@ echo "Building libxml2..."
 		already_built
 	fi
 ) || die "Failed to build libxml2"
-
-# --------------------------------------------------------------
-
-echo "Building SDL2..."
-
-(
-	LIB_VERSION="${SDL2_VERSION}"
-	LIB_ARCHIVE="$LIB_VERSION.tar.gz"
-	LIB_DIRECTORY=$LIB_VERSION
-	LIB_URL="https://libsdl.org/release/"
-
-	mkdir -p sdl2
-	cd sdl2
-
-	if [ $force_rebuild = "true" ] || [ ! -e .already-built ] || [ "$(cat .already-built)" != "$LIB_VERSION" ]; then
-		INSTALL_DIR="$(pwd)"
-
-		rm -f .already-built
-		download_lib $LIB_URL $LIB_ARCHIVE || die
-
-		rm -rf $LIB_DIRECTORY bin include lib share
-		tar -xf $LIB_ARCHIVE || die
-
-		(
-			cd $LIB_DIRECTORY || die
-			# We don't want SDL2 to pull in system iconv, force it to detect ours with flags.
-			# Don't use X11 - we don't need it and Mountain Lion removed it
-			./configure \
-				CPPFLAGS="-I${ICONV_DIR}/include" \
-				CFLAGS="$CFLAGS" \
-				CXXFLAGS="$CXXFLAGS" \
-				LDFLAGS="$LDFLAGS -L${ICONV_DIR}/lib" \
-				"$HOST_PLATFORM" \
-				--prefix="$INSTALL_DIR" \
-				--disable-video-x11 \
-				--without-x \
-				--enable-video-cocoa \
-				--enable-shared=no || die
-			make "${JOBS}" || die
-			make install || die
-		) || die "SDL2 build failed"
-
-		cp -f lib/pkgconfig/* "$PC_PATH"
-		echo "$LIB_VERSION" >.already-built
-	else
-		already_built
-	fi
-) || die "Failed to build SDL2"
 
 # --------------------------------------------------------------
 echo "Building Boost..."
@@ -1230,6 +1181,11 @@ export ARCH CXXFLAGS CFLAGS LDFLAGS CMAKE_FLAGS JOBS
 # --------------------------------------------------------------
 # shellcheck disable=SC2086
 ./../source/nvtt/build.sh $build_sh_options || die "NVTT build failed"
+
+# --------------------------------------------------------------
+# shellcheck disable=SC2086
+./../source/sdl3/build.sh $build_sh_options || die "SDL3 build failed"
+cp -f ./../source/sdl3/lib/pkgconfig/* "$PC_PATH"
 
 # --------------------------------------------------------------
 # shellcheck disable=SC2086

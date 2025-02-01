@@ -18,6 +18,7 @@ libraries/source/cxxtest-4.4/*
 libraries/source/fcollada/*
 libraries/source/nvtt/*
 libraries/source/premake-core/*
+libraries/source/sdl3/*
 libraries/source/spidermonkey/*
 !libraries/source/spidermonkey/mozconfig
 libraries/source/spirv-reflect/*

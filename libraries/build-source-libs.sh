@@ -46,6 +46,7 @@ with_system_cxxtest=false
 with_system_nvtt=false
 with_system_mozjs=false
 with_system_premake=false
+with_system_sdl=false
 with_spirv_reflect=false
 
 JOBS=${JOBS:="-j2"}
@@ -104,6 +105,11 @@ fi
 if [ "$with_system_premake" = "false" ]; then
 	# shellcheck disable=SC2086
 	./source/premake-core/build.sh $build_sh_options || die "Premake build failed"
+fi
+if [ "$with_system_sdl" = "false" ]; then
+	# shellcheck disable=SC2086
+	./source/sdl3/build.sh $build_sh_options || die "SDL3 build failed"
+	cp -R source/sdl3/lib/* ../binaries/system/
 fi
 if [ "$with_system_mozjs" = "false" ]; then
 	# shellcheck disable=SC2086
