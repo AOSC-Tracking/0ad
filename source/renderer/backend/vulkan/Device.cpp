@@ -54,11 +54,7 @@
 #include <type_traits>
 #include <vector>
 
-// According to https://wiki.libsdl.org/SDL_Vulkan_LoadLibrary the following
-// functionality is supported since SDL 2.0.6.
-#if SDL_VERSION_ATLEAST(2, 0, 6)
-#include <SDL_vulkan.h>
-#endif
+#include <SDL3/SDL_vulkan.h>
 
 namespace Renderer
 {
@@ -81,11 +77,16 @@ std::vector<const char*> GetRequiredSDLExtensions(SDL_Window* window)
 
 	const size_t MAX_EXTENSION_COUNT = 16;
 	unsigned int SDLExtensionCount = MAX_EXTENSION_COUNT;
-	const char* SDLExtensions[MAX_EXTENSION_COUNT];
-	ENSURE(SDL_Vulkan_GetInstanceExtensions(window, &SDLExtensionCount, SDLExtensions));
+	const char* const* SDLExtensions = SDL_Vulkan_GetInstanceExtensions(&SDLExtensionCount);
 	std::vector<const char*> requiredExtensions;
 	requiredExtensions.reserve(SDLExtensionCount);
-	std::copy_n(SDLExtensions, SDLExtensionCount, std::back_inserter(requiredExtensions));
+	// std::copy_n(SDLExtensions, SDLExtensionCount, std::back_inserter(requiredExtensions));
+	// For some reason SDL adds this, which fails on macos/moltenvk. It's not actually needed.
+	for (size_t i = 0; i < SDLExtensionCount; ++i) {
+		if (strcmp(SDLExtensions[i], "VK_KHR_portability_enumeration") != 0) {
+			requiredExtensions.push_back(SDLExtensions[i]);
+		}
+	}
 	return requiredExtensions;
 }
 
@@ -177,12 +178,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
 // A workaround function to meet calling conventions of Vulkan, SDL and GLAD.
 GLADapiproc GetInstanceProcAddr(VkInstance instance, const char* name)
 {
-#if SDL_VERSION_ATLEAST(2, 0, 6)
 	PFN_vkGetInstanceProcAddr function = reinterpret_cast<PFN_vkGetInstanceProcAddr>(SDL_Vulkan_GetVkGetInstanceProcAddr());
 	return reinterpret_cast<GLADapiproc>(function(instance, name));
-#else
-	return nullptr;
-#endif
 }
 
 } // anonymous namespace
@@ -332,7 +329,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	}
 
 	if (window)
-		ENSURE(SDL_Vulkan_CreateSurface(window, device->m_Instance, &device->m_Surface));
+		ENSURE(SDL_Vulkan_CreateSurface(window, device->m_Instance, nullptr, &device->m_Surface));
 
 	const std::vector<const char*> requiredDeviceExtensions =
 	{
@@ -1035,7 +1032,7 @@ void CDevice::RecreateSwapChain()
 {
 	m_BackbufferReadbackTexture.reset();
 	int surfaceDrawableWidth = 0, surfaceDrawableHeight = 0;
-	SDL_Vulkan_GetDrawableSize(m_Window, &surfaceDrawableWidth, &surfaceDrawableHeight);
+	SDL_GetWindowSizeInPixels(m_Window, &surfaceDrawableWidth, &surfaceDrawableHeight);
 	m_SwapChain = CSwapChain::Create(
 		this, m_Surface, surfaceDrawableWidth, surfaceDrawableHeight, std::move(m_SwapChain));
 }

@@ -19,8 +19,8 @@
 
 #include "KeyMap.h"
 
-#include "SDL_version.h"
-#include "SDL_keycode.h"
+#include <SDL3/SDL_version.h>
+#include <SDL3/SDL_keycode.h>
 
 int GetSDLKeyFromWxKeyCode(int wxkey)
 {

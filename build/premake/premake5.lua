@@ -4,10 +4,12 @@ newoption { category = "Pyrogenesis", trigger = "gles", description = "Use non-w
 newoption { category = "Pyrogenesis", trigger = "jenkins-tests", description = "Configure CxxTest to use the XmlPrinter runner which produces Jenkins-compatible output" }
 newoption { category = "Pyrogenesis", trigger = "minimal-flags", description = "Only set compiler/linker flags that are really needed. Has no effect on Windows builds" }
 newoption { category = "Pyrogenesis", trigger = "outpath", description = "Location for generated project files", default="../workspaces/default" }
+newoption { category = "Pyrogenesis", trigger = "video-drivers", description = "Defaults to x11 and wayland", default="wayland,x11" }
 newoption { category = "Pyrogenesis", trigger = "with-system-cxxtest", description = "Search standard paths for cxxtest, instead of using bundled copy" }
 newoption { category = "Pyrogenesis", trigger = "with-lto", description = "Enable Link Time Optimization (LTO)" }
 newoption { category = "Pyrogenesis", trigger = "with-system-mozjs", description = "Search standard paths for libmozjs115, instead of using bundled copy" }
 newoption { category = "Pyrogenesis", trigger = "with-system-nvtt", description = "Search standard paths for nvidia-texture-tools library, instead of using bundled copy" }
+newoption { category = "Pyrogenesis", trigger = "with-system-sdl", description = "Use pkg-config to search for SDL3 instead of using bundled copy" }
 newoption { category = "Pyrogenesis", trigger = "with-valgrind", description = "Enable Valgrind support (non-Windows only)" }
 newoption { category = "Pyrogenesis", trigger = "without-audio", description = "Disable use of OpenAL/Ogg/Vorbis APIs" }
 newoption { category = "Pyrogenesis", trigger = "without-atlas", description = "Disable Atlas scenario/map editor and ActorEditor" }
@@ -240,6 +242,13 @@ function project_set_build_flags()
 
 	if _OPTIONS["without-miniupnpc"] then
 		defines { "CONFIG2_MINIUPNPC=0" }
+	end
+
+	if os.istarget("windows") or os.istarget("macos") then
+		defines { "CONFIG2_VIDEO_WAYLAND=0" }
+		defines { "CONFIG2_VIDEO_X11=0" }
+	else
+		-- TODO
 	end
 
 	-- Enable C++17 standard.

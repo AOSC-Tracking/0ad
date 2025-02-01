@@ -44,13 +44,12 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 
 	switch (val.ev.type)
 	{
-	case SDL_WINDOWEVENT: typeName = "windowevent"; break;
-	case SDL_KEYDOWN: typeName = "keydown"; break;
-	case SDL_KEYUP: typeName = "keyup"; break;
-	case SDL_MOUSEMOTION: typeName = "mousemotion"; break;
-	case SDL_MOUSEBUTTONDOWN: typeName = "mousebuttondown"; break;
-	case SDL_MOUSEBUTTONUP: typeName = "mousebuttonup"; break;
-	case SDL_QUIT: typeName = "quit"; break;
+	case SDL_EVENT_KEY_DOWN: typeName = "keydown"; break;
+	case SDL_EVENT_KEY_UP: typeName = "keyup"; break;
+	case SDL_EVENT_MOUSE_MOTION: typeName = "mousemotion"; break;
+	case SDL_EVENT_MOUSE_BUTTON_DOWN: typeName = "mousebuttondown"; break;
+	case SDL_EVENT_MOUSE_BUTTON_UP: typeName = "mousebuttonup"; break;
+	case SDL_EVENT_QUIT: typeName = "quit"; break;
 	case SDL_HOTKEYPRESS: typeName = "hotkeypress"; break;
 	case SDL_HOTKEYDOWN: typeName = "hotkeydown"; break;
 	case SDL_HOTKEYUP: typeName = "hotkeyup"; break;
@@ -70,8 +69,8 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 
 	switch (val.ev.type)
 	{
-	case SDL_KEYDOWN:
-	case SDL_KEYUP:
+	case SDL_EVENT_KEY_DOWN:
+	case SDL_EVENT_KEY_UP:
 	{
 		// SET(obj, "which", (int)val.ev.key.which); // (not in wsdl.h)
 		// SET(obj, "state", (int)val.ev.key.state); // (not in wsdl.h)
@@ -86,7 +85,7 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 		JS_SetProperty(rq.cx, obj, "keysym", keysymVal);
 
 		// SET(keysym, "scancode", (int)val.ev.key.keysym.scancode); // (not in wsdl.h)
-		SET(keysym, "sym", (int)val.ev.key.keysym.sym);
+		SET(keysym, "sym", (int)val.ev.key.key);
 		// SET(keysym, "mod", (int)val.ev.key.keysym.mod); // (not in wsdl.h)
 		{
 			SET(keysym, "unicode", JS::UndefinedHandleValue);
@@ -96,7 +95,7 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 
 		break;
 	}
-	case SDL_MOUSEMOTION:
+	case SDL_EVENT_MOUSE_MOTION:
 	{
 		// SET(obj, "which", (int)val.ev.motion.which); // (not in wsdl.h)
 		// SET(obj, "state", (int)val.ev.motion.state); // (not in wsdl.h)
@@ -106,12 +105,12 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 		// SET(obj, "yrel", (int)val.ev.motion.yrel); // (not in wsdl.h)
 		break;
 	}
-	case SDL_MOUSEBUTTONDOWN:
-	case SDL_MOUSEBUTTONUP:
+	case SDL_EVENT_MOUSE_BUTTON_DOWN:
+	case SDL_EVENT_MOUSE_BUTTON_UP:
 	{
 		// SET(obj, "which", (int)val.ev.button.which); // (not in wsdl.h)
 		SET(obj, "button", (int)val.ev.button.button);
-		SET(obj, "state", (int)val.ev.button.state);
+		SET(obj, "state", (int)val.ev.button.down);
 		SET(obj, "x", (int)val.ev.button.x);
 		SET(obj, "y", (int)val.ev.button.y);
 		SET(obj, "clicks", (int)val.ev.button.clicks);

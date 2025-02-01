@@ -252,9 +252,9 @@ InReaction CList::ManuallyHandleKeys(const SDL_Event_* ev)
 {
 	InReaction result = IN_PASS;
 
-	if (ev->ev.type == SDL_KEYDOWN)
+	if (ev->ev.type == SDL_EVENT_KEY_DOWN)
 	{
-		int szChar = ev->ev.key.keysym.sym;
+		SDL_Keycode szChar = ev->ev.key.key;
 
 		switch (szChar)
 		{

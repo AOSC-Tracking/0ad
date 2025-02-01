@@ -637,16 +637,25 @@ extern_lib_defs = {
 	sdl = {
 		compile_settings = function()
 			if os.istarget("windows") then
-				includedirs { libraries_dir .. "sdl2/include/SDL" }
+				includedirs { libraries_dir .. "sdl3/include" }
 			elseif not _OPTIONS["android"] then
-				pkgconfig.add_includes("sdl2")
+				if os.istarget("macosx") or _OPTIONS["with-system-sdl"] then
+					pkgconfig.add_includes("sdl3")
+				else
+					add_source_include_paths("sdl3")
+				end
 			end
 		end,
 		link_settings = function()
 			if os.istarget("windows") then
-				add_default_lib_paths("sdl2")
+				add_default_lib_paths("sdl3")
 			elseif not _OPTIONS["android"] then
-				pkgconfig.add_links("sdl2")
+				if os.istarget("macosx") or _OPTIONS["with-system-sdl"] then
+					pkgconfig.add_links("sdl3")
+				else
+					add_source_lib_paths("sdl3")
+					links { "SDL3" }
+				end
 			end
 		end,
 	},

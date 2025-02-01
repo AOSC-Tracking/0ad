@@ -66,6 +66,14 @@
 # define CONFIG2_GLES 0
 #endif
 
+#ifndef CONFIG2_VIDEO_WAYLAND
+# define CONFIG2_VIDEO_WAYLAND 1
+#endif
+
+#ifndef CONFIG2_VIDEO_X11
+# define CONFIG2_VIDEO_X11 1
+#endif
+
 // allow use of OpenAL/Ogg/Vorbis APIs
 #ifndef CONFIG2_AUDIO
 # define CONFIG2_AUDIO 1

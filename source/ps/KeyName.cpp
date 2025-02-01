@@ -134,9 +134,9 @@ static const std::unordered_map<SDL_Keycode, CStr> keyNames {{
 	{ SDLK_PLUS, "Plus" },
 	{ SDLK_MINUS, "Minus" },
 
-	{ SDLK_QUOTE, "SingleQuote" },
-	{ SDLK_QUOTEDBL, "DoubleQuote" },
-	{ SDLK_BACKQUOTE, "BackQuote" },
+	{ SDLK_APOSTROPHE, "SingleQuote" },
+	{ SDLK_DBLAPOSTROPHE, "DoubleQuote" },
+	{ SDLK_GRAVE, "BackQuote" },
 
 	{ SDLK_LEFTPAREN, { "LeftParen" } },
 
@@ -195,7 +195,8 @@ CStr FindKeyName(SDL_Scancode scancode)
 	else if (static_cast<int>(scancode) == MOUSE_X2)
 		return "WheelRight";
 
-	SDL_Keycode code = SDL_GetKeyFromScancode(scancode);
+	SDL_Keymod modstate{0};
+	SDL_Keycode code = SDL_GetKeyFromScancode(scancode, modstate, true);
 
 	if (keyNames.find(code) != keyNames.end())
 		return keyNames.at(code);

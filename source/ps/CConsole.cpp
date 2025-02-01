@@ -138,10 +138,10 @@ void CConsole::ToggleVisible()
 	if (m_Visible)
 	{
 		ShowQuitHotkeys();
-		SDL_StartTextInput();
+		SDL_StartTextInput(g_VideoMode.GetWindow());
 		return;
 	}
-	SDL_StopTextInput();
+	SDL_StopTextInput(g_VideoMode.GetWindow());
 }
 
 void CConsole::SetVisible(bool visible)
@@ -644,9 +644,9 @@ void CConsole::SaveHistory()
 		debug_printf("FILES| Failed to write console command history to '%s'\n", m_HistoryFile.string8().c_str());
 }
 
-static bool isUnprintableChar(SDL_Keysym key)
+static bool isUnprintableChar(SDL_Keycode key)
 {
-	switch (key.sym)
+	switch (key)
 	{
 	// We want to allow some, which are handled specially
 	case SDLK_RETURN: case SDLK_TAB:
@@ -705,7 +705,7 @@ InReaction conInputHandler(const SDL_Event_* ev)
 
 	// In SDL2, we no longer get Unicode wchars via SDL_Keysym
 	// we use text input events instead and they provide UTF-8 chars
-	if (ev->ev.type == SDL_TEXTINPUT)
+	if (ev->ev.type == SDL_EVENT_TEXT_INPUT)
 	{
 		// TODO: this could be more efficient with an interface to insert UTF-8 strings directly
 		std::wstring wstr = wstring_from_utf8(ev->ev.text.text);
@@ -715,16 +715,16 @@ InReaction conInputHandler(const SDL_Event_* ev)
 	}
 	// TODO: text editing events for IME support
 
-	if (ev->ev.type != SDL_KEYDOWN && ev->ev.type != SDL_KEYUP)
+	if (ev->ev.type != SDL_EVENT_KEY_DOWN && ev->ev.type != SDL_EVENT_KEY_UP)
 		return IN_PASS;
 
-	int sym = ev->ev.key.keysym.sym;
+	int key = ev->ev.key.key;
 
 	// Stop unprintable characters (ctrl+, alt+ and escape).
-	if (ev->ev.type == SDL_KEYDOWN && isUnprintableChar(ev->ev.key.keysym) &&
+	if (ev->ev.type == SDL_EVENT_KEY_DOWN && isUnprintableChar(ev->ev.key.key) &&
 		!HotkeyIsPressed("console.toggle"))
 	{
-		g_Console->InsertChar(sym, 0);
+		g_Console->InsertChar(key, 0);
 		return IN_HANDLED;
 	}
 

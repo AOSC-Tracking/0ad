@@ -34,7 +34,7 @@
 #include <vector>
 
 typedef struct SDL_Window SDL_Window;
-typedef void* SDL_GLContext;
+typedef struct SDL_GLContextState *SDL_GLContext;
 
 namespace Renderer
 {

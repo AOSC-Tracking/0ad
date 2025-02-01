@@ -31,7 +31,7 @@ extern CStr8 FindKeyName(SDL_Scancode scancode);
 enum {
 	// Start sequential IDs in the right place
 	// Pick a code which is greater than any scancodes used by SDL itself
-	EXTRA_KEYS_BASE = SDL_NUM_SCANCODES,
+	EXTRA_KEYS_BASE = SDL_SCANCODE_COUNT,
 	// 'Keycodes' for the unified modifier keys
 	UNIFIED_SHIFT,
 	UNIFIED_CTRL,

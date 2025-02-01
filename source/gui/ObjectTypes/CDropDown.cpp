@@ -271,9 +271,9 @@ InReaction CDropDown::ManuallyHandleKeys(const SDL_Event_* ev)
 	InReaction result = IN_PASS;
 	bool update_highlight = false;
 
-	if (ev->ev.type == SDL_KEYDOWN)
+	if (ev->ev.type == SDL_EVENT_KEY_DOWN)
 	{
-		int szChar = ev->ev.key.keysym.sym;
+		SDL_Keycode szChar = ev->ev.key.key;
 
 		switch (szChar)
 		{
@@ -299,7 +299,7 @@ InReaction CDropDown::ManuallyHandleKeys(const SDL_Event_* ev)
 		default:
 			// If we have typed a character try to get the closest element to it.
 			// TODO: not too nice and doesn't deal with dashes.
-			if (m_Open && ((szChar >= SDLK_a && szChar <= SDLK_z) || szChar == SDLK_SPACE
+			if (m_Open && ((szChar >= SDLK_A && szChar <= SDLK_Z) || szChar == SDLK_SPACE
 						   || (szChar >= SDLK_0 && szChar <= SDLK_9)
 						   || (szChar >= SDLK_KP_1 && szChar <= SDLK_KP_0)))
 			{

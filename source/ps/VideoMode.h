@@ -121,9 +121,10 @@ public:
 	Renderer::Backend::IDevice* GetBackendDevice() { return m_BackendDevice.get(); }
 
 private:
-	void ReadConfig();
 	int GetBestBPP();
-	bool SetVideoMode(int w, int h, int bpp, bool fullscreen);
+	void ReadConfig();
+	void InitGLContext();
+	bool InitWindow();
 
 	bool TryCreateBackendDevice(SDL_Window* window);
 	void DowngradeBackendSettingAfterCreationFailure();
@@ -153,6 +154,11 @@ private:
 	int m_ConfigDisplay = 0;
 	bool m_ConfigEnableHiDPI = false;
 	bool m_ConfigVSync = false;
+
+	bool m_ConfigBorderlessWindow = false;
+
+	bool m_ConfigMouseGrabInFullscreen = true;
+	bool m_ConfigMouseGrabInWindowMode = false;
 
 	// (m_ConfigFullscreen defaults to false, so users don't get stuck if
 	// e.g. half the filesystem is missing and the config files aren't loaded).

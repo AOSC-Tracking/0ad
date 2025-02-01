@@ -41,9 +41,9 @@ private:
 	void fakeInput(const char* key, bool keyDown)
 	{
 		SDL_Event_ ev;
-		ev.ev.type = keyDown ? SDL_KEYDOWN : SDL_KEYUP;
+		ev.ev.type = keyDown ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
 		ev.ev.key.repeat = 0;
-		ev.ev.key.keysym.scancode = SDL_GetScancodeFromName(key);
+		ev.ev.key.scancode = SDL_GetScancodeFromName(key);
 		GlobalsInputHandler(&ev);
 		HotkeyInputPrepHandler(&ev);
 		HotkeyInputActualHandler(&ev);

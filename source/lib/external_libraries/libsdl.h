@@ -30,39 +30,18 @@
 #include "lib/config2.h"
 #include "lib/external_libraries/libsdl_fwd.h"
 
-# include "SDL.h"
-# include "SDL_thread.h"
-
-#if !SDL_VERSION_ATLEAST(2,0,2)
-#error You are using an old libsdl release. At least libsdl2 >= 2.0.2 is required.
-#endif
+# include <SDL3/SDL.h>
 
 // if the compiler doesn't support inlining, this header will pull
 // in static bswap routines. doesn't matter - modern compilers
 // will strip them if unused, and this is more convenient than
 // another header that toggles between wsdl and SDL_endian.h.
-# include "SDL_endian.h"
-
-# if MSC_VERSION
-#  pragma comment(lib, "SDL2")
-#  pragma comment(lib, "SDL2main")
-# endif
+# include <SDL3/SDL_endian.h>
 
 // complete definition of our forward-declared SDL_Event (see sdl_fwd.h)
 struct SDL_Event_
 {
 	SDL_Event ev;
 };
-
-// Returns a windowing subsystem used for the window.
-const char* GetSDLSubsystem(SDL_Window* window);
-
-#if defined(SDL_VIDEO_DRIVER_X11) && !CONFIG2_GLES
-void* GetX11Display(SDL_Window* window);
-#endif
-
-#if defined(SDL_VIDEO_DRIVER_WAYLAND) && !CONFIG2_GLES
-void* GetWaylandDisplay(SDL_Window* window);
-#endif
 
 #endif // INCLUDED_SDL

@@ -284,7 +284,7 @@ static void InitSDL()
 	setenv("SDL_VIDEO_X11_DGAMOUSE", "0", 0);
 #endif
 
-	if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER|SDL_INIT_NOPARACHUTE) < 0)
+	if(!SDL_Init(SDL_INIT_VIDEO))
 	{
 		LOGERROR("SDL library initialization failed: %s", SDL_GetError());
 		throw PSERROR_System_SDLInitFailed();
@@ -292,14 +292,12 @@ static void InitSDL()
 	atexit(SDL_Quit);
 
 	// Text input is active by default, disable it until it is actually needed.
-	SDL_StopTextInput();
+	//SDL_StopTextInput(g_VideoMode.GetWindow());
 
-#if SDL_VERSION_ATLEAST(2, 0, 9)
 	// SDL2 >= 2.0.9 defaults to 32 pixels (to support touch screens) but that can break our double-clicking.
 	SDL_SetHint(SDL_HINT_MOUSE_DOUBLE_CLICK_RADIUS, "1");
-#endif
 
-#if SDL_VERSION_ATLEAST(2, 0, 14) && OS_WIN
+#if OS_WIN
 	// SDL2 >= 2.0.14 Before SDL 2.0.14, this defaulted to true. In 2.0.14 they switched to false
 	// breaking the behavior on Windows.
 	// https://github.com/libsdl-org/SDL/commit/1947ca7028ab165cc3e6cbdb0b4b7c4db68d1710

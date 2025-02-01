@@ -260,12 +260,12 @@ InReaction CProfileViewer::Input(const SDL_Event_* ev)
 {
 	switch(ev->ev.type)
 	{
-	case SDL_KEYDOWN:
+	case SDL_EVENT_KEY_DOWN:
 	{
 		if (!m->profileVisible)
 			break;
 
-		int k = ev->ev.key.keysym.sym;
+		SDL_Keycode k = ev->ev.key.key;
 		if (k >= SDLK_0 && k <= SDLK_9)
 		{
 			m->NavigateTree(k - SDLK_0);

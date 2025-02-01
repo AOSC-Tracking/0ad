@@ -31,6 +31,7 @@
 #include "ps/GameSetup/Config.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
+#include "ps/VideoMode.h"
 
 #include <sstream>
 
@@ -119,7 +120,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 	}
 	// SDL2 has a new method of text input that better supports Unicode and CJK
 	// see https://wiki.libsdl.org/Tutorials/TextInput
-	case SDL_TEXTINPUT:
+	case SDL_EVENT_TEXT_INPUT:
 	{
 		if (m_Readonly)
 			return IN_PASS;
@@ -158,7 +159,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 
 		return IN_HANDLED;
 	}
-	case SDL_TEXTEDITING:
+	case SDL_EVENT_TEXT_EDITING:
 	{
 		if (m_Readonly)
 			return IN_PASS;
@@ -206,13 +207,13 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 
 		return IN_HANDLED;
 	}
-	case SDL_KEYDOWN:
-	case SDL_KEYUP:
+	case SDL_EVENT_KEY_DOWN:
+	case SDL_EVENT_KEY_UP:
 	{
 		// Since the GUI framework doesn't handle to set settings
 		//  in Unicode (CStrW), we'll simply retrieve the actual
 		//  pointer and edit that.
-		SDL_Keycode keyCode = ev->ev.key.keysym.sym;
+		SDL_Keycode keyCode = ev->ev.key.key;
 
 		// We have a probably printable key - we should return HANDLED so it can't trigger hotkeys.
 		// However, if Ctrl/Meta modifiers are active, just pass it through instead,
@@ -229,7 +230,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 		if (m_ComposingText)
 			return IN_HANDLED;
 
-		if (ev->ev.type == SDL_KEYDOWN)
+		if (ev->ev.type == SDL_EVENT_KEY_DOWN)
 		{
 			ManuallyImmutableHandleKeyDownEvent(keyCode);
 			ManuallyMutableHandleKeyDownEvent(keyCode);
@@ -332,7 +333,7 @@ void CInput::ManuallyMutableHandleKeyDownEvent(const SDL_Keycode keyCode)
 	}
 	default: // Insert a character
 	{
-		// Regular input is handled via SDL_TEXTINPUT, so we should ignore it here.
+		// Regular input is handled via SDL_EVENT_TEXT_INPUT, so we should ignore it here.
 		if (cooked == 0)
 			return;
 
@@ -1139,8 +1140,8 @@ void CInput::HandleMessage(SGUIMessage& Message)
 		rect.w = m_CachedActualSize.GetSize().Width;
 		rect.x = m_CachedActualSize.TopLeft().X;
 		rect.y = m_CachedActualSize.TopLeft().Y;
-		SDL_SetTextInputRect(&rect);
-		SDL_StartTextInput();
+		SDL_SetTextInputArea(g_VideoMode.GetWindow(), &rect, 0);
+		SDL_StartTextInput(g_VideoMode.GetWindow());
 		break;
 	}
 	case GUIM_LOST_FOCUS:
@@ -1149,13 +1150,13 @@ void CInput::HandleMessage(SGUIMessage& Message)
 		{
 			// Simulate a final text editing event to clear the composition
 			SDL_Event_ evt;
-			evt.ev.type = SDL_TEXTEDITING;
+			evt.ev.type = SDL_EVENT_TEXT_EDITING;
 			evt.ev.edit.length = 0;
 			evt.ev.edit.start = 0;
-			evt.ev.edit.text[0] = 0;
+			evt.ev.edit.text = "";
 			ManuallyHandleKeys(&evt);
 		}
-		SDL_StopTextInput();
+		SDL_StopTextInput(g_VideoMode.GetWindow());
 
 		m_iBufferPos = -1;
 		m_iBufferPos_Tail = -1;

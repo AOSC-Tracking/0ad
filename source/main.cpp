@@ -177,29 +177,24 @@ static InReaction MainInputHandler(const SDL_Event_* ev)
 {
 	switch(ev->ev.type)
 	{
-	case SDL_WINDOWEVENT:
-		switch(ev->ev.window.event)
-		{
-		case SDL_WINDOWEVENT_RESIZED:
-			g_ResizedW = ev->ev.window.data1;
-			g_ResizedH = ev->ev.window.data2;
-			break;
-		case SDL_WINDOWEVENT_MOVED:
-			g_VideoMode.UpdatePosition(ev->ev.window.data1, ev->ev.window.data2);
-		}
+	case SDL_EVENT_WINDOW_RESIZED:
+		g_ResizedW = ev->ev.window.data1;
+		g_ResizedH = ev->ev.window.data2;
+		break;
+	case SDL_EVENT_WINDOW_MOVED:
+		g_VideoMode.UpdatePosition(ev->ev.window.data1, ev->ev.window.data2);
 		break;
 
-	case SDL_QUIT:
+	case SDL_EVENT_QUIT:
 		QuitEngine();
 		break;
 
-	case SDL_DROPFILE:
+	case SDL_EVENT_DROP_FILE:
 	{
-		char* dropped_filedir = ev->ev.drop.file;
+		const char* dropped_filedir = ev->ev.drop.data;
 		const Paths paths(g_CmdLineArgs);
 		CModInstaller installer(paths.UserData() / "mods", paths.Cache());
 		installer.Install(std::string(dropped_filedir), g_ScriptContext, true);
-		SDL_free(dropped_filedir);
 		if (installer.GetInstalledMods().empty())
 			LOGERROR("Failed to install mod %s", dropped_filedir);
 		else
@@ -242,8 +237,7 @@ static InReaction MainInputHandler(const SDL_Event_* ev)
 		else if (hotkey == "mousegrabtoggle")
 		{
 			SDL_Window* const window{g_VideoMode.GetWindow()};
-			const SDL_bool willGrabMouse{SDL_GetWindowGrab(window) ? SDL_FALSE : SDL_TRUE};
-			SDL_SetWindowGrab(window, willGrabMouse);
+			SDL_SetWindowMouseGrab(window, !SDL_GetWindowMouseGrab(window));
 		}
 		break;
 	}

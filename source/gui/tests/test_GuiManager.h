@@ -150,8 +150,8 @@ public:
 
 		// Press 'a'.
 		SDL_Event_ hotkeyNotification;
-		hotkeyNotification.ev.type = SDL_KEYDOWN;
-		hotkeyNotification.ev.key.keysym.scancode = SDL_SCANCODE_A;
+		hotkeyNotification.ev.type = SDL_EVENT_KEY_DOWN;
+		hotkeyNotification.ev.key.scancode = SDL_SCANCODE_A;
 		hotkeyNotification.ev.key.repeat = 0;
 
 		// Init input and poll the event.
@@ -194,7 +194,7 @@ public:
 		Script::FromJSVal(prq, js_hotkey_pressed_value, hotkey_pressed_value);
 		TS_ASSERT_EQUALS(hotkey_pressed_value, true);
 
-		hotkeyNotification.ev.type = SDL_KEYUP;
+		hotkeyNotification.ev.type = SDL_EVENT_KEY_UP;
 		in_push_priority_event(&hotkeyNotification);
 		while (in_poll_event(&ev))
 			in_dispatch_event(&ev);

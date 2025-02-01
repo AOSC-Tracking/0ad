@@ -35,11 +35,10 @@
 # if OS_WIN
 #  include <glad/wgl.h>
 # elif !OS_MACOSX && !OS_MAC
-#  include <SDL_syswm.h>
-#  if defined(SDL_VIDEO_DRIVER_X11)
+#  if CONFIG2_VIDEO_X11
 #   include <glad/glx.h>
 #  endif
-#  if defined(SDL_VIDEO_DRIVER_WAYLAND)
+#  if CONFIG2_VIDEO_WAYLAND
 #   include <glad/egl.h>
 #  endif
 # endif
@@ -221,12 +220,12 @@ static int GLVersion;
 #if OS_WIN
 static int WGLVersion;
 #elif !CONFIG2_GLES && !OS_MACOSX && !OS_MAC
-#if defined(SDL_VIDEO_DRIVER_X11)
+# if CONFIG2_VIDEO_X11
 static int GLXVersion;
-#endif
-#if defined(SDL_VIDEO_DRIVER_WAYLAND)
+# endif
+# if CONFIG2_VIDEO_WAYLAND
 static int EGLVersion;
-#endif
+# endif
 #endif
 
 bool ogl_HaveVersion(int major, int minor)
@@ -429,7 +428,7 @@ bool ogl_SquelchError(GLenum err_to_ignore)
 #if OS_WIN
 bool ogl_Init(void* (load)(const char*), void* hdc)
 #elif !CONFIG2_GLES && !OS_MACOSX && !OS_MAC
-bool ogl_Init(void* (load)(const char*), void* display, int subsystem)
+bool ogl_Init(void* (load)(const char*), void* display)
 #else
 bool ogl_Init(void* (load)(const char*))
 #endif
@@ -459,11 +458,10 @@ bool ogl_Init(void* (load)(const char*))
 		return false;
 	}
 # elif !OS_MACOSX && !OS_MAC
-	const SDL_SYSWM_TYPE sysWMType = static_cast<SDL_SYSWM_TYPE>(subsystem);
-#  if defined(SDL_VIDEO_DRIVER_X11)
-	if (sysWMType == SDL_SYSWM_X11)
+#  if CONFIG2_VIDEO_X11
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
 	{
-		GLXVersion = gladLoadGLX(reinterpret_cast<Display*>(display), DefaultScreen(display), loadFunc);
+		GLXVersion = gladLoadGLX(static_cast<Display*>(display), DefaultScreen(display), loadFunc);
 		if (!GLXVersion)
 		{
 			LOAD_ERROR("Failed to load GLX functions.");
@@ -471,8 +469,8 @@ bool ogl_Init(void* (load)(const char*))
 		}
 	}
 #  endif
-#  if defined(SDL_VIDEO_DRIVER_WAYLAND)
-	if (sysWMType == SDL_SYSWM_WAYLAND)
+#  if CONFIG2_VIDEO_WAYLAND
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0)
 	{
 		// TODO: investiage do we need Wayland display to load EGL.
 		// Because without eglGetDisplay we can't get one. But the

@@ -17,6 +17,9 @@
 
 #include "precompiled.h"
 
+// as in sdl2
+#define SDL_FUNCTION_POINTER_IS_VOID_POINTER
+
 #include "Device.h"
 
 #include "lib/external_libraries/libsdl.h"
@@ -43,17 +46,17 @@ extern void* wutil_GetAppHDC();
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#if !CONFIG2_GLES && (defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_WAYLAND))
+#if !CONFIG2_GLES
 
-#if defined(SDL_VIDEO_DRIVER_X11)
+#if CONFIG2_VIDEO_X11
 #include <glad/glx.h>
 #endif
-#if defined(SDL_VIDEO_DRIVER_WAYLAND)
+#if CONFIG2_VIDEO_WAYLAND
 #include <glad/egl.h>
 #endif
-#include <SDL_syswm.h>
 
-#endif // !CONFIG2_GLES && (defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_WAYLAND))
+#endif // !CONFIG2_GLES
+
 
 namespace Renderer
 {
@@ -223,41 +226,23 @@ std::unique_ptr<IDevice> CDevice::Create(SDL_Window* window, const bool arb)
 			LOGERROR("SDL_GL_CreateContext failed: '%s'", SDL_GetError());
 			return nullptr;
 		}
-		SDL_GL_GetDrawableSize(window, &device->m_SurfaceDrawableWidth, &device->m_SurfaceDrawableHeight);
+		SDL_GetWindowSizeInPixels(window, &device->m_SurfaceDrawableWidth, &device->m_SurfaceDrawableHeight);
 
 #if OS_WIN
 		ogl_Init(SDL_GL_GetProcAddress, wutil_GetAppHDC());
-#elif (defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_WAYLAND)) && !CONFIG2_GLES
-		SDL_SysWMinfo wminfo;
-		// The info structure must be initialized with the SDL version.
-		SDL_VERSION(&wminfo.version);
-		if (!SDL_GetWindowWMInfo(window, &wminfo))
+#elif !CONFIG2_GLES && !OS_MACOSX && !OS_MAC
+		if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0)
 		{
-			LOGERROR("Failed to query SDL WM info: %s", SDL_GetError());
-			return nullptr;
+			ogl_Init(SDL_GL_GetProcAddress, nullptr);
 		}
-		switch (wminfo.subsystem)
+		else if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
 		{
-#if defined(SDL_VIDEO_DRIVER_WAYLAND)
-		case SDL_SYSWM_WAYLAND:
-			// TODO: maybe we need to load X11 functions
-			// dynamically as well.
-			ogl_Init(SDL_GL_GetProcAddress,
-				GetWaylandDisplay(device->m_Window),
-				static_cast<int>(wminfo.subsystem));
-			break;
-#endif
-#if defined(SDL_VIDEO_DRIVER_X11)
-		case SDL_SYSWM_X11:
-			ogl_Init(SDL_GL_GetProcAddress,
-				GetX11Display(device->m_Window),
-				static_cast<int>(wminfo.subsystem));
-			break;
-#endif
-		default:
-			ogl_Init(SDL_GL_GetProcAddress, nullptr,
-				static_cast<int>(wminfo.subsystem));
-			break;
+			void* display = SDL_GetPointerProperty(SDL_GetWindowProperties(device->m_Window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+			ogl_Init(SDL_GL_GetProcAddress,	display);
+		}
+		else
+		{
+			ogl_Init(SDL_GL_GetProcAddress, nullptr);
 		}
 #else
 		ogl_Init(SDL_GL_GetProcAddress);
@@ -267,23 +252,23 @@ std::unique_ptr<IDevice> CDevice::Create(SDL_Window* window, const bool arb)
 	{
 #if OS_WIN
 		ogl_Init(SDL_GL_GetProcAddress, wutil_GetAppHDC());
-#elif (defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_WAYLAND)) && !CONFIG2_GLES
+#elif !CONFIG2_GLES && !OS_MACOSX && !OS_MAC
 		bool initialized = false;
 		// Currently we don't have access to the backend type without
 		// the window. So we use hack to detect X11.
-#if defined(SDL_VIDEO_DRIVER_X11)
+#if CONFIG2_VIDEO_X11
 		Display* display = XOpenDisplay(NULL);
 		if (display)
 		{
-			ogl_Init(SDL_GL_GetProcAddress, display, static_cast<int>(SDL_SYSWM_X11));
+			ogl_Init(SDL_GL_GetProcAddress, display);
 			initialized = true;
 		}
 #endif
-#if defined(SDL_VIDEO_DRIVER_WAYLAND)
+#if CONFIG2_VIDEO_WAYLAND
 		if (!initialized)
 		{
 			// glad will find default EGLDisplay internally.
-			ogl_Init(SDL_GL_GetProcAddress, nullptr, static_cast<int>(SDL_SYSWM_WAYLAND));
+			ogl_Init(SDL_GL_GetProcAddress, nullptr);
 			initialized = true;
 		}
 #endif
@@ -296,7 +281,7 @@ std::unique_ptr<IDevice> CDevice::Create(SDL_Window* window, const bool arb)
 		ogl_Init(SDL_GL_GetProcAddress);
 #endif
 
-#if OS_WIN || defined(SDL_VIDEO_DRIVER_X11) && !CONFIG2_GLES
+#if OS_WIN || CONFIG2_VIDEO_X11 && !CONFIG2_GLES
 		// Hack to stop things looking very ugly when scrolling in Atlas.
 		ogl_SetVsyncEnabled(true);
 #endif
@@ -481,7 +466,7 @@ CDevice::~CDevice()
 #endif
 
 	if (m_Context)
-		SDL_GL_DeleteContext(m_Context);
+		SDL_GL_DestroyContext(m_Context);
 }
 
 void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
@@ -816,7 +801,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 
 
 // TODO: Support OpenGL platforms which don't use GLX as well.
-#if defined(SDL_VIDEO_DRIVER_X11) && !CONFIG2_GLES
+#if CONFIG2_VIDEO_X11 && !CONFIG2_GLES
 
 #define GLXQCR_INTEGER(id) do { \
 	unsigned int i = UINT_MAX; \
@@ -848,36 +833,34 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 	} while (false)
 
 
-	SDL_SysWMinfo wminfo;
-	SDL_VERSION(&wminfo.version);
-	const int ret = SDL_GetWindowWMInfo(m_Window, &wminfo);
-	if (ret && wminfo.subsystem == SDL_SYSWM_X11)
-	{
-		Display* dpy = wminfo.info.x11.display;
-		int scrnum = DefaultScreen(dpy);
-
-		const char* glxexts = glXQueryExtensionsString(dpy, scrnum);
-
-		Script::SetProperty(rq, settings, "GLX_EXTENSIONS", glxexts);
-
-		if (strstr(glxexts, "GLX_MESA_query_renderer") && glXQueryCurrentRendererIntegerMESA && glXQueryCurrentRendererStringMESA)
-		{
-			GLXQCR_INTEGER(GLX_RENDERER_VENDOR_ID_MESA);
-			GLXQCR_INTEGER(GLX_RENDERER_DEVICE_ID_MESA);
-			GLXQCR_INTEGER3(GLX_RENDERER_VERSION_MESA);
-			GLXQCR_INTEGER(GLX_RENDERER_ACCELERATED_MESA);
-			GLXQCR_INTEGER(GLX_RENDERER_VIDEO_MEMORY_MESA);
-			GLXQCR_INTEGER(GLX_RENDERER_UNIFIED_MEMORY_ARCHITECTURE_MESA);
-			GLXQCR_INTEGER(GLX_RENDERER_PREFERRED_PROFILE_MESA);
-			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_CORE_PROFILE_VERSION_MESA);
-			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_COMPATIBILITY_PROFILE_VERSION_MESA);
-			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_ES_PROFILE_VERSION_MESA);
-			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_ES2_PROFILE_VERSION_MESA);
-			GLXQCR_STRING(GLX_RENDERER_VENDOR_ID_MESA);
-			GLXQCR_STRING(GLX_RENDERER_DEVICE_ID_MESA);
-		}
-	}
-#endif // SDL_VIDEO_DRIVER_X11
+// FIXME
+//	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
+//	{
+//		Display* dpy = wminfo.info.x11.display;
+//		int scrnum = DefaultScreen(dpy);
+//
+//		const char* glxexts = glXQueryExtensionsString(dpy, scrnum);
+//
+//		Script::SetProperty(rq, settings, "GLX_EXTENSIONS", glxexts);
+//
+//		if (strstr(glxexts, "GLX_MESA_query_renderer") && glXQueryCurrentRendererIntegerMESA && glXQueryCurrentRendererStringMESA)
+//		{
+//			GLXQCR_INTEGER(GLX_RENDERER_VENDOR_ID_MESA);
+//			GLXQCR_INTEGER(GLX_RENDERER_DEVICE_ID_MESA);
+//			GLXQCR_INTEGER3(GLX_RENDERER_VERSION_MESA);
+//			GLXQCR_INTEGER(GLX_RENDERER_ACCELERATED_MESA);
+//			GLXQCR_INTEGER(GLX_RENDERER_VIDEO_MEMORY_MESA);
+//			GLXQCR_INTEGER(GLX_RENDERER_UNIFIED_MEMORY_ARCHITECTURE_MESA);
+//			GLXQCR_INTEGER(GLX_RENDERER_PREFERRED_PROFILE_MESA);
+//			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_CORE_PROFILE_VERSION_MESA);
+//			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_COMPATIBILITY_PROFILE_VERSION_MESA);
+//			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_ES_PROFILE_VERSION_MESA);
+//			GLXQCR_INTEGER2(GLX_RENDERER_OPENGL_ES2_PROFILE_VERSION_MESA);
+//			GLXQCR_STRING(GLX_RENDERER_VENDOR_ID_MESA);
+//			GLXQCR_STRING(GLX_RENDERER_DEVICE_ID_MESA);
+//		}
+//	}
+#endif // CONFIG2_VIDEO_X11 && !CONFIG2_GLES
 }
 
 std::unique_ptr<IDeviceCommandContext> CDevice::CreateCommandContext()

@@ -161,6 +161,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 	{
 		// This cannot use IsQuitRequested(), because the current loop and that function both run in the main thread.
 		// So SDL events are not processed unless called explicitly here.
+#define SDL_QuitRequested() (SDL_PumpEvents(), (SDL_PeepEvents(NULL,0,SDL_PEEKEVENT,SDL_EVENT_QUIT,SDL_EVENT_QUIT) > 0))
 		if (SDL_QuitRequested())
 			// Don't return, because we want to save our progress
 			break;

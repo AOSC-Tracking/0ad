@@ -110,24 +110,25 @@ JS::Value MakeSDLReport(const ScriptRequest& rq)
 {
 	LibraryReporter reporter{rq, "sdl"};
 
-	SDL_version build, runtime;
-	SDL_VERSION(&build);
-
-	char version[16];
-	snprintf(version, ARRAY_SIZE(version), "%d.%d.%d", build.major, build.minor, build.patch);
-	reporter.Add("build_version", version);
-
-	SDL_GetVersion(&runtime);
-	snprintf(version, ARRAY_SIZE(version), "%d.%d.%d", runtime.major, runtime.minor, runtime.patch);
-	reporter.Add("runtime_version", version);
+//	SDL_version build, runtime;
+//	SDL_VERSION(&build);
+//
+//	char version[16];
+//	snprintf(version, ARRAY_SIZE(version), "%d.%d.%d", build.major, build.minor, build.patch);
+//	reporter.Add("build_version", version);
+//
+//	SDL_GetVersion(&runtime);
+//	snprintf(version, ARRAY_SIZE(version), "%d.%d.%d", runtime.major, runtime.minor, runtime.patch);
+//	reporter.Add("runtime_version", version);
 
 	// This is null in atlas (and further the call triggers an assertion).
-	const char* backend = g_VideoMode.GetWindow() ? GetSDLSubsystem(g_VideoMode.GetWindow()) : "none";
-	reporter.Add("video_backend", backend ? backend : "unknown");
+	reporter.Add("video_backend", SDL_GetCurrentVideoDriver());
 
-	reporter.Add("display_count", SDL_GetNumVideoDisplays());
+	int num_displays{0};
+	SDL_GetDisplays(&num_displays);
+	reporter.Add("display_count", num_displays);
 
-	reporter.Add("cpu_count", SDL_GetCPUCount());
+	reporter.Add("cpu_count", SDL_GetNumLogicalCPUCores());
 	reporter.Add("system_ram", SDL_GetSystemRAM());
 
 	return reporter.MakeReport();

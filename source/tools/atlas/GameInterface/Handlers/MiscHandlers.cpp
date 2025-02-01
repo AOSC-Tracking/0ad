@@ -101,9 +101,9 @@ MESSAGEHANDLER(GuiSwitchPage)
 MESSAGEHANDLER(GuiMouseButtonEvent)
 {
 	SDL_Event_ ev = { { 0 } };
-	ev.ev.type = msg->pressed ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+	ev.ev.type = msg->pressed ? SDL_EVENT_MOUSE_BUTTON_DOWN : SDL_EVENT_MOUSE_BUTTON_UP;
 	ev.ev.button.button = msg->button;
-	ev.ev.button.state = msg->pressed ? SDL_PRESSED : SDL_RELEASED;
+	ev.ev.button.down = msg->pressed;
 	ev.ev.button.clicks = msg->clicks;
 	float x, y;
 	msg->pos->GetScreenSpace(x, y);
@@ -115,7 +115,7 @@ MESSAGEHANDLER(GuiMouseButtonEvent)
 MESSAGEHANDLER(GuiMouseMotionEvent)
 {
 	SDL_Event_ ev = { { 0 } };
-	ev.ev.type = SDL_MOUSEMOTION;
+	ev.ev.type = SDL_EVENT_MOUSE_MOTION;
 	float x, y;
 	msg->pos->GetScreenSpace(x, y);
 	ev.ev.motion.x = static_cast<u16>(Clamp<int>(x, 0, g_xres));
@@ -126,9 +126,9 @@ MESSAGEHANDLER(GuiMouseMotionEvent)
 MESSAGEHANDLER(GuiKeyEvent)
 {
 	SDL_Event_ ev = { { 0 } };
-	ev.ev.type = msg->pressed ? SDL_KEYDOWN : SDL_KEYUP;
-	ev.ev.key.keysym.sym = (SDL_Keycode)(int)msg->sdlkey;
-	ev.ev.key.keysym.scancode = SDL_GetScancodeFromKey((SDL_Keycode)(int)msg->sdlkey);
+	ev.ev.type = msg->pressed ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
+	ev.ev.key.key = (SDL_Keycode)(int)msg->sdlkey;
+	ev.ev.key.scancode = SDL_GetScancodeFromKey((SDL_Keycode)(int)msg->sdlkey, nullptr);
 	in_dispatch_event(&ev);
 }
 
@@ -138,16 +138,15 @@ MESSAGEHANDLER(GuiCharEvent)
 	// This isn't quite compatible with WXWidget's handling,
 	// so to avoid trouble we only send 'letter-like' ASCII input.
 	SDL_Event_ ev = { { 0 } };
-	ev.ev.type = SDL_TEXTEDITING;
-	ev.ev.text.type = SDL_TEXTEDITING;
-	ev.ev.text.text[0] = (char)msg->sdlkey;
-	ev.ev.text.text[1] = (char)0;
+	ev.ev.type = SDL_EVENT_TEXT_EDITING;
+	ev.ev.text.type = SDL_EVENT_TEXT_EDITING;
+	const char text[] = { (char)msg->sdlkey, '\0' };
+	ev.ev.text.text = text;
 	in_dispatch_event(&ev);
 
-	ev.ev.type = SDL_TEXTINPUT;
-	ev.ev.text.type = SDL_TEXTINPUT;
-	ev.ev.text.text[0] = (char)msg->sdlkey;
-	ev.ev.text.text[1] = (char)0;
+	ev.ev.type = SDL_EVENT_TEXT_INPUT;
+	ev.ev.text.type = SDL_EVENT_TEXT_INPUT;
+	ev.ev.text.text = text;
 	in_dispatch_event(&ev);
 }
 

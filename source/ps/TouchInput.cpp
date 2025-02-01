@@ -95,12 +95,12 @@ void CTouchInput::OnFingerUp(int id, int x, int y)
 		ev.ev.button.x = m_Pos[0].X;
 		ev.ev.button.y = m_Pos[0].Y;
 
-		ev.ev.type = SDL_MOUSEBUTTONDOWN;
-		ev.ev.button.state = SDL_PRESSED;
+		ev.ev.type = SDL_EVENT_MOUSE_BUTTON_DOWN;
+		ev.ev.button.down = true;
 		SDL_PushEvent(&ev.ev);
 
-		ev.ev.type = SDL_MOUSEBUTTONUP;
-		ev.ev.button.state = SDL_RELEASED;
+		ev.ev.type = SDL_EVENT_MOUSE_BUTTON_UP;
+		ev.ev.button.down = false;
 		SDL_PushEvent(&ev.ev);
 	}
 	else if (m_State == STATE_ZOOMING && id == 1)
@@ -172,12 +172,12 @@ void CTouchInput::Frame()
 		ev.ev.button.x = m_Pos[0].X;
 		ev.ev.button.y = m_Pos[0].Y;
 
-		ev.ev.type = SDL_MOUSEBUTTONDOWN;
-		ev.ev.button.state = SDL_PRESSED;
+		ev.ev.type = SDL_EVENT_MOUSE_BUTTON_DOWN;
+		ev.ev.button.down = true;
 		SDL_PushEvent(&ev.ev);
 
-		ev.ev.type = SDL_MOUSEBUTTONUP;
-		ev.ev.button.state = SDL_RELEASED;
+		ev.ev.type = SDL_EVENT_MOUSE_BUTTON_UP;
+		ev.ev.button.down = false;
 		SDL_PushEvent(&ev.ev);
 	}
 }
@@ -192,7 +192,7 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 #if EMULATE_FINGERS_WITH_MOUSE
 	switch(ev->ev.type)
 	{
-	case SDL_MOUSEBUTTONDOWN:
+	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 	{
 		int button;
 		if (ev->ev.button.button == SDL_BUTTON_LEFT)
@@ -215,7 +215,7 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 		return IN_HANDLED;
 	}
 
-	case SDL_MOUSEBUTTONUP:
+	case SDL_EVENT_MOUSE_BUTTON_UP:
 	{
 		int button;
 		if (ev->ev.button.button == SDL_BUTTON_LEFT)
@@ -245,7 +245,7 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 		return IN_HANDLED;
 	}
 
-	case SDL_MOUSEMOTION:
+	case SDL_EVENT_MOUSE_MOTION:
 	{
 		for (size_t i = 0; i < MAX_MOUSE; ++i)
 		{
@@ -261,24 +261,24 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 
 	switch(ev->ev.type)
 	{
-	case SDL_FINGERDOWN:
-	case SDL_FINGERUP:
-	case SDL_FINGERMOTION:
+	case SDL_EVENT_FINGER_DOWN:
+	case SDL_EVENT_FINGER_UP:
+	case SDL_EVENT_FINGER_MOTION:
 	{
 		// Map finger events onto the mouse, for basic testing
 		debug_printf("finger %s tid=%" PRId64 " fid=%" PRId64 " x=%f y=%f dx=%f dy=%f p=%f\n",
-			ev->ev.type == SDL_FINGERDOWN ? "down" :
-			ev->ev.type == SDL_FINGERUP ? "up" :
-			ev->ev.type == SDL_FINGERMOTION ? "motion" : "?",
-			ev->ev.tfinger.touchId, ev->ev.tfinger.fingerId,
+			ev->ev.type == SDL_EVENT_FINGER_DOWN ? "down" :
+			ev->ev.type == SDL_EVENT_FINGER_UP ? "up" :
+			ev->ev.type == SDL_EVENT_FINGER_MOTION ? "motion" : "?",
+			ev->ev.tfinger.touchID, ev->ev.tfinger.fingerID,
 			ev->ev.tfinger.x, ev->ev.tfinger.y, ev->ev.tfinger.dx, ev->ev.tfinger.dy, ev->ev.tfinger.pressure);
 
-		if (ev->ev.type == SDL_FINGERDOWN)
-			OnFingerDown(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
-		else if (ev->ev.type == SDL_FINGERUP)
-			OnFingerUp(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
-		else if (ev->ev.type == SDL_FINGERMOTION)
-			OnFingerMotion(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
+		if (ev->ev.type == SDL_EVENT_FINGER_DOWN)
+			OnFingerDown(ev->ev.tfinger.fingerID, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
+		else if (ev->ev.type == SDL_EVENT_FINGER_UP)
+			OnFingerUp(ev->ev.tfinger.fingerID, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
+		else if (ev->ev.type == SDL_EVENT_FINGER_MOTION)
+			OnFingerMotion(ev->ev.tfinger.fingerID, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
 		return IN_HANDLED;
 	}
 	}

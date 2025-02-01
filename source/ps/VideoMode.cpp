@@ -29,7 +29,7 @@
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
 #include "ps/CStr.h"
-#if OS_MACOSX && SDL_VERSION_ATLEAST(2, 0, 6)
+#if OS_MACOSX
 #include "ps/DllLoader.h"
 #endif
 #include "ps/Filesystem.h"
@@ -44,8 +44,8 @@
 
 #include <string_view>
 
-#if OS_MACOSX && SDL_VERSION_ATLEAST(2, 0, 6)
-#include <SDL_vulkan.h>
+#if OS_MACOSX
+#include <SDL3/SDL_vulkan.h>
 #include <stdlib.h>
 #endif
 
@@ -56,9 +56,6 @@ namespace
 
 int DEFAULT_WINDOW_W = 1024;
 int DEFAULT_WINDOW_H = 768;
-
-int DEFAULT_FULLSCREEN_W = 1024;
-int DEFAULT_FULLSCREEN_H = 768;
 
 const wchar_t DEFAULT_CURSOR_NAME[] = L"default-arrow";
 
@@ -154,9 +151,9 @@ CVideoMode::CCursor::CCursor()
 CVideoMode::CCursor::~CCursor()
 {
 	if (m_Cursor)
-		SDL_FreeCursor(m_Cursor);
+		SDL_DestroyCursor(m_Cursor);
 	if (m_CursorSurface)
-		SDL_FreeSurface(m_CursorSurface);
+		SDL_DestroySurface(m_CursorSurface);
 }
 
 void CVideoMode::CCursor::SetCursor(const CStrW& name)
@@ -166,13 +163,13 @@ void CVideoMode::CCursor::SetCursor(const CStrW& name)
 	m_CursorName = name;
 
 	if (m_Cursor)
-		SDL_FreeCursor(m_Cursor);
+		SDL_DestroyCursor(m_Cursor);
 	if (m_CursorSurface)
-		SDL_FreeSurface(m_CursorSurface);
+		SDL_DestroySurface(m_CursorSurface);
 
 	if (name.empty())
 	{
-		SDL_ShowCursor(SDL_DISABLE);
+		SDL_HideCursor();
 		return;
 	}
 
@@ -225,10 +222,10 @@ void CVideoMode::CCursor::SetCursor(const CStrW& name)
 		return;
 	}
 
-	m_CursorSurface = SDL_CreateRGBSurfaceFrom(imageBGRA,
-		static_cast<int>(t.m_Width), static_cast<int>(t.m_Height), 32,
-		static_cast<int>(t.m_Width * 4),
-		0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+	m_CursorSurface = SDL_CreateSurfaceFrom(
+		static_cast<int>(t.m_Width), static_cast<int>(t.m_Height),
+		SDL_GetPixelFormatForMasks(32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000),
+		imageBGRA, static_cast<int>(t.m_Width * 4));
 	if (!m_CursorSurface)
 	{
 		LOGERROR("Can't create surface for cursor: %s", SDL_GetError());
@@ -237,18 +234,17 @@ void CVideoMode::CCursor::SetCursor(const CStrW& name)
 	const float scale = g_VideoMode.GetScale();
 	if (scale != 1.0)
 	{
-		SDL_Surface* scaledSurface = SDL_CreateRGBSurface(0,
-			m_CursorSurface->w * scale,
-			m_CursorSurface->h * scale, 32,
-			0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+		SDL_Surface* scaledSurface = SDL_CreateSurface(
+			m_CursorSurface->w * scale, m_CursorSurface->h * scale,
+			SDL_GetPixelFormatForMasks(32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000));
 		if (!scaledSurface)
 		{
 			LOGERROR("Can't create scaled surface forcursor: %s", SDL_GetError());
 			return;
 		}
-		if (SDL_BlitScaled(m_CursorSurface, nullptr, scaledSurface, nullptr))
+		if (!SDL_BlitSurfaceScaled(m_CursorSurface, nullptr, scaledSurface, nullptr, SDL_SCALEMODE_LINEAR))
 			return;
-		SDL_FreeSurface(m_CursorSurface);
+		SDL_DestroySurface(m_CursorSurface);
 		m_CursorSurface = scaledSurface;
 	}
 	m_Cursor = SDL_CreateColorCursor(m_CursorSurface, hotspotX, hotspotY);
@@ -285,6 +281,9 @@ void CVideoMode::ReadConfig()
 	m_ConfigDisplay = g_ConfigDB.Get("display", m_ConfigDisplay);
 	m_ConfigEnableHiDPI = g_ConfigDB.Get("hidpi", m_ConfigEnableHiDPI);
 	m_ConfigVSync = g_ConfigDB.Get("vsync", m_ConfigVSync);
+	m_ConfigBorderlessWindow = g_ConfigDB.Get("borderless.window", m_ConfigBorderlessWindow);
+	m_ConfigMouseGrabInFullscreen = g_ConfigDB.Get("window.mousegrabinfullscreen", m_ConfigMouseGrabInFullscreen);
+	m_ConfigMouseGrabInWindowMode = g_ConfigDB.Get("window.mousegrabinwindowmode", m_ConfigMouseGrabInWindowMode);
 
 	const std::string rendererBackend{g_ConfigDB.Get("rendererbackend", std::string{})};
 	if (rendererBackend == "glarb")
@@ -302,217 +301,171 @@ void CVideoMode::ReadConfig()
 #endif
 }
 
-bool CVideoMode::SetVideoMode(int w, int h, int bpp, bool fullscreen)
+void CVideoMode::InitGLContext()
 {
-	Uint32 flags = 0;
-	if (fullscreen)
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+	if (g_ConfigDB.Get("renderer.backend.debugcontext", false))
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+
+	if (g_ConfigDB.Get("forceglversion", false))
 	{
-		flags |= g_ConfigDB.Get("borderless.fullscreen", true) ? SDL_WINDOW_FULLSCREEN_DESKTOP :
-			SDL_WINDOW_FULLSCREEN;
+		const std::string forceGLProfile = g_ConfigDB.Get("forceglprofile", "compatibility"s);
+		const int forceGLMajorVersion = g_ConfigDB.Get("forceglmajorversion", 3);
+		const int forceGLMinorVersion = g_ConfigDB.Get("forceglminorversion", 0);
+
+		int profile = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
+		if (forceGLProfile == "es")
+			profile = SDL_GL_CONTEXT_PROFILE_ES;
+		else if (forceGLProfile == "core")
+			profile = SDL_GL_CONTEXT_PROFILE_CORE;
+		else if (forceGLProfile != "compatibility")
+			LOGWARNING("Unknown force GL profile '%s', compatibility profile is used", forceGLProfile.c_str());
+
+		if (forceGLMajorVersion < 1 || forceGLMinorVersion < 0)
+		{
+			LOGERROR("Unsupported force GL version: %d.%d", forceGLMajorVersion, forceGLMinorVersion);
+		}
+		else
+		{
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, profile);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, forceGLMajorVersion);
+			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, forceGLMinorVersion);
+		}
 	}
-	else if (g_ConfigDB.Get("borderless.window", false))
+	else
+	{
+#if CONFIG2_GLES
+		// Require GLES 2.0
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#else
+		// Some macOS and MESA drivers might not create a context even if they can
+		// with the core profile. So disable it for a while until we can guarantee
+		// its creation.
+#if OS_WIN
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+#endif
+	}
+}
+
+bool CVideoMode::InitWindow()
+{
+
+	const bool isGLBackend =
+		m_Backend == Renderer::Backend::Backend::GL ||
+		m_Backend == Renderer::Backend::Backend::GL_ARB;
+
+	if (isGLBackend)
+		InitGLContext();
+
+#if OS_MACOSX
+	if (m_Backend == Renderer::Backend::Backend::VULKAN)
+	{
+		// MoltenVK - enable full component swizzling support.
+		setenv("MVK_CONFIG_FULL_IMAGE_VIEW_SWIZZLE", "1", 1);
+		CStr fullPathToVulkanLibrary = DllLoader::GenerateFilename("MoltenVK", "", ".dylib");
+		// MoltenVK - only print warnings and errors.
+		setenv("MVK_CONFIG_LOG_LEVEL", "2", 1);
+		if (!SDL_Vulkan_LoadLibrary(fullPathToVulkanLibrary.c_str()))
+		{
+			LOGWARNING("Failed to load %s: %s", fullPathToVulkanLibrary.c_str(), SDL_GetError());
+			DowngradeBackendSettingAfterCreationFailure();
+			return InitWindow();
+		}
+		else
+			LOGMESSAGE("Loaded %s.", fullPathToVulkanLibrary.c_str());
+	}
+#endif
+
+	// Note: these flags only take affect in SDL_CreateWindow
+	SDL_WindowFlags flags{SDL_WINDOW_RESIZABLE};
+	if (m_ConfigBorderlessWindow)
 		flags |= SDL_WINDOW_BORDERLESS;
+	if (m_ConfigFullscreen)
+	{
+		flags |= SDL_WINDOW_FULLSCREEN;
+		m_IsFullscreen = true;
+	}
+	if (m_ConfigEnableHiDPI)
+		flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	if (isGLBackend)
+		flags |= SDL_WINDOW_OPENGL;
+	else if (m_Backend == Renderer::Backend::Backend::VULKAN)
+		flags |= SDL_WINDOW_VULKAN;
+
+	m_WindowedX = m_WindowedY = SDL_WINDOWPOS_CENTERED_DISPLAY(m_ConfigDisplay);
+
+	// Try create the window.
+	SDL_PropertiesID props = SDL_CreateProperties();
+	SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, main_window_name);
+	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, m_WindowedX);
+	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, m_WindowedY);
+	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, m_WindowedW);
+	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, m_WindowedH);
+	SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_FLAGS_NUMBER, flags);
+	m_Window = SDL_CreateWindowWithProperties(props);
+	SDL_DestroyProperties(props);
 
 	if (!m_Window)
 	{
-		const bool isGLBackend =
-			m_Backend == Renderer::Backend::Backend::GL ||
-			m_Backend == Renderer::Backend::Backend::GL_ARB;
-		if (isGLBackend)
-		{
-			SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-			SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-			SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-			SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
-			if (g_ConfigDB.Get("renderer.backend.debugcontext", false))
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-
-			if (g_ConfigDB.Get("forceglversion", false))
-			{
-				const std::string forceGLProfile{g_ConfigDB.Get("forceglprofile", "compatibility"s)};
-				const int forceGLMajorVersion{g_ConfigDB.Get("forceglmajorversion", 3)};
-				const int forceGLMinorVersion{g_ConfigDB.Get("forceglminorversion", 0)};
-
-				int profile = SDL_GL_CONTEXT_PROFILE_COMPATIBILITY;
-				if (forceGLProfile == "es")
-					profile = SDL_GL_CONTEXT_PROFILE_ES;
-				else if (forceGLProfile == "core")
-					profile = SDL_GL_CONTEXT_PROFILE_CORE;
-				else if (forceGLProfile != "compatibility")
-					LOGWARNING("Unknown force GL profile '%s', compatibility profile is used", forceGLProfile.c_str());
-
-				if (forceGLMajorVersion < 1 || forceGLMinorVersion < 0)
-				{
-					LOGERROR("Unsupported force GL version: %d.%d", forceGLMajorVersion, forceGLMinorVersion);
-				}
-				else
-				{
-					SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, profile);
-					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, forceGLMajorVersion);
-					SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, forceGLMinorVersion);
-				}
-			}
-			else
-			{
-#if CONFIG2_GLES
-				// Require GLES 2.0
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-#else
-				// Some macOS and MESA drivers might not create a context even if they can
-				// with the core profile. So disable it for a while until we can guarantee
-				// its creation.
-#if OS_WIN
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#endif
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-				SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-#endif
-			}
-		}
-
-		// Note: these flags only take affect in SDL_CreateWindow
-		flags |= SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-		if (m_ConfigEnableHiDPI)
-			flags |= SDL_WINDOW_ALLOW_HIGHDPI;
-		if (isGLBackend)
-			flags |= SDL_WINDOW_OPENGL;
-		else if (m_Backend == Renderer::Backend::Backend::VULKAN)
-			flags |= SDL_WINDOW_VULKAN;
-		m_WindowedX = m_WindowedY = SDL_WINDOWPOS_CENTERED_DISPLAY(m_ConfigDisplay);
-
-#if OS_MACOSX && SDL_VERSION_ATLEAST(2, 0, 6)
+		// SDL might fail to create a window in case of missing a Vulkan driver.
 		if (m_Backend == Renderer::Backend::Backend::VULKAN)
 		{
-			// MoltenVK - enable full component swizzling support.
-			setenv("MVK_CONFIG_FULL_IMAGE_VIEW_SWIZZLE", "1", 1);
-			CStr fullPathToVulkanLibrary = DllLoader::GenerateFilename("MoltenVK", "", ".dylib");
-			// MoltenVK - only print warnings and errors.
-			setenv("MVK_CONFIG_LOG_LEVEL", "2", 1);
-			if (SDL_Vulkan_LoadLibrary(fullPathToVulkanLibrary.c_str()) != 0)
-			{
-				LOGWARNING("Failed to load %s.", fullPathToVulkanLibrary.c_str());
-				DowngradeBackendSettingAfterCreationFailure();
-				return SetVideoMode(w, h, bpp, fullscreen);
-			}
-			else
-				LOGMESSAGE("Loaded %s.", fullPathToVulkanLibrary.c_str());
-		}
-#endif
-
-		m_Window = SDL_CreateWindow(main_window_name, m_WindowedX, m_WindowedY, w, h, flags);
-		if (!m_Window)
-		{
-			// SDL might fail to create a window in case of missing a Vulkan driver.
-			if (m_Backend == Renderer::Backend::Backend::VULKAN)
-			{
-				LOGWARNING("Failed to create a Vulkan window: %s", SDL_GetError());
-				DowngradeBackendSettingAfterCreationFailure();
-				return SetVideoMode(w, h, bpp, fullscreen);
-			}
-
-			// If fullscreen fails, try windowed mode
-			if (fullscreen)
-			{
-				LOGWARNING("Failed to set the video mode to fullscreen for the chosen resolution "
-					"%dx%d:%d (\"%hs\"), falling back to windowed mode",
-					w, h, bpp, SDL_GetError());
-				// Using default size for the window for now, as the attempted setting
-				// could be as large, or larger than the screen size.
-				return SetVideoMode(DEFAULT_WINDOW_W, DEFAULT_WINDOW_H, bpp, false);
-			}
-			else
-			{
-				if (isGLBackend)
-				{
-					int depthSize = 24;
-					SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depthSize);
-					if (depthSize > 16)
-					{
-						// Fall back to a smaller depth buffer
-						// (The rendering may be ugly but this helps when running in VMware)
-						SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-
-						return SetVideoMode(w, h, bpp, fullscreen);
-					}
-				}
-
-				LOGERROR("SetVideoMode failed in SDL_CreateWindow: %dx%d:%d %d (\"%s\")",
-					w, h, bpp, fullscreen ? 1 : 0, SDL_GetError());
-				return false;
-			}
-		}
-
-		if (SDL_SetWindowDisplayMode(m_Window, NULL) < 0)
-		{
-			LOGERROR("SetVideoMode failed in SDL_SetWindowDisplayMode: %dx%d:%d %d (\"%s\")",
-				w, h, bpp, fullscreen ? 1 : 0, SDL_GetError());
-			return false;
-		}
-
-#if OS_WIN
-		// We need to set the window for an error dialog.
-		wutil_SetAppWindow(m_Window);
-#endif
-
-		if (!TryCreateBackendDevice(m_Window))
-		{
+			LOGWARNING("Failed to create a Vulkan window: %s", SDL_GetError());
 			DowngradeBackendSettingAfterCreationFailure();
-			SDL_DestroyWindow(m_Window);
-			m_Window = nullptr;
-			return SetVideoMode(w, h, bpp, fullscreen);
+			return InitWindow();
 		}
 
 		if (isGLBackend)
-			SDL_GL_SetSwapInterval(m_ConfigVSync ? 1 : 0);
-	}
-	else
-	{
-		if (m_IsFullscreen != fullscreen)
 		{
-			if (!fullscreen)
+			int depthSize = 24;
+			SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &depthSize);
+			if (depthSize > 16)
 			{
-				// For some reason, when switching from fullscreen to windowed mode,
-				// we have to set the window size and position before and after switching
-				SDL_SetWindowSize(m_Window, w, h);
-				SDL_SetWindowPosition(m_Window, m_WindowedX, m_WindowedY);
-			}
+				// Fall back to a smaller depth buffer
+				// (The rendering may be ugly but this helps when running in VMware)
+				SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 
-			if (SDL_SetWindowFullscreen(m_Window, flags) < 0)
-			{
-				LOGERROR("SetVideoMode failed in SDL_SetWindowFullscreen: %dx%d:%d %d (\"%s\")",
-					w, h, bpp, fullscreen ? 1 : 0, SDL_GetError());
-				return false;
+				return InitWindow();
 			}
 		}
 
-		if (!fullscreen)
-		{
-			SDL_SetWindowSize(m_Window, w, h);
-			SDL_SetWindowPosition(m_Window, m_WindowedX, m_WindowedY);
-		}
+		LOGERROR("InitWindow failed in SDL_CreateWindow: (\"%s\")", SDL_GetError());
+		return false;
 	}
 
-	// Grab the current video settings
-	SDL_GetWindowSize(m_Window, &m_CurrentW, &m_CurrentH);
-	m_CurrentBPP = bpp;
+	// Set fullscreen mode. (maybe creation flags will do, at least the best is not what is always wanted, maybe use current)
+//	SDL_DisplayID * display = SDL_GetDisplays(nullptr);
+//	SDL_DisplayMode ** modes = SDL_GetFullscreenDisplayModes(*display, nullptr);
+//	if (!SDL_SetWindowFullscreenMode(m_Window, *modes))
+//	{
+//		LOGERROR("InitWindow failed in SDL_SetWindowFullscreenMode: (\"%s\")", SDL_GetError());
+//		return false;
+//	}
 
-	// #545: we need to constrain the window in fullscreen mode to avoid mouse
-	// "falling out" of the window in case of multiple displays.
-	if (fullscreen ? g_ConfigDB.Get("window.mousegrabinfullscreen", true) :
-		g_ConfigDB.Get("window.mousegrabinwindowmode", false))
+#if OS_WIN
+	// We need to set the window for an error dialog.
+	wutil_SetAppWindow(m_Window);
+#endif
+
+	if (!TryCreateBackendDevice(m_Window))
 	{
-		SDL_SetWindowGrab(m_Window, SDL_TRUE);
+		DowngradeBackendSettingAfterCreationFailure();
+		SDL_DestroyWindow(m_Window);
+		m_Window = nullptr;
+		return InitWindow();
 	}
-	else
-		SDL_SetWindowGrab(m_Window, SDL_FALSE);
 
-	m_IsFullscreen = fullscreen;
-
-	g_xres = m_CurrentW;
-	g_yres = m_CurrentH;
+	if (isGLBackend)
+		SDL_GL_SetSwapInterval(m_ConfigVSync ? 1 : 0);
 
 	return true;
 }
@@ -523,30 +476,8 @@ bool CVideoMode::InitSDL()
 
 	ReadConfig();
 
-	// preferred video mode = current desktop settings
-	// (command line params may override these)
-	// TODO: handle multi-screen and HiDPI properly.
-	SDL_DisplayMode mode;
-	if (SDL_GetDesktopDisplayMode(0, &mode) == 0)
-	{
-		m_PreferredW = mode.w;
-		m_PreferredH = mode.h;
-		m_PreferredBPP = SDL_BITSPERPIXEL(mode.format);
-		m_PreferredFreq = mode.refresh_rate;
-	}
-
 	int w = m_ConfigW;
 	int h = m_ConfigH;
-
-	if (m_ConfigFullscreen)
-	{
-		// If fullscreen and no explicit size set, default to the desktop resolution
-		if (w == 0 || h == 0)
-		{
-			w = m_PreferredW;
-			h = m_PreferredH;
-		}
-	}
 
 	// If no size determined, default to something sensible
 	if (w == 0 || h == 0)
@@ -555,18 +486,22 @@ bool CVideoMode::InitSDL()
 		h = DEFAULT_WINDOW_H;
 	}
 
-	if (!m_ConfigFullscreen)
+	if (m_PreferredW)
+		w = std::min(w, m_PreferredW);
+	if (m_PreferredH)
+		h = std::min(h, m_PreferredH);
+	m_WindowedW = w;
+	m_WindowedH = h;
+
+	if (!m_Window)
 	{
-		// Limit the window to the screen size (if known)
-		if (m_PreferredW)
-			w = std::min(w, m_PreferredW);
-		if (m_PreferredH)
-			h = std::min(h, m_PreferredH);
+		InitWindow();
 	}
 
-	const int bpp = GetBestBPP();
-	if (!SetVideoMode(w, h, bpp, m_ConfigFullscreen))
-		return false;
+	SDL_GetWindowSize(m_Window, &m_CurrentW, &m_CurrentH);
+	UpdateRenderer(m_CurrentW, m_CurrentH);
+
+//	SetFullscreen(m_ConfigFullscreen);
 
 	// Work around a bug in the proprietary Linux ATI driver (at least versions 8.16.20 and 8.14.13).
 	// The driver appears to register its own atexit hook on context creation.
@@ -579,12 +514,6 @@ bool CVideoMode::InitSDL()
 	// End work around.
 
 	m_IsInitialised = true;
-
-	if (!m_ConfigFullscreen)
-	{
-		m_WindowedW = w;
-		m_WindowedH = h;
-	}
 
 	SetWindowIcon();
 
@@ -680,20 +609,18 @@ bool CVideoMode::ResizeWindow(int w, int h)
 	ENSURE(m_IsInitialised);
 
 	// Ignore if not windowed
-	if (m_IsFullscreen)
-		return true;
+//	if (m_IsFullscreen)
+//		return true;
 
 	// Ignore if the size hasn't changed
-	if (w == m_WindowedW && h == m_WindowedH)
-		return true;
+//	if (w == m_WindowedW && h == m_WindowedH)
+//		return true;
 
-	int bpp = GetBestBPP();
-
-	if (!SetVideoMode(w, h, bpp, false))
-		return false;
-
+	SDL_SetWindowSize(m_Window, w, h);
 	m_WindowedW = w;
 	m_WindowedH = h;
+	m_CurrentW = w;
+	m_CurrentH = h;
 
 	UpdateRenderer(w, h);
 
@@ -723,54 +650,21 @@ bool CVideoMode::SetFullscreen(bool fullscreen)
 	if (fullscreen == m_IsFullscreen)
 		return true;
 
-	if (!m_IsFullscreen)
+	if(!SDL_SetWindowFullscreen(m_Window , fullscreen))
 	{
-		// Windowed -> fullscreen:
-
-		int w = 0, h = 0;
-
-		// If a fullscreen size was configured, use that; else use the desktop size; else use a default
-		if (m_ConfigFullscreen)
-		{
-			w = m_ConfigW;
-			h = m_ConfigH;
-		}
-		if (w == 0 || h == 0)
-		{
-			w = m_PreferredW;
-			h = m_PreferredH;
-		}
-		if (w == 0 || h == 0)
-		{
-			w = DEFAULT_FULLSCREEN_W;
-			h = DEFAULT_FULLSCREEN_H;
-		}
-
-		int bpp = GetBestBPP();
-
-		if (!SetVideoMode(w, h, bpp, fullscreen))
-			return false;
-
-		UpdateRenderer(m_CurrentW, m_CurrentH);
-
-		return true;
+		LOGERROR("Failed setting fullscreen");
+		return false;
 	}
+
+	// #545: we need to constrain the window in fullscreen mode to avoid mouse
+	// "falling out" of the window in case of multiple displays.
+	if (fullscreen ? m_ConfigMouseGrabInFullscreen : m_ConfigMouseGrabInWindowMode)
+		SDL_SetWindowMouseGrab(m_Window, true);
 	else
-	{
-		// Fullscreen -> windowed:
+		SDL_SetWindowMouseGrab(m_Window, false);
 
-		// Go back to whatever the previous window size was
-		int w = m_WindowedW, h = m_WindowedH;
-
-		int bpp = GetBestBPP();
-
-		if (!SetVideoMode(w, h, bpp, fullscreen))
-			return false;
-
-		UpdateRenderer(w, h);
-
-		return true;
-	}
+	m_IsFullscreen = fullscreen;
+	return true;
 }
 
 bool CVideoMode::ToggleFullscreen()
@@ -783,13 +677,8 @@ bool CVideoMode::IsInFullscreen() const
 	return m_IsFullscreen;
 }
 
-void CVideoMode::UpdatePosition(int x, int y)
+void CVideoMode::UpdatePosition(int /*x*/, int /*y*/)
 {
-	if (!m_IsFullscreen)
-	{
-		m_WindowedX = x;
-		m_WindowedY = y;
-	}
 }
 
 void CVideoMode::UpdateRenderer(int w, int h)
@@ -907,14 +796,15 @@ void CVideoMode::SetWindowIcon()
 	if (!bgra_img)
 		return;
 
-	SDL_Surface *iconSurface = SDL_CreateRGBSurfaceFrom(bgra_img,
-		iconTexture.m_Width, iconTexture.m_Height, 32, iconTexture.m_Width * 4,
-		0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+	SDL_Surface *iconSurface = SDL_CreateSurfaceFrom(
+		iconTexture.m_Width, iconTexture.m_Height,
+		SDL_GetPixelFormatForMasks(32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000),
+		bgra_img, iconTexture.m_Width * 4);
 	if (!iconSurface)
 		return;
 
 	SDL_SetWindowIcon(m_Window, iconSurface);
-	SDL_FreeSurface(iconSurface);
+	SDL_DestroySurface(iconSurface);
 }
 
 void CVideoMode::SetCursor(const CStrW& name)
