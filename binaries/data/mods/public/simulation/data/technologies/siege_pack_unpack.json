@@ -1,18 +1,25 @@
 {
 	"genericName": "Military Engineers",
 	"description": "Military engineers are responsible for improvements in siege engines.",
+	"unique": false,
 	"cost": {
 		"food": 800
 	},
 	"requirements": {
 		"all": [
 			{ "tech": "phase_city" },
-			{ "notciv": "brit" },
-			{ "notciv": "gaul" },
-			{ "notciv": "iber" },
-			{ "notciv": "maur" },
-			{ "notciv": "kush" },
-			{ "notciv": "pers" }
+			{
+				"any": [
+					{ "civ": "athen" },
+					{ "civ": "cart" },
+					{ "civ": "han" },
+					{ "civ": "mace" },
+					{ "civ": "ptol" },
+					{ "civ": "rome" },
+					{ "civ": "sele" },
+					{ "civ": "spart" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in City Phase.",

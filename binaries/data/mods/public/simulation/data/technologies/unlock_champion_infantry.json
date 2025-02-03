@@ -5,6 +5,7 @@
 		"ptol": "Agēma",
 		"rome": "Regio Cohors"
 	},
+	"unique": false,
 	"description": "Guard units (Champions) are professionals who wield the best weapons and have the best training.",
 	"cost": {
 		"food": 600
@@ -12,11 +13,19 @@
 	"requirements": {
 		"all": [
 			{ "tech": "phase_city" },
-			{ "notciv": "athen" },
-			{ "notciv": "cart" },
-			{ "notciv": "han" },
-			{ "notciv": "sele" },
-			{ "notciv": "spart" }
+			{
+				"any": [
+					{ "civ": "brit" },
+					{ "civ": "gaul" },
+					{ "civ": "iber" },
+					{ "civ": "kush" },
+					{ "civ": "mace" },
+					{ "civ": "maur" },
+					{ "civ": "pers" },
+					{ "civ": "ptol" },
+					{ "civ": "rome" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in City Phase.",

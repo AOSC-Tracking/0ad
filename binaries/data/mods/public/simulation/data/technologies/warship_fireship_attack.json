@@ -1,6 +1,7 @@
 {
 	"genericName": "Burning Pitch",
 	"description": "Pitch can be made from petroleum, coal tar, or pine tar. It can be used to help seal the hulls of boats as well as assist in igniting enemy ships.",
+	"unique": false,
 	"cost": {
 		"wood": 300,
 		"metal": 100
@@ -8,17 +9,13 @@
 	"requirements": {
 		"all": [
 			{ "tech": "phase_city" },
-			{ "notciv": "athen" },
-			{ "notciv": "cart" },
-			{ "notciv": "han" },
-			{ "notciv": "kush" },
-			{ "notciv": "mace" },
-			{ "notciv": "maur" },
-			{ "notciv": "pers" },
-			{ "notciv": "ptol" },
-			{ "notciv": "rome" },
-			{ "notciv": "sele" },
-			{ "notciv": "spart" }
+			{
+				"any": [
+					{ "civ": "brit" },
+					{ "civ": "gaul" },
+					{ "civ": "iber" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in City Phase. Requires “Naval Construction.”",

@@ -1,6 +1,7 @@
 {
 	"supersedes": "warship_ramming_speed",
 	"genericName": "Bronze Ram",
+	"unique": false,
 	"specificName": {
 		"athen": "Embolon",
 		"cart": "Embolon",
@@ -18,12 +19,18 @@
 	"requirements": {
 		"all": [
 			{ "tech": "phase_city" },
-			{ "notciv": "brit" },
-			{ "notciv": "gaul" },
-			{ "notciv": "han" },
-			{ "notciv": "iber" },
-			{ "notciv": "kush" },
-			{ "notciv": "maur" }
+			{
+				"any": [
+					{ "civ": "athen" },
+					{ "civ": "cart" },
+					{ "civ": "mace" },
+					{ "civ": "pers" },
+					{ "civ": "ptol" },
+					{ "civ": "rome" },
+					{ "civ": "sele" },
+					{ "civ": "spart" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in City Phase. Requires “Flanking Maneuvers.”",

@@ -1,6 +1,7 @@
 {
 	"genericName": "Fertilizer",
 	"description": "Extra nutrients for farms.",
+	"unique": false,
 	"cost": {
 		"wood": 400,
 		"metal": 300

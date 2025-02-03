@@ -1,6 +1,7 @@
 {
 	"genericName": "Gather Training",
 	"description": "Training for workers to increase farm gathering speed.",
+	"unique": false,
 	"cost": {
 		"wood": 300,
 		"metal": 200

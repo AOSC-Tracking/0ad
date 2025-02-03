@@ -1,6 +1,7 @@
 {
 	"genericName": "Chain Pump",
 	"description": "Install a chain pump for improved irrigation.",
+	"unique": false,
 	"cost": {
 		"wood": 400,
 		"metal": 300

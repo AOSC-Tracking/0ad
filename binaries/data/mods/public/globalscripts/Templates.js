@@ -587,6 +587,7 @@ function GetTechnologyDataHelper(template, civ, resources)
 	for (let type of resources.GetCodes())
 		ret.cost[type] = +(template.cost && template.cost[type] || 0);
 
+	ret.unique = template.unique;
 	ret.tooltip = template.tooltip;
 	ret.requirementsTooltip = template.requirementsTooltip || "";
 

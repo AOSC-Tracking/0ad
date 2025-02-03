@@ -9,6 +9,7 @@
 		"sele": "Periplous",
 		"spart": "Periplous"
 	},
+	"unique": false,
 	"description": "The flanking maneuver was attempted in order to position the ship for a successful ram. To pull this off in the chaos of a sea battle, a ship's crew needed to be highly trained and well-motivated.",
 	"cost": {
 		"food": 300,
@@ -17,12 +18,18 @@
 	"requirements": {
 		"all": [
 			{ "tech": "phase_town" },
-			{ "notciv": "brit" },
-			{ "notciv": "gaul" },
-			{ "notciv": "han" },
-			{ "notciv": "iber" },
-			{ "notciv": "kush" },
-			{ "notciv": "maur" }
+			{
+				"any": [
+					{ "civ": "athen" },
+					{ "civ": "cart" },
+					{ "civ": "mace" },
+					{ "civ": "pers" },
+					{ "civ": "ptol" },
+					{ "civ": "rome" },
+					{ "civ": "sele" },
+					{ "civ": "spart" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in Town Phase.",

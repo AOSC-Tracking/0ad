@@ -1,6 +1,7 @@
 {
 	"genericName": "Water Weeding",
 	"description": "Remove water weeds to preserve nutrients for the rice plants.",
+	"unique": false,
 	"cost": {
 		"wood": 300,
 		"metal": 200

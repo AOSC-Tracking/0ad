@@ -53,8 +53,9 @@ class Subsection
 			// If it returns with a value other than false, then
 			// we know that this tech can be researched by any civ
 			const genericReqs = this.page.TemplateParser.getTechnology(techCode, "anyciv").reqs;
+			const unique = technology.unique ?? !genericReqs;
 
-			if (!technology.reqs || genericReqs)
+			if (!technology.reqs || !unique)
 				continue;
 
 			captions.push(this.page.formatEntry(

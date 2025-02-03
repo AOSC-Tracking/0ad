@@ -1,18 +1,25 @@
 {
 	"genericName": "Unlock Champion Cavalry",
 	"description": "Guard units (Champions) are professionals who wield the best weapons and have the best training.",
+	"unique": false,
 	"cost": {
 		"food": 600
 	},
 	"requirements": {
 		"all": [
 			{ "tech": "phase_city" },
-			{ "notciv": "athen" },
-			{ "notciv": "brit" },
-			{ "notciv": "cart" },
-			{ "notciv": "han" },
-			{ "notciv": "maur" },
-			{ "notciv": "spart" }
+			{
+				"any": [
+					{ "civ": "gaul" },
+					{ "civ": "iber" },
+					{ "civ": "kush" },
+					{ "civ": "mace" },
+					{ "civ": "pers" },
+					{ "civ": "ptol" },
+					{ "civ": "rome" },
+					{ "civ": "sele" }
+				]
+			}
 		]
 	},
 	"requirementsTooltip": "Unlocked in City Phase.",

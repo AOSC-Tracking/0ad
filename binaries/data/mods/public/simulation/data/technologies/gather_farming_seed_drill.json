@@ -1,6 +1,7 @@
 {
 	"genericName": "Seed Drill",
 	"description": "Equip your workers with seed drills.",
+	"unique": false,
 	"cost": {
 		"wood": 200,
 		"metal": 100

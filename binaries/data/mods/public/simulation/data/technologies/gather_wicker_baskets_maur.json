@@ -2,6 +2,7 @@
 	"pair": "pair_gather_food_maur",
 	"genericName": "Wicker Baskets",
 	"description": "Equip your foragers with wicker baskets for foraging.",
+	"unique": false,
 	"cost": {
 		"wood": 100
 	},
