@@ -193,7 +193,7 @@ class TemplateParser
 			return this.techs[civCode][technologyName];
 
 		let template = this.TemplateLoader.loadTechnologyTemplate(technologyName);
-		const tech = GetTechnologyDataHelper(template, civCode, g_ResourceData, this.modifiers[civCode] || {});
+		const tech = GetTechnologyDataHelper(template, civCode, g_ResourceData);
 		tech.name.internal = technologyName;
 
 		if (template.pair !== undefined)
