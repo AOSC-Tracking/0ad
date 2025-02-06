@@ -307,6 +307,26 @@ function displayReplayDetails()
 	Engine.GetGUIObjectByName("summaryButton").hidden = !Engine.HasReplayMetadata(replay.directory);
 }
 
+function exportReplay()
+{
+	let selected = Engine.GetGUIObjectByName("replaySelection").selected;
+	let replaySelected = selected > -1;
+
+	if (!replaySelected)
+		return;
+
+	let replay = g_ReplaysFiltered[selected];
+	let replayFilesDirectory = Engine.GetReplayDirectoryName(replay.directory);
+
+	Engine.ExportReplay(replayFilesDirectory);
+}
+
+function importReplays()
+{
+	Engine.ImportReplays();
+	// reload replays
+}
+
 /**
  * Returns a human-readable version of the replay date.
  */

@@ -97,6 +97,20 @@
 			<object name="replayFilename" type="input" size="0 100%-25 100% 100%" style="ModernInput" readonly="true" font="sans-14" textcolor="208 174 132" sprite="ReplayMenuFilenameBackground">
 				<translatableAttribute id="tooltip">File path for the currently selected replay.</translatableAttribute>
 			</object>
+
+			<!-- Export Replay Button -->
+			<object type="button" style="StoneButton" size="0 100%-25 200 100%">
+				<translatableAttribute id="caption">Export Replay</translatableAttribute>
+				<action on="Press">exportReplay();</action>
+			</object>
+
+			<!-- Import Replay Button -->
+			<object type="button" style="StoneButton" size="210 100%-25 410 100%">
+				<translatableAttribute id="caption">Import Replay</translatableAttribute>
+				<action on="Press">importReplays();</action>
+			</object>
+
+
 		</object>
 
 		<!-- Right Panel: Compatibility Filter & Replay Details -->
