@@ -287,6 +287,10 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"controllable": cmpIdentity.IsControllable()
 		};
 
+	const cmpTerritoryDecay = Engine.QueryInterface(ent, IID_TerritoryDecay);
+	if (cmpTerritoryDecay)
+		ret.territoryDecay = { "canDelete" : !cmpTerritoryDecay.IsDecaying() };
+
 	const cmpFormation = Engine.QueryInterface(ent, IID_Formation);
 	if (cmpFormation)
 		ret.formation = {

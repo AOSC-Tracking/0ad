@@ -400,6 +400,10 @@ var g_Commands = {
 				if (cmpIdentity && cmpIdentity.IsUndeletable())
 					continue;
 
+				const cmpTerritoryDecay = Engine.QueryInterface(ent, IID_TerritoryDecay);
+				if (cmpTerritoryDecay && !cmpTerritoryDecay.IsDecaying())
+					continue;
+
 				let cmpCapturable = QueryMiragedInterface(ent, IID_Capturable);
 				if (cmpCapturable &&
 				    cmpCapturable.GetCapturePoints()[player] < cmpCapturable.GetMaxCapturePoints() / 2)

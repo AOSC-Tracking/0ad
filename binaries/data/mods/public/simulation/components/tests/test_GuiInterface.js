@@ -32,6 +32,7 @@ Engine.LoadComponentScript("interfaces/ResourceGatherer.js");
 Engine.LoadComponentScript("interfaces/ResourceTrickle.js");
 Engine.LoadComponentScript("interfaces/ResourceSupply.js");
 Engine.LoadComponentScript("interfaces/TechnologyManager.js");
+Engine.LoadComponentScript("interfaces/TerritoryDecay.js");
 Engine.LoadComponentScript("interfaces/Trader.js");
 Engine.LoadComponentScript("interfaces/Trainer.js");
 Engine.LoadComponentScript("interfaces/TurretHolder.js");

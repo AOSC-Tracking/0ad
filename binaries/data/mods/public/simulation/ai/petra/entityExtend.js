@@ -163,6 +163,9 @@ PETRA.allowCapture = function(gameState, ent, target)
 		return false;
 	if (target.isInvulnerable())
 		return true;
+	// Only try capture if territory root.
+	if (!(ent?.get("TerritoryInfluence")?.Root === "true"))
+		return false;
 	// always try to recapture capture points from an allied, except if it's decaying
 	if (gameState.isPlayerAlly(target.owner()))
 		return !target.decaying();
