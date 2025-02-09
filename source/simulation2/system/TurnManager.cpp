@@ -247,13 +247,9 @@ bool CTurnManager::TurnNeedsFullHash(u32 turn) const
 	if (turn == 1)
 		return true;
 
-	// Otherwise check the full state every ~10 seconds in multiplayer games
-	// (TODO: should probably remove this when we're reasonably sure the game
-	// isn't too buggy, since the full hash is still pretty slow)
-	if (turn % 20 == 0)
-		return true;
-
-	return false;
+	// Check every 60 seconds to ensure we detect all OOS in reasonable time.
+	// This is rather slow, so we should do this rarely.
+	return turn % 300 == 0;
 }
 
 void CTurnManager::EnableTimeWarpRecording(size_t numTurns)
