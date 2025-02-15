@@ -1481,6 +1481,16 @@ bool CNetServerWorker::OnRejoined(CNetServerSession* session, CFsmEvent* event)
 	message->m_GUID = session->GetGUID();
 	server.Multicast(message, { NSS_INGAME });
 
+	bool isObserver = server.m_PlayerAssignments[session->GetGUID()].m_PlayerID == -1 && server.m_ControllerGUID != session->GetGUID();
+	// If the player isn't observer, we need to run a full-hash check at some future turn for OOS detection.
+	if (!isObserver)
+	{
+		CSyncNeedFullMessage message;
+		// Pick a turn that we're sure no client has reached.
+		message.m_Turn = server.m_ServerTurnManager->GetReadyTurn() + COMMAND_DELAY_MP * 3;
+		server.Multicast(&message, { NSS_INGAME });
+	}
+
 	// Send all pausing players to the rejoined client.
 	for (const CStr& guid : server.m_PausingPlayers)
 	{

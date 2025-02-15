@@ -25,6 +25,7 @@
 #include <map>
 #include <vector>
 #include <deque>
+#include <unordered_set>
 
 class CSimulationMessage;
 class CSimulation2;
@@ -149,6 +150,11 @@ public:
 	void QuickSave(JS::HandleValue GUIMetadata);
 	void QuickLoad();
 
+	/**
+	 * Mark turn @turn as requiring a full hash.
+	 */
+	void SetFullHashOnTurn(u32 turn);
+
 	u32 GetCurrentTurn() const { return m_CurrentTurn; }
 
 	/**
@@ -177,7 +183,7 @@ protected:
 	 * Returns whether we should compute a complete state hash for the given turn,
 	 * instead of a quick less-complete hash.
 	 */
-	bool TurnNeedsFullHash(u32 turn) const;
+	bool TurnNeedsFullHash(u32 turn);
 
 	CSimulation2& m_Simulation2;
 
@@ -195,6 +201,8 @@ protected:
 
 	/// Commands queued at each turn (index 0 is for m_CurrentTurn+1)
 	std::deque<std::map<u32, std::vector<SimulationCommand>>> m_QueuedCommands;
+
+	std::unordered_set<u32> m_TurnsNeedingFullHash;
 
 	int m_PlayerId;
 	uint m_ClientId;

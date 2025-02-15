@@ -199,6 +199,10 @@ CNetMessage* CNetMessageFactory::CreateMessage(const void* pData,
 		pNewMessage = new CSyncErrorMessage;
 		break;
 
+	case NMT_SYNC_NEED_FULL:
+		pNewMessage = new CSyncNeedFullMessage;
+		break;
+
 	case NMT_CHAT:
 		pNewMessage = new CChatMessage;
 		break;

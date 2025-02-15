@@ -240,8 +240,15 @@ void CTurnManager::FinishedAllCommands(u32 turn, u32 turnLength)
 	m_TurnLength = turnLength;
 }
 
-bool CTurnManager::TurnNeedsFullHash(u32 turn) const
+void CTurnManager::SetFullHashOnTurn(u32 turn) {
+	m_TurnsNeedingFullHash.insert(turn);
+}
+
+bool CTurnManager::TurnNeedsFullHash(u32 turn)
 {
+	if (m_TurnsNeedingFullHash.erase(turn) > 0)
+		return true;
+
 	// Check immediately for errors caused by e.g. inconsistent game versions
 	// (The hash is computed after the first sim update, so we start at turn == 1)
 	if (turn == 1)

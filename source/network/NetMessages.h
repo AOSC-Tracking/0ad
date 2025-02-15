@@ -28,7 +28,7 @@
 
 #define PS_PROTOCOL_MAGIC                         0x5073013f	// 'P', 's', 0x01, '?'
 #define PS_PROTOCOL_MAGIC_RESPONSE                0x50630121	// 'P', 'c', 0x01, '!'
-#define PS_PROTOCOL_VERSION                       0x01010019	// Arbitrary protocol
+#define PS_PROTOCOL_VERSION                       0x01010020	// Arbitrary protocol
 #define PS_DEFAULT_PORT                           0x5073		// 'P', 's'
 
 // Set when lobby authentication is required. Used in the SrvHandshakeResponseMessage.
@@ -80,6 +80,7 @@ enum NetMessageType
 
 	NMT_SYNC_CHECK,	// OOS-detection hash checking
 	NMT_SYNC_ERROR,	// OOS-detection error
+	NMT_SYNC_NEED_FULL, // OOS-detection asking for full hash
 
 	NMT_SIMULATION_COMMAND,
 	NMT_FLARE
@@ -259,6 +260,10 @@ START_NMT_CLASS_(SyncError, NMT_SYNC_ERROR)
 	NMT_START_ARRAY(m_PlayerNames)
 		NMT_FIELD(CStrW, m_Name)
 	NMT_END_ARRAY()
+END_NMT_CLASS()
+
+START_NMT_CLASS_(SyncNeedFull, NMT_SYNC_NEED_FULL)
+NMT_FIELD_INT(m_Turn, u32, 4)
 END_NMT_CLASS()
 
 START_NMT_CLASS_(AssignPlayer, NMT_ASSIGN_PLAYER)

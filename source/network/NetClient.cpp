@@ -110,6 +110,7 @@ CNetClient::CNetClient(CGame* game) :
 	AddTransition(NCS_LOADING, (uint)NMT_LOADED_GAME, NCS_INGAME, &OnLoadedGame, this);
 
 	AddTransition(NCS_INGAME, (uint)NMT_REJOINED, NCS_INGAME, &OnRejoined, this);
+	AddTransition(NCS_INGAME, (uint)NMT_SYNC_NEED_FULL, NCS_INGAME, &OnSyncNeedFull, this);
 	AddTransition(NCS_INGAME, (uint)NMT_KICKED, NCS_INGAME, &OnKicked, this);
 	AddTransition(NCS_INGAME, (uint)NMT_CLIENT_TIMEOUT, NCS_INGAME, &OnClientTimeout, this);
 	AddTransition(NCS_INGAME, (uint)NMT_CLIENT_PERFORMANCE, NCS_INGAME, &OnClientPerformance, this);
@@ -885,6 +886,17 @@ bool CNetClient::OnJoinSyncEndCommandBatch(CNetClient* client, CFsmEvent* event)
 
 	// Execute all the received commands for the latest turn
 	client->m_ClientTurnManager->UpdateFastForward();
+
+	return true;
+}
+
+bool CNetClient::OnSyncNeedFull(CNetClient* client, CFsmEvent* event)
+{
+	ENSURE(event->GetType() == (uint)NMT_SYNC_NEED_FULL);
+
+	CSyncNeedFullMessage* message = static_cast<CSyncNeedFullMessage*>(event->GetParamRef());
+
+	client->m_ClientTurnManager->SetFullHashOnTurn(message->m_Turn);
 
 	return true;
 }

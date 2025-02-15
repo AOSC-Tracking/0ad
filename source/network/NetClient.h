@@ -295,6 +295,7 @@ private:
 	static bool OnSavedGameStart(CNetClient* client, CFsmEvent* event);
 	static bool OnJoinSyncStart(CNetClient* client, CFsmEvent* event);
 	static bool OnJoinSyncEndCommandBatch(CNetClient* client, CFsmEvent* event);
+	static bool OnSyncNeedFull(CNetClient* client, CFsmEvent* event);
 	static bool OnFlare(CNetClient* client, CFsmEvent* event);
 	static bool OnRejoined(CNetClient* client, CFsmEvent* event);
 	static bool OnKicked(CNetClient* client, CFsmEvent* event);
