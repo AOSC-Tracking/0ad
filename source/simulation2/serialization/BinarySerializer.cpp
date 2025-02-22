@@ -29,34 +29,6 @@
 
 #include "SerializedScriptTypes.h"
 
-static u8 GetArrayType(js::Scalar::Type arrayType)
-{
-	switch(arrayType)
-	{
-	case js::Scalar::Int8:
-		return SCRIPT_TYPED_ARRAY_INT8;
-	case js::Scalar::Uint8:
-		return SCRIPT_TYPED_ARRAY_UINT8;
-	case js::Scalar::Int16:
-		return SCRIPT_TYPED_ARRAY_INT16;
-	case js::Scalar::Uint16:
-		return SCRIPT_TYPED_ARRAY_UINT16;
-	case js::Scalar::Int32:
-		return SCRIPT_TYPED_ARRAY_INT32;
-	case js::Scalar::Uint32:
-		return SCRIPT_TYPED_ARRAY_UINT32;
-	case js::Scalar::Float32:
-		return SCRIPT_TYPED_ARRAY_FLOAT32;
-	case js::Scalar::Float64:
-		return SCRIPT_TYPED_ARRAY_FLOAT64;
-	case js::Scalar::Uint8Clamped:
-		return SCRIPT_TYPED_ARRAY_UINT8_CLAMPED;
-	default:
-		LOGERROR("Cannot serialize unrecognized typed array view: %d", static_cast<int>(arrayType));
-		throw PSERROR_Serialize_InvalidScriptValue();
-	}
-}
-
 CBinarySerializerScriptImpl::CBinarySerializerScriptImpl(const ScriptInterface& scriptInterface, ISerializer& serializer) :
 	m_ScriptInterface(scriptInterface), m_Serializer(serializer), m_ScriptBackrefsNext(0)
 {
@@ -70,10 +42,13 @@ CBinarySerializerScriptImpl::~CBinarySerializerScriptImpl()
 	JS_RemoveExtraGCRootsTracer(rq.cx, Trace, this);
 }
 
-void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
+void CBinarySerializerScriptImpl::PutScriptVal(JS::HandleValue val)
 {
-	ScriptRequest rq(m_ScriptInterface);
+	HandleScriptVal(ScriptRequest(m_ScriptInterface), val);
+}
 
+void CBinarySerializerScriptImpl::HandleScriptVal(const ScriptRequest& rq, JS::HandleValue val)
+{
 	switch (JS_TypeOfValue(rq.cx, val))
 	{
 	case JSTYPE_UNDEFINED:
@@ -129,7 +104,7 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 			// Now handle its array buffer
 			// this may be a backref, since ArrayBuffers can be shared by multiple views
 			JS::RootedValue bufferVal(rq.cx, JS::ObjectValue(*JS_GetArrayBufferViewBuffer(rq.cx, obj, &sharedMemory)));
-			HandleScriptVal(bufferVal);
+			HandleScriptVal(rq, bufferVal);
 			break;
 		}
 		else if (JS::IsArrayBufferObject(obj))
@@ -177,8 +152,8 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 				ENSURE(JS_GetElement(rq.cx, keyValuePairObj, 0, &key));
 				ENSURE(JS_GetElement(rq.cx, keyValuePairObj, 1, &value));
 
-				HandleScriptVal(key);
-				HandleScriptVal(value);
+				HandleScriptVal(rq, key);
+				HandleScriptVal(rq, value);
 			}
 			break;
 		}
@@ -206,7 +181,7 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 				if (done)
 					break;
 
-				HandleScriptVal(value);
+				HandleScriptVal(rq, value);
 			}
 			break;
 		}
@@ -281,7 +256,7 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 				JS::RootedString str(rq.cx, JS::ToString(rq.cx, val));
 				if (!str)
 					throw PSERROR_Serialize_ScriptError("JS_ValueToString failed");
-				ScriptString("value", str);
+				ScriptString(rq, "value", str);
 				break;
 			}
 			else if (protokey == JSProto_Boolean)
@@ -330,12 +305,12 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 			if (!idstr)
 				throw PSERROR_Serialize_ScriptError("JS_ValueToString failed");
 
-			ScriptString("prop name", idstr);
+			ScriptString(rq, "prop name", idstr);
 
 			if (!JS_GetPropertyById(rq.cx, obj, id, &propval))
 				throw PSERROR_Serialize_ScriptError("JS_GetPropertyById failed");
 
-			HandleScriptVal(propval);
+			HandleScriptVal(rq, propval);
 		}
 
 		break;
@@ -376,7 +351,7 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 	{
 		m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_STRING);
 		JS::RootedString stringVal(rq.cx, val.toString());
-		ScriptString("string", stringVal);
+		ScriptString(rq, "string", stringVal);
 		break;
 	}
 	case JSTYPE_NUMBER:
@@ -425,10 +400,8 @@ void CBinarySerializerScriptImpl::HandleScriptVal(JS::HandleValue val)
 	}
 }
 
-void CBinarySerializerScriptImpl::ScriptString(const char* name, JS::HandleString string)
+void CBinarySerializerScriptImpl::ScriptString(const ScriptRequest& rq, const char* name, JS::HandleString string)
 {
-	ScriptRequest rq(m_ScriptInterface);
-
 #if BYTE_ORDER != LITTLE_ENDIAN
 #error TODO: probably need to convert JS strings to little-endian
 #endif
@@ -436,8 +409,9 @@ void CBinarySerializerScriptImpl::ScriptString(const char* name, JS::HandleStrin
 	size_t length;
 	JS::AutoCheckCannotGC nogc;
 	// Serialize strings directly as UTF-16 or Latin1, to avoid expensive encoding conversions
-	bool isLatin1 = JS::StringHasLatin1Chars(string);
-	m_Serializer.Bool("isLatin1", isLatin1);
+	u8 isLatin1 = JS::StringHasLatin1Chars(string);
+	// Save this as u8 as we have a fast-path.
+	m_Serializer.NumberU8_Unbounded("isLatin1", isLatin1);
 	if (isLatin1)
 	{
 		const JS::Latin1Char* chars = JS_GetLatin1StringCharsAndLength(rq.cx, nogc, string, &length);

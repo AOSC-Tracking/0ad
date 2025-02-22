@@ -86,9 +86,11 @@ public:
 	CBinarySerializerScriptImpl(const ScriptInterface& scriptInterface, ISerializer& serializer);
 	~CBinarySerializerScriptImpl();
 
-	void ScriptString(const char* name, JS::HandleString string);
-	void HandleScriptVal(JS::HandleValue val);
+	void ScriptString(const ScriptRequest& rq, const char* name, JS::HandleString string);
+	void PutScriptVal(JS::HandleValue val);
 private:
+	void HandleScriptVal(const ScriptRequest& rq, JS::HandleValue val);
+
 	static void Trace(JSTracer* trc, void* data);
 
 	const ScriptInterface& m_ScriptInterface;
@@ -104,13 +106,13 @@ private:
  * Serialize to a binary stream. T must just implement the Put() method.
  * (We use this templated approach to allow compiler inlining.)
  */
-template <typename T>
+template <typename T, typename ScriptImpl = CBinarySerializerScriptImpl>
 class CBinarySerializer : public ISerializer
 {
 	NONCOPYABLE(CBinarySerializer);
 public:
 	CBinarySerializer(const ScriptInterface& scriptInterface) :
-		m_ScriptImpl(new CBinarySerializerScriptImpl(scriptInterface, *this)),
+		m_ScriptImpl(new ScriptImpl(scriptInterface, *this)),
 		m_RawStreamBuf(m_Impl),
 		m_RawStream(&m_RawStreamBuf)
 	{
@@ -118,7 +120,7 @@ public:
 
 	template <typename A>
 	CBinarySerializer(const ScriptInterface& scriptInterface, A& a) :
-		m_ScriptImpl(new CBinarySerializerScriptImpl(scriptInterface, *this)),
+		m_ScriptImpl(new ScriptImpl(scriptInterface, *this)),
 		m_Impl(a),
 		m_RawStreamBuf(m_Impl),
 		m_RawStream(&m_RawStreamBuf)
@@ -201,7 +203,7 @@ protected:
 
 	virtual void PutScriptVal(const char* UNUSED(name), JS::MutableHandleValue value)
 	{
-		m_ScriptImpl->HandleScriptVal(value);
+		m_ScriptImpl->PutScriptVal(value);
 	}
 
 	virtual void PutRaw(const char* name, const u8* data, size_t len)
@@ -218,7 +220,7 @@ protected:
 	T m_Impl;
 
 private:
-	std::unique_ptr<CBinarySerializerScriptImpl> m_ScriptImpl;
+	std::unique_ptr<ScriptImpl> m_ScriptImpl;
 
 	CSerializerStreamBuf<T> m_RawStreamBuf;
 	std::ostream m_RawStream;

@@ -19,8 +19,14 @@
 
 #include "HashSerializer.h"
 
+#include "scriptinterface/FunctionWrapper.h"
+#include "scriptinterface/ScriptExtraHeaders.h"
+#include "scriptinterface/JSON.h"
+
+#include "SerializedScriptTypes.h"
+
 CHashSerializer::CHashSerializer(const ScriptInterface& scriptInterface) :
-	CBinarySerializer<CHashSerializerImpl>(scriptInterface)
+	CBinarySerializer<CHashSerializerImpl, CHashSerializerScriptImpl>(scriptInterface)
 {
 }
 
@@ -43,4 +49,401 @@ const u8* CHashSerializerImpl::ComputeHash()
 {
 	m_Hash.Final(m_HashData);
 	return m_HashData;
+}
+
+// Largely duplicated from CHashSerializerScriptImpl,
+// but faster as we know we won't be deserialized.
+
+
+SPrototypeSerialization GetFastPrototypeInfo(const ScriptRequest& rq, JS::HandleObject prototype, JS::PropertyKey ser, JS::PropertyKey deser)
+{
+	SPrototypeSerialization ret;
+
+	JS::RootedValue serialize(rq.cx);
+	if (!JS_GetPropertyById(rq.cx, prototype, JS::Handle<jsid>::fromMarkedLocation(&ser), &serialize))
+		throw PSERROR_Serialize_ScriptError("JS_GetProperty failed");
+
+	if (!serialize.isUndefined())
+	{
+		ret.hasCustomSerialize = true;
+		if (serialize.isNull())
+			ret.hasNullSerialize = true;
+		else if (!JS_HasPropertyById(rq.cx, prototype, JS::Handle<jsid>::fromMarkedLocation(&deser), &ret.hasCustomDeserialize) || !ret.hasCustomDeserialize)
+		{
+			// Don't throw for this error: mods might need updating and this crashes as exceptions are not correctly handled.
+			LOGERROR("Error serializing object '%s': non-null Serialize() but no matching Deserialize().", ret.name);
+		}
+	}
+
+	return ret;
+}
+
+
+CHashSerializerScriptImpl::CHashSerializerScriptImpl(const ScriptInterface& scriptInterface, ISerializer& serializer) :
+m_ScriptInterface(scriptInterface), m_Request(m_ScriptInterface), m_Serializer(serializer)
+{
+	m_SerializePropId = JS::PropertyKey::fromPinnedString(JS_AtomizeAndPinString(m_Request.cx, "Serialize"));
+	m_DeserializePropId = JS::PropertyKey::fromPinnedString(JS_AtomizeAndPinString(m_Request.cx, "Deserialize"));
+}
+
+void CHashSerializerScriptImpl::PutScriptVal(JS::HandleValue val)
+{
+	HandleScriptVal(m_Request, val);
+}
+
+void CHashSerializerScriptImpl::HandleScriptVal(const ScriptRequest& rq, JS::HandleValue val)
+{
+	switch (JS_TypeOfValue(rq.cx, val))
+	{
+	case JSTYPE_UNDEFINED:
+		{
+			m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_VOID);
+			break;
+		}
+	case JSTYPE_OBJECT:
+		{
+			if (val.isNull())
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_NULL);
+				break;
+			}
+
+			JS::RootedObject obj(rq.cx, &val.toObject());
+
+			// Unlike CBinarySerializer, just re-hash objects instead of storing them in a map.
+			// This is overall much faster for components.
+
+			// Arrays, Maps and Sets are special cases of Objects
+			bool isArray;
+			bool isMap;
+			bool isSet;
+
+			if (JS::IsArrayObject(rq.cx, obj, &isArray) && isArray)
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_ARRAY);
+				// TODO: probably should have a more efficient storage format
+
+				// Arrays like [1, 2, ] have an 'undefined' at the end which is part of the
+				// length but seemingly isn't enumerated, so store the length explicitly
+				uint length = 0;
+				if (!JS::GetArrayLength(rq.cx, obj, &length))
+					throw PSERROR_Serialize_ScriptError("JS::GetArrayLength failed");
+				m_Serializer.NumberU32_Unbounded("array length", length);
+			}
+			else if (JS_IsTypedArrayObject(obj))
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_TYPED_ARRAY);
+
+				m_Serializer.NumberU8_Unbounded("array type", GetArrayType(JS_GetArrayBufferViewType(obj)));
+				m_Serializer.NumberU32_Unbounded("byte offset", JS_GetTypedArrayByteOffset(obj));
+				m_Serializer.NumberU32_Unbounded("length", JS_GetTypedArrayLength(obj));
+
+				bool sharedMemory;
+				// Now handle its array buffer
+				// this may be a backref, since ArrayBuffers can be shared by multiple views
+				JS::RootedValue bufferVal(rq.cx, JS::ObjectValue(*JS_GetArrayBufferViewBuffer(rq.cx, obj, &sharedMemory)));
+				HandleScriptVal(rq, bufferVal);
+				break;
+			}
+			else if (JS::IsArrayBufferObject(obj))
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_ARRAY_BUFFER);
+
+#if BYTE_ORDER != LITTLE_ENDIAN
+#error TODO: need to convert JS ArrayBuffer data to little-endian
+#endif
+
+				u32 length = JS::GetArrayBufferByteLength(obj);
+				m_Serializer.NumberU32_Unbounded("buffer length", length);
+				JS::AutoCheckCannotGC nogc;
+				bool sharedMemory;
+				m_Serializer.RawBytes("buffer data", (const u8*)JS::GetArrayBufferData(obj, &sharedMemory, nogc), length);
+				break;
+			}
+
+			else if (JS::IsMapObject(rq.cx, obj, &isMap) && isMap)
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_MAP);
+				m_Serializer.NumberU32_Unbounded("map size", JS::MapSize(rq.cx, obj));
+
+				JS::RootedValue keyValueIterator(rq.cx);
+				if (!JS::MapEntries(rq.cx, obj, &keyValueIterator))
+					throw PSERROR_Serialize_ScriptError("JS::MapEntries failed");
+
+				JS::ForOfIterator it(rq.cx);
+				if (!it.init(keyValueIterator))
+					throw PSERROR_Serialize_ScriptError("JS::ForOfIterator::init failed");
+
+				JS::RootedValue keyValuePair(rq.cx);
+				bool done;
+				while (true)
+				{
+					if (!it.next(&keyValuePair, &done))
+						throw PSERROR_Serialize_ScriptError("JS::ForOfIterator::next failed");
+
+					if (done)
+						break;
+
+					JS::RootedObject keyValuePairObj(rq.cx, &keyValuePair.toObject());
+					JS::RootedValue key(rq.cx);
+					JS::RootedValue value(rq.cx);
+					ENSURE(JS_GetElement(rq.cx, keyValuePairObj, 0, &key));
+					ENSURE(JS_GetElement(rq.cx, keyValuePairObj, 1, &value));
+
+					HandleScriptVal(rq, key);
+					HandleScriptVal(rq, value);
+				}
+				break;
+			}
+
+			else if (JS::IsSetObject(rq.cx, obj, &isSet) && isSet)
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_SET);
+				m_Serializer.NumberU32_Unbounded("set size", JS::SetSize(rq.cx, obj));
+
+				JS::RootedValue valueIterator(rq.cx);
+				if (!JS::SetValues(rq.cx, obj, &valueIterator))
+					throw PSERROR_Serialize_ScriptError("JS::SetValues failed");
+
+				JS::ForOfIterator it(rq.cx);
+				if (!it.init(valueIterator))
+					throw PSERROR_Serialize_ScriptError("JS::ForOfIterator::init failed");
+
+				JS::RootedValue value(rq.cx);
+				bool done;
+				while (true)
+				{
+					if (!it.next(&value, &done))
+						throw PSERROR_Serialize_ScriptError("JS::ForOfIterator::next failed");
+
+					if (done)
+						break;
+
+					HandleScriptVal(rq, value);
+				}
+				break;
+			}
+
+			else
+			{
+				// Find type of object
+				const JSClass* jsclass = JS::GetClass(obj);
+				if (!jsclass)
+					throw PSERROR_Serialize_ScriptError("JS::GetClass failed");
+
+				JSProtoKey protokey = JSCLASS_CACHED_PROTO_KEY(jsclass);
+
+				if (protokey == JSProto_Object)
+				{
+					// Object class - check for user-defined prototype
+					JS::RootedObject proto(rq.cx);
+					if (!JS_GetPrototype(rq.cx, obj, &proto))
+						throw PSERROR_Serialize_ScriptError("JS_GetPrototype failed");
+
+					SPrototypeSerialization protoInfo = GetFastPrototypeInfo(rq, proto, m_SerializePropId, m_DeserializePropId);
+
+					m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_PROTOTYPE);
+
+					// Does it have custom Serialize function?
+					// if so, we serialize the data it returns, rather than the object's properties directly
+					if (protoInfo.hasCustomSerialize)
+					{
+						// If serialize is null, don't serialize anything more
+						if (!protoInfo.hasNullSerialize)
+						{
+							JS::RootedValue data(rq.cx);
+							if (!ScriptFunction::Call(rq, val, "Serialize", &data))
+								throw PSERROR_Serialize_ScriptError("Prototype Serialize function failed");
+							m_Serializer.ScriptVal("data", &data);
+						}
+						// Break here to skip the custom object property serialization logic below.
+						break;
+					}
+					//}
+				}
+				else if (protokey == JSProto_Number)
+				{
+					// Get primitive value
+					double d;
+					if (!JS::ToNumber(rq.cx, val, &d))
+						throw PSERROR_Serialize_ScriptError("JS::ToNumber failed");
+
+					// Refuse to serialize NaN values: their representation can differ, leading to OOS
+					// and in general this is indicative of an underlying bug rather than desirable behaviour.
+					if (std::isnan(d))
+					{
+						LOGERROR("Cannot serialize NaN values.");
+						throw PSERROR_Serialize_InvalidScriptValue();
+					}
+
+					// Standard Number object
+					m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_NUMBER);
+					m_Serializer.NumberDouble_Unbounded("value", d);
+					break;
+				}
+				else if (protokey == JSProto_String)
+				{
+					// Standard String object
+					m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_STRING);
+					// Get primitive value
+					JS::RootedString str(rq.cx, JS::ToString(rq.cx, val));
+					if (!str)
+						throw PSERROR_Serialize_ScriptError("JS_ValueToString failed");
+					ScriptString(rq, "value", str);
+					break;
+				}
+				else if (protokey == JSProto_Boolean)
+				{
+					// Standard Boolean object
+					m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_OBJECT_BOOLEAN);
+					// Get primitive value
+					bool b = JS::ToBoolean(val);
+					m_Serializer.Bool("value", b);
+					break;
+				}
+				else
+				{
+					// Unrecognized class
+					LOGERROR("Cannot serialise JS objects with unrecognized class '%s'", jsclass->name);
+					throw PSERROR_Serialize_InvalidScriptValue();
+				}
+			}
+
+			// Find all properties (ordered by insertion time)
+			JS::Rooted<JS::IdVector> ida(rq.cx, JS::IdVector(rq.cx));
+			if (!JS_Enumerate(rq.cx, obj, &ida))
+				throw PSERROR_Serialize_ScriptError("JS_Enumerate failed");
+
+			m_Serializer.NumberU32_Unbounded("num props", (u32)ida.length());
+
+			for (size_t i = 0; i < ida.length(); ++i)
+			{
+				JS::RootedId id(rq.cx, ida[i]);
+				JS::RootedValue propval(rq.cx);
+
+				uintptr_t idbytes = id.asRawBits();
+				m_Serializer.RawBytes("prop name", reinterpret_cast<u8*>(&idbytes), sizeof(uintptr_t));
+
+				if (!JS_GetPropertyById(rq.cx, obj, id, &propval))
+					throw PSERROR_Serialize_ScriptError("JS_GetPropertyById failed");
+
+				HandleScriptVal(rq, propval);
+			}
+
+			break;
+		}
+	case JSTYPE_FUNCTION:
+		{
+			// We can't serialise functions, but we can at least name the offender (hopefully)
+			std::wstring funcname(L"(unnamed)");
+			JS::RootedFunction func(rq.cx, JS_ValueToFunction(rq.cx, val));
+			if (func)
+			{
+				JS::RootedString string(rq.cx, JS_GetFunctionId(func));
+				if (string)
+				{
+					if (JS::StringHasLatin1Chars(string))
+					{
+						size_t length;
+						JS::AutoCheckCannotGC nogc;
+						const JS::Latin1Char* ch = JS_GetLatin1StringCharsAndLength(rq.cx, nogc, string, &length);
+						if (ch && length > 0)
+							funcname.assign(ch, ch + length);
+					}
+					else
+					{
+						size_t length;
+						JS::AutoCheckCannotGC nogc;
+						const char16_t* ch = JS_GetTwoByteStringCharsAndLength(rq.cx, nogc, string, &length);
+						if (ch && length > 0)
+							funcname.assign(ch, ch + length);
+					}
+				}
+			}
+
+			LOGERROR("Cannot serialise JS objects of type 'function': %s", utf8_from_wstring(funcname));
+			throw PSERROR_Serialize_InvalidScriptValue();
+		}
+	case JSTYPE_STRING:
+		{
+			m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_STRING);
+			JS::RootedString stringVal(rq.cx, val.toString());
+			ScriptString(rq, "string", stringVal);
+			break;
+		}
+	case JSTYPE_NUMBER:
+		{
+			// Refuse to serialize NaN values: their representation can differ, leading to OOS
+			// and in general this is indicative of an underlying bug rather than desirable behaviour.
+			if (val == JS::NaNValue())
+			{
+				LOGERROR("Cannot serialize NaN values.");
+				throw PSERROR_Serialize_InvalidScriptValue();
+			}
+
+			// To reduce the size of the serialized data, we handle integers and doubles separately.
+			// We can't check for val.isInt32 and val.isDouble directly, because integer numbers are not guaranteed
+			// to be represented as integers. A number like 33 could be stored as integer on the computer of one player
+			// and as double on the other player's computer. That would cause out of sync errors in multiplayer games because
+			// their binary representation and thus the hash would be different.
+			double d;
+			d = val.toNumber();
+			i32 integer;
+
+			if (JS_DoubleIsInt32(d, &integer))
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_INT);
+				m_Serializer.NumberI32_Unbounded("value", integer);
+			}
+			else
+			{
+				m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_DOUBLE);
+				m_Serializer.NumberDouble_Unbounded("value", d);
+			}
+			break;
+		}
+	case JSTYPE_BOOLEAN:
+		{
+			m_Serializer.NumberU8_Unbounded("type", SCRIPT_TYPE_BOOLEAN);
+			bool b = val.toBoolean();
+			m_Serializer.NumberU8_Unbounded("value", b ? 1 : 0);
+			break;
+		}
+	default:
+		{
+			debug_warn(L"Invalid TypeOfValue");
+			throw PSERROR_Serialize_InvalidScriptValue();
+		}
+	}
+}
+
+void CHashSerializerScriptImpl::ScriptString(const ScriptRequest& rq, const char* name, JS::HandleString string)
+{
+#if BYTE_ORDER != LITTLE_ENDIAN
+#error TODO: probably need to convert JS strings to little-endian
+#endif
+
+	size_t length;
+	JS::AutoCheckCannotGC nogc;
+	// Serialize strings directly as UTF-16 or Latin1, to avoid expensive encoding conversions
+	u8 isLatin1 = JS::StringHasLatin1Chars(string);
+	// Save this as u8 as we have a fast-path.
+	m_Serializer.NumberU8_Unbounded("isLatin1", isLatin1);
+	if (isLatin1)
+	{
+		const JS::Latin1Char* chars = JS_GetLatin1StringCharsAndLength(rq.cx, nogc, string, &length);
+		if (!chars)
+			throw PSERROR_Serialize_ScriptError("JS_GetLatin1StringCharsAndLength failed");
+		m_Serializer.NumberU32_Unbounded("string length", (u32)length);
+		m_Serializer.RawBytes(name, (const u8*)chars, length);
+	}
+	else
+	{
+		const char16_t* chars = JS_GetTwoByteStringCharsAndLength(rq.cx, nogc, string, &length);
+
+		if (!chars)
+			throw PSERROR_Serialize_ScriptError("JS_GetTwoByteStringCharsAndLength failed");
+		m_Serializer.NumberU32_Unbounded("string length", (u32)length);
+		m_Serializer.RawBytes(name, (const u8*)chars, length*2);
+	}
 }

@@ -55,6 +55,34 @@ enum
 	SCRIPT_TYPED_ARRAY_UINT8_CLAMPED = 8
 };
 
+inline u8 GetArrayType(js::Scalar::Type arrayType)
+{
+	switch(arrayType)
+	{
+	case js::Scalar::Int8:
+		return SCRIPT_TYPED_ARRAY_INT8;
+	case js::Scalar::Uint8:
+		return SCRIPT_TYPED_ARRAY_UINT8;
+	case js::Scalar::Int16:
+		return SCRIPT_TYPED_ARRAY_INT16;
+	case js::Scalar::Uint16:
+		return SCRIPT_TYPED_ARRAY_UINT16;
+	case js::Scalar::Int32:
+		return SCRIPT_TYPED_ARRAY_INT32;
+	case js::Scalar::Uint32:
+		return SCRIPT_TYPED_ARRAY_UINT32;
+	case js::Scalar::Float32:
+		return SCRIPT_TYPED_ARRAY_FLOAT32;
+	case js::Scalar::Float64:
+		return SCRIPT_TYPED_ARRAY_FLOAT64;
+	case js::Scalar::Uint8Clamped:
+		return SCRIPT_TYPED_ARRAY_UINT8_CLAMPED;
+	default:
+		LOGERROR("Cannot serialize unrecognized typed array view: %d", static_cast<int>(arrayType));
+		throw PSERROR_Serialize_InvalidScriptValue();
+	}
+}
+
 struct SPrototypeSerialization
 {
 	std::string name = "";

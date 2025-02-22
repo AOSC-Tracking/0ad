@@ -21,6 +21,7 @@
 #include "BinarySerializer.h"
 
 #include "maths/MD5.h"
+#include "scriptinterface/ScriptRequest.h"
 
 class CHashSerializerImpl
 {
@@ -42,7 +43,30 @@ private:
 	u8 m_HashData[HashFunc::DIGESTSIZE];
 };
 
-class CHashSerializer : public CBinarySerializer<CHashSerializerImpl>
+/**
+ * PutScriptVal implementation details.
+ * (Split out from the main class because it's too big to be inlined.)
+ */
+class CHashSerializerScriptImpl
+{
+public:
+	CHashSerializerScriptImpl(const ScriptInterface& scriptInterface, ISerializer& serializer);
+
+	void ScriptString(const ScriptRequest& rq, const char* name, JS::HandleString string);
+	void PutScriptVal(JS::HandleValue val);
+private:
+	void HandleScriptVal(const ScriptRequest& rq, JS::HandleValue val);
+
+	const ScriptInterface& m_ScriptInterface;
+	ScriptRequest m_Request;
+	ISerializer& m_Serializer;
+
+	JS::PropertyKey m_SerializePropId;
+	JS::PropertyKey m_DeserializePropId;
+};
+
+
+class CHashSerializer : public CBinarySerializer<CHashSerializerImpl, CHashSerializerScriptImpl>
 {
 public:
 	CHashSerializer(const ScriptInterface& scriptInterface);
