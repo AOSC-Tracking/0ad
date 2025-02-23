@@ -1,0 +1,80 @@
+---
+name: pre-commit
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  branches:
+    - main
+env:
+  # yamllint disable-line rule:line-length
+  NIGHTLY_SVN_URL: ${{ vars.NIGHTLY_SVN_URL || "https://svn.wildfiregames.com/nightly-build/trunk" }}
+  NIGHTLY_SVN_DIR: ${{ vars.NIGHTLY_SVN_DIR || "nightly-build" }}
+jobs:
+  update-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          key: pip-cache-v1-${{ github.workflow }}
+          path: ~/.cache/pip
+      - name: install subversion
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update
+          apt-get install -qy subversion
+      - name: install Python dependencies
+        run: pip install ./source/tools/i18n/requirements.txt
+      - name: get translators.json from nightly-build SVN repository
+          svn export --force \
+            "$NIGHTLY_SVN_URL/binaries/data/mods/public/gui/credits/texts/translators.json" \
+            ./binaries/data/mods/public/gui/credits/texts/translators.json
+      - name: update the PO templates
+        run: ./source/tools/i18n/update_templates.py
+      - name: get translations from Transifex
+        run: TX_TOKEN=${{ secrets.TX_TOKEN }} ./source/tools/i18n/pull_translations.py
+      - name: generate long translation
+        run: ./source/tools/i18n/generate_debug_translation_files.py --long
+      - name: clean translation files
+        run: ./source/tools/i18n/clean_translation_files.py
+      - name: create translator credits
+        run: ./source/tools/i18n/credit_translators.py
+      - name: check translations
+        run: ./source/tools/i18n/check_translations.py || true
+      - name: create a sparse checkout of the translations from the nightly-build SVN repository
+        run: |
+          svn checkout --depth=empty "$NIGHTLY_SVN_URL" "$RUNNER_TEMP/$NIGHTLY_SVN_DIR"
+          svn update --set-depth empty "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries"
+          svn update --set-depth empty "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data"
+          svn update --set-depth infinity "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/l10n"
+          svn update --set-depth empty "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods"
+          svn update --set-depth empty "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/mod"
+          svn update --set-depth infinity \
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/mod/l10n"
+          svn update --set-depth empty "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/public"
+          svn update --set-depth infinity \
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/public/l10n"
+      - name: copy translations and translator credits from Git to SVN checkout
+        run: |
+          cp -r binaries/data/l10n "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/l10n"
+          cp -r binaries/data/mods/mod/l10n \
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/mod/l10n"
+          cp -r binaries/data/mods/public/l10n \
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/public/l10n"
+          cp -r binaries/data/mods/public/gui/credits/texts/translators.json \
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR/binaries/data/mods/public/gui/credits/texts/translators.json"
+      - name: diff the translations and omit unimportant changes
+        run: ./source/tools/i18n/check_diff.py --checkout-dir "$RUNNER_TEMP/$NIGHTLY_SVN_DIR"
+      - name: commit updated translations to SVN
+        run: |
+          svn add --force $RUNNER_TEMP/$NIGHTLY_SVN_DIR
+          svn commit \
+            --username "${{ secrets.SVNUSER }}" \
+            --password "${{ secrets.SVNPASS }}" \
+            --no-auth-cache \
+            --non-interactive \
+            --message "Nightly translation update"\
+            "$RUNNER_TEMP/$NIGHTLY_SVN_DIR"

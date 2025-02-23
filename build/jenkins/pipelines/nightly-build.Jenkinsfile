@@ -32,7 +32,6 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'NEW_REPO', defaultValue: false, description: 'If a brand new nightly repo is being generated, do not attempt to identify unchanged translations.')
         stashedFile(name: 'spirv_rules', description: 'rules.json file for generation of SPIR-V shaders. Needed for a new repo, else the existing rules files will be used. Uploading a new rules file will force-rebuild the shaders.')
     }
 
@@ -106,7 +105,6 @@ pipeline {
                     /XD %NIGHTLY_PATH%\\binaries\\data\\mods\\mod\\shaders\\spirv ^
                     /XD %NIGHTLY_PATH%\\binaries\\data\\mods\\public\\shaders\\spirv ^
                     /XF %NIGHTLY_PATH%\\source\\tools\\spirv\\rules.json ^
-                    /XF %NIGHTLY_PATH%\\binaries\\data\\mods\\public\\gui\\credits\\texts\\translators.json ^
                 /MIR /NDL /NJH /NJS /NP /NS /NC) ^& IF %ERRORLEVEL% LEQ 1 exit 0
                 '''
                 bat '''
@@ -141,25 +139,6 @@ pipeline {
                     bat 'del /s /q binaries\\data\\mods\\public\\shaders\\spirv'
                     bat 'python source/tools/spirv/compile.py -d binaries/data/mods/mod binaries/data/mods/mod source/tools/spirv/rules.json binaries/data/mods/mod'
                     bat 'python source/tools/spirv/compile.py -d binaries/data/mods/mod binaries/data/mods/public source/tools/spirv/rules.json binaries/data/mods/public'
-                }
-            }
-        }
-
-        stage('Update translations') {
-            steps {
-                ws('workspace/nightly-svn') {
-                    bat 'cd source\\tools\\i18n && python update_templates.py'
-                    withCredentials([string(credentialsId: 'TX_TOKEN', variable: 'TX_TOKEN')]) {
-                        bat 'cd source\\tools\\i18n && python pull_translations.py'
-                    }
-                    bat 'cd source\\tools\\i18n && python generate_debug_translation.py --long'
-                    bat 'cd source\\tools\\i18n && python clean_translation_files.py'
-                    script {
-                        if (!params.NEW_REPO) {
-                            bat 'python source\\tools\\i18n\\check_diff.py --verbose'
-                        }
-                    }
-                    bat 'cd source\\tools\\i18n && python credit_translators.py'
                 }
             }
         }
