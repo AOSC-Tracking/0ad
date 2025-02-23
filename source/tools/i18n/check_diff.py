@@ -24,11 +24,11 @@ from itertools import islice
 from i18n_helper import PROJECT_ROOT_DIRECTORY
 
 
-def get_diff():
+def get_diff(checkout_dir):
     """Return a diff using svn diff."""
-    os.chdir(PROJECT_ROOT_DIRECTORY)
-
-    diff_process = subprocess.run(["svn", "diff", "binaries"], capture_output=True, check=False)
+    diff_process = subprocess.run(
+        ["svn", "diff", os.path.join(checkout_dir, "binaries")], capture_output=True, check=False
+    )
     if diff_process.returncode != 0:
         print(f"Error running svn diff: {diff_process.stderr.decode('utf-8')}. Exiting.")
         return None
@@ -84,7 +84,7 @@ def check_diff(diff: io.StringIO) -> list[str]:
     return list(files.difference(keep))
 
 
-def revert_files(files: list[str], verbose=False):
+def revert_files(checkout_dir, files: list[str], verbose=False):
     def batched(iterable, n):
         """Split an iterable in equally sized chunks.
 
@@ -96,8 +96,9 @@ def revert_files(files: list[str], verbose=False):
 
     errors = []
     for batch in batched(files, 100):
+        files_in_batch = [os.path.join(checkout_dir, f) for f in batch]
         revert_process = subprocess.run(
-            ["svn", "revert", *batch], capture_output=True, check=False
+            ["svn", "revert", *files_in_batch], capture_output=True, check=False
         )
         if revert_process.returncode != 0:
             errors.append(revert_process.stderr.decode())
@@ -111,9 +112,11 @@ def revert_files(files: list[str], verbose=False):
         print("\n".join(errors))
 
 
-def add_untracked(verbose=False):
+def add_untracked(checkout_dir, verbose=False):
     """Add untracked .po files to svn."""
-    diff_process = subprocess.run(["svn", "st", "binaries"], capture_output=True, check=False)
+    diff_process = subprocess.run(
+        ["svn", "st", os.path.join(checkout_dir, "binaries")], capture_output=True, check=False
+    )
     if diff_process.stderr != b"":
         print(f"Error running svn st: {diff_process.stderr.decode('utf-8')}. Exiting.")
         return
@@ -127,7 +130,9 @@ def add_untracked(verbose=False):
         if not file.endswith(".po") and not file.endswith(".pot"):
             continue
         add_process = subprocess.run(
-            ["svn", "add", file, "--parents"], capture_output=True, check=False
+            ["svn", "add", os.path.join(checkout_dir, file), "--parents"],
+            capture_output=True,
+            check=False,
         )
         if add_process.stderr != b"":
             print(f"Warning: file {file} could not be added.")
@@ -139,8 +144,14 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--checkout-dir",
+        help="Location of the SVN working copy.",
+        action="store_true",
+        default=PROJECT_ROOT_DIRECTORY,
+    )
     parser.add_argument("--verbose", help="Print reverted files.", action="store_true")
     args = parser.parse_args()
-    need_revert = check_diff(get_diff())
-    revert_files(need_revert, args.verbose)
-    add_untracked(args.verbose)
+    need_revert = check_diff(get_diff(args.checkout_dir))
+    revert_files(args.checkout_dir, need_revert, args.verbose)
+    add_untracked(args.checkout_dir, args.verbose)
