@@ -117,7 +117,7 @@ else
 	elseif string.find(machine, "ppc64") == 1 or string.find(machine, "powerpc64") == 1 then
 		arch = "ppc64"
 	else
-		print("WARNING: Cannot determine architecture from GCC, assuming x86")
+		arch = "generic"
 	end
 end
 
@@ -919,6 +919,8 @@ function setup_all_libs ()
 		table.insert(source_dirs, "lib/sysdep/arch/e2k");
 	elseif arch == "ppc64" then
 		table.insert(source_dirs, "lib/sysdep/arch/ppc64");
+	else
+		table.insert(source_dirs, "lib/sysdep/arch/generic");
 	end
 
 	-- OS-specific
@@ -1130,6 +1132,9 @@ function setup_main_exe ()
 			links {
 				-- Dynamic libraries (needed for linking for gold)
 				"dl",
+				-- boost lockfree algorithms cause references, satisfy them
+				-- <https://github.com/scylladb/seastar/issues/530#issuecomment-2679517925>
+				"atomic",
 			}
 		end
 
