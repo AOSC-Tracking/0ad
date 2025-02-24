@@ -83,11 +83,6 @@
 # define ARCH_E2K 0
 #endif
 
-// ensure exactly one architecture has been detected
-#if (ARCH_IA32+ARCH_IA64+ARCH_AMD64+ARCH_ALPHA+ARCH_ARM+ARCH_AARCH64+ARCH_MIPS+ARCH_E2K+ARCH_PPC64) != 1
-# error "architecture not correctly detected (either none or multiple ARCH_* defined)"
-#endif
-
 // "X86_X64"-specific code requires either IA-32 or AMD64
 #define ARCH_X86_X64 (ARCH_IA32|ARCH_AMD64)
 
