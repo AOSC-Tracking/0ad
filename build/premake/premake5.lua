@@ -114,8 +114,6 @@ else
 		arch = "aarch64"
 	elseif string.find(machine, "e2k") == 1 then
 		arch = "e2k"
-	elseif string.find(machine, "ppc64") == 1 or string.find(machine, "powerpc64") == 1 then
-		arch = "ppc64"
 	else
 		arch = "generic"
 	end
