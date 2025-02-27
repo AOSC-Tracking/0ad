@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
+import logging
 import sys
 from os import chdir
 from pathlib import Path
 from re import split
 from subprocess import run
 
-from scriptlib import SimulTemplateEntity, find_files, warn
+from scriptlib import SimulTemplateEntity, find_files
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def find_entities(vfs_root):
@@ -19,12 +24,13 @@ def find_entities(vfs_root):
 def main():
     vfs_root = Path(__file__).resolve().parents[3] / "binaries" / "data" / "mods"
     simul_templates_path = Path("simulation/templates")
-    simul_template_entity = SimulTemplateEntity(vfs_root)
+    simul_template_entity = SimulTemplateEntity(vfs_root, logger)
     with open("creation.dot", "w", encoding="utf-8") as dot_f:
         dot_f.write("digraph G {\n")
         files = sorted(find_entities(vfs_root))
         for f in files:
-            if f.startswith("template_"):
+            # TODO: not sure if excluding "mixins/" is correct
+            if f.startswith(("template_", "mixins/")):
                 continue
             print(f"# {f}...")
             entity = simul_template_entity.load_inherited(simul_templates_path, f, ["public"])
@@ -40,7 +46,7 @@ def main():
                 builders = split(r"\s+", entities.strip())
                 for builder in builders:
                     if Path(builder) in files:
-                        warn(f"Invalid Builder reference: {f} -> {builder}")
+                        logger.warning("Invalid Builder reference: %s -> %s", f, builder)
                     dot_f.write(f'"{f}" -> "{builder}" [color=green];\n')
             if (
                 entity.find("TrainingQueue") is not None
@@ -54,13 +60,15 @@ def main():
                 training_queues = split(r"\s+", entities.strip())
                 for training_queue in training_queues:
                     if Path(training_queue) in files:
-                        warn(f"Invalid TrainingQueue reference: {f} -> {training_queue}")
+                        logger.warning(
+                            "Invalid TrainingQueue reference: %s -> %s", f, training_queue
+                        )
                     dot_f.write(f'"{f}" -> "{training_queue}" [color=blue];\n')
         dot_f.write("}\n")
     if run(["dot", "-V"], capture_output=True, check=False).returncode == 0:
         sys.exit(
             run(
-                ["dot", "-Tpng", "creation.dot", "-o", "creation.png"], text=True, check=False
+                ["dot", "-Tsvg", "creation.dot", "-o", "creation.svg"], text=True, check=False
             ).returncode
         )
 
