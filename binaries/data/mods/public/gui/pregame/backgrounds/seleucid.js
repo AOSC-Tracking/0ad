@@ -1,17 +1,27 @@
 g_BackgroundLayerData.push(
 	[
 		{
-			"offset": (time, width) => 0.05 * width * Math.cos(0.02 * time),
+			"animation": {
+				"relativeDistance": 0.1,
+				"duration": 60
+			},
 			"sprite": "background-seleucid1_1",
 			"tiling": true,
 		},
 		{
-			"offset": (time, width) => 0.10 * width * Math.cos(0.04 * time),
+			"animation": {
+				"relativeDistance": 0.2,
+				"duration": 60
+			},
 			"sprite": "background-seleucid1_2",
 			"tiling": true,
 		},
 		{
-			"offset": (time, width) => 0.17 * width * Math.cos(0.05 * time) + width / 8,
+			"animation": {
+				"relativeDistance": 0.34,
+				"duration": 60
+			},
+			"relativeHorizontalOffset": 0.125,
 			"sprite": "background-seleucid1_3",
 			"tiling": false,
 		},

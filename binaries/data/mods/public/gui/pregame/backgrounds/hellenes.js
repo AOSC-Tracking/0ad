@@ -1,17 +1,28 @@
 g_BackgroundLayerData.push(
 	[
 		{
-			"offset": (time, width) => 0.02 * width * Math.cos(0.05 * time),
+			"animation": {
+				"relativeDistance": 0.04,
+				"duration": 60
+			},
 			"sprite": "background-hellenes1-1",
 			"tiling": true,
 		},
 		{
-			"offset": (time, width) => 0.12 * width * Math.cos(0.05 * time) - width / 10,
+			"animation": {
+				"relativeDistance": 0.24,
+				"duration": 60
+			},
+			"relativeHorizontalOffset": -0.1,
 			"sprite": "background-hellenes1-2",
 			"tiling": false,
 		},
 		{
-			"offset": (time, width) => 0.16 * width * Math.cos(0.05 * time) + width / 4,
+			"animation": {
+				"relativeDistance": 0.32,
+				"duration": 60
+			},
+			"relativeHorizontalOffset": 0.25,
 			"sprite": "background-hellenes1-3",
 			"tiling": false,
 		},

@@ -1,7 +1,7 @@
 /**
  * This class is extended in subclasses.
  * Each subclass represents one button in the session menu.
- * All subclasses  store the button member so that mods can change it easily.
+ * All subclasses store the button member so that mods can change it easily.
  */
 class MenuButtons
 {

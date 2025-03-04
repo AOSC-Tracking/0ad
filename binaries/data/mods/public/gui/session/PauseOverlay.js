@@ -28,10 +28,27 @@ class PauseOverlay
 
 	rebuild()
 	{
-		let hidden = !this.pauseControl.explicitPause && !this.pauseControl.pausingClients.length || g_Disconnected;
-		this.pauseOverlay.hidden = hidden;
-		if (hidden)
+		let isPaused = !this.pauseControl.explicitPause && !this.pauseControl.pausingClients.length || g_Disconnected;
+		if (isPaused)
+		{
+			if (!this.pauseOverlay.hidden)
+			{
+				this.pauseOverlay.hidden = true;
+				GuiAnimator.animateObjectProperties("blackOverlay",
+					{ "color": { "a": 0 } },
+					{ "duration": this.FadingDuration, "curve": "ease-in-out-subtle" }
+				);
+			}
 			return;
+		}
+		else if (this.pauseOverlay.hidden)
+		{
+			this.pauseOverlay.hidden = false;
+			GuiAnimator.animateObjectProperties("blackOverlay",
+				{ "color": { "a": this.TargetOpacity } },
+				{ "duration": this.FadingDuration, "curve": "ease-in-out-subtle" }
+			);
+		}
 
 		this.resumeMessage.hidden = !this.pauseControl.explicitPause;
 
@@ -43,3 +60,7 @@ class PauseOverlay
 }
 
 PauseOverlay.prototype.PausedByCaption = markForTranslation("Paused by %(players)s");
+
+PauseOverlay.prototype.FadingDuration = 300;
+
+PauseOverlay.prototype.TargetOpacity = 185;

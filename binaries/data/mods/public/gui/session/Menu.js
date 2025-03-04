@@ -10,7 +10,6 @@ class Menu
 		registerHotkeyChangeHandler(this.rebuild.bind(this));
 
 		this.isOpen = false;
-		this.lastTick = undefined;
 
 		this.menuButtonPanel = Engine.GetGUIObjectByName("menuButtonPanel");
 		let menuButtons = this.menuButtonPanel.children;
@@ -29,11 +28,13 @@ class Menu
 			return handler;
 		});
 
-		this.endPosition = this.margin + this.buttonHeight * (1 + handlerNames.length);
+		this.topPanelHeight = Engine.GetGUIObjectByName("topPanel").size.bottom;
+		this.expansionDistance = this.margin + this.buttonHeight * (1 + handlerNames.length);
 		let size = this.menuButtonPanel.size;
-		size.top = -this.endPosition;
-		size.bottom = 0;
+		size.top = this.topPanelHeight - this.expansionDistance;
+		size.bottom = this.topPanelHeight;
 		this.menuButtonPanel.size = size;
+		this.menuButtonPanel.hidden = true;
 	}
 
 	rebuild()
@@ -53,20 +54,22 @@ class Menu
 
 	toggle()
 	{
-		this.isOpen = !this.isOpen;
-		this.startAnimation();
+		if (this.isOpen)
+			this.retract();
+		else
+			this.expand();
 	}
 
 	close()
 	{
-		this.isOpen = false;
-		this.startAnimation();
+		if(this.isOpen)
+			this.retract();
 	}
 
 	initButton(handler, button, i)
 	{
 		button.onPress = () => {
-			this.close();
+			this.retract();
 			handler.onPress();
 		};
 
@@ -78,42 +81,32 @@ class Menu
 		button.hidden = false;
 	}
 
-	startAnimation()
+	expand()
 	{
-		this.lastTick = Date.now();
-		this.menuButtonPanel.onTick = this.onTick.bind(this);
+		this.isOpen = true;
+		GuiAnimator.animateObjectProperties(this.menuButtonPanel, {
+			"size": {
+				"top": 0,
+				"bottom": this.expansionDistance
+			}
+		}, { "duration": this.AnimationDuration, "curve": "ease-out" },
+		{ "onStart": (() => { this.menuButtonPanel.hidden = false;} ).bind(this)})
 	}
 
-	/**
-	 * Animate menu panel.
-	 */
-	onTick()
+	retract()
 	{
-		let tickLength = Date.now() - this.lastTick;
-		this.lastTick = Date.now();
-
-		let maxOffset =
-			this.endPosition + (
-			this.isOpen ?
-				-this.menuButtonPanel.size.bottom :
-				+this.menuButtonPanel.size.top);
-
-
-		if (maxOffset <= 0)
-		{
-			delete this.menuButtonPanel.onTick;
-			return;
-		}
-
-		let offset = Math.min(this.Speed * tickLength, maxOffset) * (this.isOpen ? +1 : -1);
-		let size = this.menuButtonPanel.size;
-		size.top += offset;
-		size.bottom += offset;
-		this.menuButtonPanel.size = size;
+		this.isOpen = false;
+		GuiAnimator.animateObjectProperties(this.menuButtonPanel, {
+			"size": {
+				"top": this.topPanelHeight - this.expansionDistance,
+				"bottom": this.topPanelHeight
+			}
+		}, { "duration": this.AnimationDuration, "curve": "ease-out" },
+		{ "onComplete": (() => { this.menuButtonPanel.hidden = true;} ).bind(this)})
 	}
 }
 
 /**
- * Number of pixels per millisecond to move.
+ * Menu retraction and expansion time in milliseconds.
  */
-Menu.prototype.Speed = 1.2;
+Menu.prototype.AnimationDuration = 250;

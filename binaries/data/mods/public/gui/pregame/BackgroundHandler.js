@@ -5,10 +5,7 @@ class BackgroundHandler
 		this.backgroundLayers = layers.map((layer, i) =>
 			new BackgroundLayer(layer, i));
 
-		this.initTime = Date.now();
-
 		this.backgrounds = Engine.GetGUIObjectByName("backgrounds");
-		this.backgrounds.onTick = this.onTick.bind(this);
 		this.backgrounds.onWindowResized = this.onWindowResized.bind(this);
 		this.onWindowResized();
 	}
@@ -16,14 +13,9 @@ class BackgroundHandler
 	onWindowResized()
 	{
 		let size = this.backgrounds.getComputedSize();
-		this.backgroundsSize = deepfreeze(new GUISize(size.top, size.left, size.right, size.bottom));
-	}
-
-	onTick()
-	{
-		let time = Date.now() - this.initTime;
-		for (let background of this.backgroundLayers)
-			background.update(time, this.backgroundsSize);
+		this.windowSize = deepfreeze(new GUISize(size.top, size.left, size.right, size.bottom));
+		for (const layer of this.backgroundLayers)
+			layer.initializeAnimationCycle(this.windowSize);
 	}
 }
 
@@ -39,33 +31,43 @@ class BackgroundLayer
 		this.background.hidden = false;
 	}
 
-	update(time, backgroundsSize)
+	initializeAnimationCycle(windowSize)
 	{
-		let height = backgroundsSize.bottom - backgroundsSize.top;
-		let width = height * this.AspectRatio;
-		let offset = this.layer.offset(time / 1000, width);
+		if (!this.layer.animation)
+			return;
 
+		this.windowSize = windowSize;
+		const height = windowSize.bottom - windowSize.top;
+		const width = height * this.AspectRatio;
+		const distance = this.layer.animation.relativeDistance * width;
+		const offset = (this.layer.relativeHorizontalOffset || 0) * width;
+
+		const startingSize = Object.assign({}, windowSize);
+		const targetSize = Object.assign({}, windowSize);
 		if (this.layer.tiling)
 		{
-			let iw = height * 2;
-			let left = offset % iw;
-			if (left >= 0)
-				left -= iw;
-			this.background.size = new GUISize(
-				left,
-				backgroundsSize.top,
-				backgroundsSize.right,
-				backgroundsSize.bottom);
+			startingSize.left = offset;
+			targetSize.left = -Math.abs(distance) + offset;
 		}
 		else
 		{
-			let right = backgroundsSize.right / 2 + offset;
-			this.background.size = new GUISize(
-				right - height,
-				backgroundsSize.top,
-				right + height,
-				backgroundsSize.bottom);
+			const horizontalCenter = windowSize.right / 2;
+			const rightPosition = horizontalCenter + distance / 2 + offset;
+			const leftPosition = windowSize.right / 2 - distance / 2 + offset;
+			// The images have an aspect ratio of 2:1.
+			// And 'height' here stands for half their width.
+			startingSize.left = rightPosition - height;
+			startingSize.right = rightPosition + height;
+			targetSize.left = leftPosition - height;
+			targetSize.right = leftPosition + height;
 		}
+
+		this.background.size = new GUISize(startingSize.left, startingSize.top, startingSize.right, startingSize.bottom);
+
+		GuiAnimator.animateObjectPropertiesPeriodically(this.background,
+			{ "size": targetSize }, { "size": startingSize },
+			{ "duration": this.layer.animation.duration * 1000, "curve": "ease-in-out-subtle" },
+		);
 	}
 }
 

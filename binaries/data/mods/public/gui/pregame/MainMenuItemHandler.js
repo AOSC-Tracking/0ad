@@ -21,7 +21,10 @@ class MainMenuItemHandler
 		this.setupMenuButtons(this.mainMenuButtons.children, this.menuItems);
 		this.setupHotkeys(this.menuItems);
 
-		Engine.GetGUIObjectByName("closeMenuButton").onPress = this.closeSubmenu.bind(this);
+		Engine.GetGUIObjectByName("closeMenuButton").onPress = (() => {
+			if (!this.submenu.hidden)
+				this.retractSubmenu();
+		}).bind(this);
 	}
 
 	setupMenuButtons(buttons, menuItems)
@@ -53,16 +56,19 @@ class MainMenuItemHandler
 	pressButton(item, i)
 	{
 		if (this.submenu.hidden)
-		{
 			this.performButtonAction(item, i);
-		}
 		else
 		{
-			this.closeSubmenu();
 			if (this.lastOpenItem && this.lastOpenItem != item)
+			{
+				this.hideSubmenu();
 				this.performButtonAction(item, i);
+			}
 			else
+			{
+				this.retractSubmenu();
 				this.lastOpenItem = undefined;
+			}
 		}
 	}
 
@@ -86,7 +92,7 @@ class MainMenuItemHandler
 			let item = menuItems[i];
 			if (item.onPress && item.hotkey)
 				Engine.SetGlobalHotkey(item.hotkey, "Press", () => {
-					this.closeSubmenu();
+					this.hideSubmenu();
 					item.onPress();
 				});
 
@@ -105,6 +111,13 @@ class MainMenuItemHandler
 			this.submenu.size.left, top - this.Margin,
 			this.submenu.size.right, top + (this.ButtonHeight + this.Margin) * this.menuItems[i].submenu.length);
 
+		const submenuWidth = this.mainMenu.size.right - this.submenu.size.left;
+		GuiAnimator.animateObjectProperties(this.submenu, {
+			"size": {
+				"left": this.submenu.size.left + submenuWidth,
+				"right": this.submenu.size.right + submenuWidth
+			}}, { "duration": this.SubmenuAnimationDuration, "curve": "ease-out" });
+
 		this.submenu.hidden = false;
 
 		{
@@ -119,45 +132,35 @@ class MainMenuItemHandler
 			size.top = this.submenu.size.bottom;
 			this.MainMenuPanelRightBorderBottom.size = size;
 		}
-
-		// Start animation
-		this.lastTickTime = Date.now();
-		this.mainMenu.onTick = this.onTick.bind(this);
 	}
 
-	closeSubmenu()
+	hideSubmenu()
 	{
+		GuiAnimator.revertLastAnimationsOnObject(this.submenu);
 		this.submenu.hidden = true;
-		this.submenu.size = this.mainMenu.size;
+	}
 
+	retractSubmenu()
+	{
+		GuiAnimator.animateObjectProperties(this.submenu, {
+			"size": {
+				"left": this.mainMenu.size.left,
+				"right": this.mainMenu.size.right
+			} },
+			{ "duration": this.SubmenuAnimationDuration, "curve": "ease-out"},
+			{ "onComplete": (() => {
+				this.submenu.hidden = true;
+				this.mendRightBorder(); }).bind(this) }
+		);
+	}
+
+	mendRightBorder()
+	{
 		let size = this.MainMenuPanelRightBorderTop.size;
 		size.top = 0;
 		size.bottom = 0;
 		size.rbottom = 100;
 		this.MainMenuPanelRightBorderTop.size = size;
-	}
-
-	onTick()
-	{
-		let now = Date.now();
-		if (now == this.lastTickTime)
-			return;
-
-		let maxOffset = this.mainMenu.size.right - this.submenu.size.left;
-		let offset = Math.min(this.MenuSpeed * (now - this.lastTickTime), maxOffset);
-
-		this.lastTickTime = now;
-
-		if (this.submenu.hidden || !offset)
-		{
-			delete this.mainMenu.onTick;
-			return;
-		}
-
-		let size = this.submenu.size;
-		size.left += offset;
-		size.right += offset;
-		this.submenu.size = size;
 	}
 }
 
@@ -172,6 +175,6 @@ MainMenuItemHandler.prototype.ButtonHeight = 28;
 MainMenuItemHandler.prototype.Margin = 4;
 
 /**
- * Collapse / expansion speed in pixels per milliseconds used when animating the button menu size.
+ * Submenu retraction and expansion time in milliseconds.
  */
-MainMenuItemHandler.prototype.MenuSpeed = 1.2;
+MainMenuItemHandler.prototype.SubmenuAnimationDuration = 250

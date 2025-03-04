@@ -21,7 +21,8 @@ class PanelEntity
 		 */
 		this.orderKey = orderKey;
 
-		this.overlayName = "panelEntityHitOverlay[" + buttonID + "]";
+		this.blinkingAnimation = new PanelEntityBlinking("panelEntityHitOverlay[" + buttonID + "]", this.BlinkingColors.gray, this.BlinkingColors.red, this.BlinkingFrequency);
+
 		this.panelEntityHealthBar = Engine.GetGUIObjectByName("panelEntityHealthBar[" + buttonID + "]");
 		this.panelEntityCaptureBar = Engine.GetGUIObjectByName("panelEntityCapture[" + buttonID + "]");
 		this.panelEntButton = Engine.GetGUIObjectByName("panelEntityButton[" + buttonID + "]");
@@ -51,14 +52,13 @@ class PanelEntity
 	destroy()
 	{
 		this.panelEntButton.hidden = true;
-		stopColorFade(this.overlayName);
+		this.blinkingAnimation.stop();
 	}
 
-	update(i, reposition)
+	update(i, total, reposition)
 	{
-		// TODO: Instead of instant position changes, animate button movement.
 		if (reposition)
-			setPanelObjectPosition(this.panelEntButton, i, Infinity);
+			this.reposition(i, total);
 
 		let entityState = GetEntityState(this.entityID);
 		this.updateHitpointsBar(entityState);
@@ -67,6 +67,20 @@ class PanelEntity
 		this.panelEntButton.tooltip =
 			this.nameTooltip +
 			this.Tooltips.map(tooltip => tooltip(entityState)).filter(tip => tip).join("\n");
+	}
+
+	reposition(i)
+	{
+		const margin = 1;
+		let newSize = this.panelEntButton.size;
+		const width = newSize.right - newSize.left;
+		newSize.left = i * (width + margin) + margin;
+		newSize.right = newSize.left + width;
+
+		GuiAnimator.animateObjectProperties(this.panelEntButton,
+			{ "size": newSize },
+			{ "delay": i * this.SlideTime / 3, "duration": this.SlideTime, "curve": "ease-in-out-moderate" }
+		);
 	}
 
 	updateHitpointsBar(entityState)
@@ -115,7 +129,7 @@ class PanelEntity
 
 	onAttacked()
 	{
-		startColorFade(this.overlayName, 100, 0, colorFade_attackUnit, true, smoothColorFadeRestart_attackUnit);
+		this.blinkingAnimation.start();
 	}
 
 	onPress()
@@ -144,3 +158,21 @@ PanelEntity.prototype.Tooltips = [
 	getEntityTooltip,
 	getAurasTooltip
 ];
+
+/**
+ * The two colors oscillated back and forth when blinking.
+ */
+PanelEntity.prototype.BlinkingColors = {
+	"red": { "r": 175, "g": 0, "b": 0, "a": 100 },
+	"gray": { "r": 175, "g": 255, "b": 255, "a": 100 }
+};
+
+/**
+ * Time between two "blinks" in milliseconds.
+ */
+PanelEntity.prototype.BlinkingFrequency = 500;
+
+/**
+ * Duration of the repositioning animation in milliseconds.
+ */
+PanelEntity.prototype.SlideTime = 500;

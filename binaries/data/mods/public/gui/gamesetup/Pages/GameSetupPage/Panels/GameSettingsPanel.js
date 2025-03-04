@@ -14,9 +14,7 @@ class GameSettingsPanel
 
 		this.settingsPanel = Engine.GetGUIObjectByName("settingsPanel");
 
-		this.enabled = Engine.ConfigDB_GetValue("user", this.ConfigNameSlide) == "true";
-		this.slideSpeed = this.enabled ? this.SlideSpeed : Infinity;
-		this.lastTickTime = undefined;
+		this.isSlidingEnabled = Engine.ConfigDB_GetValue("user", this.ConfigNameSlide) == "true";
 
 		gameSettingTabs.registerTabSelectHandler(this.updateSize.bind(this));
 		setupWindow.controls.gameSettingsController.registerUpdateLayoutHandler(this.updateSize.bind(this));
@@ -45,59 +43,32 @@ class GameSettingsPanel
 		this.gameSettingControlManager.updateSettingVisibility();
 		this.positionSettings();
 
-		this.lastTickTime = undefined;
-		this.settingsPanelFrame.onTick = this.onTick.bind(this);
-	}
-
-	onTick()
-	{
-		let now = Date.now();
-		let tickLength = now - this.lastTickTime;
-		let previousTime = this.lastTickTime;
-		this.lastTickTime = now;
-		if (previousTime === undefined)
-			return;
-
-		const distance = this.slideSpeed * (tickLength || 1);
-		let rightBorder = this.settingTabButtonsFrame.size.left;
-		let offset = 0;
+		let targetSize = this.settingsPanelFrame.size;
+		const width = targetSize.right - targetSize.left;
 		if (g_TabCategorySelected === undefined)
 		{
-			let maxOffset = rightBorder - this.settingsPanelFrame.size.left;
-			if (maxOffset > 0)
-				offset = Math.min(distance, maxOffset);
-		}
-		else if (rightBorder > this.settingsPanelFrame.size.right)
-		{
-			offset = Math.min(distance, rightBorder - this.settingsPanelFrame.size.right);
+			targetSize.left = this.settingTabButtonsFrame.size.left;
+			targetSize.right = targetSize.left + width;
 		}
 		else
 		{
-			let maxOffset = this.settingsPanelFrame.size.left - rightBorder + (this.settingsPanelFrame.size.right - this.settingsPanelFrame.size.left);
-			if (maxOffset > 0)
-				offset = -Math.min(distance, maxOffset);
+			targetSize.right = this.settingTabButtonsFrame.size.left;
+			targetSize.left = targetSize.right - width;
 		}
 
-		if (offset)
-			this.changePanelWidth(offset);
-		else
-		{
-			delete this.settingsPanelFrame.onTick;
-			this.lastTickTime = undefined;
-		}
-	}
+		const difference = Math.abs(this.settingsPanelFrame.size.left - targetSize.left);
 
-	changePanelWidth(offset)
-	{
-		if (!offset)
+		if (difference === 0)
 			return;
 
-		let size = this.settingsPanelFrame.size;
-		size.left += offset;
-		size.right += offset;
-		this.settingsPanelFrame.size = size;
-
-		this.triggerResizeHandlers();
+		if (this.isSlidingEnabled)
+			GuiAnimator.animateObjectProperties(this.settingsPanelFrame,
+				{ "size": targetSize },
+				{ "curve": "ease-out", "duration": difference / this.AverageSlideSpeed},
+				{ "onTick": (() => { this.triggerResizeHandlers(); }).bind(this)}
+			);
+		else
+			this.settingsPanelFrame.size = targetSize;
 	}
 
 	/**
@@ -168,9 +139,9 @@ GameSettingsPanel.prototype.ConfigNameSlide =
 GameSettingsPanel.prototype.MaxColumnWidth = 470;
 
 /**
- * Pixels per millisecond the settings panel slides when opening/closing.
+ * Speed of the settings panel's  horizontal sliding animation in pixels per millisecond.
  */
-GameSettingsPanel.prototype.SlideSpeed = 1.2;
+GameSettingsPanel.prototype.AverageSlideSpeed = 1.2;
 
 /**
  * Vertical size of a setting frame.
