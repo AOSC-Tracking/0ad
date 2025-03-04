@@ -1,9 +1,4 @@
 /**
- * Used to highlight hotkeys in tooltip descriptions.
- */
-var g_HotkeyTags = { "color": "255 251 131" };
-
-/**
  * Concatenate integer color values to a string (for use in GUI objects)
  *
  * @param {Object} color
@@ -25,7 +20,7 @@ function rgbToGuiColor(color, alpha)
 
 function guiToRgbColor(string)
 {
-	let color = string.split(" ");
+	let color = string.trim().split(/\s+/);
 	if (color.length != 3 && color.length != 4 ||
 	    color.some(num => !Number.isInteger(+num) || num < 0 || num > 255))
 		return undefined;
@@ -34,7 +29,7 @@ function guiToRgbColor(string)
 		"r": +color[0],
 		"g": +color[1],
 		"b": +color[2],
-		"a": color.length == 4 ? +color[3] : undefined
+		"a": color.length == 4 ? +color[3] : 255
 	};
 }
 
@@ -168,33 +163,4 @@ function hslToRgb(h, s, l)
 	}
 
 	return [r, g, b].map(n => Math.round(n * 255));
-}
-
-function colorizeHotkey(text, hotkey)
-{
-	// TODO: Be more efficient in retrieving the mapping(s) for a specific hotkey
-	let key = Engine.GetHotkeyMap()[hotkey];
-
-	if (!key)
-		key = sprintf(translate("Unassigned hotkey: %(hotkeyName)s"), {
-			"hotkeyName": hotkey
-		});
-	else
-		key = formatHotkeyCombinations(key);
-
-	return sprintf(text, {
-		"hotkey": setStringTags("\\[" + key + "]", g_HotkeyTags)
-	});
-}
-
-/**
- * The autocomplete hotkey is hardcoded in SDLK_TAB of CInput.cpp,
- * as we don't want hotkeys interfering with typing text.
- */
-function colorizeAutocompleteHotkey(string)
-{
-	return sprintf(string || translate("Press %(hotkey)s to autocomplete player names."), {
-		"hotkey":
-			setStringTags("\\[" + translateWithContext("hotkey", "Tab") + "]", g_HotkeyTags)
-	});
 }
