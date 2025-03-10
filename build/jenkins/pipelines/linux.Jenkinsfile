@@ -132,6 +132,15 @@ pipeline {
 						}
 					}
 				}
+
+				post {
+					always {
+						// This is a workaround for an infrastructure bug where git touches
+						// all files upon checkout, preventing incremental builds.
+						// The root issue has not been pinpointed yet, see #7699
+						sh "git update-index --really-refresh"
+					}
+				}
 			}
 
 			post {
