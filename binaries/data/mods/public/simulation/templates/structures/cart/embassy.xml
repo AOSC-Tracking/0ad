@@ -15,6 +15,7 @@
   </Health>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Ḥaṣēr</SpecificName>
     <GenericName>Embassy</GenericName>
     <Tooltip>Train Mercenaries.</Tooltip>
     <Icon>structures/embassy_italic.png</Icon>

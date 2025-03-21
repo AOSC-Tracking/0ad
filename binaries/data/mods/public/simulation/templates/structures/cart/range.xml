@@ -2,6 +2,7 @@
 <Entity parent="template_structure_military_range">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Maḥanēt ki Qēštim</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/carthaginians/range.xml</Actor>

@@ -2,8 +2,8 @@
 <Entity parent="hoplite|spec_champ|template_unit_champion_infantry_spearman">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Bin Qart-ḥadašt</SpecificName>
     <GenericName>Sacred Band Infantry</GenericName>
-    <SpecificName>Sacred Band of Ba'al</SpecificName>
     <Icon>units/cart/champion_infantry.png</Icon>
   </Identity>
   <VisualActor>

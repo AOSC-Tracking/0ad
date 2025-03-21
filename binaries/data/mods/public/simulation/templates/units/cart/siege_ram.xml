@@ -2,6 +2,7 @@
 <Entity parent="template_unit_siege_ram">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>ʾAyl</SpecificName>
     <Icon>units/iber/siege_ram.png</Icon>
   </Identity>
   <VisualActor>

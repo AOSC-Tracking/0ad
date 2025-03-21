@@ -7,7 +7,8 @@
   <GarrisonHolder disable=""/>
   <Identity>
     <Civ>brit</Civ>
-    <SpecificName>Uffington White Horse</SpecificName>
+    <GenericName>Uffington White Horse</GenericName>
+    <SpecificName>Equus Albus</SpecificName>
   </Identity>
   <Obstruction>
     <Static width="60.0" depth="30.0"/>

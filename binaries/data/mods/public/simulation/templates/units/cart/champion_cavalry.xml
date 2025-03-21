@@ -2,8 +2,8 @@
 <Entity parent="spec_champ|template_unit_champion_cavalry_spearman">
   <Identity>
     <Civ>cart</Civ>
-    <GenericName>Sacred Band Cavalry</GenericName>
-    <SpecificName>Sacred Band of Astarte</SpecificName>
+    <SpecificName>ʾAṣīl</SpecificName>
+    <GenericName>Noble Cavalry</GenericName>
     <Icon>units/cart/champion_cavalry.png</Icon>
     <Requirements>
       <Techs datatype="tokens">phase_city -unlock_champion_cavalry</Techs>

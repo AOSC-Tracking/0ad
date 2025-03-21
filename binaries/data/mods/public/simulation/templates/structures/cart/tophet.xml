@@ -15,8 +15,8 @@
   </Health>
   <Identity>
     <Civ>cart</Civ>
-    <GenericName>Sacrificial Temple</GenericName>
-    <SpecificName>Tophet</SpecificName>
+    <SpecificName>Bēt-mulk</SpecificName>
+    <GenericName>Tophet</GenericName> 
   </Identity>
   <Loot>
     <stone>40</stone>

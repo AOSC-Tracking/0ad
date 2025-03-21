@@ -2,6 +2,7 @@
 <Entity parent="template_structure_military_arsenal">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Sadnā</SpecificName>
   </Identity>
   <VisualActor>
     <Actor>structures/carthaginians/workshop.xml</Actor>

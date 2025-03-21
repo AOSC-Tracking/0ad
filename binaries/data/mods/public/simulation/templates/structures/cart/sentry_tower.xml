@@ -2,6 +2,7 @@
 <Entity parent="template_structure_defensive_tower_sentry">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Migdal</SpecificName>
   </Identity>
   <VisualActor>
     <FoundationActor>structures/carthaginians/fndn_wooden_tower.xml</FoundationActor>

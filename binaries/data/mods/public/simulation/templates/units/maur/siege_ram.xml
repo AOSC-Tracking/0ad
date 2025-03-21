@@ -6,6 +6,7 @@
   </Footprint>
   <Identity>
     <Civ>maur</Civ>
+    <SpecificName>Bhedakāstra</SpecificName>
     <Icon>units/maur/siege_ram.png</Icon>
   </Identity>
   <VisualActor>
