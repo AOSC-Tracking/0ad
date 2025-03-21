@@ -37,7 +37,7 @@
   <Identity>
     <Civ>cart</Civ>
     <GenericName>Naval Shipyard</GenericName>
-    <SpecificName>Cothon</SpecificName>
+    <SpecificName>Kōthōn</SpecificName>
     <Tooltip>Build upon a shoreline in own, neutral, or allied territory. Acquire large tracts of territory. Territory root. Construct Warships and research technologies.</Tooltip>
     <Classes datatype="tokens">ConquestCritical CivSpecific</Classes>
     <VisibleClasses datatype="tokens">Naval Shipyard</VisibleClasses>
