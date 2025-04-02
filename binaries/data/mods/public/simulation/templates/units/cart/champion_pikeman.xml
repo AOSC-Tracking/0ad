@@ -2,8 +2,8 @@
 <Entity parent="template_unit_champion_infantry_pikeman">
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Mašāl</SpecificName>
     <GenericName>Sacred Band Pikeman</GenericName>
-    <SpecificName>Mašal</SpecificName>
     <Icon>units/cart/champion_infantry.png</Icon>
   </Identity>
   <VisualActor>

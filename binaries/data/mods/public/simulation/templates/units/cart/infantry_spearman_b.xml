@@ -11,8 +11,8 @@
   <Identity>
     <Civ>cart</Civ>
     <SelectionGroupName>units/cart/infantry_spearman_b</SelectionGroupName>
+    <SpecificName>Sēḥīr Ḥanīt</SpecificName>
     <GenericName>Libyan Spearman</GenericName>
-    <SpecificName>Sǝḫīr Ḥanīt</SpecificName>
     <Icon>units/cart/infantry_spearman.png</Icon>
   </Identity>
   <Promotion>

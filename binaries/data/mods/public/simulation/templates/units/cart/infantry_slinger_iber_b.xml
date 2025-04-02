@@ -10,8 +10,8 @@
   </Builder>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Qallāʿ Ibūšimi</SpecificName>
     <GenericName>Balearic Slinger</GenericName>
-    <SpecificName>Qallāʿ Ibušimi</SpecificName>
     <SelectionGroupName>units/cart/infantry_slinger_iber_b</SelectionGroupName>
     <Icon>units/cart/infantry_slinger.png</Icon>
     <Requirements>

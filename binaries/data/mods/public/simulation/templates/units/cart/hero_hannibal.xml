@@ -5,8 +5,8 @@
   </Auras>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Ḥanībaʿal Baraq</SpecificName>
     <GenericName>Hannibal Barca</GenericName>
-    <SpecificName>Ḥannibaʿal Baraq</SpecificName>
     <Icon>units/cart/hero_hannibal.png</Icon>
   </Identity>
   <VisualActor>

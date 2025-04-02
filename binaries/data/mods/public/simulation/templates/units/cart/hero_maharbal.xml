@@ -5,8 +5,8 @@
   </Auras>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Mahārbaʿal</SpecificName>
     <GenericName>Maharbal</GenericName>
-    <SpecificName>Maharbaʿal</SpecificName>
     <Icon>units/cart/hero_maharbal.png</Icon>
   </Identity>
   <VisualActor>

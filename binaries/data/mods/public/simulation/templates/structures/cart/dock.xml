@@ -14,8 +14,8 @@
   </Health>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Lamēn</SpecificName>
     <GenericName>Commercial Port</GenericName>
-    <SpecificName>Namel</SpecificName>
   </Identity>
   <Loot>
     <wood>30</wood>

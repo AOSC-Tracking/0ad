@@ -10,8 +10,8 @@
   </Builder>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Sēḥīr Kidōn</SpecificName>
     <GenericName>Iberian Mercenary Skirmisher</GenericName>
-    <SpecificName>Sǝḫīr Kidōn</SpecificName>
     <SelectionGroupName>units/cart/infantry_javelineer_iber_b</SelectionGroupName>
     <Icon>units/cart/infantry_javelinist.png</Icon>
     <Requirements>

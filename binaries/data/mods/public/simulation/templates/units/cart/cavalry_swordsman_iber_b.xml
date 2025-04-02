@@ -7,8 +7,8 @@
   </Attack>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Ḥayyāl ʾIvēr Raḥūv</SpecificName>
     <GenericName>Iberian Heavy Cavalry</GenericName>
-    <SpecificName>Ḥayyāl Ḥerev Raḫūv</SpecificName>
     <SelectionGroupName>units/cart/cavalry_swordsman_iber_b</SelectionGroupName>
     <Icon>units/cart/cavalry_swordsman.png</Icon>
     <Requirements>

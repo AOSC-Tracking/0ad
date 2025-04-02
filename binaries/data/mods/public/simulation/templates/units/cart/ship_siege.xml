@@ -2,7 +2,7 @@
 <Entity parent="template_unit_ship_warship_siege">
   <Identity>
     <Civ>cart</Civ>
-    <SpecificName>Ḥameš-Mašōt</SpecificName>
+    <SpecificName>Ḥamēš-Mašōt</SpecificName>
     <Icon>units/cart/ship_siege.png</Icon>
   </Identity>
   <VisualActor>

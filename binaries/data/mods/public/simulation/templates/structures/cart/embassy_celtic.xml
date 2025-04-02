@@ -14,7 +14,8 @@
   </Health>
   <Identity>
     <Civ>cart</Civ>
-    <SpecificName>Celtic Embassy</SpecificName>
+    <SpecificName>Šipr Galiḥ</SpecificName>
+    <GenericName>Celtic Embassy</GenericName>
     <Tooltip>Train Celtic Mercenaries.</Tooltip>
     <Classes datatype="tokens">CivSpecific</Classes>
     <Icon>structures/embassy_celtic.png</Icon>

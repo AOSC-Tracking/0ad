@@ -10,8 +10,8 @@
   </Builder>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Sēḥīr Rōmaḥ</SpecificName>
     <GenericName>Samnite Swordsman</GenericName>
-    <SpecificName>Seḫīr Romaḥ</SpecificName>
     <SelectionGroupName>units/cart/infantry_swordsman_ital_b</SelectionGroupName>
     <Icon>units/cart/infantry_swordsman_2.png</Icon>
     <Requirements>

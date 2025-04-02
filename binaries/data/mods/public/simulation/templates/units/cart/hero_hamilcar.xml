@@ -11,8 +11,8 @@
   </Auras>
   <Identity>
     <Civ>cart</Civ>
+    <SpecificName>Ḥamīlqart Baraq</SpecificName>
     <GenericName>Hamilcar Barca</GenericName>
-    <SpecificName>Ḥimelqart Baraq</SpecificName>
     <Icon>units/cart/hero_hamilcar.png</Icon>
   </Identity>
   <VisualActor>
