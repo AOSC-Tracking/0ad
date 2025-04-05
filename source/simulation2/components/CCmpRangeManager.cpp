@@ -42,7 +42,15 @@
 #include "lib/timer.h"
 #include "ps/CLogger.h"
 #include "ps/Profile.h"
+#include "ps/TaskManager.h"
 #include "renderer/Scene.h"
+
+#include <deque>
+#include <mutex>
+#include <utility>
+#include <optional>
+#include <atomic>
+#include <tuple>
 
 #define DEBUG_RANGE_MANAGER_BOUNDS 0
 
@@ -388,7 +396,20 @@ public:
 	EntityMap<EntityData> m_EntityData;
 
 	FastSpatialSubdivision m_Subdivision; // spatial index of m_EntityData
+	
+	// For memory reuse, keep vectors around.
+	std::deque<std::tuple<
+		tag_t, std::reference_wrapper<Query>,
+		std::optional<std::pair<entity_id_t, CMessageRangeUpdate>>>
+	> m_WorkQueue;
 	std::vector<entity_id_t> m_SubdivisionResults;
+	struct QueryWorkerData {
+		std::vector<entity_id_t> results;
+		std::vector<entity_id_t> added;
+		std::vector<entity_id_t> removed;
+		std::vector<entity_id_t> subdivResults;
+	};
+	std::vector<QueryWorkerData> m_QueryWorkerData;
 
 	// LOS state:
 	static const player_id_t MAX_LOS_PLAYER_ID = 16;
@@ -449,8 +470,6 @@ public:
 		// Initialise with bogus values (these will get replaced when
 		// SetBounds is called)
 		ResetSubdivisions(entity_pos_t::FromInt(1024), entity_pos_t::FromInt(1024));
-
-		m_SubdivisionResults.reserve(4096);
 
 		// The whole map should be visible to Gaia by default, else e.g. animals
 		// will get confused when trying to run from enemies
@@ -997,7 +1016,7 @@ public:
 	{
 		Query q = ConstructQuery(INVALID_ENTITY, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize);
 		std::vector<entity_id_t> r;
-		PerformQuery(q, r, pos);
+		PerformQuery(m_SubdivisionResults, q, r, pos);
 
 		// Return the list sorted by distance from the entity
 		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos));
@@ -1023,7 +1042,7 @@ public:
 		}
 
 		CFixedVector2D pos = cmpSourcePosition->GetPosition2D();
-		PerformQuery(q, r, pos);
+		PerformQuery(m_SubdivisionResults, q, r, pos);
 
 		// Return the list sorted by distance from the entity
 		std::stable_sort(r.begin(), r.end(), EntityDistanceOrdering(m_EntityData, pos));
@@ -1056,7 +1075,7 @@ public:
 		}
 
 		CFixedVector2D pos = cmpSourcePosition->GetPosition2D();
-		PerformQuery(q, r, pos);
+		PerformQuery(m_SubdivisionResults, q, r, pos);
 
 		q.lastMatch = r;
 
@@ -1110,55 +1129,90 @@ public:
 	{
 		PROFILE3("ExecuteActiveQueries");
 
-		// Store a queue of all messages before sending any, so we can assume
-		// no entities will move until we've finished checking all the ranges
-		std::vector<std::pair<entity_id_t, CMessageRangeUpdate> > messages;
-		std::vector<entity_id_t> results;
-		std::vector<entity_id_t> added;
-		std::vector<entity_id_t> removed;
+		// Prepare the work queue
+		m_WorkQueue.clear();
+		for (auto& [tag, query] : m_Queries)
+			if (query.enabled)
+				m_WorkQueue.emplace_back(tag, std::ref(query), std::nullopt);
 
-		for (std::map<tag_t, Query>::iterator it = m_Queries.begin(); it != m_Queries.end(); ++it)
+		if (m_WorkQueue.empty())
+			return;
+
+		// Create tasks for parallel processing with work stealing
+		std::vector<Future<void>> futures;
+		std::atomic<size_t> nextWorkIndex{0};
+
+		// Have at least one worker
+		size_t numWorkers = std::max(g_TaskManager.GetNumberOfWorkers(), 1ul);
+		m_QueryWorkerData.resize(numWorkers);
+
+		for (size_t i = 0; i < numWorkers; ++i)
 		{
-			Query& query = it->second;
+			futures.push_back(g_TaskManager.PushTask([&, i]() {
+				PROFILE2("ExecuteActiveQueries: worker");
 
-			if (!query.enabled)
-				continue;
+				auto& results = m_QueryWorkerData[i].results;
+				auto& added = m_QueryWorkerData[i].added;
+				auto& removed = m_QueryWorkerData[i].removed;
 
-			results.clear();
-			CmpPtr<ICmpPosition> cmpSourcePosition(query.source);
-			if (cmpSourcePosition && cmpSourcePosition->IsInWorld())
-			{
-				results.reserve(query.lastMatch.size());
-				PerformQuery(query, results, cmpSourcePosition->GetPosition2D());
-			}
+				while (true)
+				{
+					// Get next work item atomically
+					size_t currentIndex = nextWorkIndex.fetch_add(1, std::memory_order_relaxed);
+					if (currentIndex >= m_WorkQueue.size())
+						break;
 
-			// Compute the changes vs the last match
-			added.clear();
-			removed.clear();
-			// Return the 'added' list sorted by distance from the entity
-			// (Don't bother sorting 'removed' because they might not even have positions or exist any more)
-			std::set_difference(results.begin(), results.end(), query.lastMatch.begin(), query.lastMatch.end(),
-				std::back_inserter(added));
-			std::set_difference(query.lastMatch.begin(), query.lastMatch.end(), results.begin(), results.end(),
-				std::back_inserter(removed));
-			if (added.empty() && removed.empty())
-				continue;
+					auto& [tag, queryRef, resultMsg] = m_WorkQueue[currentIndex];
+					Query& query = queryRef.get();
 
-			if (cmpSourcePosition && cmpSourcePosition->IsInWorld())
-				std::stable_sort(added.begin(), added.end(), EntityDistanceOrdering(m_EntityData, cmpSourcePosition->GetPosition2D()));
+					CmpPtr<ICmpPosition> cmpSourcePosition(query.source);
+					if (!cmpSourcePosition || !cmpSourcePosition->IsInWorld())
+						continue;
 
-			messages.resize(messages.size() + 1);
-			std::pair<entity_id_t, CMessageRangeUpdate>& back = messages.back();
-			back.first = query.source.GetId();
-			back.second.tag = it->first;
-			back.second.added.swap(added);
-			back.second.removed.swap(removed);
-			query.lastMatch.swap(results);
+					results.clear();
+					results.reserve(query.lastMatch.size());
+					PerformQuery(m_QueryWorkerData[i].subdivResults, query, results, cmpSourcePosition->GetPosition2D());
+
+					added.clear();
+					removed.clear();
+
+					// Compute the changes vs the last match
+					std::set_difference(results.begin(), results.end(), 
+						query.lastMatch.begin(), query.lastMatch.end(),
+						std::back_inserter(added));
+
+					std::set_difference(query.lastMatch.begin(), query.lastMatch.end(), 
+						results.begin(), results.end(),
+						std::back_inserter(removed));
+
+					if (!added.empty() || !removed.empty())
+					{
+						if (cmpSourcePosition && cmpSourcePosition->IsInWorld())
+							std::stable_sort(added.begin(), added.end(), 
+								EntityDistanceOrdering(m_EntityData, cmpSourcePosition->GetPosition2D()));
+
+						// Store result in the m_WorkQueue
+						CMessageRangeUpdate msg;
+						msg.tag = tag;
+						msg.added = added;
+						msg.removed = removed;
+						resultMsg = std::make_pair(query.source.GetId(), msg);
+					}
+
+					query.lastMatch.swap(results);
+				}
+			}));
 		}
 
+		// Wait for all tasks to complete
+		for (auto& future : futures)
+			future.Get();
+
+		// Send all messages in original order
 		CComponentManager& cmpMgr = GetSimContext().GetComponentManager();
-		for (size_t i = 0; i < messages.size(); ++i)
-			cmpMgr.PostMessage(messages[i].first, messages[i].second);
+		for (const auto& [tag, queryRef, resultMsg] : m_WorkQueue)
+			if (resultMsg)
+				cmpMgr.PostMessage(resultMsg->first, resultMsg->second);
 	}
 
 	/**
@@ -1192,9 +1246,8 @@ public:
 	/**
 	 * Returns a list of distinct entity IDs that match the given query, sorted by ID.
 	 */
-	void PerformQuery(const Query& q, std::vector<entity_id_t>& r, CFixedVector2D pos)
+	void PerformQuery(std::vector<entity_id_t>& results, const Query& q, std::vector<entity_id_t>& r, CFixedVector2D pos)
 	{
-
 		// Special case: range is ALWAYS_IN_RANGE means check all entities ignoring distance.
 		if (q.maxRange == ALWAYS_IN_RANGE)
 		{
@@ -1205,6 +1258,7 @@ public:
 
 				r.push_back(it->first);
 			}
+			// No need to sort, the order is already guaranteed to be sorted by ID.
 		}
 		// Not the entire world, so check a parabolic range, or a regular range.
 		else if (q.parabolic)
@@ -1214,18 +1268,18 @@ public:
 			CFixedVector3D pos3d = cmpSourcePosition->GetPosition()+
 			    CFixedVector3D(entity_pos_t::Zero(), q.yOrigin, entity_pos_t::Zero()) ;
 			// Get a quick list of entities that are potentially in range, with a cutoff of 2*maxRange.
-			m_SubdivisionResults.clear();
-			m_Subdivision.GetNear(m_SubdivisionResults, pos, q.maxRange * 2);
+			results.clear();
+			m_Subdivision.GetNear(results, pos, q.maxRange * 2);
 
-			for (size_t i = 0; i < m_SubdivisionResults.size(); ++i)
+			for (size_t i = 0; i < results.size(); ++i)
 			{
-				EntityMap<EntityData>::const_iterator it = m_EntityData.find(m_SubdivisionResults[i]);
+				EntityMap<EntityData>::const_iterator it = m_EntityData.find(results[i]);
 				ENSURE(it != m_EntityData.end());
 
 				if (!TestEntityQuery(q, it->first, it->second))
 					continue;
 
-				CmpPtr<ICmpPosition> cmpSecondPosition(GetSimContext(), m_SubdivisionResults[i]);
+				CmpPtr<ICmpPosition> cmpSecondPosition(GetSimContext(), results[i]);
 				if (!cmpSecondPosition || !cmpSecondPosition->IsInWorld())
 					continue;
 				CFixedVector3D secondPosition = cmpSecondPosition->GetPosition();
@@ -1253,12 +1307,12 @@ public:
 		else
 		{
 			// Get a quick list of entities that are potentially in range
-			m_SubdivisionResults.clear();
-			m_Subdivision.GetNear(m_SubdivisionResults, pos, q.maxRange);
+			results.clear();
+			m_Subdivision.GetNear(results, pos, q.maxRange);
 
-			for (size_t i = 0; i < m_SubdivisionResults.size(); ++i)
+			for (size_t i = 0; i < results.size(); ++i)
 			{
-				EntityMap<EntityData>::const_iterator it = m_EntityData.find(m_SubdivisionResults[i]);
+				EntityMap<EntityData>::const_iterator it = m_EntityData.find(results[i]);
 				ENSURE(it != m_EntityData.end());
 
 				if (!TestEntityQuery(q, it->first, it->second))
