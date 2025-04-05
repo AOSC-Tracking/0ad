@@ -95,14 +95,15 @@ bool CComponentManager::DumpDebugState(std::ostream& stream, bool includeDebugIn
 	return true;
 }
 
-bool CComponentManager::ComputeStateHash(std::string& outHash, bool quick) const
+bool CComponentManager::ComputeStateHash(std::string& outHash, u32 turn) const
 {
+	PROFILE3("ComputeStateHash");
 	// Hash serialization: this includes the minimal data necessary to detect
 	// differences in the state, and ignores things like counts and names
 
-	// If 'quick' is set, this checks even fewer things, so that it will
-	// be fast enough to run every turn but will typically detect any
-	// out-of-syncs fairly soon
+	// If turn == 0, do a full state hash to check for errors
+	// Otherwise check a subset of entities based on the turn number
+	// Always check the position component as it's very fast to do and detects some OOS very early.
 
 	CHashSerializer serializer(m_ScriptInterface);
 
@@ -112,31 +113,22 @@ bool CComponentManager::ComputeStateHash(std::string& outHash, bool quick) const
 	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator cit = m_ComponentsByTypeId.begin();
 	for (; cit != m_ComponentsByTypeId.end(); ++cit)
 	{
-		// In quick mode, only check unit positions
-		if (quick && !(cit->first == CID_Position))
+		// Iterating over components is quite slow, so reduce overhead by skipping some every turn.
+		if (turn != 0 && cit->first != CID_Position && (turn + cit->first) % 3 != 0)
 			continue;
 
-		// Only emit component types if they have a component that will be serialized
-		bool needsSerialization = false;
+		serializer.NumberI32_Unbounded("component type id", cit->first);
+
+		u32 loopCounter = 0;
 		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities
 			if (ENTITY_IS_LOCAL(eit->first))
 				continue;
 
-			needsSerialization = true;
-			break;
-		}
-
-		if (!needsSerialization)
-			continue;
-
-		serializer.NumberI32_Unbounded("component type id", cit->first);
-
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
-		{
-			// Don't serialize local entities
-			if (ENTITY_IS_LOCAL(eit->first))
+			// For non-zero turns, only check entities whose ID matches the turn pattern
+			// We complete a full check every 30 turns (3*10)
+			if (turn != 0 && cit->first != CID_Position && (loopCounter++ + turn) % 10 != 0)
 				continue;
 
 			serializer.NumberU32_Unbounded("entity id", eit->first);

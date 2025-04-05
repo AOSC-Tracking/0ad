@@ -76,11 +76,10 @@ void CReplayTurnManager::NotifyFinishedUpdate(u32 turn)
 		return;
 
 	std::string expectedHash = turnHashIt->second.first;
-	bool quickHash = turnHashIt->second.second;
 
 	// Compute hash
 	std::string hash;
-	ENSURE(m_Simulation2.ComputeStateHash(hash, quickHash));
+	ENSURE(m_Simulation2.ComputeStateHash(hash, turn));
 	hash = Hexify(hash);
 
 	if (hash == expectedHash)
