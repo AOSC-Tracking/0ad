@@ -62,6 +62,12 @@ namespace JSI_Sound
 			sndManager->StartPlayList(looping );
 	}
 
+	void InterruptPlayListWith(const std::wstring& filename)
+	{
+		if (CSoundManager* sndManager = (CSoundManager*)g_SoundManager)
+            sndManager->InterruptPlayListWith(VfsPath(filename));
+	}
+
 	void PlayMusic(const std::wstring& filename, bool looping)
 	{
 		if (CSoundManager* sndManager = (CSoundManager*)g_SoundManager)
@@ -123,6 +129,7 @@ namespace JSI_Sound
 	void PlayMusic(const std::wstring& UNUSED(filename), bool UNUSED(looping) ) {}
 	void StartPlaylist(bool UNUSED(looping) ){}
 	void AddPlaylistItem(const std::wstring& UNUSED(filename) ){}
+	void InterruptPlayListWith(const std::wstring& UNUSED(filename) ){}
 	void ClearPlaylist( ){}
 	void StopMusic( ){}
 	void StartMusic( ){}
@@ -141,6 +148,7 @@ namespace JSI_Sound
 		ScriptFunction::Register<&ClearPlaylist>(rq, "ClearPlaylist");
 		ScriptFunction::Register<&AddPlaylistItem>(rq, "AddPlaylistItem");
 		ScriptFunction::Register<&StartPlaylist>(rq, "StartPlaylist");
+		ScriptFunction::Register<&InterruptPlayListWith>(rq, "InterruptPlayListWith");
 		ScriptFunction::Register<&PlayMusic>(rq, "PlayMusic");
 		ScriptFunction::Register<&PlayUISound>(rq, "PlayUISound");
 		ScriptFunction::Register<&PlayAmbientSound>(rq, "PlayAmbientSound");

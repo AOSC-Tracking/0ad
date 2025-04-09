@@ -128,11 +128,13 @@ Music.prototype.updateState = function()
 			break;
 
 		case this.states.VICTORY:
-			this.startPlayList(shuffleArray(this.tracks.VICTORY), 2.0, true);
+			this.startPlayList(shuffleArray(this.tracks.PEACE), 3.0, true);
+			Engine.InterruptPlayListWith(this.RELATIVE_MUSIC_PATH + shuffleArray(this.tracks.VICTORY)[0]);
 			break;
 
 		case this.states.DEFEAT:
-			this.startPlayList(shuffleArray(this.tracks.DEFEAT), 2.0, true);
+			Engine.ClearPlaylist();
+			Engine.InterruptPlayListWith(this.RELATIVE_MUSIC_PATH + shuffleArray(this.tracks.DEFEAT)[0]);
 			break;
 
 		case this.states.CUSTOM:

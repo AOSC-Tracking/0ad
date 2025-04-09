@@ -69,6 +69,7 @@ protected:
 	std::mutex m_DistressMutex;
 	PlayList* m_PlayListItems;
 	SoundGroupMap m_SoundGroups;
+	std::vector<VfsPath> m_SavedPlayList;
 
 	float m_Gain;
 	float m_MusicGain;
@@ -87,6 +88,9 @@ protected:
 	bool m_RunningPlaylist;
 	bool m_PlayingPlaylist;
 	bool m_LoopingPlaylist;
+	bool m_Interrupting;
+	bool m_InterruptedPlaylistActive;
+	bool m_InterruptedPlaylistLoop;
 
 	long m_PlaylistGap;
 	long m_DistressErrCount;
@@ -109,6 +113,7 @@ public:
 	void ClearPlayListItems();
 	void StartPlayList(bool doLoop);
 	void AddPlayListItem(const VfsPath& itemPath);
+	void InterruptPlayListWith(const VfsPath& trackPath);
 
 	static void CreateSoundManager();
 	static void SetEnabled(bool doEnable);

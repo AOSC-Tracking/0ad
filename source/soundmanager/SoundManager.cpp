@@ -237,7 +237,7 @@ Status CSoundManager::ReloadChangedFiles(const VfsPath& UNUSED(path))
 CSoundManager::CSoundManager(ALCdevice* device)
 	: m_Context(nullptr), m_Device(device), m_ALSourceBuffer(nullptr),
 	m_CurrentTune(nullptr), m_CurrentEnvirons(nullptr),
-	m_Worker(nullptr), m_DistressMutex(), m_PlayListItems(nullptr), m_SoundGroups(),
+	m_Worker(nullptr), m_DistressMutex(), m_PlayListItems(nullptr), m_SoundGroups(), m_SavedPlayList(),
 	m_Gain{g_ConfigDB.Get("sound.mastergain", 0.5f)},
 	m_MusicGain{g_ConfigDB.Get("sound.musicgain", 0.5f)},
 	m_AmbientGain{g_ConfigDB.Get("sound.ambientgain", 0.5f)},
@@ -247,6 +247,7 @@ CSoundManager::CSoundManager(ALCdevice* device)
 	m_SoundEnabled(true), m_MusicEnabled(true), m_MusicPaused(false),
 	m_AmbientPaused(false), m_ActionPaused(false),
 	m_RunningPlaylist(false), m_PlayingPlaylist(false), m_LoopingPlaylist(false),
+	m_Interrupting(false), m_InterruptedPlaylistActive(false), m_InterruptedPlaylistLoop(false),
 	m_PlaylistGap(0), m_DistressErrCount(0), m_DistressTime(0)
 {
 	AlcInit();
@@ -480,6 +481,38 @@ void CSoundManager::StartPlayList(bool doLoop)
 	}
 }
 
+void CSoundManager::InterruptPlayListWith(const VfsPath& trackPath)
+{
+	if (!m_Enabled || !m_MusicEnabled)
+		return;
+
+    if (m_Interrupting)
+    {
+        // If another interrupt was in progress, just cancel it and replace it with the new one
+        m_Interrupting = false;
+    }
+    else
+    {
+        // Save old playlist state, so we can restore it
+        m_InterruptedPlaylistActive = m_PlayingPlaylist;
+        m_InterruptedPlaylistLoop = m_LoopingPlaylist;
+        m_SavedPlayList.clear();
+        if (m_PlayListItems && !m_PlayListItems->empty())
+            m_SavedPlayList.assign(m_PlayListItems->begin(), m_PlayListItems->end());
+    }
+
+    // Clear out the current playlist (this also stops the current tune)
+    ClearPlayListItems();
+
+    // Replace it with a single-track "interrupt playlist"
+    AddPlayListItem(trackPath);
+    StartPlayList(false);
+
+    // Mark we are in interrupt mode
+    m_Interrupting = true;
+}
+
+
 void CSoundManager::SetMasterGain(float gain)
 {
 	if (m_Enabled)
@@ -557,48 +590,83 @@ ISoundItem* CSoundManager::ItemForData(CSoundData* itemData)
 
 void CSoundManager::IdleTask()
 {
-	if (m_Enabled)
+	if (!m_Enabled)
+		return;
+
+	if (m_CurrentTune)
 	{
-		if (m_CurrentTune)
+		m_CurrentTune->EnsurePlay();
+		if (m_PlayingPlaylist && m_RunningPlaylist && m_CurrentTune->Finished())
 		{
-			m_CurrentTune->EnsurePlay();
-			if (m_PlayingPlaylist && m_RunningPlaylist)
+			if (m_PlaylistGap == 0)
 			{
-				if (m_CurrentTune->Finished())
+				m_PlaylistGap = timer_Time() + 15;
+			}
+			else if (m_PlaylistGap < timer_Time())
+			{
+				m_PlaylistGap = 0;
+				PlayList::iterator it = std::find(
+					m_PlayListItems->begin(), m_PlayListItems->end(), m_CurrentTune->GetName()
+				);
+				if (it != m_PlayListItems->end())
 				{
-					if (m_PlaylistGap == 0)
+					++it;
+					if (it == m_PlayListItems->end())
 					{
-						m_PlaylistGap = timer_Time() + 15;
-					}
-					else if (m_PlaylistGap < timer_Time())
-					{
-						m_PlaylistGap = 0;
-						PlayList::iterator it = find(m_PlayListItems->begin(), m_PlayListItems->end(), m_CurrentTune->GetName());
-						if (it != m_PlayListItems->end())
+						if (m_LoopingPlaylist)
 						{
-							++it;
-
-							Path nextPath;
-							if (it == m_PlayListItems->end())
-								nextPath = m_PlayListItems->at(0);
-							else
-								nextPath = *it;
-
-							ISoundItem* aSnd = LoadItem(nextPath);
-							if (aSnd)
+							// Loop to first track
+							Path nextPath = m_PlayListItems->at(0);
+							if (ISoundItem *aSnd = LoadItem(nextPath))
 								SetMusicItem(aSnd);
 						}
+						else
+						{
+							// End the playlist
+							SetMusicItem(NULL);
+						}
+					}
+					else
+					{
+						// There's a next track
+						Path nextPath = *it;
+						if (ISoundItem* aSnd = LoadItem(nextPath))
+							SetMusicItem(aSnd);
 					}
 				}
 			}
 		}
-
-		if (m_CurrentEnvirons)
-			m_CurrentEnvirons->EnsurePlay();
-
-		if (m_Worker)
-			m_Worker->CleanupItems();
 	}
+
+	// If we are in the middle of an interrupt, check if the single-track playlist is done,
+	// i.e. if m_CurrentTune has become NULL or is finished with no next track.
+	// If so, restore the old playlist.
+	if (m_Interrupting && !m_CurrentTune)
+	{
+		// The interrupt single track is no longer playing.
+		m_Interrupting = false;
+
+		// If a playlist was active before, restore it.
+		if (m_InterruptedPlaylistActive && !m_SavedPlayList.empty())
+		{
+			ClearPlayListItems();
+			for (const VfsPath& p : m_SavedPlayList)
+				AddPlayListItem(p);
+
+			StartPlayList(m_InterruptedPlaylistLoop);
+		}
+
+		// Clear the flags
+		m_InterruptedPlaylistActive = false;
+		m_InterruptedPlaylistLoop   = false;
+		m_SavedPlayList.clear();
+	}
+
+	if (m_CurrentEnvirons)
+		m_CurrentEnvirons->EnsurePlay();
+
+	if (m_Worker)
+		m_Worker->CleanupItems();
 }
 
 ISoundItem*	CSoundManager::ItemForEntity(entity_id_t UNUSED(source), CSoundData* sndData)
