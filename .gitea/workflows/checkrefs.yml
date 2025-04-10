@@ -11,6 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+      - name: Add remote fork origin for LFS
+        run: |
+          PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
+          git remote add ${{ gitea.actor }} https://gitea.wildfiregames.com/${PR_REPO}.git
       - name: Workaround for authentication problem with LFS
         # https://gitea.com/gitea/act_runner/issues/164
         run: |
@@ -24,10 +28,6 @@ jobs:
           '${EXTRAHEADER}'
           git config --local \
           http.${{ gitea.server_url }}/${PR_REPO}.git/info/lfs/objects/.extraheader ''
-      - name: Add remote fork origin for LFS
-        run: |
-          PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
-          git remote add ${{ gitea.actor }} https://gitea.wildfiregames.com/${PR_REPO}.git
       - name: Download necessary LFS assets
         shell: sh {0}
         run: |
