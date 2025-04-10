@@ -13,9 +13,14 @@ jobs:
       - uses: actions/setup-python@v5
       - name: Workaround for authentication problem with LFS
         # https://gitea.com/gitea/act_runner/issues/164
-        run: >
-          git config --local
+        run: |
+          git config --local \
           http.${{ gitea.server_url }}/${{ gitea.repository }}.git/info/lfs/objects/.extraheader ''
+          PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
+          EXTRAHEADER="$(git config --get --local http.${{ gitea.server_url }}/.extraheader)"
+          git config --local \
+          http.${{ gitea.server_url }}/${PR_REPO}.git/info/lfs/objects/batch.extraheader \
+          '${EXTRAHEADER}'
       - name: Add remote fork origin for LFS
         run: |
           PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
