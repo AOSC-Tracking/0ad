@@ -416,7 +416,13 @@ PETRA.DiplomacyManager.prototype.handleDiplomacyRequest = function(gameState, pl
 		{
 			requiredTribute = gameState.ai.HQ.pickMostNeededResources(gameState, resTribCodes)[0];
 			response = "acceptWithTribute";
-			requiredTribute.wanted = Math.max(1000, gameState.getOwnUnits().length * (requestType === "ally" ? 10 : 5));
+
+			// Calculate tribute in multiples of 100 based on unit count and request type
+			const unitCount = gameState.getOwnUnits().length;
+			const unitBasedTribute = 100 * Math.round((50 + unitCount) / (requestType === "ally" ? 11 : 17));
+			const minimumTribute = requestType === "ally" ? 900 : 800;
+			requiredTribute.wanted = Math.max(minimumTribute, unitBasedTribute);
+
 			this.receivedDiplomacyRequests.set(player, {
 				"status": "waitingForTribute",
 				"wanted": requiredTribute.wanted,
