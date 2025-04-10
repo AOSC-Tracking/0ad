@@ -23,6 +23,7 @@ jobs:
           git remote add ${{ gitea.actor }} \
             git@gitea.wildfiregames.com:${{ gitea.actor }}/${{ gitea.head_ref }}.git
       - name: Download necessary LFS assets
+        shell: sh {0}
         run: |
           echo "test"
           git lfs pull -I binaries/data/mods/public/maps
