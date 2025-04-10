@@ -16,11 +16,14 @@ jobs:
         run: |
           git config --local \
           http.${{ gitea.server_url }}/${{ gitea.repository }}.git/info/lfs/objects/.extraheader ''
+
           PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
           EXTRAHEADER="$(git config --get --local http.${{ gitea.server_url }}/.extraheader)"
           git config --local \
           http.${{ gitea.server_url }}/${PR_REPO}.git/info/lfs/objects/batch.extraheader \
           '${EXTRAHEADER}'
+          git config --local \
+          http.${{ gitea.server_url }}/${PR_REPO}.git/info/lfs/objects/.extraheader ''
       - name: Add remote fork origin for LFS
         run: |
           PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
