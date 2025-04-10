@@ -35,10 +35,12 @@ jobs:
           ORIGIN_LFS_PULL_RESULT=$?
           git lfs pull ${{ gitea.actor }} -I binaries/data/mods/public/maps
           FORK_LFS_PULL_RESULT=$?
+
+          PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
           if [ "$ORIGIN_LFS_PULL_RESULT" = "0" ]; then
-            echo "SUCCESS: Found all LFS assets in origin LFS storage."
+            echo "SUCCESS: Found all LFS assets in the LFS storage of ${{ gitea.repository }}."
           elif [ "$FORK_LFS_PULL_RESULT" = "0" ]; then
-            echo "SUCCESS: Found all LFS assets in fork LFS storage."
+            echo "SUCCESS: Found all LFS assets in the LFS storage of ${PR_REPO}."
           else
             echo "ERROR: Couldn't find all LFS assets in neither of the LFS storages."
             false;
