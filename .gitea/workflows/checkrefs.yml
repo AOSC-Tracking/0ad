@@ -32,10 +32,15 @@ jobs:
         shell: sh {0}
         run: |
           git lfs pull -I binaries/data/mods/public/maps
-          UPSTREAM_LFS_PULL_RESULT=$?
+          ORIGIN_LFS_PULL_RESULT=$?
           git lfs pull ${{ gitea.actor }} -I binaries/data/mods/public/maps
           FORK_LFS_PULL_RESULT=$?
-          if [ "$UPSTREAM_LFS_PULL_RESULT" != "0" -a "$FORK_LFS_PULL_RESULT" != "0" ]; then
+          if [ "$ORIGIN_LFS_PULL_RESULT" = "0" ]; then
+            echo "SUCCESS: Found all LFS assets in origin LFS storage."
+          elif [ "$FORK_LFS_PULL_RESULT" = "0" ]; then
+            echo "SUCCESS: Found all LFS assets in fork LFS storage."
+          else
+            echo "ERROR: Couldn't find all LFS assets in neither of the LFS storages."
             false;
           fi
       - name: Install lxml
