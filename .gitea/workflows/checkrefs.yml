@@ -19,7 +19,7 @@ jobs:
       - name: Add remote fork origin for LFS
         run: |
           PR_REPO="${{ gitea.event.pull_request.head.repo.full_name || gitea.repository }}"
-          git remote add ${{ gitea.actor }} https://gitea.wildfiregames.com:${PR_REPO}.git
+          git remote add ${{ gitea.actor }} https://gitea.wildfiregames.com/${PR_REPO}.git
       - name: Download necessary LFS assets
         shell: sh {0}
         run: |
