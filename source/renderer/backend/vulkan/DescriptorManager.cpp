@@ -321,7 +321,7 @@ VkDescriptorSet CDescriptorManager::GetSingleTypeDescritorSet(
 	ENSURE(
 		type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER || type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC ||
 		type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER || type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC);
-	const VkPhysicalDeviceLimits& physicalDeviceLimits = m_Device->GetChoosenPhysicalDevice().properties.limits;
+	const VkPhysicalDeviceLimits& physicalDeviceLimits = m_Device->GetChosenPhysicalDevice().properties.limits;
 	const uint32_t maxBufferRange =
 		type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER || type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC
 		? physicalDeviceLimits.maxStorageBufferRange

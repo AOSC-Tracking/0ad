@@ -107,7 +107,7 @@ VkPipeline CGraphicsPipelineState::GetOrCreatePipeline(
 	PS::StaticVector<VkVertexInputBindingDescription, 16> attributeBindings;
 	PS::StaticVector<VkVertexInputAttributeDescription, 16> attributes;
 
-	const VkPhysicalDeviceLimits& limits = m_Device->GetChoosenPhysicalDevice().properties.limits;
+	const VkPhysicalDeviceLimits& limits = m_Device->GetChosenPhysicalDevice().properties.limits;
 	const uint32_t maxVertexInputAttributes = limits.maxVertexInputAttributes;
 	const uint32_t maxVertexInputAttributeOffset = limits.maxVertexInputAttributeOffset;
 	for (const SVertexAttributeFormat& vertexAttributeFormat : vertexInputLayout->GetAttributes())
@@ -203,7 +203,7 @@ VkPipeline CGraphicsPipelineState::GetOrCreatePipeline(
 	rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
 
 	const PolygonMode polygonMode =
-		m_Device->GetChoosenPhysicalDevice().features.fillModeNonSolid
+		m_Device->GetChosenPhysicalDevice().features.fillModeNonSolid
 			? m_Desc.rasterizationState.polygonMode : PolygonMode::FILL;
 	rasterizationStateCreateInfo.polygonMode =
 		Mapping::FromPolygonMode(polygonMode);

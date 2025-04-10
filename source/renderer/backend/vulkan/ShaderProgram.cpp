@@ -567,7 +567,7 @@ std::unique_ptr<CShaderProgram> CShaderProgram::Create(
 		shaderProgram->m_UniformMapping[shaderProgram->m_Uniforms[index].name] = index;
 	if (!shaderProgram->m_Uniforms.empty())
 	{
-		if (shaderProgram->m_MaterialConstantsDataSize > device->GetChoosenPhysicalDevice().properties.limits.maxUniformBufferRange)
+		if (shaderProgram->m_MaterialConstantsDataSize > device->GetChosenPhysicalDevice().properties.limits.maxUniformBufferRange)
 		{
 			LOGERROR("Uniform buffer size is too big for the device.");
 			return nullptr;

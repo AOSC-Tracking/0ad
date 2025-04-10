@@ -59,12 +59,12 @@ std::unique_ptr<CRingCommandContext> CRingCommandContext::Create(
 		new CRingCommandContext{device, submitScheduler}};
 
 	ringCommandContext->m_OptimalBufferCopyOffsetAlignment = std::max(
-		1u, static_cast<uint32_t>(device->GetChoosenPhysicalDevice().properties.limits.optimalBufferCopyOffsetAlignment));
+		1u, static_cast<uint32_t>(device->GetChosenPhysicalDevice().properties.limits.optimalBufferCopyOffsetAlignment));
 	// In case of small amount of host memory it's better to make uploading
 	// slower rather than crashing due to OOM, because memory for a
 	// staging buffer is allocated in the host memory.
 	ringCommandContext->m_MaxStagingBufferCapacity =
-		device->GetChoosenPhysicalDevice().hostTotalMemory <= SMALL_HOST_TOTAL_MEMORY_THRESHOLD
+		device->GetChosenPhysicalDevice().hostTotalMemory <= SMALL_HOST_TOTAL_MEMORY_THRESHOLD
 			? MAX_SMALL_STAGING_BUFFER_CAPACITY
 			: MAX_STAGING_BUFFER_CAPACITY;
 

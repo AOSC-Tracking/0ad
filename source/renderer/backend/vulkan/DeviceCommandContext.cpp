@@ -1137,7 +1137,7 @@ void CDeviceCommandContext::UpdateOutdatedConstants()
 	if (m_ShaderProgram->IsMaterialConstantsDataOutdated())
 	{
 		const VkDeviceSize alignment =
-			std::max(static_cast<VkDeviceSize>(16), m_Device->GetChoosenPhysicalDevice().properties.limits.minUniformBufferOffsetAlignment);
+			std::max(static_cast<VkDeviceSize>(16), m_Device->GetChosenPhysicalDevice().properties.limits.minUniformBufferOffsetAlignment);
 		const uint32_t offset = m_UniformUploadRing->ScheduleUpload(
 			m_PrependCommandContext->GetCommandBuffer(),
 			PS::span<const std::byte>{
@@ -1227,7 +1227,7 @@ VkDescriptorSet CDeviceCommandContext::GetUniformDescriptorSet(
 		m_UniformDescriptorSets.clear();
 
 		constexpr uint32_t initialSize{16};
-		const uint32_t maxUniformBufferRange{m_Device->GetChoosenPhysicalDevice().properties.limits.maxUniformBufferRange};
+		const uint32_t maxUniformBufferRange{m_Device->GetChosenPhysicalDevice().properties.limits.maxUniformBufferRange};
 		const uint32_t maxSize{std::min(uniformBuffer->GetSize(), 65536u)};
 
 		uint32_t maxSets{0};

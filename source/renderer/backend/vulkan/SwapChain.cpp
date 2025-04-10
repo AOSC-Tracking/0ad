@@ -46,7 +46,7 @@ std::unique_ptr<CSwapChain> CSwapChain::Create(
 	CDevice* device, VkSurfaceKHR surface, int surfaceDrawableWidth, int surfaceDrawableHeight,
 	std::unique_ptr<CSwapChain> oldSwapChain)
 {
-	VkPhysicalDevice physicalDevice = device->GetChoosenPhysicalDevice().device;
+	VkPhysicalDevice physicalDevice = device->GetChosenPhysicalDevice().device;
 
 	VkSurfaceCapabilitiesKHR surfaceCapabilities{};
 	ENSURE_VK_SUCCESS(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(

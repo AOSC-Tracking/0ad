@@ -405,16 +405,16 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 			availablePhyscialDevices.begin(), availablePhyscialDevices.end(),
 			ComparePhysicalDevices);
 	}
-	device->m_ChoosenDevice = *choosedDeviceIt;
-	const SAvailablePhysicalDevice& choosenDevice = device->m_ChoosenDevice;
+	device->m_ChosenDevice = *choosedDeviceIt;
+	const SAvailablePhysicalDevice& chosenDevice = device->m_ChosenDevice;
 	device->m_AvailablePhysicalDevices.erase(std::remove_if(
 		device->m_AvailablePhysicalDevices.begin(), device->m_AvailablePhysicalDevices.end(),
-		[physicalDevice = choosenDevice.device](const SAvailablePhysicalDevice& device)
+		[physicalDevice = chosenDevice.device](const SAvailablePhysicalDevice& device)
 		{
 			return physicalDevice == device.device;
 		}), device->m_AvailablePhysicalDevices.end());
 
-	gladVulkanVersion = gladLoadVulkanUserPtr(choosenDevice.device, gladLoadFunction, device->m_Instance);
+	gladVulkanVersion = gladLoadVulkanUserPtr(chosenDevice.device, gladLoadFunction, device->m_Instance);
 	if (!gladVulkanVersion)
 	{
 		LOGERROR("GLAD unable to re-load vulkan after choosing its physical device.");
@@ -422,7 +422,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	}
 
 #if !OS_MACOSX
-	auto hasDeviceExtension = [&extensions = choosenDevice.extensions](const char* name) -> bool
+	auto hasDeviceExtension = [&extensions = chosenDevice.extensions](const char* name) -> bool
 	{
 		return std::find(extensions.begin(), extensions.end(), name) != extensions.end();
 	};
@@ -435,21 +435,21 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 #endif
 	const bool hasNeededDescriptorIndexingFeatures =
 		hasDescriptorIndexing &&
-		choosenDevice.descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools >= 65536 &&
-		choosenDevice.descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing &&
-		choosenDevice.descriptorIndexingFeatures.runtimeDescriptorArray &&
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount &&
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingPartiallyBound &&
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending &&
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind;
+		chosenDevice.descriptorIndexingProperties.maxUpdateAfterBindDescriptorsInAllPools >= 65536 &&
+		chosenDevice.descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing &&
+		chosenDevice.descriptorIndexingFeatures.runtimeDescriptorArray &&
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount &&
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingPartiallyBound &&
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending &&
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind;
 
 	std::vector<const char*> deviceExtensions = requiredDeviceExtensions;
 	if (hasDescriptorIndexing)
 		deviceExtensions.emplace_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 
-	device->m_GraphicsQueueFamilyIndex = choosenDevice.graphicsQueueFamilyIndex;
+	device->m_GraphicsQueueFamilyIndex = chosenDevice.graphicsQueueFamilyIndex;
 	const std::array<size_t, 1> queueFamilyIndices{{
-		choosenDevice.graphicsQueueFamilyIndex
+		chosenDevice.graphicsQueueFamilyIndex
 	}};
 
 	PS::StaticVector<VkDeviceQueueCreateInfo, 1> queueCreateInfos;
@@ -471,23 +471,23 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	VkPhysicalDeviceFeatures2 deviceFeatures2{};
 	VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures{};
 
-	deviceFeatures.textureCompressionBC = choosenDevice.features.textureCompressionBC;
-	deviceFeatures.samplerAnisotropy = choosenDevice.features.samplerAnisotropy;
-	deviceFeatures.fillModeNonSolid = choosenDevice.features.fillModeNonSolid;
+	deviceFeatures.textureCompressionBC = chosenDevice.features.textureCompressionBC;
+	deviceFeatures.samplerAnisotropy = chosenDevice.features.samplerAnisotropy;
+	deviceFeatures.fillModeNonSolid = chosenDevice.features.fillModeNonSolid;
 
 	descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
 	descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing =
-		choosenDevice.descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing;
+		chosenDevice.descriptorIndexingFeatures.shaderSampledImageArrayNonUniformIndexing;
 	descriptorIndexingFeatures.runtimeDescriptorArray =
-		choosenDevice.descriptorIndexingFeatures.runtimeDescriptorArray;
+		chosenDevice.descriptorIndexingFeatures.runtimeDescriptorArray;
 	descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount =
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount;
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingVariableDescriptorCount;
 	descriptorIndexingFeatures.descriptorBindingPartiallyBound =
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingPartiallyBound;
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingPartiallyBound;
 	descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending =
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending;
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending;
 	descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind =
-		choosenDevice.descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind;
+		chosenDevice.descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind;
 
 	deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
 	deviceFeatures2.features = deviceFeatures;
@@ -506,7 +506,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	deviceCreateInfo.ppEnabledLayerNames = nullptr;
 
 	const VkResult createDeviceResult = vkCreateDevice(
-		choosenDevice.device, &deviceCreateInfo, nullptr, &device->m_Device);
+		chosenDevice.device, &deviceCreateInfo, nullptr, &device->m_Device);
 	if (createDeviceResult != VK_SUCCESS)
 	{
 		if (createDeviceResult == VK_ERROR_FEATURE_NOT_PRESENT)
@@ -548,7 +548,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 
 	VmaAllocatorCreateInfo allocatorCreateInfo{};
 	allocatorCreateInfo.instance = device->m_Instance;
-	allocatorCreateInfo.physicalDevice = choosenDevice.device;
+	allocatorCreateInfo.physicalDevice = chosenDevice.device;
 	allocatorCreateInfo.device = device->m_Device;
 	allocatorCreateInfo.vulkanApiVersion = applicationInfo.apiVersion;
 	allocatorCreateInfo.pVulkanFunctions = &vulkanFunctions;
@@ -563,7 +563,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 
 	// We need to use VK_SHARING_MODE_CONCURRENT if we have graphics and present
 	// in different queues.
-	vkGetDeviceQueue(device->m_Device, choosenDevice.graphicsQueueFamilyIndex,
+	vkGetDeviceQueue(device->m_Device, chosenDevice.graphicsQueueFamilyIndex,
 		0, &device->m_GraphicsQueue);
 	ENSURE(device->m_GraphicsQueue != VK_NULL_HANDLE);
 
@@ -571,17 +571,17 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 
 	capabilities.debugLabels = enableDebugLabels;
 	capabilities.debugScopedLabels = enableDebugScopedLabels;
-	capabilities.S3TC = choosenDevice.features.textureCompressionBC;
+	capabilities.S3TC = chosenDevice.features.textureCompressionBC;
 	capabilities.ARBShaders = false;
 	capabilities.ARBShadersShadow = false;
 	capabilities.computeShaders = true;
-	capabilities.storage = choosenDevice.properties.limits.maxStorageBufferRange >= GiB;
+	capabilities.storage = chosenDevice.properties.limits.maxStorageBufferRange >= GiB;
 	capabilities.instancing = true;
 	capabilities.maxSampleCount = 1;
 	const VkSampleCountFlags sampleCountFlags =
-		choosenDevice.properties.limits.framebufferColorSampleCounts
-		& choosenDevice.properties.limits.framebufferDepthSampleCounts
-		& choosenDevice.properties.limits.framebufferStencilSampleCounts;
+		chosenDevice.properties.limits.framebufferColorSampleCounts
+		& chosenDevice.properties.limits.framebufferDepthSampleCounts
+		& chosenDevice.properties.limits.framebufferStencilSampleCounts;
 	const std::array<VkSampleCountFlagBits, 5> allowedSampleCountBits =
 	{
 		VK_SAMPLE_COUNT_1_BIT,
@@ -594,10 +594,10 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 		if (sampleCountFlags & allowedSampleCountBits[index])
 			device->m_Capabilities.maxSampleCount = 1u << index;
 	capabilities.multisampling = device->m_Capabilities.maxSampleCount > 1;
-	capabilities.anisotropicFiltering = choosenDevice.features.samplerAnisotropy;
-	capabilities.maxAnisotropy = choosenDevice.properties.limits.maxSamplerAnisotropy;
+	capabilities.anisotropicFiltering = chosenDevice.features.samplerAnisotropy;
+	capabilities.maxAnisotropy = chosenDevice.properties.limits.maxSamplerAnisotropy;
 	capabilities.maxTextureSize =
-		choosenDevice.properties.limits.maxImageDimension2D;
+		chosenDevice.properties.limits.maxImageDimension2D;
 
 	device->m_RenderPassManager =
 		std::make_unique<CRenderPassManager>(device.get());
@@ -619,21 +619,21 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	if (!device->m_SwapChain)
 		return nullptr;
 
-	device->m_Name = choosenDevice.properties.deviceName;
+	device->m_Name = chosenDevice.properties.deviceName;
 	device->m_Version =
-		std::to_string(VK_API_VERSION_VARIANT(choosenDevice.properties.apiVersion)) +
-		"." + std::to_string(VK_API_VERSION_MAJOR(choosenDevice.properties.apiVersion)) +
-		"." + std::to_string(VK_API_VERSION_MINOR(choosenDevice.properties.apiVersion)) +
-		"." + std::to_string(VK_API_VERSION_PATCH(choosenDevice.properties.apiVersion));
+		std::to_string(VK_API_VERSION_VARIANT(chosenDevice.properties.apiVersion)) +
+		"." + std::to_string(VK_API_VERSION_MAJOR(chosenDevice.properties.apiVersion)) +
+		"." + std::to_string(VK_API_VERSION_MINOR(chosenDevice.properties.apiVersion)) +
+		"." + std::to_string(VK_API_VERSION_PATCH(chosenDevice.properties.apiVersion));
 
-	device->m_DriverInformation = std::to_string(choosenDevice.properties.driverVersion);
+	device->m_DriverInformation = std::to_string(chosenDevice.properties.driverVersion);
 
 	// Refs:
 	// * https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/VkPhysicalDeviceProperties.html
 	// * https://pcisig.com/membership/member-companies
-	device->m_VendorID = std::to_string(choosenDevice.properties.vendorID);
+	device->m_VendorID = std::to_string(chosenDevice.properties.vendorID);
 
-	device->m_Extensions = choosenDevice.extensions;
+	device->m_Extensions = chosenDevice.extensions;
 
 	return device;
 }
@@ -685,8 +685,8 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 
 	JS::RootedValue device(rq.cx);
 	Script::CreateObject(rq, &device);
-	ReportAvailablePhysicalDevice(m_ChoosenDevice, rq, device);
-	Script::SetProperty(rq, settings, "choosen_device", device);
+	ReportAvailablePhysicalDevice(m_ChosenDevice, rq, device);
+	Script::SetProperty(rq, settings, "chosen_device", device);
 
 	JS::RootedValue availableDevices(rq.cx);
 	Script::CreateArray(rq, &availableDevices, m_AvailablePhysicalDevices.size());
@@ -848,7 +848,7 @@ bool CDevice::IsTextureFormatSupported(const Format format) const
 
 	VkFormatProperties formatProperties{};
 	vkGetPhysicalDeviceFormatProperties(
-		m_ChoosenDevice.device, Mapping::FromFormat(format), &formatProperties);
+		m_ChosenDevice.device, Mapping::FromFormat(format), &formatProperties);
 	return formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT;
 }
 
@@ -856,7 +856,7 @@ bool CDevice::IsFramebufferFormatSupported(const Format format) const
 {
 	VkFormatProperties formatProperties{};
 	vkGetPhysicalDeviceFormatProperties(
-		m_ChoosenDevice.device, Mapping::FromFormat(format), &formatProperties);
+		m_ChosenDevice.device, Mapping::FromFormat(format), &formatProperties);
 	if (IsDepthFormat(format))
 		return formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT;
 	return formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;
@@ -882,7 +882,7 @@ Format CDevice::GetPreferredDepthStencilFormat(
 		std::array<Format, 3> formatRequestOrder;
 		// TODO: add most known vendors to enum.
 		// https://developer.nvidia.com/blog/vulkan-dos-donts/
-		if (m_ChoosenDevice.properties.vendorID == 0x10DE)
+		if (m_ChosenDevice.properties.vendorID == 0x10DE)
 			formatRequestOrder = {Format::D24_UNORM, Format::D32_SFLOAT, Format::D16_UNORM};
 		else
 			formatRequestOrder = {Format::D32_SFLOAT, Format::D24_UNORM, Format::D16_UNORM};
@@ -900,7 +900,7 @@ bool CDevice::IsFormatSupportedForUsage(const Format format, const uint32_t usag
 {
 	VkFormatProperties formatProperties{};
 	vkGetPhysicalDeviceFormatProperties(
-		m_ChoosenDevice.device, Mapping::FromFormat(format), &formatProperties);
+		m_ChosenDevice.device, Mapping::FromFormat(format), &formatProperties);
 	VkFormatFeatureFlags expectedFeatures = 0;
 	if (usage & ITexture::Usage::COLOR_ATTACHMENT)
 		expectedFeatures |= VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT;

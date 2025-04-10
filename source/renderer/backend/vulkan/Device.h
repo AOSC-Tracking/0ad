@@ -156,7 +156,7 @@ public:
 
 	std::unique_ptr<CRingCommandContext> CreateRingCommandContext(const size_t size);
 
-	const SAvailablePhysicalDevice& GetChoosenPhysicalDevice() const { return m_ChoosenDevice; }
+	const SAvailablePhysicalDevice& GetChosenPhysicalDevice() const { return m_ChosenDevice; }
 
 	CRenderPassManager& GetRenderPassManager() { return *m_RenderPassManager; }
 
@@ -188,7 +188,7 @@ private:
 	std::vector<std::string> m_InstanceExtensions;
 	std::vector<std::string> m_ValidationLayers;
 
-	SAvailablePhysicalDevice m_ChoosenDevice{};
+	SAvailablePhysicalDevice m_ChosenDevice{};
 	std::vector<SAvailablePhysicalDevice> m_AvailablePhysicalDevices;
 
 	Capabilities m_Capabilities{};

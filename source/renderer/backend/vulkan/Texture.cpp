@@ -67,7 +67,7 @@ std::unique_ptr<CTexture> CTexture::Create(
 	VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL;
 
 	const VkPhysicalDevice physicalDevice =
-		device->GetChoosenPhysicalDevice().device;
+		device->GetChosenPhysicalDevice().device;
 
 	VkFormatProperties formatProperties{};
 	vkGetPhysicalDeviceFormatProperties(
