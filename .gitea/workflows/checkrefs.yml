@@ -30,7 +30,7 @@ jobs:
           UPSTREAM_LFS_PULL_RESULT=$?
           git lfs pull ${{ gitea.actor }} -I binaries/data/mods/public/maps
           FORK_LFS_PULL_RESULT=$?
-          if [ "$UPSTREAM_LFS_PULL_RESULT" != "0" -a "$FORK_LFS_PULL_RESULT" != "0" ]; then;
+          if [ "$UPSTREAM_LFS_PULL_RESULT" != "0" -a "$FORK_LFS_PULL_RESULT" != "0" ]; then
             false;
           fi
       - name: Check for missing references
