@@ -42,7 +42,7 @@ jobs:
           elif [ "$FORK_LFS_PULL_RESULT" = "0" ]; then
             echo "SUCCESS: Found all LFS assets in the LFS storage of ${PR_REPO}."
           else
-            echo "ERROR: Couldn't find all LFS assets in neither of the LFS storages."
+            echo "ERROR: Couldn't find all LFS assets in either of the LFS storages."
             false;
           fi
       - name: Install lxml
