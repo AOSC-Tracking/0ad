@@ -24,6 +24,7 @@ jobs:
             git@gitea.wildfiregames.com:${{ gitea.actor }}/${{ gitea.head_ref }}.git
       - name: Download necessary LFS assets
         run: |
+          echo "test"
           git lfs pull -I binaries/data/mods/public/maps
           UPSTREAM_LFS_PULL_RESULT=$?
           git lfs pull ${{ gitea.actor }} -I binaries/data/mods/public/maps
