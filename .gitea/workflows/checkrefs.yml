@@ -11,8 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install lxml
-        run: pip3 install lxml
       - name: Workaround for authentication problem with LFS
         # https://gitea.com/gitea/act_runner/issues/164
         run: >
@@ -33,6 +31,8 @@ jobs:
           if [ "$UPSTREAM_LFS_PULL_RESULT" != "0" -a "$FORK_LFS_PULL_RESULT" != "0" ]; then
             false;
           fi
+      - name: Install lxml
+        run: pip3 install lxml
       - name: Check for missing references
         run: |
           ./source/tools/entity/checkrefs.py \
