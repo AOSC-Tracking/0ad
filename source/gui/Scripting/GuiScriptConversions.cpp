@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -38,11 +38,12 @@
 	// ignore JS_SetProperty return value, because errors should be impossible
 	// and we can't do anything useful in the case of errors anyway
 
-template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::MutableHandleValue ret, SDL_Event_ const& val)
+template<> void Script::ToJSVal<SDL_Event>(const ScriptRequest& rq, JS::MutableHandleValue ret,
+	const SDL_Event& val)
 {
 	const char* typeName;
 
-	switch (val.ev.type)
+	switch (val.type)
 	{
 	case SDL_WINDOWEVENT: typeName = "windowevent"; break;
 	case SDL_KEYDOWN: typeName = "keydown"; break;
@@ -68,13 +69,13 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 
 	SET(obj, "type", typeName);
 
-	switch (val.ev.type)
+	switch (val.type)
 	{
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
 	{
-		// SET(obj, "which", (int)val.ev.key.which); // (not in wsdl.h)
-		// SET(obj, "state", (int)val.ev.key.state); // (not in wsdl.h)
+		// SET(obj, "which", static_cast<int>(val.key.which)); // (not in wsdl.h)
+		// SET(obj, "state", static_cast<int>(val.key.state)); // (not in wsdl.h)
 
 		JS::RootedObject keysym(rq.cx, JS_NewPlainObject(rq.cx));
 		if (!keysym)
@@ -85,9 +86,9 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 		JS::RootedValue keysymVal(rq.cx, JS::ObjectValue(*keysym));
 		JS_SetProperty(rq.cx, obj, "keysym", keysymVal);
 
-		// SET(keysym, "scancode", (int)val.ev.key.keysym.scancode); // (not in wsdl.h)
-		SET(keysym, "sym", (int)val.ev.key.keysym.sym);
-		// SET(keysym, "mod", (int)val.ev.key.keysym.mod); // (not in wsdl.h)
+		// SET(keysym, "scancode", static_cast<int>(val.key.keysym.scancode)); // (not in wsdl.h)
+		SET(keysym, "sym", static_cast<int>(val.key.keysym.sym));
+		// SET(keysym, "mod", static_cast<int>(val.key.keysym.mod)); // (not in wsdl.h)
 		{
 			SET(keysym, "unicode", JS::UndefinedHandleValue);
 		}
@@ -98,23 +99,23 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 	}
 	case SDL_MOUSEMOTION:
 	{
-		// SET(obj, "which", (int)val.ev.motion.which); // (not in wsdl.h)
-		// SET(obj, "state", (int)val.ev.motion.state); // (not in wsdl.h)
-		SET(obj, "x", (int)val.ev.motion.x);
-		SET(obj, "y", (int)val.ev.motion.y);
-		// SET(obj, "xrel", (int)val.ev.motion.xrel); // (not in wsdl.h)
-		// SET(obj, "yrel", (int)val.ev.motion.yrel); // (not in wsdl.h)
+		// SET(obj, "which", static_cast<int>(val.motion.which)); // (not in wsdl.h)
+		// SET(obj, "state", static_cast<int>(val.motion.state)); // (not in wsdl.h)
+		SET(obj, "x", static_cast<int>(val.motion.x));
+		SET(obj, "y", static_cast<int>(val.motion.y));
+		// SET(obj, "xrel", static_cast<int>(val.motion.xrel)); // (not in wsdl.h)
+		// SET(obj, "yrel", static_cast<int>(val.motion.yrel)); // (not in wsdl.h)
 		break;
 	}
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
 	{
-		// SET(obj, "which", (int)val.ev.button.which); // (not in wsdl.h)
-		SET(obj, "button", (int)val.ev.button.button);
-		SET(obj, "state", (int)val.ev.button.state);
-		SET(obj, "x", (int)val.ev.button.x);
-		SET(obj, "y", (int)val.ev.button.y);
-		SET(obj, "clicks", (int)val.ev.button.clicks);
+		// SET(obj, "which", static_cast<int>(val.button.which)); // (not in wsdl.h)
+		SET(obj, "button", static_cast<int>(val.button.button));
+		SET(obj, "state", static_cast<int>(val.button.state));
+		SET(obj, "x", static_cast<int>(val.button.x));
+		SET(obj, "y", static_cast<int>(val.button.y));
+		SET(obj, "clicks", static_cast<int>(val.button.clicks));
 		break;
 	}
 	case SDL_HOTKEYPRESS:
@@ -123,7 +124,7 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 	case SDL_HOTKEYPRESS_SILENT:
 	case SDL_HOTKEYUP_SILENT:
 	{
-		SET(obj, "hotkey", static_cast<const char*>(val.ev.user.data1));
+		SET(obj, "hotkey", static_cast<const char*>(val.user.data1));
 		break;
 	}
 	}

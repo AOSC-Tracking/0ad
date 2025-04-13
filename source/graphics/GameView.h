@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,11 +18,10 @@
 #ifndef INCLUDED_GAMEVIEW
 #define INCLUDED_GAMEVIEW
 
+#include "ps/Input_FWD.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/Scene.h"
 #include "simulation2/system/Entity.h"
-
-#include "lib/input.h" // InReaction - can't forward-declare enum
 
 class CCamera;
 class CCinemaManager;
@@ -57,7 +56,7 @@ public:
 	void Render(Renderer::Backend::IDeviceCommandContext* deviceCommandContext);
 	void RenderOverlays(Renderer::Backend::IDeviceCommandContext* deviceCommandContext);
 
-	InReaction HandleEvent(const SDL_Event_* ev);
+	Input::Reaction HandleEvent(const SDL_Event& ev);
 
 	CVector3D GetCameraPivot() const;
 	CVector3D GetCameraPosition() const;
@@ -97,6 +96,6 @@ private:
 	CGameViewImpl* m;
 };
 
-extern InReaction game_view_handler(const SDL_Event_* ev);
+extern Input::Reaction game_view_handler(const SDL_Event& ev);
 
 #endif // INCLUDED_GAMEVIEW

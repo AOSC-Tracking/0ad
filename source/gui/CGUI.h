@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -28,10 +28,10 @@
 #include "gui/SGUIIcon.h"
 #include "gui/SGUIMessage.h"
 #include "gui/SGUIStyle.h"
-#include "lib/input.h"
 #include "maths/Rect.h"
 #include "maths/Size2D.h"
 #include "maths/Vector2D.h"
+#include "ps/Input_FWD.h"
 #include "ps/XML/Xeromyces.h"
 #include "scriptinterface/ScriptForward.h"
 
@@ -112,11 +112,11 @@ public:
 	void DrawSprite(const CGUISpriteInstance& Sprite, CCanvas2D& canvas, const CRect& Rect, const CRect& Clipping = CRect());
 
 	/**
-	 * The replacement of Process(), handles an SDL_Event_
+	 * The replacement of Process(), handles an SDL_Event
 	 *
 	 * @param ev SDL Event, like mouse/keyboard input
 	 */
-	InReaction HandleEvent(const SDL_Event_* ev);
+	Input::Reaction HandleEvent(const SDL_Event& ev);
 
 	/**
 	 * Load a GUI XML file into the GUI.

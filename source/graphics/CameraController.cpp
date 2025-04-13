@@ -22,7 +22,6 @@
 #include "graphics/HFTracer.h"
 #include "graphics/Terrain.h"
 #include "i18n/L10n.h"
-#include "lib/input.h"
 #include "lib/timer.h"
 #include "maths/MathUtil.h"
 #include "maths/Matrix3D.h"
@@ -32,6 +31,7 @@
 #include "ps/Game.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 #include "ps/Pyrogenesis.h"
 #include "ps/TouchInput.h"
 #include "ps/World.h"
@@ -628,24 +628,24 @@ void CCameraController::FocusHeight(bool smooth)
 		m_PosY.Add(diff);
 }
 
-InReaction CCameraController::HandleEvent(const SDL_Event_* ev)
+Input::Reaction CCameraController::HandleEvent(const SDL_Event& ev)
 {
-	switch (ev->ev.type)
+	switch (ev.type)
 	{
 	case SDL_HOTKEYPRESS:
 	{
-		std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+		std::string hotkey = static_cast<const char*>(ev.user.data1);
 		if (hotkey == "camera.reset")
 		{
 			ResetCameraAngleZoom();
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
-		return IN_PASS;
+		return Input::Reaction::PASS;
 	}
 
 	case SDL_HOTKEYDOWN:
 	{
-		std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+		std::string hotkey = static_cast<const char*>(ev.user.data1);
 
 		// Mouse wheel must be treated using events instead of polling,
 		// because SDL auto-generates a sequence of mousedown/mouseup events
@@ -653,64 +653,64 @@ InReaction CCameraController::HandleEvent(const SDL_Event_* ev)
 		if (hotkey == "camera.zoom.wheel.in")
 		{
 			m_Zoom.AddSmoothly(-m_ViewZoomSpeedWheel);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.zoom.wheel.out")
 		{
 			m_Zoom.AddSmoothly(m_ViewZoomSpeedWheel);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.rotate.wheel.cw")
 		{
 			m_RotateY.AddSmoothly(m_ViewRotateYSpeedWheel);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.rotate.wheel.ccw")
 		{
 			m_RotateY.AddSmoothly(-m_ViewRotateYSpeedWheel);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.scroll.speed.increase")
 		{
 			m_ViewScrollSpeed *= m_ViewScrollSpeedModifier;
 			LOGMESSAGERENDER("Scroll speed increased to %.1f", m_ViewScrollSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.scroll.speed.decrease")
 		{
 			m_ViewScrollSpeed /= m_ViewScrollSpeedModifier;
 			LOGMESSAGERENDER("Scroll speed decreased to %.1f", m_ViewScrollSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.rotate.speed.increase")
 		{
 			m_ViewRotateXSpeed *= m_ViewRotateSpeedModifier;
 			m_ViewRotateYSpeed *= m_ViewRotateSpeedModifier;
 			LOGMESSAGERENDER("Rotate speed increased to X=%.3f, Y=%.3f", m_ViewRotateXSpeed, m_ViewRotateYSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.rotate.speed.decrease")
 		{
 			m_ViewRotateXSpeed /= m_ViewRotateSpeedModifier;
 			m_ViewRotateYSpeed /= m_ViewRotateSpeedModifier;
 			LOGMESSAGERENDER("Rotate speed decreased to X=%.3f, Y=%.3f", m_ViewRotateXSpeed, m_ViewRotateYSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.zoom.speed.increase")
 		{
 			m_ViewZoomSpeed *= m_ViewZoomSpeedModifier;
 			LOGMESSAGERENDER("Zoom speed increased to %.1f", m_ViewZoomSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "camera.zoom.speed.decrease")
 		{
 			m_ViewZoomSpeed /= m_ViewZoomSpeedModifier;
 			LOGMESSAGERENDER("Zoom speed decreased to %.1f", m_ViewZoomSpeed);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
-		return IN_PASS;
+		return Input::Reaction::PASS;
 	}
 	}
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }

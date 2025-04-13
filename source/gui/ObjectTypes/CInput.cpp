@@ -31,6 +31,7 @@
 #include "ps/GameSetup/Config.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 
 #include <sstream>
 
@@ -100,7 +101,7 @@ void CInput::ClearComposedText()
 	m_iComposedPos = 0;
 }
 
-InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
+Input::Reaction CInput::ManuallyHandleKeys(const SDL_Event& ev)
 {
 	ENSURE(m_iBufferPos != -1);
 
@@ -108,12 +109,12 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 	// (Messages don't currently need to be sent)
 	CStrW& caption = m_Caption.GetMutable();
 
-	switch (ev->ev.type)
+	switch (ev.type)
 	{
 	case SDL_HOTKEYDOWN:
 	{
 		if (m_ComposingText)
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 
 		return ManuallyHandleHotkeyEvent(ev);
 	}
@@ -122,14 +123,14 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 	case SDL_TEXTINPUT:
 	{
 		if (m_Readonly)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		// Text has been committed, either single key presses or through an IME
-		std::wstring text = wstring_from_utf8(ev->ev.text.text);
+		std::wstring text = wstring_from_utf8(ev.text.text);
 
 		// Check max length
 		if (m_MaxLength != 0 && caption.length() + text.length() > static_cast<size_t>(m_MaxLength))
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 
 		m_WantedX = 0.0f;
 
@@ -156,16 +157,16 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 		UpdateAutoScroll();
 		SendEvent(GUIM_TEXTEDIT, EventNameTextEdit);
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	case SDL_TEXTEDITING:
 	{
 		if (m_Readonly)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		// Text is being composed with an IME
 		// TODO: indicate this by e.g. underlining the uncommitted text
-		const char* rawText = ev->ev.edit.text;
+		const char* rawText = ev.edit.text;
 		int rawLength = strlen(rawText);
 		std::wstring wtext = wstring_from_utf8(rawText);
 
@@ -183,7 +184,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 			ClearComposedText();
 		}
 
-		m_ComposingText = ev->ev.edit.start != 0 || rawLength != 0;
+		m_ComposingText = ev.edit.start != 0 || rawLength != 0;
 		if (m_ComposingText)
 		{
 			caption.insert(m_iInsertPos, wtext);
@@ -191,7 +192,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 			// The text buffer is limited to SDL_TEXTEDITINGEVENT_TEXT_SIZE bytes, yet start
 			// increases without limit, so don't let it advance beyond the composed text length
 			m_iComposedLength = wtext.length();
-			m_iComposedPos = ev->ev.edit.start < m_iComposedLength ? ev->ev.edit.start : m_iComposedLength;
+			m_iComposedPos = ev.edit.start < m_iComposedLength ? ev.edit.start : m_iComposedLength;
 			m_iBufferPos = m_iInsertPos + m_iComposedPos;
 
 			// TODO: composed text selection - what does ev.edit.length do?
@@ -204,7 +205,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 		UpdateAutoScroll();
 		SendEvent(GUIM_TEXTEDIT, EventNameTextEdit);
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
@@ -212,7 +213,7 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 		// Since the GUI framework doesn't handle to set settings
 		//  in Unicode (CStrW), we'll simply retrieve the actual
 		//  pointer and edit that.
-		SDL_Keycode keyCode = ev->ev.key.keysym.sym;
+		SDL_Keycode keyCode = ev.key.keysym.sym;
 
 		// We have a probably printable key - we should return HANDLED so it can't trigger hotkeys.
 		// However, if Ctrl/Meta modifiers are active, just pass it through instead,
@@ -224,23 +225,23 @@ InReaction CInput::ManuallyHandleKeys(const SDL_Event_* ev)
 		if (keyCode == SDLK_ESCAPE || EventWillFireHotkey(ev, "cancel") ||
 		     g_scancodes[SDL_SCANCODE_LCTRL] || g_scancodes[SDL_SCANCODE_RCTRL] ||
 		     g_scancodes[SDL_SCANCODE_LGUI] || g_scancodes[SDL_SCANCODE_RGUI])
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		if (m_ComposingText)
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 
-		if (ev->ev.type == SDL_KEYDOWN)
+		if (ev.type == SDL_KEYDOWN)
 		{
 			ManuallyImmutableHandleKeyDownEvent(keyCode);
 			ManuallyMutableHandleKeyDownEvent(keyCode);
 
 			UpdateBufferPositionSetting();
 		}
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	default:
 	{
-		return IN_PASS;
+		return Input::Reaction::PASS;
 	}
 	}
 }
@@ -606,11 +607,11 @@ void CInput::SetupGeneratedPlaceholderText()
 	m_GeneratedPlaceholderTextValid = true;
 }
 
-InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
+Input::Reaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event& ev)
 {
 	bool shiftKeyPressed = g_scancodes[SDL_SCANCODE_LSHIFT] || g_scancodes[SDL_SCANCODE_RSHIFT];
 
-	std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+	std::string hotkey = static_cast<const char*>(ev.user.data1);
 
 	// Get direct access to silently mutate m_Caption.
 	// (Messages don't currently need to be sent)
@@ -619,13 +620,13 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 	if (hotkey == "paste")
 	{
 		if (m_Readonly)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		m_WantedX = 0.0f;
 
 		char* utf8_text = SDL_GetClipboardText();
 		if (!utf8_text)
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 
 		std::wstring text = wstring_from_utf8(utf8_text);
 		SDL_free(utf8_text);
@@ -652,12 +653,12 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 
 		SendEvent(GUIM_TEXTEDIT, EventNameTextEdit);
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	else if (hotkey == "copy" || hotkey == "cut")
 	{
 		if (m_Readonly && hotkey == "cut")
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		m_WantedX = 0.0f;
 
@@ -689,12 +690,12 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 			}
 		}
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	else if (hotkey == "text.delete.left")
 	{
 		if (m_Readonly)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		m_WantedX = 0.0f;
 
@@ -735,12 +736,12 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 			SendEvent(GUIM_TEXTEDIT, EventNameTextEdit);
 		}
 		UpdateAutoScroll();
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	else if (hotkey == "text.delete.right")
 	{
 		if (m_Readonly)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		m_WantedX = 0.0f;
 
@@ -772,7 +773,7 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 		}
 		UpdateAutoScroll();
 		SendEvent(GUIM_TEXTEDIT, EventNameTextEdit);
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	else if (hotkey == "text.move.left")
 	{
@@ -825,7 +826,7 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 		UpdateBufferPositionSetting();
 		UpdateAutoScroll();
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	else if (hotkey == "text.move.right")
 	{
@@ -868,10 +869,10 @@ InReaction CInput::ManuallyHandleHotkeyEvent(const SDL_Event_* ev)
 		UpdateBufferPositionSetting();
 		UpdateAutoScroll();
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }
 
 void CInput::ResetStates()
@@ -1148,12 +1149,12 @@ void CInput::HandleMessage(SGUIMessage& Message)
 		if (m_ComposingText)
 		{
 			// Simulate a final text editing event to clear the composition
-			SDL_Event_ evt;
-			evt.ev.type = SDL_TEXTEDITING;
-			evt.ev.edit.length = 0;
-			evt.ev.edit.start = 0;
-			evt.ev.edit.text[0] = 0;
-			ManuallyHandleKeys(&evt);
+			SDL_Event evt;
+			evt.type = SDL_TEXTEDITING;
+			evt.edit.length = 0;
+			evt.edit.start = 0;
+			evt.edit.text[0] = 0;
+			ManuallyHandleKeys(evt);
 		}
 		SDL_StopTextInput();
 

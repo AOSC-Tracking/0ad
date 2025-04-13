@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 #include "lib/timer.h"
 #include "lib/external_libraries/libsdl.h"
 #include "ps/Game.h"
+#include "ps/Input.h"
 
 // When emulation is enabled:
 // Left-click to put finger 0 down.
@@ -90,18 +91,18 @@ void CTouchInput::OnFingerUp(int id, int x, int y)
 	{
 		m_State = STATE_INACTIVE;
 
-		SDL_Event_ ev;
-		ev.ev.button.button = SDL_BUTTON_LEFT;
-		ev.ev.button.x = m_Pos[0].X;
-		ev.ev.button.y = m_Pos[0].Y;
+		SDL_Event ev;
+		ev.button.button = SDL_BUTTON_LEFT;
+		ev.button.x = m_Pos[0].X;
+		ev.button.y = m_Pos[0].Y;
 
-		ev.ev.type = SDL_MOUSEBUTTONDOWN;
-		ev.ev.button.state = SDL_PRESSED;
-		SDL_PushEvent(&ev.ev);
+		ev.type = SDL_MOUSEBUTTONDOWN;
+		ev.button.state = SDL_PRESSED;
+		SDL_PushEvent(&ev);
 
-		ev.ev.type = SDL_MOUSEBUTTONUP;
-		ev.ev.button.state = SDL_RELEASED;
-		SDL_PushEvent(&ev.ev);
+		ev.type = SDL_MOUSEBUTTONUP;
+		ev.button.state = SDL_RELEASED;
+		SDL_PushEvent(&ev);
 	}
 	else if (m_State == STATE_ZOOMING && id == 1)
 	{
@@ -167,27 +168,27 @@ void CTouchInput::Frame()
 	{
 		m_State = STATE_INACTIVE;
 
-		SDL_Event_ ev;
-		ev.ev.button.button = SDL_BUTTON_RIGHT;
-		ev.ev.button.x = m_Pos[0].X;
-		ev.ev.button.y = m_Pos[0].Y;
+		SDL_Event ev;
+		ev.button.button = SDL_BUTTON_RIGHT;
+		ev.button.x = m_Pos[0].X;
+		ev.button.y = m_Pos[0].Y;
 
-		ev.ev.type = SDL_MOUSEBUTTONDOWN;
-		ev.ev.button.state = SDL_PRESSED;
-		SDL_PushEvent(&ev.ev);
+		ev.type = SDL_MOUSEBUTTONDOWN;
+		ev.button.state = SDL_PRESSED;
+		SDL_PushEvent(&ev);
 
-		ev.ev.type = SDL_MOUSEBUTTONUP;
-		ev.ev.button.state = SDL_RELEASED;
-		SDL_PushEvent(&ev.ev);
+		ev.type = SDL_MOUSEBUTTONUP;
+		ev.button.state = SDL_RELEASED;
+		SDL_PushEvent(&ev);
 	}
 }
 
-InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
+Input::Reaction CTouchInput::HandleEvent(const SDL_Event& ev)
 {
 	UNUSED2(ev); // may be unused depending on #ifs
 
 	if (!IsEnabled())
-		return IN_PASS;
+		return Input::Reaction::PASS;
 
 #if EMULATE_FINGERS_WITH_MOUSE
 	switch(ev->ev.type)
@@ -259,7 +260,7 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 	}
 #endif
 
-	switch(ev->ev.type)
+	switch(ev.type)
 	{
 	case SDL_FINGERDOWN:
 	case SDL_FINGERUP:
@@ -267,28 +268,28 @@ InReaction CTouchInput::HandleEvent(const SDL_Event_* ev)
 	{
 		// Map finger events onto the mouse, for basic testing
 		debug_printf("finger %s tid=%" PRId64 " fid=%" PRId64 " x=%f y=%f dx=%f dy=%f p=%f\n",
-			ev->ev.type == SDL_FINGERDOWN ? "down" :
-			ev->ev.type == SDL_FINGERUP ? "up" :
-			ev->ev.type == SDL_FINGERMOTION ? "motion" : "?",
-			ev->ev.tfinger.touchId, ev->ev.tfinger.fingerId,
-			ev->ev.tfinger.x, ev->ev.tfinger.y, ev->ev.tfinger.dx, ev->ev.tfinger.dy, ev->ev.tfinger.pressure);
+			ev.type == SDL_FINGERDOWN ? "down" :
+			ev.type == SDL_FINGERUP ? "up" :
+			ev.type == SDL_FINGERMOTION ? "motion" : "?",
+			ev.tfinger.touchId, ev.tfinger.fingerId,
+			ev.tfinger.x, ev.tfinger.y, ev.tfinger.dx, ev.tfinger.dy, ev.tfinger.pressure);
 
-		if (ev->ev.type == SDL_FINGERDOWN)
-			OnFingerDown(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
-		else if (ev->ev.type == SDL_FINGERUP)
-			OnFingerUp(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
-		else if (ev->ev.type == SDL_FINGERMOTION)
-			OnFingerMotion(ev->ev.tfinger.fingerId, g_xres * ev->ev.tfinger.x, g_yres * ev->ev.tfinger.y);
-		return IN_HANDLED;
+		if (ev.type == SDL_FINGERDOWN)
+			OnFingerDown(ev.tfinger.fingerId, g_xres * ev.tfinger.x, g_yres * ev.tfinger.y);
+		else if (ev.type == SDL_FINGERUP)
+			OnFingerUp(ev.tfinger.fingerId, g_xres * ev.tfinger.x, g_yres * ev.tfinger.y);
+		else if (ev.type == SDL_FINGERMOTION)
+			OnFingerMotion(ev.tfinger.fingerId, g_xres * ev.tfinger.x, g_yres * ev.tfinger.y);
+		return Input::Reaction::HANDLED;
 	}
 	}
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }
 
 CTouchInput g_TouchInput;
 
-InReaction touch_input_handler(const SDL_Event_* ev)
+Input::Reaction touch_input_handler(const SDL_Event& ev)
 {
 	return g_TouchInput.HandleEvent(ev);
 }

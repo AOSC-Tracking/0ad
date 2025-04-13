@@ -35,7 +35,6 @@ that of Atlas depending on commandline parameters.
 #include "lib/status.h"
 #include "lib/secure_crt.h"
 #include "lib/frequency_filter.h"
-#include "lib/input.h"
 #include "lib/timer.h"
 #include "lib/external_libraries/libsdl.h"
 
@@ -47,6 +46,7 @@ that of Atlas depending on commandline parameters.
 #include "ps/Game.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 #include "ps/Loader.h"
 #include "ps/Mod.h"
 #include "ps/ModInstaller.h"
@@ -173,19 +173,19 @@ void RestartEngine()
 }
 
 // main app message handler
-static InReaction MainInputHandler(const SDL_Event_* ev)
+static Input::Reaction MainInputHandler(const SDL_Event& ev)
 {
-	switch(ev->ev.type)
+	switch(ev.type)
 	{
 	case SDL_WINDOWEVENT:
-		switch(ev->ev.window.event)
+		switch(ev.window.event)
 		{
 		case SDL_WINDOWEVENT_RESIZED:
-			g_ResizedW = ev->ev.window.data1;
-			g_ResizedH = ev->ev.window.data2;
+			g_ResizedW = ev.window.data1;
+			g_ResizedH = ev.window.data2;
 			break;
 		case SDL_WINDOWEVENT_MOVED:
-			g_VideoMode.UpdatePosition(ev->ev.window.data1, ev->ev.window.data2);
+			g_VideoMode.UpdatePosition(ev.window.data1, ev.window.data2);
 		}
 		break;
 
@@ -195,7 +195,7 @@ static InReaction MainInputHandler(const SDL_Event_* ev)
 
 	case SDL_DROPFILE:
 	{
-		char* dropped_filedir = ev->ev.drop.file;
+		char* dropped_filedir = ev.drop.file;
 		const Paths paths(g_CmdLineArgs);
 		CModInstaller installer(paths.UserData() / "mods", paths.Cache());
 		installer.Install(std::string(dropped_filedir), g_ScriptContext, true);
@@ -213,31 +213,31 @@ static InReaction MainInputHandler(const SDL_Event_* ev)
 	}
 
 	case SDL_HOTKEYPRESS:
-		std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+		std::string hotkey = static_cast<const char*>(ev.user.data1);
 		if (hotkey == "exit")
 		{
 			QuitEngine();
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "screenshot")
 		{
 			g_Renderer.MakeScreenShotOnNextFrame(CRenderer::ScreenShotType::DEFAULT);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "bigscreenshot")
 		{
 			g_Renderer.MakeScreenShotOnNextFrame(CRenderer::ScreenShotType::BIG);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "togglefullscreen")
 		{
 			g_VideoMode.ToggleFullscreen();
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "profile2.toggle")
 		{
 			g_Profiler2.Toggle();
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		else if (hotkey == "mousegrabtoggle")
 		{
@@ -248,7 +248,7 @@ static InReaction MainInputHandler(const SDL_Event_* ev)
 		break;
 	}
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }
 
 
@@ -259,8 +259,7 @@ static void PumpEvents()
 
 	PROFILE3("dispatch events");
 
-	SDL_Event_ ev;
-	while (in_poll_event(&ev))
+	for (SDL_Event& ev : g_VideoMode.m_InputManager.PollEvents())
 	{
 		PROFILE2("event");
 		if (g_GUI)
@@ -270,7 +269,7 @@ static void PumpEvents()
 			std::string data = Script::StringifyJSON(rq, &tmpVal);
 			PROFILE2_ATTR("%s", data.c_str());
 		}
-		in_dispatch_event(&ev);
+		g_VideoMode.m_InputManager.DispatchEvent(ev);
 	}
 
 	g_TouchInput.Frame();
@@ -480,19 +479,6 @@ static void NonVisualFrame()
 		QuitEngine();
 }
 
-static void MainControllerInit()
-{
-	// add additional input handlers only needed by this controller:
-
-	// must be registered after gui_handler. Should mayhap even be last.
-	in_add_handler(MainInputHandler);
-}
-
-static void MainControllerShutdown()
-{
-	in_reset_handlers();
-}
-
 static std::optional<RL::Interface> CreateRLInterface(const CmdLineArgs& args)
 {
 	if (!args.Has("rl-interface"))
@@ -676,41 +662,60 @@ static void RunGameOrAtlas(const PS::span<const char* const> argv)
 			g_Mods.UpdateAvailableMods(modInterface);
 		}
 
-		std::optional<ScriptInterface> guiScriptInterface;
-
-		if (isVisual)
 		{
-			guiScriptInterface.emplace("Engine", "gui", *g_ScriptContext);
-			InitGraphics(args, 0, installedMods, *g_ScriptContext, *guiScriptInterface);
-			MainControllerInit();
-		}
-		else if (!InitNonVisual(args))
-			g_Shutdown = ShutdownType::Quit;
-
-		// MSVC doesn't support copy elision in ternary expressions. So we use a lambda instead.
-		std::optional<RL::Interface> rlInterface{[&]() -> std::optional<RL::Interface>
+			class VisualData
 			{
-				if (g_Shutdown == ShutdownType::None)
-					return CreateRLInterface(args);
+			public:
+				VisualData(const CmdLineArgs& args, std::vector<CStr>& installedMods) :
+					inputHandlers{InitGraphics(args, 0, installedMods, *g_ScriptContext,
+						scriptInterface)}
+				{
+				}
+
+				VisualData(const VisualData&) = delete;
+				VisualData& operator=(const VisualData&) = delete;
+				VisualData(VisualData&&) = delete;
+				VisualData& operator=(VisualData&) = delete;
+				~VisualData() = default;
+
+			private:
+				ScriptInterface scriptInterface{"Engine", "gui", *g_ScriptContext};
+				std::unique_ptr<InputHandlers> inputHandlers;
+				Input::Handler<Input::Reaction(&)(const SDL_Event&)> mainInputHandler{
+					g_VideoMode.m_InputManager, Input::Slot::main, MainInputHandler};
+			};
+
+			// MSVC doesn't support copy elision in ternary expressions. So we use a lambda instead.
+			const std::optional<VisualData> visualData{[&]() -> std::optional<VisualData>
+				{
+					if (isVisual)
+						return std::make_optional<VisualData>(args, installedMods);
+					else
+						return std::nullopt;
+				}()};
+			if (!isVisual && !InitNonVisual(args))
+				g_Shutdown = ShutdownType::Quit;
+
+			std::optional<RL::Interface> rlInterface{[&]() -> std::optional<RL::Interface>
+				{
+					if (g_Shutdown == ShutdownType::None)
+						return CreateRLInterface(args);
+					else
+						return std::nullopt;
+				}()};
+
+			while (g_Shutdown == ShutdownType::None)
+			{
+				if (isVisual)
+					Frame(rlInterface ? &*rlInterface : nullptr, fixedFrameFrequency);
+				else if(rlInterface)
+					rlInterface->TryApplyMessage();
 				else
-					return std::nullopt;
-			}()};
-
-		while (g_Shutdown == ShutdownType::None)
-		{
-			if (isVisual)
-				Frame(rlInterface ? &*rlInterface : nullptr, fixedFrameFrequency);
-			else if(rlInterface)
-				rlInterface->TryApplyMessage();
-			else
-				NonVisualFrame();
+					NonVisualFrame();
+			}
+			ShutdownNetworkAndUI();
 		}
-
-		ShutdownNetworkAndUI();
-		guiScriptInterface.reset();
 		ShutdownConfigAndSubsequent();
-		MainControllerShutdown();
-
 	} while (g_Shutdown == ShutdownType::Restart);
 
 #if OS_MACOSX

@@ -58,10 +58,10 @@ CGUIManager* g_GUI = nullptr;
 // called from main loop when (input) events are received.
 // event is passed to other handlers if false is returned.
 // trampoline: we don't want to make the HandleEvent implementation static
-InReaction gui_handler(const SDL_Event_* ev)
+Input::Reaction gui_handler(const SDL_Event& ev)
 {
 	if (!g_GUI)
-		return IN_PASS;
+		return Input::Reaction::PASS;
 
 	PROFILE("GUI event handler");
 	return g_GUI->HandleEvent(ev);
@@ -335,7 +335,7 @@ Status CGUIManager::ReloadAllPages()
 	return INFO::OK;
 }
 
-InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
+Input::Reaction CGUIManager::HandleEvent(const SDL_Event& ev)
 {
 	// We want scripts to have access to the raw input events, so they can do complex
 	// processing when necessary (e.g. for unit selection and camera movement).
@@ -351,15 +351,15 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 		ScriptRequest rq(*top()->GetScriptInterface());
 
 		JS::RootedValue global(rq.cx, rq.globalValue());
-		if (ScriptFunction::Call(rq, global, "handleInputBeforeGui", handled, *ev, top()->FindObjectUnderMouse()))
+		if (ScriptFunction::Call(rq, global, "handleInputBeforeGui", handled, ev, top()->FindObjectUnderMouse()))
 			if (handled)
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 	}
 
 	{
 		PROFILE("handle event in native GUI");
-		InReaction r = top()->HandleEvent(ev);
-		if (r != IN_PASS)
+		Input::Reaction r = top()->HandleEvent(ev);
+		if (r != Input::Reaction::PASS)
 			return r;
 	}
 
@@ -369,12 +369,12 @@ InReaction CGUIManager::HandleEvent(const SDL_Event_* ev)
 		JS::RootedValue global(rq.cx, rq.globalValue());
 
 		PROFILE("handleInputAfterGui");
-		if (ScriptFunction::Call(rq, global, "handleInputAfterGui", handled, *ev))
+		if (ScriptFunction::Call(rq, global, "handleInputAfterGui", handled, ev))
 			if (handled)
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 	}
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }
 
 void CGUIManager::SendEventToAll(const CStr& eventName) const

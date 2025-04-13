@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -70,7 +70,7 @@ protected:
 	/**
 	 * Handle events manually to catch keyboard inputting.
 	 */
-	virtual InReaction ManuallyHandleKeys(const SDL_Event_* ev);
+	virtual Input::Reaction ManuallyHandleKeys(const SDL_Event& ev);
 
 	/**
 	 * Handle events manually to catch keys which change the text.
@@ -85,7 +85,7 @@ protected:
 	/**
 	 * Handle hotkey events (called by ManuallyHandleKeys)
 	 */
-	virtual InReaction ManuallyHandleHotkeyEvent(const SDL_Event_* ev);
+	virtual Input::Reaction ManuallyHandleHotkeyEvent(const SDL_Event& ev);
 
 	/**
 	 * @see IGUIObject#UpdateCachedSize()

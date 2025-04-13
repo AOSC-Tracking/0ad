@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 #include "ps/CStrInternStatic.h"
 #include "ps/Filesystem.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 #include "ps/Profile.h"
 #include "ps/Pyrogenesis.h"
 #include "scriptinterface/Object.h"
@@ -256,25 +257,25 @@ void CProfileViewer::RenderProfile(CCanvas2D& canvas)
 
 
 // Handle input
-InReaction CProfileViewer::Input(const SDL_Event_* ev)
+Input::Reaction CProfileViewer::Input(const SDL_Event& ev)
 {
-	switch(ev->ev.type)
+	switch(ev.type)
 	{
 	case SDL_KEYDOWN:
 	{
 		if (!m->profileVisible)
 			break;
 
-		int k = ev->ev.key.keysym.sym;
+		int k = ev.key.keysym.sym;
 		if (k >= SDLK_0 && k <= SDLK_9)
 		{
 			m->NavigateTree(k - SDLK_0);
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 		break;
 	}
 	case SDL_HOTKEYPRESS:
-		std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+		std::string hotkey = static_cast<const char*>(ev.user.data1);
 
 		if( hotkey == "profile.toggle" )
 		{
@@ -307,24 +308,24 @@ InReaction CProfileViewer::Input(const SDL_Event_* ev)
 					m->profileVisible = false;
 				}
 			}
-			return( IN_HANDLED );
+			return Input::Reaction::HANDLED;
 		}
 		else if( hotkey == "profile.save" )
 		{
 			SaveToFile();
-			return( IN_HANDLED );
+			return Input::Reaction::HANDLED;
 		}
 		break;
 	}
-	return( IN_PASS );
+	return Input::Reaction::PASS;
 }
 
-InReaction CProfileViewer::InputThunk(const SDL_Event_* ev)
+Input::Reaction CProfileViewer::InputThunk(const SDL_Event& ev)
 {
 	if (CProfileViewer::IsInitialised())
 		return g_ProfileViewer.Input(ev);
 
-	return IN_PASS;
+	return Input::Reaction::PASS;
 }
 
 

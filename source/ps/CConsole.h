@@ -23,7 +23,7 @@
 #define INCLUDED_CCONSOLE
 
 #include "lib/file/vfs/vfs_path.h"
-#include "lib/input.h"
+#include "ps/Input_FWD.h"
 
 #include <deque>
 #include <memory>
@@ -134,6 +134,6 @@ private:
 
 extern CConsole* g_Console;
 
-extern InReaction conInputHandler(const SDL_Event_* ev);
+extern Input::Reaction conInputHandler(const SDL_Event& ev);
 
 #endif // INCLUDED_CCONSOLE

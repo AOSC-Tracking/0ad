@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -36,7 +36,6 @@
 #include "graphics/TerritoryTexture.h"
 #include "graphics/Unit.h"
 #include "graphics/UnitManager.h"
-#include "lib/input.h"
 #include "lib/timer.h"
 #include "lobby/IXmppClient.h"
 #include "maths/BoundingBoxAligned.h"
@@ -48,6 +47,7 @@
 #include "ps/Game.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 #include "ps/Loader.h"
 #include "ps/Profile.h"
 #include "ps/Pyrogenesis.h"
@@ -354,24 +354,24 @@ entity_id_t CGameView::GetFollowedEntity()
 	return m->CameraController->GetFollowedEntity();
 }
 
-InReaction game_view_handler(const SDL_Event_* ev)
+Input::Reaction game_view_handler(const SDL_Event& ev)
 {
 	// put any events that must be processed even if inactive here
 	if (!g_app_has_focus || !g_Game || !g_Game->IsGameStarted() || g_Game->GetView()->GetCinema()->IsEnabled())
-		return IN_PASS;
+		return Input::Reaction::PASS;
 
 	CGameView *pView=g_Game->GetView();
 
 	return pView->HandleEvent(ev);
 }
 
-InReaction CGameView::HandleEvent(const SDL_Event_* ev)
+Input::Reaction CGameView::HandleEvent(const SDL_Event& ev)
 {
-	switch(ev->ev.type)
+	switch(ev.type)
 	{
 	case SDL_HOTKEYPRESS:
 	{
-		std::string hotkey = static_cast<const char*>(ev->ev.user.data1);
+		std::string hotkey = static_cast<const char*>(ev.user.data1);
 		CSceneRenderer& sceneRenderer = g_Renderer.GetSceneRenderer();
 		if (hotkey == "wireframe")
 		{
@@ -398,7 +398,7 @@ InReaction CGameView::HandleEvent(const SDL_Event_* ev)
 				sceneRenderer.SetModelRenderMode(SOLID);
 				sceneRenderer.SetOverlayRenderMode(SOLID);
 			}
-			return IN_HANDLED;
+			return Input::Reaction::HANDLED;
 		}
 	}
 	}

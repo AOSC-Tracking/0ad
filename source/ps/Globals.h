@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 #ifndef INCLUDED_PS_GLOBALS
 #define INCLUDED_PS_GLOBALS
 
-#include "lib/input.h"
 #include "lib/frequency_filter.h"
+#include "ps/Input_FWD.h"
 #include "ps/KeyName.h"
 
 #include <unordered_map>
@@ -56,7 +56,7 @@ extern std::unordered_map<int32_t, bool> g_scancodes;
  */
 extern bool g_mouse_buttons[MOUSE_LAST - MOUSE_BASE];
 
-extern InReaction GlobalsInputHandler(const SDL_Event_* ev);
+extern Input::Reaction GlobalsInputHandler(const SDL_Event& ev);
 
 extern PIFrequencyFilter g_frequencyFilter;
 

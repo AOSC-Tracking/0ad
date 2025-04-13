@@ -19,9 +19,9 @@
 #define INCLUDED_GUIMANAGER
 
 #include "lib/file/vfs/vfs_path.h"
-#include "lib/input.h"
 #include "ps/containers/StaticVector.h"
 #include "ps/CStr.h"
+#include "ps/Input_FWD.h"
 #include "ps/TemplateLoader.h"
 #include "scriptinterface/StructuredClone.h"
 
@@ -87,7 +87,7 @@ public:
 	/**
 	 * Pass input events to the currently active GUI page.
 	 */
-	InReaction HandleEvent(const SDL_Event_* ev);
+	Input::Reaction HandleEvent(const SDL_Event& ev);
 
 	/**
 	 * See CGUI::SendEventToAll; applies to the currently active page.
@@ -223,6 +223,6 @@ private:
 
 extern CGUIManager* g_GUI;
 
-extern InReaction gui_handler(const SDL_Event_* ev);
+extern Input::Reaction gui_handler(const SDL_Event& ev);
 
 #endif // INCLUDED_GUIMANAGER

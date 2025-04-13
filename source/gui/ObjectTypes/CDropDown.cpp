@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include "gui/SettingTypes/CGUIList.h"
 #include "lib/external_libraries/libsdl.h"
 #include "lib/timer.h"
+#include "ps/Input.h"
 #include "ps/Profile.h"
 
 CDropDown::CDropDown(CGUI& pGUI)
@@ -266,20 +267,20 @@ void CDropDown::HandleMessage(SGUIMessage& Message)
 		SetupText();
 }
 
-InReaction CDropDown::ManuallyHandleKeys(const SDL_Event_* ev)
+Input::Reaction CDropDown::ManuallyHandleKeys(const SDL_Event& ev)
 {
-	InReaction result = IN_PASS;
+	Input::Reaction result{Input::Reaction::PASS};
 	bool update_highlight = false;
 
-	if (ev->ev.type == SDL_KEYDOWN)
+	if (ev.type == SDL_KEYDOWN)
 	{
-		int szChar = ev->ev.key.keysym.sym;
+		int szChar = ev.key.keysym.sym;
 
 		switch (szChar)
 		{
 		case '\r':
 			m_Open = false;
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_HOME:
@@ -289,7 +290,7 @@ InReaction CDropDown::ManuallyHandleKeys(const SDL_Event_* ev)
 		case SDLK_PAGEUP:
 		case SDLK_PAGEDOWN:
 			if (!m_Open)
-				return IN_PASS;
+				return Input::Reaction::PASS;
 			// Set current selected item to highlighted, before
 			//  then really processing these in CList::ManuallyHandleKeys()
 			m_Selected.Set(m_ElementHighlight, true);
@@ -343,14 +344,14 @@ InReaction CDropDown::ManuallyHandleKeys(const SDL_Event_* ev)
 					update_highlight = true;
 					GetScrollBar(0).SetPos(m_ItemsYPositions[closest] - 60);
 				}
-				result = IN_HANDLED;
+				result = Input::Reaction::HANDLED;
 			}
 			break;
 		}
 	}
 
-	if (CList::ManuallyHandleKeys(ev) == IN_HANDLED)
-		result = IN_HANDLED;
+	if (CList::ManuallyHandleKeys(ev) == Input::Reaction::HANDLED)
+		result = Input::Reaction::HANDLED;
 
 	if (update_highlight)
 		m_ElementHighlight = m_Selected;

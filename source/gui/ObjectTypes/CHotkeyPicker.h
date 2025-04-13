@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -50,7 +50,7 @@ public:
 	virtual void HandleMessage(SGUIMessage& Message);
 
 	// Pre-empt events: this is our sole purpose.
-	virtual InReaction PreemptEvent(const SDL_Event_* ev);
+	virtual Input::Reaction PreemptEvent(const SDL_Event& ev);
 
 	struct Key
 	{

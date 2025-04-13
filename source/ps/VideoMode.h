@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 #define INCLUDED_VIDEOMODE
 
 #include "ps/CStrForward.h"
+#include "ps/Input.h"
 #include "renderer/backend/Backend.h"
 
 #include <memory>
@@ -136,7 +137,10 @@ private:
 	bool m_IsInitialised = false;
 
 	SDL_Window* m_Window = nullptr;
+public:
+	Input::Manager m_InputManager;
 
+private:
 	// Initial desktop settings.
 	// Frequency is in Hz, and BPP means bits per pixels (not bytes per pixels).
 	int m_PreferredW = 0;

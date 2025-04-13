@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include "gui/SettingTypes/CGUIList.h"
 #include "lib/external_libraries/libsdl.h"
 #include "lib/timer.h"
+#include "ps/Input.h"
 
 const CStr CList::EventNameSelectionChange = "SelectionChange";
 const CStr CList::EventNameHoverChange = "HoverChange";
@@ -248,52 +249,52 @@ void CList::HandleMessage(SGUIMessage& Message)
 	IGUITextOwner::HandleMessage(Message);
 }
 
-InReaction CList::ManuallyHandleKeys(const SDL_Event_* ev)
+Input::Reaction CList::ManuallyHandleKeys(const SDL_Event& ev)
 {
-	InReaction result = IN_PASS;
+	Input::Reaction result{Input::Reaction::PASS};
 
-	if (ev->ev.type == SDL_KEYDOWN)
+	if (ev.type == SDL_KEYDOWN)
 	{
-		int szChar = ev->ev.key.keysym.sym;
+		int szChar = ev.key.keysym.sym;
 
 		switch (szChar)
 		{
 		case SDLK_HOME:
 			SelectFirstElement();
 			UpdateAutoScroll();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_END:
 			SelectLastElement();
 			UpdateAutoScroll();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_UP:
 			SelectPrevElement();
 			UpdateAutoScroll();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_DOWN:
 			SelectNextElement();
 			UpdateAutoScroll();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_PAGEUP:
 			GetScrollBar(0).ScrollMinusPlenty();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		case SDLK_PAGEDOWN:
 			GetScrollBar(0).ScrollPlusPlenty();
-			result = IN_HANDLED;
+			result = Input::Reaction::HANDLED;
 			break;
 
 		default: // Do nothing
-			result = IN_PASS;
+			result =Input::Reaction::PASS;
 		}
 	}
 

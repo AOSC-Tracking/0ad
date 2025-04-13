@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -44,6 +44,7 @@
 #include "renderer/SceneRenderer.h"
 #include "scriptinterface/ScriptInterface.h"
 
+#include <memory>
 #include <optional>
 
 #if OS_WIN
@@ -68,6 +69,8 @@ const int g_InitFlags = INIT_HAVE_VMODE | INIT_NO_GUI;
 std::optional<FileLogger> g_FileLogger;
 
 std::optional<ScriptInterface> g_ScriptInterface;
+
+std::unique_ptr<InputHandlers> g_InputHandlers;
 }
 
 MESSAGEHANDLER(Init)
@@ -135,7 +138,8 @@ MESSAGEHANDLER(InitGraphics)
 	g_VideoMode.GetBackendDevice()->OnWindowResize(g_xres, g_yres);
 
 	g_ScriptInterface.emplace("Engine", "GUIManager", *g_ScriptContext);
-	InitGraphics(g_AtlasGameLoop->args, g_InitFlags, {}, *g_ScriptContext, *g_ScriptInterface);
+	g_InputHandlers = InitGraphics(g_AtlasGameLoop->args, g_InitFlags, {}, *g_ScriptContext,
+		*g_ScriptInterface);
 }
 
 
@@ -151,6 +155,7 @@ MESSAGEHANDLER(Shutdown)
 	g_AtlasGameLoop->view = AtlasView::GetView_None();
 
 	ShutdownNetworkAndUI();
+	g_InputHandlers.reset();
 	g_ScriptInterface.reset();
 	ShutdownConfigAndSubsequent();
 	g_FileLogger.reset();
@@ -259,9 +264,8 @@ QUERYHANDLER(RenderLoop)
 	RendererIncrementalLoad();
 
 	// Pump SDL events (e.g. hotkeys)
-	SDL_Event_ ev;
-	while (in_poll_priority_event(&ev))
-		in_dispatch_event(&ev);
+	for (SDL_Event& ev : g_VideoMode.m_InputManager.PollEvents())
+		g_VideoMode.m_InputManager.DispatchEvent(ev);
 
 	if (g_GUI)
 		g_GUI->TickObjects();

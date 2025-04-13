@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #include "lib/timer.h"
 #include "ps/CLogger.h"
 #include "ps/Hotkey.h"
+#include "ps/Input.h"
 #include "ps/KeyName.h"
 #include "scriptinterface/ScriptConversions.h"
 
@@ -97,9 +98,9 @@ void CHotkeyPicker::HandleMessage(SGUIMessage& Message)
 	}
 }
 
-InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
+Input::Reaction CHotkeyPicker::PreemptEvent(const SDL_Event& ev)
 {
-	switch (ev->ev.type)
+	switch (ev.type)
 	{
 	// Handle the same mouse events that hotkeys handle
 	case SDL_MOUSEBUTTONDOWN:
@@ -108,30 +109,32 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 	{
 		SDL_Scancode scancode;
 
-		if (ev->ev.type != SDL_MOUSEWHEEL)
+		if (ev.type != SDL_MOUSEWHEEL)
 		{
 			// Wait a little bit -> this gets triggered when clicking on a button,
 			// but after the button click is processed, thus immediately triggering...
 			if (timer_Time()-m_LastKeyChange < 0.2)
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 			// This is from hotkeyHandler - not sure what it does in all honesty.
-			if(ev->ev.button.button >= SDL_BUTTON_X1)
-				scancode = static_cast<SDL_Scancode>(MOUSE_BASE + (int)ev->ev.button.button + 2);
+			if(ev.button.button >= SDL_BUTTON_X1)
+				scancode = static_cast<SDL_Scancode>(MOUSE_BASE +
+					static_cast<int>(ev.button.button) + 2);
 			else
-				scancode = static_cast<SDL_Scancode>(MOUSE_BASE + (int)ev->ev.button.button);
+				scancode = static_cast<SDL_Scancode>(MOUSE_BASE +
+					static_cast<int>(ev.button.button));
 		}
 		else
 		{
-			if (ev->ev.wheel.y > 0)
+			if (ev.wheel.y > 0)
 				scancode = static_cast<SDL_Scancode>(MOUSE_WHEELUP);
-			else if (ev->ev.wheel.y < 0)
+			else if (ev.wheel.y < 0)
 				scancode = static_cast<SDL_Scancode>(MOUSE_WHEELDOWN);
-			else if (ev->ev.wheel.x > 0)
+			else if (ev.wheel.x > 0)
 				scancode = static_cast<SDL_Scancode>(MOUSE_X2);
-			else if (ev->ev.wheel.x < 0)
+			else if (ev.wheel.x < 0)
 				scancode = static_cast<SDL_Scancode>(MOUSE_X1);
 			else
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 		}
 		// Don't handle keys and mouse together except for modifiers.
 		m_KeysPressed.erase(std::remove_if(m_KeysPressed.begin(), m_KeysPressed.end(), [](const Key& k) {
@@ -140,16 +143,16 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 		// For mouse events, assume we immediately want to return.
 		FireEvent(EventNameCombination);
 
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
 	{
-		SDL_Scancode scancode = ev->ev.key.keysym.scancode;
+		SDL_Scancode scancode = ev.key.keysym.scancode;
 
 		// Don't handle caps-lock, it doesn't really work in-game and it's a weird hotkey.
 		if (scancode == SDL_SCANCODE_CAPSLOCK)
-			return IN_PASS;
+			return Input::Reaction::PASS;
 
 		if (scancode == SDL_SCANCODE_LSHIFT || scancode == SDL_SCANCODE_RSHIFT)
 			scancode = static_cast<SDL_Scancode>(UNIFIED_SHIFT);
@@ -160,13 +163,13 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 		else if (scancode == SDL_SCANCODE_LGUI || scancode == SDL_SCANCODE_RGUI)
 			scancode = static_cast<SDL_Scancode>(UNIFIED_SUPER);
 
-		if (ev->ev.type == SDL_KEYDOWN)
+		if (ev.type == SDL_KEYDOWN)
 		{
 			std::vector<Key>::const_iterator it = \
 				std::find_if(m_KeysPressed.begin(), m_KeysPressed.end(), [&scancode](Key& k) { return k.code == scancode; });
 			// Can happen if multiple keys are mapped the same.
 			if (it != m_KeysPressed.end())
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 			m_KeysPressed.emplace_back(Key{scancode, FindScancodeName(scancode)});
 		}
 		else
@@ -175,7 +178,7 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 				std::find_if(m_KeysPressed.begin(), m_KeysPressed.end(), [&scancode](Key& k) { return k.code == scancode; });
 			// Might happen if a key was down before this object is created.
 			if (it == m_KeysPressed.end())
-				return IN_HANDLED;
+				return Input::Reaction::HANDLED;
 			m_KeysPressed.erase(it);
 		}
 
@@ -183,11 +186,11 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 
 		// Register after-JS in case this takes a while (probably not but it doesn't hurt).
 		m_LastKeyChange = timer_Time();
-		return IN_HANDLED;
+		return Input::Reaction::HANDLED;
 	}
 	default:
 	{
-		return IN_PASS;
+		return Input::Reaction::PASS;
 	}
 	}
 }

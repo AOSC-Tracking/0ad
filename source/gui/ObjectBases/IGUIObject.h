@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -31,8 +31,8 @@
 #include "gui/SGUIMessage.h"
 #include "lib/allocators/DynamicArena.h"
 #include "lib/allocators/STLAllocators.h"
-#include "lib/input.h" // just for IN_PASS
 #include "ps/CStr.h"
+#include "ps/Input_FWD.h"
 #include "ps/XML/Xeromyces.h"
 #include "scriptinterface/ScriptTypes.h"
 
@@ -176,12 +176,12 @@ public:
 	 * @param eventName String representation of event name
 	 * @return IN_HANDLED if event was handled, or IN_PASS if skipped
 	 */
-	InReaction SendEvent(EGUIMessageType type, const CStr& eventName);
+	Input::Reaction SendEvent(EGUIMessageType type, const CStr& eventName);
 
 	/**
 	 * Same as SendEvent, but passes mouse coordinates and button state as an argument.
 	 */
-	InReaction SendMouseEvent(EGUIMessageType type, const CStr& eventName);
+	Input::Reaction SendMouseEvent(EGUIMessageType type, const CStr& eventName);
 
 	/**
 	 * All sizes are relative to resolution, and the calculation
@@ -278,18 +278,18 @@ protected:
 	virtual void Draw(CCanvas2D& canvas) = 0;
 
 	/**
-	 * Some objects need to be able to pre-emptively process SDL_Event_.
+	 * Some objects need to be able to pre-emptively process SDL_Event.
 	 *
 	 * Only the object with focus will have this function called.
 	 *
 	 * Returns either IN_PASS or IN_HANDLED. If IN_HANDLED, then
 	 * the event won't be passed on and processed by other handlers.
 	 */
-	virtual InReaction PreemptEvent(const SDL_Event_* UNUSED(ev)) { return IN_PASS; }
+	virtual Input::Reaction PreemptEvent(const SDL_Event& UNUSED(ev));
 
 	/**
-	 * Some objects need to handle the text-related SDL_Event_ manually.
-	 * For instance the input box.
+	 * Some objects need to handle the text-related SDL_Event manually. For
+	 * instance the input box.
 	 *
 	 * Only the object with focus will have this function called.
 	 *
@@ -297,7 +297,7 @@ protected:
 	 * the key won't be passed on and processed by other handlers.
 	 * This is used for keys that the GUI uses.
 	 */
-	virtual InReaction ManuallyHandleKeys(const SDL_Event_* UNUSED(ev)) { return IN_PASS; }
+	virtual Input::Reaction ManuallyHandleKeys(const SDL_Event& UNUSED(ev));
 
 	/**
 	 * Applies the given style to the object.
