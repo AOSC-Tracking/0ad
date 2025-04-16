@@ -27,6 +27,7 @@
 #include "renderer/backend/gl/PipelineState.h"
 #include "renderer/backend/gl/ShaderProgram.h"
 #include "renderer/backend/gl/Texture.h"
+#include "renderer/backend/gl/Utilities.h"
 
 #include <algorithm>
 #include <cstring>

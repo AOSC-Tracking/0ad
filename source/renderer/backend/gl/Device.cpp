@@ -28,6 +28,7 @@
 #include "renderer/backend/gl/DeviceCommandContext.h"
 #include "renderer/backend/gl/PipelineState.h"
 #include "renderer/backend/gl/Texture.h"
+#include "renderer/backend/gl/Utilities.h"
 #include "scriptinterface/JSON.h"
 #include "scriptinterface/Object.h"
 #include "scriptinterface/ScriptInterface.h"
@@ -336,7 +337,7 @@ std::unique_ptr<IDevice> CDevice::Create(SDL_Window* window, const bool arb)
 	glEnable(GL_TEXTURE_2D);
 	// glEnable(GL_TEXTURE_2D) is deprecated and might trigger an error. But we
 	// still support pre 2.0 drivers pretending to support 2.0.
-	ogl_SquelchError(GL_INVALID_ENUM);
+	Utilities::SquelchError(GL_INVALID_ENUM);
 
 	if (arb)
 	{
@@ -493,7 +494,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define INTEGER(id) do { \
 	GLint i = -1; \
 	glGetIntegerv(GL_##id, &i); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) \
 		Script::SetProperty(rq, settings, "GL_" #id, errstr); \
 	else \
 		Script::SetProperty(rq, settings, "GL_" #id, i); \
@@ -502,7 +503,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define INTEGER2(id) do { \
 	GLint i[2] = { -1, -1 }; \
 	glGetIntegerv(GL_##id, i); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) { \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) { \
 		Script::SetProperty(rq, settings, "GL_" #id "[0]", errstr); \
 		Script::SetProperty(rq, settings, "GL_" #id "[1]", errstr); \
 	} else { \
@@ -514,7 +515,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define FLOAT(id) do { \
 	GLfloat f = std::numeric_limits<GLfloat>::quiet_NaN(); \
 	glGetFloatv(GL_##id, &f); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) \
 		Script::SetProperty(rq, settings, "GL_" #id, errstr); \
 	else \
 		Script::SetProperty(rq, settings, "GL_" #id, f); \
@@ -523,7 +524,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define FLOAT2(id) do { \
 	GLfloat f[2] = { std::numeric_limits<GLfloat>::quiet_NaN(), std::numeric_limits<GLfloat>::quiet_NaN() }; \
 	glGetFloatv(GL_##id, f); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) { \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) { \
 		Script::SetProperty(rq, settings, "GL_" #id "[0]", errstr); \
 		Script::SetProperty(rq, settings, "GL_" #id "[1]", errstr); \
 	} else { \
@@ -535,14 +536,14 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define STRING(id) do { \
 	const char* c = (const char*)glGetString(GL_##id); \
 	if (!c) c = ""; \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) c = errstr; \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) c = errstr; \
 	Script::SetProperty(rq, settings, "GL_" #id, std::string(c)); \
 	}  while (false)
 
 #define QUERY(target, pname) do { \
 	GLint i = -1; \
 	glGetQueryivARB(GL_##target, GL_##pname, &i); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) \
 		Script::SetProperty(rq, settings, "GL_" #target ".GL_" #pname, errstr); \
 	else \
 		Script::SetProperty(rq, settings, "GL_" #target ".GL_" #pname, i); \
@@ -551,7 +552,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define VERTEXPROGRAM(id) do { \
 	GLint i = -1; \
 	glGetProgramivARB(GL_VERTEX_PROGRAM_ARB, GL_##id, &i); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) \
 		Script::SetProperty(rq, settings, "GL_VERTEX_PROGRAM_ARB.GL_" #id, errstr); \
 	else \
 		Script::SetProperty(rq, settings, "GL_VERTEX_PROGRAM_ARB.GL_" #id, i); \
@@ -560,7 +561,7 @@ void CDevice::Report(const ScriptRequest& rq, JS::HandleValue settings)
 #define FRAGMENTPROGRAM(id) do { \
 	GLint i = -1; \
 	glGetProgramivARB(GL_FRAGMENT_PROGRAM_ARB, GL_##id, &i); \
-	if (ogl_SquelchError(GL_INVALID_ENUM)) \
+	if (Utilities::SquelchError(GL_INVALID_ENUM)) \
 		Script::SetProperty(rq, settings, "GL_FRAGMENT_PROGRAM_ARB.GL_" #id, errstr); \
 	else \
 		Script::SetProperty(rq, settings, "GL_FRAGMENT_PROGRAM_ARB.GL_" #id, i); \
@@ -1000,7 +1001,7 @@ void CDevice::Present()
 	// We have to check GL errors after SwapBuffer to avoid possible
 	// synchronizations during rendering.
 	if (GLenum err = glGetError())
-		ONCE(LOGERROR("GL error %s (0x%04x) occurred", ogl_GetErrorName(err), err));
+		ONCE(LOGERROR("GL error %s (0x%04x) occurred", Utilities::GetErrorName(err), err));
 }
 
 void CDevice::OnWindowResize(const uint32_t width, const uint32_t height)

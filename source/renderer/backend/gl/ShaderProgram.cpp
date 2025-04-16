@@ -31,6 +31,7 @@
 #include "renderer/backend/gl/Buffer.h"
 #include "renderer/backend/gl/Device.h"
 #include "renderer/backend/gl/DeviceCommandContext.h"
+#include "renderer/backend/gl/Utilities.h"
 
 #define USE_SHADER_XML_VALIDATION 1
 
@@ -402,7 +403,7 @@ public:
 
 		glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)code.length(), code.c_str());
 
-		if (ogl_SquelchError(GL_INVALID_OPERATION))
+		if (Utilities::SquelchError(GL_INVALID_OPERATION))
 		{
 			GLint errPos = 0;
 			glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errPos);

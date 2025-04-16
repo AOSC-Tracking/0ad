@@ -23,6 +23,7 @@
 #include "renderer/backend/gl/Device.h"
 #include "renderer/backend/gl/DeviceCommandContext.h"
 #include "renderer/backend/gl/Mapping.h"
+#include "renderer/backend/gl/Utilities.h"
 
 #include <algorithm>
 
