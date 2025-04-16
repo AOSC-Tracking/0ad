@@ -47,28 +47,29 @@ enum class Reaction
 namespace Slot
 {
 constexpr std::integral_constant<size_t, 0> main;
+constexpr std::integral_constant<size_t, 1> window;
 
 // These two must be called first `globalsInput` deals with some important global state, such as which
 // scancodes are being pressed, mouse buttons pressed, etc. while hotkeyStateChange updates the map of
 // active hotkeys.
-constexpr std::integral_constant<size_t, 1> hotkeyStateChange;
-constexpr std::integral_constant<size_t, 2> global;
+constexpr std::integral_constant<size_t, 2> hotkeyStateChange;
+constexpr std::integral_constant<size_t, 3> global;
 
 // Should be called after scancode map update (i.e. after the global input, but before UI). This never
 // blocks the event, but it does some processing necessary for hotkeys, which are triggered later down the
 // input chain. (by calling this before the UI, we can use `EventWouldTriggerHotkey` in the UI).
-constexpr std::integral_constant<size_t, 3> hotkeyInputPreparation;
+constexpr std::integral_constant<size_t, 4> hotkeyInputPreparation;
 
-constexpr std::integral_constant<size_t, 4> touchInput;
+constexpr std::integral_constant<size_t, 5> touchInput;
 
 // The console handler needs to be called before the hotkey handler so that text can be typed in without
 // setting off hotkeys.
-constexpr std::integral_constant<size_t, 5> console;
+constexpr std::integral_constant<size_t, 6> console;
 // Likewise for gui.
-constexpr std::integral_constant<size_t, 6> gui;
-constexpr std::integral_constant<size_t, 7> hotkeyInput;
-constexpr std::integral_constant<size_t, 8> profileViewer;
-constexpr std::integral_constant<size_t, 9> gameView;
+constexpr std::integral_constant<size_t, 7> gui;
+constexpr std::integral_constant<size_t, 8> hotkeyInput;
+constexpr std::integral_constant<size_t, 9> profileViewer;
+constexpr std::integral_constant<size_t, 10> gameView;
 }
 
 /**
@@ -136,7 +137,7 @@ public:
 	PollEventsResult PollEvents();
 
 private:
-	std::array<HandlerBase*, 10> m_Handlers{{}};
+	std::array<HandlerBase*, 11> m_Handlers{{}};
 	const std::unique_ptr<std::queue<SDL_Event>> m_PriorityEvents;
 };
 

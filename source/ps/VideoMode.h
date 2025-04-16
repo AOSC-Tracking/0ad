@@ -65,7 +65,7 @@ public:
 	/**
 	 * Resize the SDL window and associated graphics stuff to the new size.
 	 */
-	bool ResizeWindow(int w, int h);
+	bool OnceAFrameWork();
 
 	/**
 	 * Set scale and tell dependent compoenent to recompute sizes.
@@ -81,16 +81,6 @@ public:
 	* Returns true if window runs in fullscreen mode.
 	*/
 	bool IsInFullscreen() const;
-
-	/**
-	 * Switch between fullscreen and windowed mode.
-	 */
-	bool ToggleFullscreen();
-
-	/**
-	 * Update window position, to restore later if necessary (SDL2 only).
-	 */
-	void UpdatePosition(int x, int y);
 
 	/**
 	 * Update the graphics code to start drawing to the new size.
@@ -182,6 +172,19 @@ private:
 
 	Renderer::Backend::Backend m_Backend = Renderer::Backend::Backend::GL;
 	std::unique_ptr<Renderer::Backend::IDevice> m_BackendDevice;
+
+	// To avoid redundant and/or recursive resizing, we save the new size after VIDEORESIZE messages and
+	// only update the video mode once per frame.
+	// These values are the values of the latest resize message.
+	int m_ResizedW{0};
+	int m_ResizedH{0};
+
+	struct InputHandler
+	{
+		CVideoMode& videoMode;
+		Input::Reaction operator()(const SDL_Event& ev);
+	};
+	Input::Handler<InputHandler> m_InputHandler{m_InputManager, Input::Slot::window, {*this}};
 };
 
 extern CVideoMode g_VideoMode;
