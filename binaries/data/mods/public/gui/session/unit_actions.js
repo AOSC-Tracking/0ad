@@ -56,8 +56,8 @@ var g_UnitActions =
 			Engine.PostNetworkCommand({
 				"type": "walk",
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": Math.round(position.x),
+				"z": Math.round(position.z),
 				"queued": queued,
 				"pushFront": pushFront,
 				"formation": g_AutoFormation.getDefault()
@@ -107,8 +107,8 @@ var g_UnitActions =
 			Engine.PostNetworkCommand({
 				"type": "attack-walk",
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": Math.round(position.x),
+				"z": Math.round(position.z),
 				"targetClasses": targetClasses,
 				"queued": queued,
 				"pushFront": pushFront,
@@ -305,8 +305,8 @@ var g_UnitActions =
 			Engine.PostNetworkCommand({
 				"type": "patrol",
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": Math.round(position.x),
+				"z": Math.round(position.z),
 				"target": action.target,
 				"targetClasses": { "attack": g_PatrolTargets },
 				"queued": queued,
@@ -1034,8 +1034,8 @@ var g_UnitActions =
 			Engine.PostNetworkCommand({
 				"type": "focus-fire",
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": Math.round(position.x),
+				"z": Math.round(position.z),
 				"target": action.target,
 				"data": action.data,
 				"queued": queued,
@@ -1116,11 +1116,14 @@ var g_UnitActions =
 			if (action.position)
 				position = action.position;
 
+			var x = Math.round(position.x);
+			var z = Math.round(position.z)
+
 			Engine.PostNetworkCommand({
 				"type": "set-rallypoint",
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": x,
+				"z": z,
 				"data": action.data,
 				"queued": queued
 			});
@@ -1128,8 +1131,8 @@ var g_UnitActions =
 			// Display rally point at the new coordinates, to avoid display lag
 			Engine.GuiInterfaceCall("DisplayRallyPoint", {
 				"entities": selection,
-				"x": position.x,
-				"z": position.z,
+				"x": x,
+				"z": z,
 				"queued": queued
 			});
 
