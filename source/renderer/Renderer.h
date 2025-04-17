@@ -181,8 +181,6 @@ protected:
 	Stats m_Stats;
 
 	bool m_ShouldPreloadResourcesBeforeNextFrame = false;
-
-	ScreenShotType m_ScreenShotType = ScreenShotType::NONE;
 };
 
 #endif // INCLUDED_RENDERER

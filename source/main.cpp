@@ -199,16 +199,6 @@ static Input::Reaction MainInputHandler(const SDL_Event& ev)
 			QuitEngine();
 			return Input::Reaction::HANDLED;
 		}
-		else if (hotkey == "screenshot")
-		{
-			g_Renderer.MakeScreenShotOnNextFrame(CRenderer::ScreenShotType::DEFAULT);
-			return Input::Reaction::HANDLED;
-		}
-		else if (hotkey == "bigscreenshot")
-		{
-			g_Renderer.MakeScreenShotOnNextFrame(CRenderer::ScreenShotType::BIG);
-			return Input::Reaction::HANDLED;
-		}
 		else if (hotkey == "profile2.toggle")
 		{
 			g_Profiler2.Toggle();
