@@ -23,7 +23,7 @@
 #define INCLUDED_CCONSOLE
 
 #include "lib/file/vfs/vfs_path.h"
-#include "ps/Input_FWD.h"
+#include "ps/Input.h"
 
 #include <deque>
 #include <memory>
@@ -52,7 +52,6 @@ public:
 
 	void UpdateScreenSize(int w, int h);
 
-	void ToggleVisible();
 	void SetVisible(bool visible);
 
 	/**
@@ -62,14 +61,10 @@ public:
 
 	void Render(CCanvas2D& canvas);
 
-	void InsertChar(const int szChar, const wchar_t cooked);
-
 	void InsertMessage(const std::string& message);
 
 	void SetBuffer(const wchar_t* szMessage);
 
-	// Only returns a pointer to the buffer; copy out of here if you want to keep it.
-	const wchar_t* GetBuffer();
 	void FlushBuffer();
 
 	bool IsActive() const { return m_Visible; }
@@ -113,6 +108,8 @@ private:
 	bool m_QuitHotkeyWasShown;	// show console.toggle hotkey values at first time
 	double m_CursorBlinkRate;	// cursor blink rate in seconds, if greater than 0.0
 
+	void InsertChar(const int szChar, const wchar_t cooked);
+
 	void DrawWindow(CCanvas2D& canvas);
 	void DrawHistory(CTextRenderer& textRenderer);
 	void DrawBuffer(CTextRenderer& textRenderer);
@@ -129,11 +126,15 @@ private:
 
 	void LoadHistory();
 	void SaveHistory();
-	void ShowQuitHotkeys();
+
+	struct InputHandler
+	{
+		CConsole& console;
+		Input::Reaction operator()(const SDL_Event& ev);
+	};
+	Input::Handler<InputHandler> m_InputHandler;
 };
 
 extern CConsole* g_Console;
-
-extern Input::Reaction conInputHandler(const SDL_Event& ev);
 
 #endif // INCLUDED_CCONSOLE
