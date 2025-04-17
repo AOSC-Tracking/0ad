@@ -234,11 +234,6 @@ static void InitPs(bool setup_gui, const CStrW& gui_page, ScriptInterface* srcSc
 
 	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::hotkeyInput, HotkeyInputActualHandler);
 
-	// gui_handler needs to be registered after (i.e. called before!) the
-	// hotkey handler so that input boxes can be typed in without
-	// setting off hotkeys.
-	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::gui, gui_handler);
-
 	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::touchInput, touch_input_handler);
 
 	// Should be called after scancode map update (i.e. after the global input, but before UI).
