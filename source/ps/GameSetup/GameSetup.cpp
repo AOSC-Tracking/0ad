@@ -228,8 +228,6 @@ static void InitPs(bool setup_gui, const CStrW& gui_page, ScriptInterface* srcSc
 	g_Joystick.Initialise();
 
 	std::unique_ptr<InputHandlers> handlers{std::make_unique<InputHandlers>()};
-	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::gameView, game_view_handler);
-
 	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::hotkeyInput, HotkeyInputActualHandler);
 
 	handlers->emplace(g_VideoMode.m_InputManager, Input::Slot::touchInput, touch_input_handler);

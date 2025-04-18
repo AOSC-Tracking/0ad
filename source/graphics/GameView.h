@@ -18,7 +18,6 @@
 #ifndef INCLUDED_GAMEVIEW
 #define INCLUDED_GAMEVIEW
 
-#include "ps/Input_FWD.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/Scene.h"
 #include "simulation2/system/Entity.h"
@@ -55,8 +54,6 @@ public:
 	void Prepare(Renderer::Backend::IDeviceCommandContext* deviceCommandContext);
 	void Render(Renderer::Backend::IDeviceCommandContext* deviceCommandContext);
 	void RenderOverlays(Renderer::Backend::IDeviceCommandContext* deviceCommandContext);
-
-	Input::Reaction HandleEvent(const SDL_Event& ev);
 
 	CVector3D GetCameraPivot() const;
 	CVector3D GetCameraPosition() const;
@@ -95,7 +92,5 @@ private:
 
 	CGameViewImpl* m;
 };
-
-extern Input::Reaction game_view_handler(const SDL_Event& ev);
 
 #endif // INCLUDED_GAMEVIEW
