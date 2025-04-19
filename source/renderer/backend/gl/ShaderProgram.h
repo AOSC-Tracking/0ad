@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,14 +20,13 @@
 
 #include "lib/ogl.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
 #include "ps/containers/Span.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrForward.h"
 #include "renderer/backend/Format.h"
 #include "renderer/backend/gl/Texture.h"
 #include "renderer/backend/IShaderProgram.h"
-
-#include <map>
-#include <vector>
 
 struct CColor;
 class CMatrix3D;
@@ -63,12 +62,12 @@ public:
 
 	IDevice* GetDevice() override;
 
-	const std::vector<SVertexAttributeFormat>& GetAttributes() const noexcept { return m_Attributes; }
+	const PS::vector<SVertexAttributeFormat>& GetAttributes() const noexcept { return m_Attributes; }
 
 private:
 	CDevice* m_Device = nullptr;
 
-	std::vector<SVertexAttributeFormat> m_Attributes;
+	PS::vector<SVertexAttributeFormat> m_Attributes;
 };
 
 /**

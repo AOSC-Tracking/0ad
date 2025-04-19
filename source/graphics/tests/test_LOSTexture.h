@@ -53,7 +53,7 @@ public:
 		// should always be LosState::MASK for player 1 (as the other players are bit-shifted).
 		CLosQuerier los((u32)LosState::MASK, inputDataVec, size);
 
-		std::vector<u8> losData;
+		PS::vector<u8> losData;
 		size_t pitch;
 		losData.resize(tex.GetBitmapSize(size, size, &pitch));
 
@@ -82,7 +82,7 @@ public:
 		double t = timer_Time();
 		for (size_t i = 0; i < reps; ++i)
 		{
-			std::vector<u8> losData;
+			PS::vector<u8> losData;
 			size_t pitch;
 			losData.resize(tex.GetBitmapSize(size, size, &pitch));
 

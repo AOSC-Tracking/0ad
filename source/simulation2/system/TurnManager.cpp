@@ -132,8 +132,8 @@ bool CTurnManager::Update(float simFrameLength, size_t maxTurns)
 		}
 
 		// Put all the client commands into a single list, in a globally consistent order
-		std::vector<SimulationCommand> commands;
-		for (std::pair<const u32, std::vector<SimulationCommand>>& p : m_QueuedCommands[0])
+		PS::vector<SimulationCommand> commands;
+		for (std::pair<const u32, PS::vector<SimulationCommand>>& p : m_QueuedCommands[0])
 			commands.insert(commands.end(), std::make_move_iterator(p.second.begin()), std::make_move_iterator(p.second.end()));
 
 		m_QueuedCommands.pop_front();
@@ -175,8 +175,8 @@ bool CTurnManager::UpdateFastForward()
 		m_Simulation2.FlushDestroyedEntities();
 
 		// Put all the client commands into a single list, in a globally consistent order
-		std::vector<SimulationCommand> commands;
-		for (std::pair<const u32, std::vector<SimulationCommand>>& p : m_QueuedCommands[0])
+		PS::vector<SimulationCommand> commands;
+		for (std::pair<const u32, PS::vector<SimulationCommand>>& p : m_QueuedCommands[0])
 			commands.insert(commands.end(), std::make_move_iterator(p.second.begin()), std::make_move_iterator(p.second.end()));
 
 		m_QueuedCommands.pop_front();

@@ -22,12 +22,12 @@
 #include "lib/allocators/shared_ptr.h"
 #include "lib/file/vfs/vfs_path.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedSet.h"
 #include "ps/CStr.h"
 #include "ps/Filesystem.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <mutex>
-#include <unordered_set>
 
 namespace
 {
@@ -38,7 +38,7 @@ void TriggerAllHooks(const std::multimap<CStr, std::function<void()>>& hooks, co
 }
 
 // These entries will not be printed to logfiles, so that logfiles can be shared without leaking personal or sensitive data
-const std::unordered_set<std::string> g_UnloggedEntries = {
+const PS::unordered_set<std::string> g_UnloggedEntries = {
 	"lobby.password",
 	"lobby.buddies",
 	"userreport.id" // authentication token for GDPR personal data requests
@@ -206,10 +206,10 @@ EConfigNamespace CConfigDB::GetValueNamespace(EConfigNamespace ns, const CStr& n
 	return CFG_LAST;
 }
 
-std::map<CStr, CConfigValueSet> CConfigDB::GetValuesWithPrefix(EConfigNamespace ns, const CStr& prefix) const
+PS::map<CStr, CConfigValueSet> CConfigDB::GetValuesWithPrefix(EConfigNamespace ns, const CStr& prefix) const
 {
 	std::lock_guard<std::recursive_mutex> s(m_Mutex);
-	std::map<CStr, CConfigValueSet> ret;
+	PS::map<CStr, CConfigValueSet> ret;
 
 	CHECK_NS(ret);
 
@@ -250,7 +250,7 @@ void CConfigDB::SetValueBool(EConfigNamespace ns, const CStr& name, const bool v
 	SetValueString(ns, name, valueString);
 }
 
-void CConfigDB::SetValueList(EConfigNamespace ns, const CStr& name, std::vector<CStr> values)
+void CConfigDB::SetValueList(EConfigNamespace ns, const CStr& name, PS::vector<CStr> values)
 {
 	CHECK_NS(;);
 
@@ -318,7 +318,7 @@ bool CConfigDB::Reload(EConfigNamespace ns)
 	CStr name;
 	CStr value;
 	int line = 1;
-	std::vector<CStr> values;
+	PS::vector<CStr> values;
 	for (char* pos = filebuf; pos < filebufend; ++pos)
 	{
 		switch (*pos)

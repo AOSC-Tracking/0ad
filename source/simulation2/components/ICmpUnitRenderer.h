@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 
 #include "simulation2/system/Interface.h"
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class CUnit;
 class CBoundingSphere;
@@ -65,7 +65,7 @@ public:
 	 * querying a lot of entities for component interfaces and doing these types
 	 * of tests first.
 	 */
-	virtual void PickAllEntitiesAtPoint(std::vector<std::pair<CEntityHandle, CVector3D> >& outEntities,
+	virtual void PickAllEntitiesAtPoint(PS::vector<std::pair<CEntityHandle, CVector3D> >& outEntities,
 		const CVector3D& origin, const CVector3D& dir,
 		bool allowEditorSelectables) const = 0;
 

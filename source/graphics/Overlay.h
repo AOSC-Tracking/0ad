@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,9 +22,8 @@
 #include "graphics/Texture.h"
 #include "maths/Vector2D.h"
 #include "maths/Vector3D.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
-
-#include <vector>
 
 class CFrustum;
 class CSimContext;
@@ -41,7 +40,7 @@ struct SOverlayLine
 
 	CColor m_Color;
 	// Shape is not automatically closed.
-	std::vector<CVector3D> m_Coords;
+	PS::vector<CVector3D> m_Coords;
 	// Half-width of the line, in world-space units.
 	float m_Thickness;
 
@@ -60,7 +59,7 @@ struct SOverlayLine
  * Once submitted for rendering, instances must not be copied afterwards. The reason is that they
  * are assigned rendering data that is unique to the submitted instance, and non-transferable to
  * any copies that would otherwise be made. Amongst others, this restraint includes that they must
- * not be submitted by their address inside a std::vector storing them by value.
+ * not be submitted by their address inside a PS::vector storing them by value.
  */
 struct SOverlayTexturedLine
 {
@@ -90,7 +89,7 @@ struct SOverlayTexturedLine
 	/// Color to apply to the line texture, where indicated by the mask.
 	CColor m_Color;
 	/// (x, z) vertex coordinate pairs; y is computed automatically.
-	std::vector<CVector2D> m_Coords;
+	PS::vector<CVector2D> m_Coords;
 	/// Half-width of the line, in world-space units.
 	float m_Thickness;
 	/// Should this line be treated as a closed loop? If set, any end cap settings are ignored.
@@ -131,7 +130,7 @@ struct SOverlayTexturedLine
 
 	void PushCoords(const float x, const float z) { m_Coords.emplace_back(x, z); }
 	void PushCoords(const CVector2D& v) { m_Coords.push_back(v); }
-	void PushCoords(const std::vector<CVector2D>& points)
+	void PushCoords(const PS::vector<CVector2D>& points)
 	{
 		for (const CVector2D& point : points)
 			PushCoords(point);

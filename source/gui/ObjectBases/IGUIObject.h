@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -32,12 +32,11 @@
 #include "lib/allocators/DynamicArena.h"
 #include "lib/allocators/STLAllocators.h"
 #include "lib/input.h" // just for IN_PASS
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/XML/Xeromyces.h"
 #include "scriptinterface/ScriptTypes.h"
-
-#include <map>
-#include <vector>
 
 class CCanvas2D;
 class CGUI;
@@ -116,7 +115,7 @@ public:
 	/**
 	 * Return all child objects of the current object.
 	 */
-	const std::vector<IGUIObject*>& GetChildren() const { return m_Children; }
+	const PS::vector<IGUIObject*>& GetChildren() const { return m_Children; }
 
 	//@}
 	//--------------------------------------------------------
@@ -217,7 +216,7 @@ public:
 	 */
 	JSObject* GetJSObject();
 
-	virtual const std::vector<IGUIObject*>& GetVisibleChildren() const { return m_Children; }
+	virtual const PS::vector<IGUIObject*>& GetVisibleChildren() const { return m_Children; }
 	void SetIsInsideBoundaries(bool& isInsideBoundaries) { m_IsInsideBoundaries = isInsideBoundaries; }
 	bool IsHiddenOrGhostOrOutOfBoundaries() const;
 
@@ -507,7 +506,7 @@ protected:
 	CStr m_Name;
 
 	// Constructed on the heap, will be destroyed along with the the CGUI
-	std::vector<IGUIObject*> m_Children;
+	PS::vector<IGUIObject*> m_Children;
 
 	// Pointer to parent
 	IGUIObject* m_pParent;
@@ -524,13 +523,13 @@ protected:
 	/**
 	 * Settings pool, all an object's settings are located here
 	 */
-	std::map<CStr, IGUISetting*> m_Settings;
+	PS::map<CStr, IGUISetting*> m_Settings;
 
 	// An object can't function stand alone
 	CGUI& m_pGUI;
 
 	// Internal storage for registered script handlers.
-	std::map<CStr, JS::Heap<JSObject*> > m_ScriptHandlers;
+	PS::map<CStr, JS::Heap<JSObject*> > m_ScriptHandlers;
 
 	// Cached JSObject representing this GUI object.
 	std::unique_ptr<IGUIProxyObject> m_JSObject;

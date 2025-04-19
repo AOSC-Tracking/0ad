@@ -133,7 +133,7 @@ ErrorReactionInternal psDisplayError(const wchar_t* UNUSED(text), size_t UNUSED(
 	return ERI_NOT_IMPLEMENTED;
 }
 
-void MountMods(const Paths& paths, const std::vector<CStr>& mods)
+void MountMods(const Paths& paths, const PS::vector<CStr>& mods)
 {
 	OsPath modPath = paths.RData()/"mods";
 	OsPath modUserPath = paths.UserData()/"mods";
@@ -547,7 +547,7 @@ bool Init(const CmdLineArgs& args, int flags)
 	{
 		ScriptInterface modInterface("Engine", "Mod", g_ScriptContext);
 		g_Mods.UpdateAvailableMods(modInterface);
-		std::vector<CStr> mods;
+		PS::vector<CStr> mods;
 		if (args.Has("mod"))
 			mods = args.GetMultiple("mod");
 		else
@@ -610,7 +610,7 @@ bool Init(const CmdLineArgs& args, int flags)
 	return true;
 }
 
-void InitGraphics(const CmdLineArgs& args, int flags, const std::vector<CStr>& installedMods,
+void InitGraphics(const CmdLineArgs& args, int flags, const PS::vector<CStr>& installedMods,
 	ScriptContext& scriptContext, ScriptInterface& scriptInterface)
 {
 	const bool setup_vmode = (flags & INIT_HAVE_VMODE) == 0;
@@ -759,7 +759,7 @@ bool Autostart(const CmdLineArgs& args)
 	// that can run the priviledged "LoadScript" function, and then call the appropriate function.
 
 	// TODO: this essentially duplicates the CGUI logic to load directory or scripts.
-	std::unordered_set<VfsPath> templateCache;
+	PS::unordered_set<VfsPath> templateCache;
 	const auto autostartLoadScript = [&templateCache](const ScriptInterface& scriptInterface,
 		const VfsPath& path)
 	{

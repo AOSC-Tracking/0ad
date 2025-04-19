@@ -66,7 +66,7 @@ size_t CScriptStatsTable::GetNumberRows()
 	return NumberRows;
 }
 
-const std::vector<ProfileColumn>& CScriptStatsTable::GetColumns()
+const PS::vector<ProfileColumn>& CScriptStatsTable::GetColumns()
 {
 	m_ColumnDescriptions.clear();
 	m_ColumnDescriptions.push_back(ProfileColumn("Name", 200));

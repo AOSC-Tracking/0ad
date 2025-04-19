@@ -91,7 +91,7 @@ public:
 
 	entity_id_t m_TurretParent;
 	CFixedVector3D m_TurretPosition;
-	std::set<entity_id_t> m_Turrets;
+	PS::set<entity_id_t> m_Turrets;
 
 	// Not serialized:
 	float m_InterpolatedRotX, m_InterpolatedRotY, m_InterpolatedRotZ;
@@ -304,7 +304,7 @@ public:
 		}
 	}
 
-	std::set<entity_id_t>* GetTurrets() override
+	PS::set<entity_id_t>* GetTurrets() override
 	{
 		return &m_Turrets;
 	}
@@ -882,7 +882,7 @@ private:
 	 */
 	void AdvertisePositionChanges() const
 	{
-		for (std::set<entity_id_t>::const_iterator it = m_Turrets.begin(); it != m_Turrets.end(); ++it)
+		for (PS::set<entity_id_t>::const_iterator it = m_Turrets.begin(); it != m_Turrets.end(); ++it)
 		{
 			CmpPtr<ICmpPosition> cmpPosition(GetSimContext(), *it);
 			if (cmpPosition)

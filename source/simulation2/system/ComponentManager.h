@@ -18,6 +18,9 @@
 #ifndef INCLUDED_COMPONENTMANAGER
 #define INCLUDED_COMPONENTMANAGER
 
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/Filesystem.h"
 #include "scriptinterface/ScriptInterface.h"
 #include "simulation2/helpers/Player.h"
@@ -26,9 +29,6 @@
 #include "simulation2/system/IComponent.h"
 
 #include <boost/random/linear_congruential.hpp>
-#include <map>
-#include <set>
-#include <unordered_map>
 
 class IComponent;
 class CParamNode;
@@ -242,8 +242,8 @@ public:
 	IComponent* QueryInterface(entity_id_t ent, InterfaceId iid) const;
 
 	using InterfacePair = std::pair<entity_id_t, IComponent*>;
-	using InterfaceList = std::vector<InterfacePair>;
-	using InterfaceListUnordered = std::unordered_map<entity_id_t, IComponent*>;
+	using InterfaceList = PS::vector<InterfacePair>;
+	using InterfaceListUnordered = PS::unordered_map<entity_id_t, IComponent*>;
 
 	InterfaceList GetEntitiesWithInterface(InterfaceId iid) const;
 	const InterfaceListUnordered& GetEntitiesWithInterfaceUnordered(InterfaceId iid) const;
@@ -293,8 +293,8 @@ private:
 	void Script_RegisterInterface(const std::string& name);
 	void Script_RegisterMessageType(const std::string& name);
 	void Script_RegisterGlobal(const std::string& name, JS::HandleValue value);
-	std::vector<int> Script_GetEntitiesWithInterface(int iid);
-	std::vector<IComponent*> Script_GetComponentsWithInterface(int iid);
+	PS::vector<int> Script_GetEntitiesWithInterface(int iid);
+	PS::vector<IComponent*> Script_GetComponentsWithInterface(int iid);
 	void Script_PostMessage(int ent, int mtid, JS::HandleValue data);
 	void Script_BroadcastMessage(int mtid, JS::HandleValue data);
 	int Script_AddEntity(const std::wstring& templateName);
@@ -320,26 +320,26 @@ private:
 	bool m_CurrentlyHotloading;
 
 	// TODO: some of these should be vectors
-	std::map<ComponentTypeId, ComponentType> m_ComponentTypesById;
-	std::vector<CComponentManager::ComponentTypeId> m_ScriptedSystemComponents;
-	std::vector<std::unordered_map<entity_id_t, IComponent*> > m_ComponentsByInterface; // indexed by InterfaceId
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> > m_ComponentsByTypeId;
-	std::map<MessageTypeId, std::vector<ComponentTypeId> > m_LocalMessageSubscriptions;
-	std::map<MessageTypeId, std::vector<ComponentTypeId> > m_GlobalMessageSubscriptions;
-	std::map<std::string, ComponentTypeId> m_ComponentTypeIdsByName;
-	std::map<std::string, MessageTypeId> m_MessageTypeIdsByName;
-	std::map<MessageTypeId, std::string> m_MessageTypeNamesById;
-	std::map<std::string, InterfaceId> m_InterfaceIdsByName;
+	PS::map<ComponentTypeId, ComponentType> m_ComponentTypesById;
+	PS::vector<CComponentManager::ComponentTypeId> m_ScriptedSystemComponents;
+	PS::vector<PS::unordered_map<entity_id_t, IComponent*> > m_ComponentsByInterface; // indexed by InterfaceId
+	PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> > m_ComponentsByTypeId;
+	PS::map<MessageTypeId, PS::vector<ComponentTypeId> > m_LocalMessageSubscriptions;
+	PS::map<MessageTypeId, PS::vector<ComponentTypeId> > m_GlobalMessageSubscriptions;
+	PS::map<std::string, ComponentTypeId> m_ComponentTypeIdsByName;
+	PS::map<std::string, MessageTypeId> m_MessageTypeIdsByName;
+	PS::map<MessageTypeId, std::string> m_MessageTypeNamesById;
+	PS::map<std::string, InterfaceId> m_InterfaceIdsByName;
 
-	std::map<MessageTypeId, CDynamicSubscription> m_DynamicMessageSubscriptionsNonsync;
-	std::map<IComponent*, std::set<MessageTypeId> > m_DynamicMessageSubscriptionsNonsyncByComponent;
+	PS::map<MessageTypeId, CDynamicSubscription> m_DynamicMessageSubscriptionsNonsync;
+	PS::map<IComponent*, PS::set<MessageTypeId> > m_DynamicMessageSubscriptionsNonsyncByComponent;
 
-	std::unordered_map<entity_id_t, SEntityComponentCache*> m_ComponentCaches;
+	PS::unordered_map<entity_id_t, SEntityComponentCache*> m_ComponentCaches;
 
 	// TODO: maintaining both ComponentsBy* is nasty; can we get rid of one,
 	// while keeping QueryInterface and PostMessage sufficiently efficient?
 
-	std::vector<entity_id_t> m_DestructionQueue;
+	PS::vector<entity_id_t> m_DestructionQueue;
 
 	ComponentTypeId m_NextScriptComponentTypeId;
 	entity_id_t m_NextEntityId;

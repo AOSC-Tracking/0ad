@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,10 +20,10 @@
 
 #include "graphics/Texture.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 
 #include <memory>
-#include <vector>
 
 class CRect;
 class CTextRenderer;
@@ -49,7 +49,7 @@ public:
 	 * Draws a line by the given points with the width and color.
 	 */
 	void DrawLine(
-		const std::vector<CVector2D>& points,
+		const PS::vector<CVector2D>& points,
 		const float width, const CColor& color);
 
 	/**

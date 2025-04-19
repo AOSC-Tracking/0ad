@@ -20,9 +20,8 @@
 
 #include "lib/input.h"
 #include "lib/frequency_filter.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/KeyName.h"
-
-#include <unordered_map>
 
 // thin abstraction layer on top of SDL.
 // game code should use it instead of SDL_GetMouseState etc. because
@@ -44,7 +43,7 @@ extern bool g_mouse_active;
  * it represents a pressed key.
  * Updated by GlobalsInputHandler in response to key press/release events.
  */
-extern std::unordered_map<int32_t, bool> g_scancodes;
+extern PS::unordered_map<int32_t, bool> g_scancodes;
 
 /**
  * g_mouse_buttons: Mouse buttons states, indexed by SDL_BUTTON_* constants.

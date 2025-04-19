@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,7 +18,8 @@
 #ifndef INCLUDED_CLOGGER
 #define INCLUDED_CLOGGER
 
-#include <deque>
+#include "ps/containers/Deque.h"
+
 #include <fmt/printf.h>
 #include <fstream>
 #include <mutex>
@@ -98,7 +99,7 @@ private:
 		double time;
 		std::string message;
 	};
-	std::deque<RenderedMessage> m_RenderMessages;
+	PS::deque<RenderedMessage> m_RenderMessages;
 
 	// The logger might be constructed too early to allow us to call timer_Time(),
 	// so we'll fill in the initial value later

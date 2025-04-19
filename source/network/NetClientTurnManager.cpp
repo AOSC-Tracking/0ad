@@ -105,7 +105,7 @@ void CNetClientTurnManager::OnSimulationMessage(CSimulationMessage* msg)
 	AddCommand(msg->m_Client, msg->m_Player, msg->m_Data, msg->m_Turn);
 }
 
-void CNetClientTurnManager::OnSyncError(u32 turn, const CStr& expectedHash, const std::vector<CSyncErrorMessage::S_m_PlayerNames>& playerNames)
+void CNetClientTurnManager::OnSyncError(u32 turn, const CStr& expectedHash, const PS::vector<CSyncErrorMessage::S_m_PlayerNames>& playerNames)
 {
 	CStr expectedHashHex(Hexify(expectedHash));
 	NETCLIENTTURN_LOG("OnSyncError(%d, %hs)\n", turn, expectedHashHex.c_str());
@@ -125,7 +125,7 @@ void CNetClientTurnManager::OnSyncError(u32 turn, const CStr& expectedHash, cons
 	binfile.close();
 
 	std::stringstream playerNamesString;
-	std::vector<CStr> playerNamesStrings;
+	PS::vector<CStr> playerNamesStrings;
 	playerNamesStrings.reserve(playerNames.size());
 	for (size_t i = 0; i < playerNames.size(); ++i)
 	{

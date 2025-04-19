@@ -227,7 +227,7 @@ extern Status tex_codec_transform(Tex* t, size_t transforms);
  * depending on src and dst, the row array is flipped if necessary.
  **/
 typedef const u8* RowPtr;
-extern std::vector<RowPtr> tex_codec_alloc_rows(const u8* data, size_t h, size_t pitch, size_t src_flags, size_t dst_orientation);
+extern PS::vector<RowPtr> tex_codec_alloc_rows(const u8* data, size_t h, size_t pitch, size_t src_flags, size_t dst_orientation);
 
 /**
  * apply transforms and then copy header and image into output buffer.

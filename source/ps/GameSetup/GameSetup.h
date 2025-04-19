@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 #ifndef INCLUDED_GAMESETUP
 #define INCLUDED_GAMESETUP
 
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
-
-#include <vector>
 
 class CmdLineArgs;
 class Paths;
@@ -54,13 +53,13 @@ enum InitFlags
 	INIT_MODS_PUBLIC = 16
 };
 
-extern const std::vector<CStr>& GetMods(const CmdLineArgs& args, int flags);
+extern const PS::vector<CStr>& GetMods(const CmdLineArgs& args, int flags);
 
 /**
  * Mounts all files of the given mods in the global VFS.
  * Make sure to call CacheEnabledModVersions after every call to this.
  */
-extern void MountMods(const Paths& paths, const std::vector<CStr>& mods);
+extern void MountMods(const Paths& paths, const PS::vector<CStr>& mods);
 
 void InitVfs(const CmdLineArgs& args);
 
@@ -75,7 +74,7 @@ extern void InitInput();
 /**
  * `ShutdownNetworkAndUI` has to be called later.
  */
-void InitGraphics(const CmdLineArgs& args, int flags, const std::vector<CStr>& installedMods,
+void InitGraphics(const CmdLineArgs& args, int flags, const PS::vector<CStr>& installedMods,
 	ScriptContext& scriptContext, ScriptInterface& scriptInterface);
 
 /**

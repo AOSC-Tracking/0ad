@@ -21,9 +21,9 @@
 #include "graphics/FontManager.h"
 #include "ps/Filesystem.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
 #include "renderer/Renderer.h"
 
-#include <map>
 #include <string>
 
 CFont::GlyphMap::GlyphMap()

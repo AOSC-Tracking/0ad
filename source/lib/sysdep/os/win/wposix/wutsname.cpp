@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,12 +25,12 @@
 #include "lib/sysdep/os/win/wposix/wutsname.h"
 #include "lib/sysdep/os/win/wutil.h"	// WinScopedPreserveLastError
 #include "lib/sysdep/os/win/wversion.h"	// wversion_Family
+#include "ps/containers/Vector.h"
 
 #include <iostream>
 #include <memory>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <windows.h>
 #include <winternl.h>
 
@@ -53,7 +53,7 @@ static DWORD GetNtdllVersion()
 	if (verSize <= 0)
 		return  0;
 
-	std::vector<BYTE> versionData(verSize);
+	PS::vector<BYTE> versionData(verSize);
 	if (!GetFileVersionInfoW(dllPath, verHandle, verSize, versionData.data()))
 		return 0;
 

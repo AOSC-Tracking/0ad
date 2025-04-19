@@ -21,12 +21,12 @@
 #include "graphics/Color.h"
 #include "graphics/ObjectBase.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 
-#include <map>
 #include <memory>
-#include <set>
-#include <vector>
 
 class CModelAbstract;
 class CSkeletonAnim;
@@ -43,15 +43,15 @@ public:
 	~CObjectEntry();
 
 	// Construct this actor, using the specified variation selections
-	bool BuildVariation(const std::vector<const std::set<CStr>*>& completeSelections,
-		const std::vector<u8>& variationKey, CObjectManager& objectManager);
+	bool BuildVariation(const PS::vector<const PS::set<CStr>*>& completeSelections,
+		const PS::vector<u8>& variationKey, CObjectManager& objectManager);
 
 	// Base actor. Contains all the things that don't change between
 	// different variations of the actor.
 	std::shared_ptr<CObjectBase> m_Base;
 
 	// samplers list
-	std::vector<CObjectBase::Samp> m_Samplers;
+	PS::vector<CObjectBase::Samp> m_Samplers;
 	// model name
 	VfsPath m_ModelName;
 	// color (used when doing alpha-channel coloring, but not doing player-color)
@@ -74,7 +74,7 @@ public:
 	 * Returns all the animations matching the given ID or animationName if ID is empty.
 	 * If none found returns Idle animations (which are always added)
 	 */
-	std::vector<CSkeletonAnim*> GetAnimations(const CStr& animationName, const CStr& ID = "") const;
+	PS::vector<CSkeletonAnim*> GetAnimations(const CStr& animationName, const CStr& ID = "") const;
 
 	// corresponding model
 	std::unique_ptr<CModelAbstract> m_Model;

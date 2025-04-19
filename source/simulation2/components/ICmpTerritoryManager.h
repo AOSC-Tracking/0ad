@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,10 +20,9 @@
 
 #include "simulation2/system/Interface.h"
 
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/Player.h"
 #include "simulation2/components/ICmpPosition.h"
-
-#include <vector>
 
 template<typename T>
 class Grid;
@@ -71,7 +70,7 @@ public:
 	 * get the number of neighbour tiles for per player for the selected position
 	 * @return A list with the number of neighbour tiles per player
 	 */
-	virtual std::vector<u32> GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected) = 0;
+	virtual PS::vector<u32> GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected) = 0;
 
 	/**
 	 * Get whether territory at given position is connected to a root object

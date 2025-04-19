@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,6 +22,8 @@
 #include "graphics/ShaderTechniquePtr.h"
 #include "graphics/Texture.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/backend/ITexture.h"
@@ -29,8 +31,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 class CLOSTexture;
 class CSimulation2;
@@ -73,7 +73,7 @@ public:
 		float halfSize;
 	};
 	// Returns icons for corresponding entities on the minimap texture.
-	const std::vector<Icon>& GetIcons() { return m_Icons; }
+	const PS::vector<Icon>& GetIcons() { return m_Icons; }
 
 private:
 	void CreateTextures(
@@ -140,7 +140,7 @@ private:
 	double m_NextBlinkTime = 0.0;
 	bool m_BlinkState = false;
 
-	std::vector<Icon> m_Icons;
+	PS::vector<Icon> m_Icons;
 	// We store the map as a member to avoid redundant reallocations on each
 	// update. We use a grid approach to combine icons by distance.
 	struct CellIconKey
@@ -163,7 +163,7 @@ private:
 		float halfSize;
 		CVector2D worldPosition;
 	};
-	std::unordered_map<CellIconKey, std::vector<CellIcon>, CellIconKeyHash, CellIconKeyEqual> m_IconsCache;
+	PS::unordered_map<CellIconKey, PS::vector<CellIcon>, CellIconKeyHash, CellIconKeyEqual> m_IconsCache;
 };
 
 #endif // INCLUDED_MINIMAPTEXTURE

@@ -65,7 +65,7 @@ struct Waypoint
  */
 struct WaypointPath
 {
-	std::vector<Waypoint> m_Waypoints;
+	PS::vector<Waypoint> m_Waypoints;
 };
 
 /**

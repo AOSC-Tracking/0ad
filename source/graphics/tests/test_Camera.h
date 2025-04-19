@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,9 +22,9 @@
 #include "maths/Vector2D.h"
 #include "maths/Vector3D.h"
 #include "maths/Vector4D.h"
+#include "ps/containers/Vector.h"
 
 #include <cmath>
-#include <vector>
 
 class TestCamera : public CxxTest::TestSuite
 {
@@ -49,7 +49,7 @@ public:
 		camera.UpdateFrustum();
 
 		const float sqrt2 = sqrtf(2.0f) / 2.0f;
-		const std::vector<CPlane> expectedPlanes = {
+		const PS::vector<CPlane> expectedPlanes = {
 			CVector4D(sqrt2, 0.0f, sqrt2, 0.0f),
 			CVector4D(-sqrt2, 0.0f, sqrt2, 0.0f),
 			CVector4D(0.0f, sqrt2, sqrt2, 0.0f),
@@ -81,7 +81,7 @@ public:
 		TS_ASSERT_EQUALS(camera.GetProjectionType(), CCamera::ProjectionType::CUSTOM);
 		camera.UpdateFrustum();
 
-		const std::vector<CPlane> expectedPlanes = {
+		const PS::vector<CPlane> expectedPlanes = {
 			CVector4D(1.0f, 0.0f, 0.0f, 10.0f),
 			CVector4D(-1.0f, 0.0f, 0.0f, 10.0f),
 			CVector4D(0.0f, 1.0f, 0.0f, 10.0f),
@@ -93,10 +93,10 @@ public:
 	}
 
 	// Order of planes is unknown. So use interactive checker.
-	void CheckFrustumPlanes(const CFrustum& frustum, const std::vector<CPlane>& expectedPlanes)
+	void CheckFrustumPlanes(const CFrustum& frustum, const PS::vector<CPlane>& expectedPlanes)
 	{
 		TS_ASSERT_EQUALS(frustum.GetNumPlanes(), expectedPlanes.size());
-		std::set<size_t> indices;
+		PS::set<size_t> indices;
 		for (size_t i = 0; i < expectedPlanes.size(); ++i)
 			indices.insert(i);
 
@@ -300,7 +300,7 @@ public:
 			cameraPerspective.GetNearPlane(), cameraPerspective.GetFarPlane());
 		camera.SetProjection(projection);
 
-		const std::vector<float> distances = {
+		const PS::vector<float> distances = {
 			cameraPerspective.GetNearPlane(),
 			(cameraPerspective.GetNearPlane() + cameraPerspective.GetFarPlane()) / 2.0f,
 			cameraPerspective.GetFarPlane()
@@ -317,7 +317,7 @@ public:
 	void test_perspective_screen_rays()
 	{
 		const float EPS = 1e-4f;
-		const std::vector<SViewPort> viewPorts = {
+		const PS::vector<SViewPort> viewPorts = {
 			SViewPort{0, 0, 512, 512},
 			SViewPort{0, 0, 1024, 768},
 			SViewPort{0, 0, 1440, 2536},
@@ -347,7 +347,7 @@ public:
 	void test_ortho_screen_rays()
 	{
 		const float EPS = 1e-4f;
-		const std::vector<SViewPort> viewPorts = {
+		const PS::vector<SViewPort> viewPorts = {
 			SViewPort{0, 0, 512, 512},
 			SViewPort{0, 0, 1024, 768},
 			SViewPort{0, 0, 1440, 2536},

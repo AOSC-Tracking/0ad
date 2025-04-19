@@ -130,7 +130,7 @@ void SkyManager::LoadAndUploadSkyTexturesIfNeeded(
 				Renderer::Backend::Sampler::Filter::LINEAR,
 				Renderer::Backend::Sampler::AddressMode::CLAMP_TO_EDGE), 1, 1);
 
-	std::vector<u8> rotated;
+	PS::vector<u8> rotated;
 	for (size_t i = 0; i < NUMBER_OF_TEXTURES + 1; ++i)
 	{
 		u8* data = textures[i].get_data();
@@ -186,9 +186,9 @@ void SkyManager::SetSkySet(const CStrW& newSet)
 	m_SkySet = newSet;
 }
 
-std::vector<CStrW> SkyManager::GetSkySets() const
+PS::vector<CStrW> SkyManager::GetSkySets() const
 {
-	std::vector<CStrW> skies;
+	PS::vector<CStrW> skies;
 
 	// Find all subdirectories in art/textures/skies
 
@@ -197,7 +197,7 @@ std::vector<CStrW> SkyManager::GetSkySets() const
 	if (g_VFS->GetDirectoryEntries(path, 0, &subdirectories) != INFO::OK)
 	{
 		LOGERROR("Error opening directory '%s'", path.string8());
-		return std::vector<CStrW>(1, GetSkySet()); // just return what we currently have
+		return PS::vector<CStrW>(1, GetSkySet()); // just return what we currently have
 	}
 
 	for(size_t i = 0; i < subdirectories.size(); i++)

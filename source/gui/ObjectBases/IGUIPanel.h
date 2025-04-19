@@ -31,7 +31,7 @@ public:
 
 	virtual bool IsMouseOver() const;
 
-	virtual const std::vector<IGUIObject*>& GetVisibleChildren() const;
+	virtual const PS::vector<IGUIObject*>& GetVisibleChildren() const;
 
 protected:
 	CRect m_CachedLayoutActualSize;

@@ -33,9 +33,8 @@
 
 #include "CStr.h"
 #include "lib/input.h"
-
-#include <unordered_map>
-#include <vector>
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 
 // SDL_Scancode is an enum, we'll use an explicit int to avoid including SDL in this header.
 using SDL_Scancode_ = int;
@@ -64,15 +63,15 @@ struct SHotkeyMapping
 {
 	CStr name; // name of the hotkey
 	SKey primary; // the primary key
-	std::vector<SKey> required; // list of non-primary keys that must also be active
+	PS::vector<SKey> required; // list of non-primary keys that must also be active
 };
 
-typedef std::vector<SHotkeyMapping> KeyMapping;
+typedef PS::vector<SHotkeyMapping> KeyMapping;
 
 // A mapping of scancodes onto the hotkeys that are associated with that key.
 // (A hotkey triggered by a combination of multiple keys will be in this map
 // multiple times.)
-extern std::unordered_map<SDL_Scancode_, KeyMapping> g_HotkeyMap;
+extern PS::unordered_map<SDL_Scancode_, KeyMapping> g_HotkeyMap;
 
 class CConfigDB;
 extern void LoadHotkeys(CConfigDB& configDB);

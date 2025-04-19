@@ -24,6 +24,7 @@
 #include "lib/file/vfs/vfs.h"
 #include "lib/sysdep/os.h"
 #include "lib/utf8.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/Filesystem.h"
 #include "ps/GameSetup/GameSetup.h"
 #include "ps/GameSetup/Paths.h"
@@ -45,7 +46,6 @@
 #endif
 #include <fstream>
 #include <sstream>
-#include <unordered_map>
 
 namespace
 {
@@ -129,27 +129,27 @@ Mod& Mod::Instance()
 	return g_ModInstance;
 }
 
-const std::vector<CStr>& Mod::GetEnabledMods() const
+const PS::vector<CStr>& Mod::GetEnabledMods() const
 {
 	return m_EnabledMods;
 }
 
-const std::vector<CStr>& Mod::GetIncompatibleMods() const
+const PS::vector<CStr>& Mod::GetIncompatibleMods() const
 {
 	return m_IncompatibleMods;
 }
 
-const std::vector<Mod::ModData>& Mod::GetAvailableMods() const
+const PS::vector<Mod::ModData>& Mod::GetAvailableMods() const
 {
 	return m_AvailableMods;
 }
 
-bool Mod::EnableMods(const std::vector<CStr>& mods, const bool addPublic)
+bool Mod::EnableMods(const PS::vector<CStr>& mods, const bool addPublic)
 {
 	m_IncompatibleMods.clear();
 	m_EnabledMods.clear();
 
-	std::unordered_map<CStr, int> counts;
+	PS::unordered_map<CStr, int> counts;
 	for (const CStr& mod : mods)
 	{
 		// Ignore duplicates.
@@ -174,16 +174,16 @@ bool Mod::EnableMods(const std::vector<CStr>& mods, const bool addPublic)
 
 const Mod::ModData* Mod::GetModData(const CStr& mod) const
 {
-	std::vector<ModData>::const_iterator it = std::find_if(m_AvailableMods.begin(), m_AvailableMods.end(),
+	PS::vector<ModData>::const_iterator it = std::find_if(m_AvailableMods.begin(), m_AvailableMods.end(),
 		[&mod](const ModData& modData) { return modData.m_Pathname == mod; });
 	if (it == m_AvailableMods.end())
 		return nullptr;
 	return std::addressof(*it);
 }
 
-const std::vector<const Mod::ModData*> Mod::GetEnabledModsData() const
+const PS::vector<const Mod::ModData*> Mod::GetEnabledModsData() const
 {
-	std::vector<const ModData*> loadedMods;
+	PS::vector<const ModData*> loadedMods;
 	for (const CStr& mod : m_EnabledMods)
 	{
 		if (mod == "mod" || mod == "user")
@@ -203,11 +203,11 @@ const std::vector<const Mod::ModData*> Mod::GetEnabledModsData() const
 	return loadedMods;
 }
 
-bool Mod::AreModsPlayCompatible(const std::vector<const Mod::ModData*>& modsA, const std::vector<const Mod::ModData*>& modsB)
+bool Mod::AreModsPlayCompatible(const PS::vector<const Mod::ModData*>& modsA, const PS::vector<const Mod::ModData*>& modsB)
 {
 	// Mods must be loaded in the same order.
-	std::vector<const Mod::ModData*>::const_iterator a = modsA.begin();
-	std::vector<const Mod::ModData*>::const_iterator b = modsB.begin();
+	PS::vector<const Mod::ModData*>::const_iterator a = modsA.begin();
+	PS::vector<const Mod::ModData*>::const_iterator b = modsB.begin();
 
 	while (a != modsA.end() || b != modsB.end())
 	{
@@ -281,17 +281,17 @@ void Mod::UpdateAvailableMods(const ScriptInterface& scriptInterface)
 	}
 }
 
-std::vector<CStr> Mod::CheckForIncompatibleMods(const std::vector<CStr>& mods) const
+PS::vector<CStr> Mod::CheckForIncompatibleMods(const PS::vector<CStr>& mods) const
 {
-	std::vector<CStr> incompatibleMods;
-	std::unordered_map<CStr, std::vector<CStr>> modDependencies;
-	std::unordered_map<CStr, CStr> modNameVersions;
+	PS::vector<CStr> incompatibleMods;
+	PS::unordered_map<CStr, PS::vector<CStr>> modDependencies;
+	PS::unordered_map<CStr, CStr> modNameVersions;
 	for (const CStr& mod : mods)
 	{
 		if (mod == "mod" || mod == "user")
 			continue;
 
-		std::vector<ModData>::const_iterator it = std::find_if(m_AvailableMods.begin(), m_AvailableMods.end(),
+		PS::vector<ModData>::const_iterator it = std::find_if(m_AvailableMods.begin(), m_AvailableMods.end(),
 			[&mod](const ModData& modData) { return modData.m_Pathname == mod; });
 
 		if (it == m_AvailableMods.end())
@@ -304,16 +304,16 @@ std::vector<CStr> Mod::CheckForIncompatibleMods(const std::vector<CStr>& mods) c
 		modDependencies.emplace(it->m_Pathname, it->m_Dependencies);
 	}
 
-	static const std::vector<CStr> toCheck = { "<=", ">=", "=", "<", ">" };
+	static const PS::vector<CStr> toCheck = { "<=", ">=", "=", "<", ">" };
 	for (const CStr& mod : mods)
 	{
 		if (mod == "mod" || mod == "user")
 			continue;
 
-		const std::unordered_map<CStr, std::vector<CStr>>::iterator res = modDependencies.find(mod);
+		const PS::unordered_map<CStr, PS::vector<CStr>>::iterator res = modDependencies.find(mod);
 		if (res == modDependencies.end())
 			continue;
-		const std::vector<CStr> deps = res->second;
+		const PS::vector<CStr> deps = res->second;
 		if (deps.empty())
 			continue;
 
@@ -331,7 +331,7 @@ std::vector<CStr> Mod::CheckForIncompatibleMods(const std::vector<CStr>& mods) c
 				const CStr modToCheck = dep.substr(0, pos);
 				//0.0.24
 				const CStr versionToCheck = dep.substr(pos + op.size());
-				const std::unordered_map<CStr, CStr>::iterator it = modNameVersions.find(modToCheck);
+				const PS::unordered_map<CStr, CStr>::iterator it = modNameVersions.find(modToCheck);
 				// Could not find the mod, or 0.0.25(0ad) , <=, 0.0.24(required version)
 				if (it == modNameVersions.end() || !CompareVersionStrings(it->second, op, versionToCheck))
 					incompatibleMods.push_back(mod);
@@ -346,8 +346,8 @@ std::vector<CStr> Mod::CheckForIncompatibleMods(const std::vector<CStr>& mods) c
 
 bool Mod::CompareVersionStrings(const CStr& version, const CStr& op, const CStr& required) const
 {
-	std::vector<CStr> versionSplit;
-	std::vector<CStr> requiredSplit;
+	PS::vector<CStr> versionSplit;
+	PS::vector<CStr> requiredSplit;
 	static const std::string toIgnore = "-,_";
 	boost::split(versionSplit, version, boost::is_any_of(toIgnore), boost::token_compress_on);
 	boost::split(requiredSplit, required, boost::is_any_of(toIgnore), boost::token_compress_on);

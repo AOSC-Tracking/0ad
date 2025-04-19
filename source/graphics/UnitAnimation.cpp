@@ -74,7 +74,7 @@ void CUnitAnimation::AddModel(CModel* model, const CObjectEntry* object)
 			m_AnimStatesAreStatic = false;
 
 	// Recursively add all props
-	const std::vector<CModel::Prop>& props = model->GetProps();
+	const PS::vector<CModel::Prop>& props = model->GetProps();
 	for (const CModel::Prop& prop : props)
 	{
 		CModel* propModel = prop.m_Model->ToCModel();
@@ -127,7 +127,7 @@ void CUnitAnimation::SetAnimationSyncOffset(float actionTime)
 		return;
 
 	// Update all the synced prop models to each coincide with actionTime
-	for (std::vector<SModelAnimState>::iterator it = m_AnimStates.begin(); it != m_AnimStates.end(); ++it)
+	for (PS::vector<SModelAnimState>::iterator it = m_AnimStates.begin(); it != m_AnimStates.end(); ++it)
 	{
 		CSkeletonAnimDef* animDef = it->anim->m_AnimDef;
 		if (animDef == NULL)
@@ -162,7 +162,7 @@ void CUnitAnimation::Update(float time)
 	bool shouldPlaySound = false;
 
 	// Advance all of the prop models independently
-	for (std::vector<SModelAnimState>::iterator it = m_AnimStates.begin(); it != m_AnimStates.end(); ++it)
+	for (PS::vector<SModelAnimState>::iterator it = m_AnimStates.begin(); it != m_AnimStates.end(); ++it)
 	{
 		CSkeletonAnimDef* animDef = it->anim->m_AnimDef;
 		if (!animDef)

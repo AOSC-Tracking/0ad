@@ -71,7 +71,7 @@ void CReplayTurnManager::NotifyFinishedUpdate(u32 turn)
 	DoTurn(turn);
 
 	// Compare hash if it exists in the replay and if we didn't have an OOS already
-	std::map<u32, std::pair<std::string, bool>>::iterator turnHashIt = m_ReplayHash.find(turn);
+	PS::map<u32, std::pair<std::string, bool>>::iterator turnHashIt = m_ReplayHash.find(turn);
 	if (m_HasSyncError || turnHashIt == m_ReplayHash.end())
 		return;
 

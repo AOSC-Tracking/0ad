@@ -210,7 +210,7 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 			Bool("isLatin1", isLatin1);
 			if (isLatin1)
 			{
-				std::vector<JS::Latin1Char> propname;
+				PS::vector<JS::Latin1Char> propname;
 				ReadStringLatin1("prop name", propname);
 				JS::RootedValue propval(rq.cx, ReadScriptVal("prop value", nullptr));
 
@@ -435,7 +435,7 @@ JS::Value CStdDeserializer::ReadScriptVal(const char* UNUSED(name), JS::HandleOb
 	}
 }
 
-void CStdDeserializer::ReadStringLatin1(const char* name, std::vector<JS::Latin1Char>& str)
+void CStdDeserializer::ReadStringLatin1(const char* name, PS::vector<JS::Latin1Char>& str)
 {
 	uint32_t len;
 	NumberU32_Unbounded("string length", len);
@@ -465,7 +465,7 @@ void CStdDeserializer::ScriptString(const char* name, JS::MutableHandleString ou
 	Bool("isLatin1", isLatin1);
 	if (isLatin1)
 	{
-		std::vector<JS::Latin1Char> str;
+		PS::vector<JS::Latin1Char> str;
 		ReadStringLatin1(name, str);
 
 		out.set(JS_NewStringCopyN(rq.cx, (const char*)str.data(), str.size()));

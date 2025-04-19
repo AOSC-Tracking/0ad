@@ -77,7 +77,7 @@ void CUnit::SetEntitySelection(const CStr& key, const CStr& selection)
 	ReloadObject();
 }
 
-void CUnit::SetEntitySelection(const std::map<CStr, CStr>& selections)
+void CUnit::SetEntitySelection(const PS::map<CStr, CStr>& selections)
 {
 	for (const std::pair<const CStr, CStr>& s : selections)
 		m_EntitySelections[s.first] = s.second.LowerCase();
@@ -85,7 +85,7 @@ void CUnit::SetEntitySelection(const std::map<CStr, CStr>& selections)
 	ReloadObject();
 }
 
-void CUnit::SetActorSelections(const std::set<CStr>& selections)
+void CUnit::SetActorSelections(const PS::set<CStr>& selections)
 {
 	m_ActorSelections = selections;
 	ReloadObject();
@@ -93,10 +93,10 @@ void CUnit::SetActorSelections(const std::set<CStr>& selections)
 
 void CUnit::ReloadObject()
 {
-	std::set<CStr> entitySelections;
+	PS::set<CStr> entitySelections;
 	for (const std::pair<const CStr, CStr>& selection : m_EntitySelections)
 		entitySelections.insert(selection.second);
-	std::vector<std::set<CStr>> selections;
+	PS::vector<PS::set<CStr>> selections;
 	selections.push_back(entitySelections);
 	selections.push_back(m_ActorSelections);
 

@@ -20,10 +20,10 @@
 
 #include "graphics/ParticleEmitter.h"
 #include "graphics/ParticleEmitterType.h"
+#include "ps/containers/List.h"
+#include "ps/containers/UnorderedMap.h"
 
 #include <boost/random/mersenne_twister.hpp>
-#include <list>
-#include <unordered_map>
 
 class SceneCollector;
 
@@ -60,9 +60,9 @@ public:
 private:
 	float m_CurrentTime;
 
-	std::list<CParticleEmitterPtr> m_UnattachedEmitters;
+	PS::list<CParticleEmitterPtr> m_UnattachedEmitters;
 
-	std::unordered_map<VfsPath, CParticleEmitterTypePtr> m_EmitterTypes;
+	PS::unordered_map<VfsPath, CParticleEmitterTypePtr> m_EmitterTypes;
 };
 
 #endif // INCLUDED_PARTICLEMANAGER

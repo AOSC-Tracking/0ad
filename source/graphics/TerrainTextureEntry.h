@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,16 +23,15 @@
 #include "graphics/Texture.h"
 #include "lib/file/vfs/vfs_path.h"
 #include "maths/Matrix3D.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
-
-#include <vector>
 
 // CTerrainTextureEntry: class wrapping a terrain texture object; contains various other required
 // elements - color of minimap, terrain "group" it belongs to, etc
 class CTerrainTextureEntry
 {
 public:
-	using GroupVector = std::vector<CTerrainGroup*>;
+	using GroupVector = PS::vector<CTerrainGroup*>;
 
 	// Most of the texture's data is delay-loaded, so after the constructor has
 	// been called, the texture entry is ready to be used.

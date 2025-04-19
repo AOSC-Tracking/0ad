@@ -19,9 +19,9 @@
 #define INCLUDED_MESHMANAGER
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/UnorderedMap.h"
 
 #include <memory>
-#include <unordered_map>
 
 class CModelDef;
 using CModelDefPtr = std::shared_ptr<CModelDef>;
@@ -38,7 +38,7 @@ public:
 	CModelDefPtr GetMesh(const VfsPath& pathname);
 
 private:
-	using mesh_map = std::unordered_map<VfsPath, std::weak_ptr<CModelDef> >;
+	using mesh_map = PS::unordered_map<VfsPath, std::weak_ptr<CModelDef> >;
 	mesh_map m_MeshMap;
 	CColladaManager& m_ColladaManager;
 };

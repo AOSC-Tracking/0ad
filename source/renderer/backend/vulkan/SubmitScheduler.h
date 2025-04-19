@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_SUBMITSCHEDULER
 #define INCLUDED_RENDERER_BACKEND_VULKAN_SUBMITSCHEDULER
 
+#include "ps/containers/Queue.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/vulkan/Device.h"
 
 #include <glad/vulkan.h>
 #include <memory>
-#include <queue>
 #include <utility>
-#include <vector>
 
 namespace Renderer
 {
@@ -77,7 +77,7 @@ private:
 		SubmitHandle lastUsedHandle = INVALID_SUBMIT_HANDLE;
 		bool inUse = false;
 	};
-	std::vector<Fence> m_Fences;
+	PS::vector<Fence> m_Fences;
 	uint32_t m_FenceIndex = 0;
 
 	// We assume that we won't run so long that the frame ID will overflow.
@@ -88,7 +88,7 @@ private:
 		SubmitHandle value;
 		uint32_t fenceIndex;
 	};
-	std::queue<SubmittedHandle> m_SubmittedHandles;
+	PS::queue<SubmittedHandle> m_SubmittedHandles;
 
 	// We can't reuse frame data immediately after present because it might
 	// still be processing on GPU.
@@ -105,7 +105,7 @@ private:
 	VkPipelineStageFlags m_NextWaitDstStageMask = 0;
 	VkSemaphore m_NextSubmitSignalSemaphore = VK_NULL_HANDLE;
 
-	std::vector<VkCommandBuffer> m_SubmittedCommandBuffers;
+	PS::vector<VkCommandBuffer> m_SubmittedCommandBuffers;
 
 	std::unique_ptr<CRingCommandContext> m_AcquireCommandContext;
 	std::unique_ptr<CRingCommandContext> m_PresentCommandContext;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 #ifndef INCLUDED_SCRIPTCONVERSIONS
 #define INCLUDED_SCRIPTCONVERSIONS
 
+#include "ps/containers/Vector.h"
 #include "ScriptRequest.h"
 #include "ScriptExceptions.h"
 #include "ScriptExtraHeaders.h" // for typed arrays
 
 #include <limits>
-#include <vector>
 
 namespace Script
 {
@@ -89,7 +89,7 @@ template<typename T> inline bool FromJSProperty(const ScriptRequest& rq, const J
 	return FromJSVal(rq, value, ret);
 }
 
-template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::vector<T>& val)
+template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::MutableHandleValue ret, const PS::vector<T>& val)
 {
 	JS::RootedObject obj(rq.cx, JS::NewArrayObject(rq.cx, 0));
 	if (!obj)
@@ -110,7 +110,7 @@ template<typename T> inline void ToJSVal_vector(const ScriptRequest& rq, JS::Mut
 
 #define FAIL(msg) STMT(ScriptException::Raise(rq, msg); return false)
 
-template<typename T> inline bool FromJSVal_vector(const ScriptRequest& rq, JS::HandleValue v, std::vector<T>& out)
+template<typename T> inline bool FromJSVal_vector(const ScriptRequest& rq, JS::HandleValue v, PS::vector<T>& out)
 {
 	JS::RootedObject obj(rq.cx);
 	if (!v.isObject())
@@ -143,11 +143,11 @@ template<typename T> inline bool FromJSVal_vector(const ScriptRequest& rq, JS::H
 #undef FAIL
 
 #define JSVAL_VECTOR(T) \
-template<> void Script::ToJSVal<std::vector<T> >(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::vector<T>& val) \
+template<> void Script::ToJSVal<PS::vector<T> >(const ScriptRequest& rq, JS::MutableHandleValue ret, const PS::vector<T>& val) \
 { \
 	ToJSVal_vector(rq, ret, val); \
 } \
-template<> bool Script::FromJSVal<std::vector<T> >(const ScriptRequest& rq, JS::HandleValue v, std::vector<T>& out) \
+template<> bool Script::FromJSVal<PS::vector<T> >(const ScriptRequest& rq, JS::HandleValue v, PS::vector<T>& out) \
 { \
 	return FromJSVal_vector(rq, v, out); \
 }

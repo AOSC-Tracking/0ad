@@ -60,7 +60,7 @@ public:
 	CLogger* logger;
 	std::stringstream mainlog;
 	std::stringstream interestinglog;
-	std::vector<std::string> lines;
+	PS::vector<std::string> lines;
 
 	void setUp()
 	{

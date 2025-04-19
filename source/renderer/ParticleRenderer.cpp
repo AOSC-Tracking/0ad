@@ -37,7 +37,7 @@ struct ParticleRendererInternals
 	CShaderTechniquePtr techOverlay;
 	CShaderTechniquePtr techMultiply;
 	CShaderTechniquePtr techWireframe;
-	std::vector<CParticleEmitter*> emitters[CSceneRenderer::CULL_MAX];
+	PS::vector<CParticleEmitter*> emitters[CSceneRenderer::CULL_MAX];
 };
 
 ParticleRenderer::ParticleRenderer()
@@ -58,7 +58,7 @@ void ParticleRenderer::Submit(int cullGroup, CParticleEmitter* emitter)
 
 void ParticleRenderer::EndFrame()
 {
-	for (std::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
+	for (PS::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
 		cullGroupEmitters.clear();
 	// this should leave the capacity unchanged, which is okay since it
 	// won't be very large or very variable
@@ -103,7 +103,7 @@ void ParticleRenderer::PrepareForRendering(const CShaderDefines& context)
 
 	++m->frameNumber;
 
-	for (std::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
+	for (PS::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
 	{
 		PROFILE("update emitters");
 		for (CParticleEmitter* emitter : cullGroupEmitters)
@@ -115,7 +115,7 @@ void ParticleRenderer::PrepareForRendering(const CShaderDefines& context)
 
 	CMatrix3D worldToCamera;
 	g_Renderer.GetSceneRenderer().GetViewCamera().GetOrientation().GetInverse(worldToCamera);
-	for (std::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
+	for (PS::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
 	{
 		// Sort back-to-front by distance from camera
 		PROFILE("sort emitters");
@@ -128,7 +128,7 @@ void ParticleRenderer::PrepareForRendering(const CShaderDefines& context)
 void ParticleRenderer::Upload(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext)
 {
-	for (std::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
+	for (PS::vector<CParticleEmitter*>& cullGroupEmitters : m->emitters)
 		for (CParticleEmitter* emitter : cullGroupEmitters)
 			emitter->UploadData(deviceCommandContext);
 }

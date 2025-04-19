@@ -115,14 +115,14 @@ public:
 		bool culled;
 	};
 
-	std::vector<SUnit> m_Units;
-	std::vector<tag_t> m_UnitTagsFree;
+	PS::vector<SUnit> m_Units;
+	PS::vector<tag_t> m_UnitTagsFree;
 
 	int m_FrameNumber;
 	float m_FrameOffset;
 
 	bool m_EnableDebugOverlays;
-	std::vector<SOverlaySphere> m_DebugSpheres;
+	PS::vector<SOverlaySphere> m_DebugSpheres;
 
 	static void ClassInit(CComponentManager& componentManager)
 	{
@@ -269,11 +269,11 @@ public:
 		m_EnableDebugOverlays = enabled;
 	}
 
-	void PickAllEntitiesAtPoint(std::vector<std::pair<CEntityHandle, CVector3D> >& outEntities, const CVector3D& origin, const CVector3D& dir, bool allowEditorSelectables) const override
+	void PickAllEntitiesAtPoint(PS::vector<std::pair<CEntityHandle, CVector3D> >& outEntities, const CVector3D& origin, const CVector3D& dir, bool allowEditorSelectables) const override
 	{
 		// First, make a rough test with the worst-case bounding boxes to pick all
 		// entities/models that could possibly be hit by the ray.
-		std::vector<const SUnit*> candidates;
+		PS::vector<const SUnit*> candidates;
 		for (const SUnit& unit : m_Units)
 		{
 			if (!unit.actor || !unit.inWorld)

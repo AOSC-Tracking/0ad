@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,9 +20,9 @@
 #include "network/NetFileTransfer.h"
 #include "network/NetMessage.h"
 #include "network/NetSession.h"
+#include "ps/containers/Vector.h"
 
 #include <utility>
-#include <vector>
 
 namespace
 {
@@ -55,10 +55,10 @@ public:
 		return true;
 	}
 
-	std::vector<CFileTransferRequestMessage> requests;
-	std::vector<CFileTransferResponseMessage> responses;
-	std::vector<CFileTransferDataMessage> data;
-	std::vector<CFileTransferAckMessage> acknowledgements;
+	PS::vector<CFileTransferRequestMessage> requests;
+	PS::vector<CFileTransferResponseMessage> responses;
+	PS::vector<CFileTransferDataMessage> data;
+	PS::vector<CFileTransferAckMessage> acknowledgements;
 };
 
 void CheckSizes(MessageQueues& queues, size_t requestSize, size_t responseSize, size_t dataSize,

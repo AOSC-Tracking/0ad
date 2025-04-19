@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,9 @@
 #ifndef INCLUDED_UNITANIMATION
 #define INCLUDED_UNITANIMATION
 
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "simulation2/system/Entity.h"
-
-#include <vector>
 
 class CUnit;
 class CModel;
@@ -109,7 +108,7 @@ private:
 		bool pastSoundPos;
 	};
 
-	std::vector<SModelAnimState> m_AnimStates;
+	PS::vector<SModelAnimState> m_AnimStates;
 
 	/**
 	 * True if all the current AnimStates are static, so Update() doesn't need

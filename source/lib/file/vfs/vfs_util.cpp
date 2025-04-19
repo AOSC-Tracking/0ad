@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -27,10 +27,10 @@
 #include "precompiled.h"
 
 #include "lib/file/vfs/vfs_util.h"
+#include "ps/containers/Queue.h"
 
 #include <cstdio>
 #include <cstring>
-#include <queue>
 
 #include "lib/regex.h"
 #include "lib/sysdep/filesystem.h"
@@ -40,7 +40,7 @@ namespace vfs {
 
 Status GetPathnames(const PIVFS& fs, const VfsPath& path, const wchar_t* filter, VfsPaths& pathnames)
 {
-	std::vector<CFileInfo> files;
+	PS::vector<CFileInfo> files;
 	RETURN_STATUS_IF_ERR(fs->GetDirectoryEntries(path, &files, 0));
 
 	pathnames.reserve(files.size());
@@ -63,7 +63,7 @@ Status ForEachFile(const PIVFS& fs, const VfsPath& startPath, FileCallback cb, u
 
 	// (a FIFO queue is more efficient than recursion because it uses less
 	// stack space and avoids seeks due to breadth-first traversal.)
-	std::queue<VfsPath> pendingDirectories;
+	PS::queue<VfsPath> pendingDirectories;
 	pendingDirectories.push(startPath/"");
 	while(!pendingDirectories.empty())
 	{

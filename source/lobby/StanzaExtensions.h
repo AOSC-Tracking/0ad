@@ -18,8 +18,7 @@
 #define STANZAEXTENSIONS_H
 
 #include "lib/external_libraries/gloox.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 /// Global Gamelist Extension
 #define EXTGAMELISTQUERY 1403
@@ -80,7 +79,7 @@ public:
 	gloox::Tag* tag() const override;
 	gloox::StanzaExtension* clone() const override;
 
-	std::vector<const gloox::Tag*> m_GameReport;
+	PS::vector<const gloox::Tag*> m_GameReport;
 };
 
 class GameListQuery : public gloox::StanzaExtension
@@ -100,7 +99,7 @@ public:
 	~GameListQuery();
 
 	std::string m_Command;
-	std::vector<const gloox::Tag*> m_GameList;
+	PS::vector<const gloox::Tag*> m_GameList;
 };
 
 class BoardListQuery : public gloox::StanzaExtension
@@ -120,7 +119,7 @@ public:
 	~BoardListQuery();
 
 	std::string m_Command;
-	std::vector<const gloox::Tag*> m_StanzaBoardList;
+	PS::vector<const gloox::Tag*> m_StanzaBoardList;
 };
 
 class ProfileQuery : public gloox::StanzaExtension
@@ -140,7 +139,7 @@ public:
 	~ProfileQuery();
 
 	std::string m_Command;
-	std::vector<const gloox::Tag*> m_StanzaProfile;
+	PS::vector<const gloox::Tag*> m_StanzaProfile;
 };
 
 class LobbyAuth : public gloox::StanzaExtension

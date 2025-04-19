@@ -79,12 +79,12 @@
 #define INCLUDED_PROFILER2
 
 #include "lib/timer.h"
+#include "ps/containers/Vector.h"
 #include "ps/ThreadUtil.h"
 
 #include <mutex>
 #include <string>
 #include <thread>
-#include <vector>
 
 namespace Renderer
 {
@@ -397,7 +397,7 @@ private:
 	std::mutex m_Mutex;
 
 	static thread_local ThreadStorage* m_CurrentStorage;
-	std::vector<std::unique_ptr<ThreadStorage>> m_Threads; // thread-safe; protected by m_Mutex
+	PS::vector<std::unique_ptr<ThreadStorage>> m_Threads; // thread-safe; protected by m_Mutex
 };
 
 extern CProfiler2 g_Profiler2;

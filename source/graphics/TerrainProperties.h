@@ -42,7 +42,7 @@ typedef std::shared_ptr<CTerrainProperties> CTerrainPropertiesPtr;
 class CTerrainProperties
 {
 public:
-	typedef std::vector<CTerrainGroup *> GroupVector;
+	typedef PS::vector<CTerrainGroup *> GroupVector;
 
 private:
 	CTerrainPropertiesPtr m_pParent;

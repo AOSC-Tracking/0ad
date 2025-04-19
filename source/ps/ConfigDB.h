@@ -28,16 +28,16 @@
 #define INCLUDED_CONFIGDB
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 
 #include <array>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <string_view>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 /**
  * Namespace priorities:
@@ -57,7 +57,7 @@ enum EConfigNamespace
 	CFG_LAST
 };
 
-using CConfigValueSet = std::vector<CStr>;
+using CConfigValueSet = PS::vector<CStr>;
 
 // Opaque data type so that callers that hook into ConfigDB can delete their hooks.
 // Would be defined in CConfigDB but then it couldn't be forward-declared, which is rather annoying.
@@ -136,7 +136,7 @@ public:
 	 * with the given prefix;
 	 * will search all namespaces from default up to the specified namespace.
 	 */
-	std::map<CStr, CConfigValueSet> GetValuesWithPrefix(EConfigNamespace ns, const CStr& prefix) const;
+	PS::map<CStr, CConfigValueSet> GetValuesWithPrefix(EConfigNamespace ns, const CStr& prefix) const;
 
 	/**
 	 * Save a config value in the specified namespace. If the config variable
@@ -146,7 +146,7 @@ public:
 
 	void SetValueBool(EConfigNamespace ns, const CStr& name, const bool value);
 
-	void SetValueList(EConfigNamespace ns, const CStr& name, std::vector<CStr> values);
+	void SetValueList(EConfigNamespace ns, const CStr& name, PS::vector<CStr> values);
 
 	/**
 	 * Remove a config value in the specified namespace.
@@ -217,7 +217,7 @@ public:
 	void UnregisterHook(std::unique_ptr<CConfigDBHook> hook);
 
 private:
-	using TConfigMap = std::map<CStr, CConfigValueSet, std::less<>>;
+	using TConfigMap = PS::map<CStr, CConfigValueSet, std::less<>>;
 	std::array<TConfigMap, CFG_LAST> m_Map;
 	std::multimap<CStr, std::function<void()>> m_Hooks;
 	std::array<VfsPath, CFG_LAST> m_ConfigFile;

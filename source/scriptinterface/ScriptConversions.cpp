@@ -308,20 +308,20 @@ JSVAL_VECTOR(u32)
 JSVAL_VECTOR(u16)
 JSVAL_VECTOR(std::string)
 JSVAL_VECTOR(std::wstring)
-JSVAL_VECTOR(std::vector<std::wstring>)
+JSVAL_VECTOR(PS::vector<std::wstring>)
 JSVAL_VECTOR(CStr8)
 JSVAL_VECTOR(CStrW)
-JSVAL_VECTOR(std::vector<CStr8>)
-JSVAL_VECTOR(std::vector<std::string>)
+JSVAL_VECTOR(PS::vector<CStr8>)
+JSVAL_VECTOR(PS::vector<std::string>)
 
 
 class IComponent;
-template<> void Script::ToJSVal<std::vector<IComponent*>>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const std::vector<IComponent*>& val)
+template<> void Script::ToJSVal<PS::vector<IComponent*>>(const ScriptRequest& rq,  JS::MutableHandleValue ret, const PS::vector<IComponent*>& val)
 {
 	ToJSVal_vector(rq, ret, val);
 }
 
-template<> bool Script::FromJSVal<std::vector<Entity>>(const ScriptRequest& rq,  JS::HandleValue v, std::vector<Entity>& out)
+template<> bool Script::FromJSVal<PS::vector<Entity>>(const ScriptRequest& rq,  JS::HandleValue v, PS::vector<Entity>& out)
 {
 	return FromJSVal_vector(rq, v, out);
 }

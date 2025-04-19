@@ -43,7 +43,7 @@ namespace
 {
 
 // Global overlay list management:
-std::vector<std::pair<ITerrainOverlay*, int>> g_TerrainOverlayList;
+PS::vector<std::pair<ITerrainOverlay*, int>> g_TerrainOverlayList;
 
 void AdjustOverlayGraphicsPipelineState(
 	Renderer::Backend::SGraphicsPipelineStateDesc& pipelineStateDesc, const bool drawHidden)
@@ -104,7 +104,7 @@ ITerrainOverlay::ITerrainOverlay(int priority)
 
 ITerrainOverlay::~ITerrainOverlay()
 {
-	std::vector<std::pair<ITerrainOverlay*, int> >::iterator newEnd =
+	PS::vector<std::pair<ITerrainOverlay*, int> >::iterator newEnd =
 		std::remove_if(g_TerrainOverlayList.begin(), g_TerrainOverlayList.end(),
 			[this](const std::pair<ITerrainOverlay*, int>& a) { return a.first == this; });
 	g_TerrainOverlayList.erase(newEnd, g_TerrainOverlayList.end());
@@ -220,7 +220,7 @@ void TerrainOverlay::RenderTile(
 		for (int dj = 0; dj < 2; ++dj)
 			m_Terrain->CalcPosition(i + di, j + dj, pos[di][dj]);
 
-	std::vector<float> vertices;
+	PS::vector<float> vertices;
 #define ADD(position) \
 	vertices.emplace_back((position).X); \
 	vertices.emplace_back((position).Y); \
@@ -283,7 +283,7 @@ void TerrainOverlay::RenderTileOutline(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	const CColor& color, bool drawHidden, ssize_t i, ssize_t j)
 {
-	std::vector<float> vertices;
+	PS::vector<float> vertices;
 #define ADD(i, j) \
 	m_Terrain->CalcPosition(i, j, position); \
 	vertices.emplace_back(position.X); \

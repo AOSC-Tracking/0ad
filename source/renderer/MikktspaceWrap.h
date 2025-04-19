@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,16 +20,15 @@
 
 #include "graphics/MeshManager.h"
 #include "graphics/ModelDef.h"
+#include "ps/containers/Vector.h"
 #include "third_party/mikktspace/mikktspace.h"
-
-#include <vector>
 
 class MikkTSpace
 {
 
 public:
 
-	MikkTSpace(const CModelDefPtr& m, std::vector<float>& v, bool gpuSkinning);
+	MikkTSpace(const CModelDefPtr& m, PS::vector<float>& v, bool gpuSkinning);
 
 	void Generate();
 
@@ -40,7 +39,7 @@ private:
 
 	const CModelDefPtr& m_Model;
 
-	std::vector<float>& m_NewVertices;
+	PS::vector<float>& m_NewVertices;
 
 	bool m_GpuSkinning;
 

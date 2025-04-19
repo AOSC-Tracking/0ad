@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,8 +23,7 @@
 #define INCLUDED_BRUSH
 
 #include "maths/Vector3D.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class CBoundingBoxAligned;
 class CFrustum;
@@ -82,20 +81,20 @@ public:
 	 * Returns vertices in the brush. Intended for testing purposes; you should not need to use
 	 * this method directly.
 	 */
-	const std::vector<CVector3D>& GetVertices() const;
+	const PS::vector<CVector3D>& GetVertices() const;
 
 	/**
 	 * Writes a vector of the faces in this brush to @p out. Each face is itself a vector, listing the vertex indices
 	 * that make up the face, starting and ending with the same index. Intended for testing purposes; you should not
 	 * need to use this method directly.
 	 */
-	void GetFaces(std::vector<std::vector<size_t>>& out) const;
+	void GetFaces(PS::vector<PS::vector<size_t>>& out) const;
 
 private:
 	static const size_t NO_VERTEX = ~0u;
 
-	typedef std::vector<CVector3D> Vertices;
-	typedef std::vector<size_t> FaceIndices;
+	typedef PS::vector<CVector3D> Vertices;
+	typedef PS::vector<size_t> FaceIndices;
 
 	/// Collection of unique vertices that make up this shape.
 	Vertices m_Vertices;

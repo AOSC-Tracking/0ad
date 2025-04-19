@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,10 +19,9 @@
 #define INCLUDED_REPLAY
 
 #include "lib/os_path.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "scriptinterface/ScriptTypes.h"
-
-#include <vector>
 
 struct SimulationCommand;
 class CSimulation2;
@@ -46,7 +45,7 @@ public:
 	/**
 	 * Run the given turn with the given collection of player commands.
 	 */
-	virtual void Turn(u32 n, u32 turnLength, std::vector<SimulationCommand>& commands) = 0;
+	virtual void Turn(u32 n, u32 turnLength, PS::vector<SimulationCommand>& commands) = 0;
 
 	/**
 	 * Optional hash of simulation state (for sync checking).
@@ -71,7 +70,7 @@ class CDummyReplayLogger : public IReplayLogger
 {
 public:
 	virtual void StartGame(JS::MutableHandleValue UNUSED(attribs)) { }
-	virtual void Turn(u32 UNUSED(n), u32 UNUSED(turnLength), std::vector<SimulationCommand>& UNUSED(commands)) { }
+	virtual void Turn(u32 UNUSED(n), u32 UNUSED(turnLength), PS::vector<SimulationCommand>& UNUSED(commands)) { }
 	virtual void Hash(const std::string& UNUSED(hash), bool UNUSED(quick)) { }
 	virtual void SaveMetadata(const CSimulation2& UNUSED(simulation)) { };
 	virtual OsPath GetDirectory() const { return OsPath(); }
@@ -88,7 +87,7 @@ public:
 	~CReplayLogger();
 
 	virtual void StartGame(JS::MutableHandleValue attribs);
-	virtual void Turn(u32 n, u32 turnLength, std::vector<SimulationCommand>& commands);
+	virtual void Turn(u32 n, u32 turnLength, PS::vector<SimulationCommand>& commands);
 	virtual void Hash(const std::string& hash, bool quick);
 	virtual void SaveMetadata(const CSimulation2& simulation);
 	virtual OsPath GetDirectory() const;

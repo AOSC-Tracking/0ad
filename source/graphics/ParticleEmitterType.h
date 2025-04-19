@@ -112,10 +112,10 @@ private:
 	CBoundingBoxAligned m_MaxBounds;
 
 	typedef std::shared_ptr<IParticleVar> IParticleVarPtr;
-	std::vector<IParticleVarPtr> m_Variables;
+	PS::vector<IParticleVarPtr> m_Variables;
 
 	typedef std::shared_ptr<IParticleEffector> IParticleEffectorPtr;
-	std::vector<IParticleEffectorPtr> m_Effectors;
+	PS::vector<IParticleEffectorPtr> m_Effectors;
 
 	CParticleManager& m_Manager;
 };

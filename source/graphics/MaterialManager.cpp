@@ -46,7 +46,7 @@ CMaterial CMaterialManager::LoadMaterial(const VfsPath& pathname)
 	if (pathname.empty())
 		return CMaterial();
 
-	std::map<VfsPath, CMaterial>::iterator iter = m_Materials.find(pathname);
+	PS::map<VfsPath, CMaterial>::iterator iter = m_Materials.find(pathname);
 	if (iter != m_Materials.end())
 		return iter->second;
 

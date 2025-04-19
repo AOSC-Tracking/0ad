@@ -53,7 +53,7 @@ public:
 		VfsPath src = L"art/textures/b/test.png";
 
 		CTextureConverter converter(m_VFS, false);
-		CTextureConverter::Settings settings = converter.ComputeSettings(L"", std::vector<CTextureConverter::SettingsFile*>());
+		CTextureConverter::Settings settings = converter.ComputeSettings(L"", PS::vector<CTextureConverter::SettingsFile*>());
 		TS_ASSERT(converter.ConvertTexture(CTexturePtr(), src, L"cache/test.png", settings));
 
 		VfsPath dest;
@@ -98,7 +98,7 @@ public:
 
 		CTextureConverter converter(m_VFS, false);
 		CTextureConverter::Settings settings =
-			converter.ComputeSettings(L"", std::vector<CTextureConverter::SettingsFile*>());
+			converter.ComputeSettings(L"", PS::vector<CTextureConverter::SettingsFile*>());
 		TS_ASSERT(!converter.ConvertTexture(CTexturePtr(), path, L"cache/npot.png", settings));
 		TS_ASSERT(logger.GetOutput().find("be power of two") != std::string::npos);
 	}

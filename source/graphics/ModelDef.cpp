@@ -32,7 +32,7 @@ void CModelDef::GetMaxBounds(CSkeletonAnimDef* anim, bool loop, CBoundingBoxAlig
 {
 	const u32 animIndex = anim ? anim->m_UID : 0;
 
-	std::unordered_map<u32, CBoundingBoxAligned>::const_iterator it = m_MaxBoundsPerAnimDef.find(animIndex);
+	PS::unordered_map<u32, CBoundingBoxAligned>::const_iterator it = m_MaxBoundsPerAnimDef.find(animIndex);
 	if (it != m_MaxBoundsPerAnimDef.end())
 	{
 		result = it->second;
@@ -51,7 +51,7 @@ void CModelDef::GetMaxBounds(CSkeletonAnimDef* anim, bool loop, CBoundingBoxAlig
 	}
 	ENSURE(animIndex != 0);
 	CMatrix3D* inverseBindBoneMatrix = GetInverseBindBoneMatrices();
-	std::vector<CMatrix3D> boneMatrix(anim->GetNumKeys());
+	PS::vector<CMatrix3D> boneMatrix(anim->GetNumKeys());
 
 	const size_t numFrames = anim->GetNumFrames();
 	const float frameTime = anim->GetFrameTime();
@@ -365,7 +365,7 @@ CModelDef* CModelDef::Load(const VfsPath& filename, const VfsPath& name)
 		unpacker.UnpackRaw(mdef->m_Bones,mdef->m_NumBones*sizeof(CBoneState));
 
 		mdef->m_pBlendIndices = new size_t[mdef->m_NumVertices];
-		std::vector<SVertexBlend> blends;
+		PS::vector<SVertexBlend> blends;
 		for (size_t i = 0; i < mdef->m_NumVertices; i++)
 		{
 			const SVertexBlend &blend = mdef->m_pVertices[i].m_Blend;
@@ -439,7 +439,7 @@ CModelDef* CModelDef::Load(const VfsPath& filename, const VfsPath& name)
 
 		if (mdef->m_NumBones) // only do skinned models
 		{
-			std::vector<CMatrix3D> bindPose (mdef->m_NumBones);
+			PS::vector<CMatrix3D> bindPose (mdef->m_NumBones);
 
 			for (size_t i = 0; i < mdef->m_NumBones; ++i)
 			{

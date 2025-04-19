@@ -103,7 +103,7 @@ public:
 #define TS_ASSERT_PARSE(input, expected_error) \
 	{ \
 		TestLogger logger; \
-		std::vector<ModIoModData> mods; \
+		PS::vector<ModIoModData> mods; \
 		std::string err; \
 		TS_ASSERT(!ModIo::ParseModsResponse(script, input, mods, pk, err)); \
 		TS_ASSERT_STR_EQUALS(err, expected_error); \
@@ -124,7 +124,7 @@ public:
 #define TS_ASSERT_PARSE(input, expected_error) \
 	{ \
 		TestLogger logger; \
-		std::vector<ModIoModData> mods; \
+		PS::vector<ModIoModData> mods; \
 		std::string err; \
 		TS_ASSERT(ModIo::ParseModsResponse(script, input, mods, pk, err)); \
 		TS_ASSERT_EQUALS(mods.size(), 1); \
@@ -179,7 +179,7 @@ public:
 		// Thus all such mods/modfiles are marked as invalid.
 		{
 			TestLogger logger;
-			std::vector<ModIoModData> mods;
+			PS::vector<ModIoModData> mods;
 			std::string err;
 			TS_ASSERT(ModIo::ParseModsResponse(script, "{\"data\": [{\"name\":\"\",\"name_id\":\"\",\"summary\":\"\",\"modfile\":{\"version\":\"\",\"filesize\":1234, \"filehash\":{\"md5\":\"abc\"}, \"download\":{\"binary_url\":\"\"},\"metadata_blob\":\"{\\\"dependencies\\\":[],\\\"minisigs\\\":[]}\"}}]}", mods, pk, err));
 			TS_ASSERT(err.empty());
@@ -190,7 +190,7 @@ public:
 		// Correctly formed input (with a signature matching the public key above, and a valid global signature)
 		{
 			TestLogger logger;
-			std::vector<ModIoModData> mods;
+			PS::vector<ModIoModData> mods;
 			std::string err;
 			TS_ASSERT(ModIo::ParseModsResponse(script, "{\"data\": [{\"name\":\"\",\"name_id\":\"\",\"summary\":\"\",\"modfile\":{\"version\":\"\",\"filesize\":1234, \"filehash\":{\"md5\":\"abc\"}, \"download\":{\"binary_url\":\"\"},\"metadata_blob\":\"{\\\"dependencies\\\":[],\\\"minisigs\\\":[\\\"untrusted comment: signature from minisign secret key\\\\nRUTA6VIoth2Q1HUg5bwwbCUZPcqbQ/reLXqxiaWARH5PNcwxX5vBv/mLPLgdxGsIrOyK90763+rCVTmjeYx5BDz8C0CIbGZTNQs=\\\\ntrusted comment: timestamp:1517285433\\\\tfile:tm.zip\\\\nTHwNMhK4Ogj6XA4305p1K9/ouP/DrxPcDFrPaiu+Ke6/WGlHIzBZHvmHWUedvsK6dzL31Gk8YNzscKWnZqWNCw==\\\"]}\"}}]}", mods, pk, err));
 			TS_ASSERT(err.empty());

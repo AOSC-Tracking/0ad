@@ -39,7 +39,7 @@ struct Span
 	i16 j;
 };
 
-typedef std::vector<Span> Spans;
+typedef PS::vector<Span> Spans;
 
 /**
  * Converts an ObstructionSquare @p shape (a rotated rectangle),

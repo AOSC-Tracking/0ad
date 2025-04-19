@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@
 #include "lib/timer.h"
 #include "lib/utf8.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
 #include "ps/CStrInternStatic.h"
 #include "ps/Filesystem.h"
@@ -41,7 +42,6 @@
 #endif
 
 #include <optional>
-#include <vector>
 
 TIMER_ADD_CLIENT(tc_ShaderValidation);
 
@@ -69,7 +69,7 @@ CShaderManager::~CShaderManager()
 CShaderProgramPtr CShaderManager::LoadProgram(const CStr& name, const CShaderDefines& defines)
 {
 	CacheKey key = { name, defines };
-	std::map<CacheKey, CShaderProgramPtr>::iterator it = m_ProgramCache.find(key);
+	PS::map<CacheKey, CShaderProgramPtr>::iterator it = m_ProgramCache.find(key);
 	if (it != m_ProgramCache.end())
 		return it->second;
 
@@ -158,7 +158,7 @@ bool CShaderManager::LoadTechnique(CShaderTechniquePtr& tech)
 	if (m_Device->GetBackend() == Renderer::Backend::Backend::DUMMY)
 	{
 		CShaderProgramPtr shaderProgram = LoadProgram(str_dummy.string(), tech->GetShaderDefines());
-		std::vector<CShaderPass> techPasses;
+		PS::vector<CShaderPass> techPasses;
 		Renderer::Backend::SGraphicsPipelineStateDesc passPipelineStateDesc =
 			Renderer::Backend::MakeDefaultGraphicsPipelineStateDesc();
 		passPipelineStateDesc.shaderProgram = shaderProgram->GetBackendShaderProgram();
@@ -297,7 +297,7 @@ bool CShaderManager::LoadTechnique(CShaderTechniquePtr& tech)
 	// pass tags.
 	// TODO: we might want to implement that in a proper way via splitting passes
 	// and tags in different groups in XML.
-	std::vector<CShaderPass> techPasses;
+	PS::vector<CShaderPass> techPasses;
 	XERO_ITER_EL((*usableTech), Child)
 	{
 		if (Child.GetNodeName() == el_pass)

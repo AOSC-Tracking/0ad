@@ -353,14 +353,14 @@ void CCmpRallyPointRenderer::RecomputeRallyPointPath(size_t index, CmpPtr<ICmpPo
 {
 	while (index >= m_Path.size())
 	{
-		std::vector<CVector2D> tmp;
+		PS::vector<CVector2D> tmp;
 		m_Path.push_back(tmp);
 	}
 	m_Path[index].clear();
 
 	while (index >= m_VisibilitySegments.size())
 	{
-		std::vector<SVisibilitySegment> tmp;
+		PS::vector<SVisibilitySegment> tmp;
 		m_VisibilitySegments.push_back(tmp);
 	}
 	m_VisibilitySegments[index].clear();
@@ -369,7 +369,7 @@ void CCmpRallyPointRenderer::RecomputeRallyPointPath(size_t index, CmpPtr<ICmpPo
 	// list of waypoints (i.e. a Path) from the goal to the foundation/previous rally point, where each
 	// waypoint is centered at a tile. We'll have to do some post-processing on the path to get it smooth.
 	WaypointPath path;
-	std::vector<Waypoint>& waypoints = path.m_Waypoints;
+	PS::vector<Waypoint>& waypoints = path.m_Waypoints;
 
 	CFixedVector2D start(cmpPosition->GetPosition2D());
 	PathGoal goal = { PathGoal::POINT, m_RallyPoints[index].X, m_RallyPoints[index].Y };
@@ -481,7 +481,7 @@ void CCmpRallyPointRenderer::ConstructOverlayLines(size_t index)
 	// pass (which is only sensible).
 	while (index >= m_TexturedOverlayLines.size())
 	{
-		std::vector<SOverlayTexturedLine> tmp;
+		PS::vector<SOverlayTexturedLine> tmp;
 		m_TexturedOverlayLines.push_back(tmp);
 	}
 	m_TexturedOverlayLines[index].clear();
@@ -526,7 +526,7 @@ void CCmpRallyPointRenderer::ConstructOverlayLines(size_t index)
 		else
 		{
 			// Construct dashed line from startPointIdx to endPointIdx; add textured overlay lines for it to the render list
-			std::vector<CVector2D> straightLine;
+			PS::vector<CVector2D> straightLine;
 			straightLine.push_back(m_Path[index][segment.m_StartIndex]);
 			straightLine.push_back(m_Path[index][segment.m_EndIndex]);
 
@@ -604,7 +604,7 @@ void CCmpRallyPointRenderer::ConstructOverlayLines(size_t index)
 	{
 		while (index >= m_DebugNodeOverlays.size())
 		{
-			std::vector<SOverlayLine> tmp;
+			PS::vector<SOverlayLine> tmp;
 			m_DebugNodeOverlays.push_back(tmp);
 		}
 		for (size_t j = 0; j < m_Path[index].size(); ++j)
@@ -627,10 +627,10 @@ void CCmpRallyPointRenderer::UpdateOverlayLines()
 		return;
 
 	// See if there have been any changes to the SoD by grabbing the visibility edge points and comparing them to the previous ones
-	std::vector<std::vector<SVisibilitySegment> > newVisibilitySegments;
+	PS::vector<PS::vector<SVisibilitySegment> > newVisibilitySegments;
 	for (size_t i = 0; i < m_Path.size(); ++i)
 	{
-		std::vector<SVisibilitySegment> tmp;
+		PS::vector<SVisibilitySegment> tmp;
 		newVisibilitySegments.push_back(tmp);
 		GetVisibilitySegments(newVisibilitySegments[i], i);
 	}
@@ -707,7 +707,7 @@ void CCmpRallyPointRenderer::GetClosestsEdgePointFrom(CFixedVector2D& result, CF
 	}
 }
 
-void CCmpRallyPointRenderer::ReduceSegmentsByVisibility(std::vector<CVector2D>& coords, unsigned maxSegmentLinks, bool floating) const
+void CCmpRallyPointRenderer::ReduceSegmentsByVisibility(PS::vector<CVector2D>& coords, unsigned maxSegmentLinks, bool floating) const
 {
 	CmpPtr<ICmpPathfinder> cmpPathFinder(GetSystemEntity());
 	CmpPtr<ICmpTerrain> cmpTerrain(GetSystemEntity());
@@ -721,7 +721,7 @@ void CCmpRallyPointRenderer::ReduceSegmentsByVisibility(std::vector<CVector2D>& 
 	// line between it and the base point. If so, keep going, otherwise, make the last visible point the new base node and start the same
 	// process from there on until the entire line is checked. The output is the array of base nodes.
 
-	std::vector<CVector2D> newCoords;
+	PS::vector<CVector2D> newCoords;
 	StationaryOnlyObstructionFilter obstructionFilter;
 	entity_pos_t lineRadius = fixed::FromFloat(m_LineThickness);
 	pass_class_t passabilityClass = cmpPathFinder->GetPassabilityClass(m_LinePassabilityClass);
@@ -806,7 +806,7 @@ void CCmpRallyPointRenderer::ReduceSegmentsByVisibility(std::vector<CVector2D>& 
 	coords.swap(newCoords);
 }
 
-void CCmpRallyPointRenderer::GetVisibilitySegments(std::vector<SVisibilitySegment>& out, size_t index) const
+void CCmpRallyPointRenderer::GetVisibilitySegments(PS::vector<SVisibilitySegment>& out, size_t index) const
 {
 	out.clear();
 
@@ -853,7 +853,7 @@ void CCmpRallyPointRenderer::GetVisibilitySegments(std::vector<SVisibilitySegmen
 	MergeVisibilitySegments(out);
 }
 
-void CCmpRallyPointRenderer::MergeVisibilitySegments(std::vector<SVisibilitySegment>& segments)
+void CCmpRallyPointRenderer::MergeVisibilitySegments(PS::vector<SVisibilitySegment>& segments)
 {
 	// Scan for single-point segments; if they are inbetween two other segments, delete them and merge the surrounding segments.
 	// If they're at either end of the path, include them in their bordering segment (but only if those bordering segments aren't
@@ -925,7 +925,7 @@ void CCmpRallyPointRenderer::MergeVisibilitySegments(std::vector<SVisibilitySegm
 void CCmpRallyPointRenderer::RenderSubmit(SceneCollector& collector, const CFrustum& frustum, bool culling)
 {
 	// We only get here if the rally point is set and should be displayed
-	for(std::vector<SOverlayTexturedLine>& row : m_TexturedOverlayLines)
+	for(PS::vector<SOverlayTexturedLine>& row : m_TexturedOverlayLines)
 		for (SOverlayTexturedLine& col : row) {
 			if (col.m_Coords.empty())
 				continue;
@@ -936,7 +936,7 @@ void CCmpRallyPointRenderer::RenderSubmit(SceneCollector& collector, const CFrus
 
 	if (m_EnableDebugNodeOverlay && !m_DebugNodeOverlays.empty())
 	{
-		for (std::vector<SOverlayLine>& row : m_DebugNodeOverlays)
+		for (PS::vector<SOverlayLine>& row : m_DebugNodeOverlays)
 			for (SOverlayLine& col : row)
 				if (!col.m_Coords.empty())
 					collector.Submit(&col);

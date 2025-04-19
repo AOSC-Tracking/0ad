@@ -37,9 +37,10 @@
 # include "lib/sysdep/os/win/wfirmware.h"
 #endif
 
+#include "ps/containers/Vector.h"
+
 #include <cstring>
 #include <sstream>
-#include <vector>
 
 namespace SMBIOS {
 
@@ -85,7 +86,7 @@ static Status GetTable(wfirmware::Table& table)
 // strings
 
 // pointers to the strings (if any) at the end of an SMBIOS structure
-typedef std::vector<const char*> Strings;
+typedef PS::vector<const char*> Strings;
 
 static Strings ExtractStrings(const Header* header, const char* end, const Header*& next)
 {
@@ -114,7 +115,7 @@ static Strings ExtractStrings(const Header* header, const char* end, const Heade
 
 
 // storage for all structures' strings (must be copied from the original
-// wfirmware table since its std::vector container cannot be stored in a
+// wfirmware table since its PS::vector container cannot be stored in a
 // static variable because we may be called before _cinit)
 static char* stringStorage;
 static char* stringStoragePos;
@@ -420,7 +421,7 @@ static Status InitStructures()
 	wfirmware::Table table;
 	RETURN_STATUS_IF_ERR(GetTable(table));
 #else
-	std::vector<u8> table;
+	PS::vector<u8> table;
 	return ERR::NOT_SUPPORTED;
 #endif
 

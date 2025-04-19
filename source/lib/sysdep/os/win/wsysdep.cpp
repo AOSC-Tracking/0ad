@@ -27,6 +27,8 @@
 #include "precompiled.h"
 #include "lib/sysdep/sysdep.h"
 
+#include "ps/containers/Vector.h"
+
 #include "lib/alignment.h"
 #include "lib/sysdep/os/win/win.h"	// includes windows.h; must come before shlobj
 #include <SDL_clipboard.h>	// SDL_SetClipboardText
@@ -66,7 +68,7 @@ std::wstring sys_WideFromArgv(const char* argv_i)
 	const UINT cp = CP_ACP;
 	const DWORD flags = MB_PRECOMPOSED|MB_ERR_INVALID_CHARS;
 	const int inputSize = -1;	// null-terminated
-	std::vector<wchar_t> buf(strlen(argv_i)+1);	// (upper bound on number of characters)
+	PS::vector<wchar_t> buf(strlen(argv_i)+1);	// (upper bound on number of characters)
 	// NB: avoid mbstowcs because it may specify another locale
 	const int ret = MultiByteToWideChar(cp, flags, argv_i, (int)inputSize, &buf[0], (int)buf.size());
 	ENSURE(ret != 0);
@@ -220,7 +222,7 @@ static void dlg_OnCommand(HWND hDlg, int id, HWND UNUSED(hWndCtl), UINT UNUSED(c
 	{
 	case IDC_COPY:
 	{
-		std::vector<wchar_t> buf(128*KiB);	// (too big for stack)
+		PS::vector<wchar_t> buf(128*KiB);	// (too big for stack)
 		GetDlgItemTextW(hDlg, IDC_EDIT1, &buf[0], (int)buf.size());
 		std::string string = utf8_from_wstring(&buf[0]);
 		SDL_SetClipboardText(string.c_str());
@@ -534,7 +536,7 @@ static std::wstring parse_proxy(const std::wstring& input)
 	if(input.find('=') == input.npos)
 		return input;
 
-	std::vector<std::wstring> parts;
+	PS::vector<std::wstring> parts;
 	split(parts, input, boost::algorithm::is_any_of("; \t\r\n"), boost::algorithm::token_compress_on);
 
 	constexpr std::wstring_view http{L"http="};

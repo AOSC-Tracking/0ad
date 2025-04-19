@@ -134,7 +134,7 @@ CVector3D RNSpline::GetPosition(float time) const
 		Node[i+1].Position, endVel, t);
 }
 
-const std::vector<SplineData>& RNSpline::GetAllNodes() const
+const PS::vector<SplineData>& RNSpline::GetAllNodes() const
 {
 	return Node;
 }

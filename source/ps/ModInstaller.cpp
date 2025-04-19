@@ -134,7 +134,7 @@ CModInstaller::ModInstallationResult CModInstaller::Install(
 	return SUCCESS;
 }
 
-const std::vector<CStr>& CModInstaller::GetInstalledMods() const
+const PS::vector<CStr>& CModInstaller::GetInstalledMods() const
 {
 	return m_InstalledMods;
 }

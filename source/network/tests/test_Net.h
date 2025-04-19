@@ -60,7 +60,7 @@ public:
 		DeleteDirectory(DataDir()/"_testcache");
 	}
 
-	bool clients_are_all(const std::vector<CNetClient*>& clients, uint state)
+	bool clients_are_all(const PS::vector<CNetClient*>& clients, uint state)
 	{
 		for (size_t j = 0; j < clients.size(); ++j)
 			if (clients[j]->GetCurrState() != state)
@@ -68,7 +68,7 @@ public:
 		return true;
 	}
 
-	void connect(CNetServer& server, const std::vector<CNetClient*>& clients)
+	void connect(CNetServer& server, const PS::vector<CNetClient*>& clients)
 	{
 		TS_ASSERT(server.SetupConnection(PS_DEFAULT_PORT));
 		for (CNetClient* client: clients)
@@ -97,7 +97,7 @@ public:
 	}
 
 #if 0
-	void disconnect(CNetServer& server, const std::vector<CNetClient*>& clients)
+	void disconnect(CNetServer& server, const PS::vector<CNetClient*>& clients)
 	{
 		for (size_t i = 0; ; ++i)
 		{
@@ -120,7 +120,7 @@ public:
 	}
 #endif
 
-	void wait(const std::vector<CNetClient*>& clients, size_t msecs)
+	void wait(const PS::vector<CNetClient*>& clients, size_t msecs)
 	{
 		for (size_t i = 0; i < msecs/10; ++i)
 		{
@@ -144,7 +144,7 @@ public:
 
 		TestStdoutLogger logger;
 
-		std::vector<CNetClient*> clients;
+		PS::vector<CNetClient*> clients;
 
 		CGame client1Game(false);
 		CGame client2Game(false);
@@ -223,7 +223,7 @@ public:
 
 		TestStdoutLogger logger;
 
-		std::vector<CNetClient*> clients;
+		PS::vector<CNetClient*> clients;
 
 		CGame client1Game(false);
 		CGame client2Game(false);

@@ -65,7 +65,7 @@ size_t CNetStatsTable::GetNumberRows()
 	return NumberRows;
 }
 
-const std::vector<ProfileColumn>& CNetStatsTable::GetColumns()
+const PS::vector<ProfileColumn>& CNetStatsTable::GetColumns()
 {
 	m_ColumnDescriptions.clear();
 	m_ColumnDescriptions.push_back(ProfileColumn("Name", 200));

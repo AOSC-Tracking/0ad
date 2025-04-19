@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,13 +18,12 @@
 #ifndef INCLUDED_SCRIPTINTERFACE
 #define INCLUDED_SCRIPTINTERFACE
 
+#include "ps/containers/Map.h"
 #include "ps/Errors.h"
 #include "scriptinterface/ScriptConversions.h"
 #include "scriptinterface/ScriptExceptions.h"
 #include "scriptinterface/ScriptRequest.h"
 #include "scriptinterface/ScriptTypes.h"
-
-#include <map>
 
 ERROR_GROUP(Scripting);
 ERROR_TYPE(Scripting, SetupFailed);
@@ -289,7 +288,7 @@ private:
 	// members have to be called before the custom destructor of ScriptInterface_impl.
 	std::unique_ptr<ScriptInterface_impl> m;
 
-	std::map<std::string, CustomType> m_CustomObjectTypes;
+	PS::map<std::string, CustomType> m_CustomObjectTypes;
 };
 
 // Explicitly instantiate void* as that is used for the generic template,

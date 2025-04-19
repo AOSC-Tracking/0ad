@@ -74,10 +74,10 @@ struct TerrainRendererInternals
 	Phase phase;
 
 	/// Patches that were submitted for this frame
-	std::vector<CPatchRData*> visiblePatches[CSceneRenderer::CULL_MAX];
+	PS::vector<CPatchRData*> visiblePatches[CSceneRenderer::CULL_MAX];
 
 	/// Decals that were submitted for this frame
-	std::vector<CDecalRData*> visibleDecals[CSceneRenderer::CULL_MAX];
+	PS::vector<CDecalRData*> visibleDecals[CSceneRenderer::CULL_MAX];
 
 	/// Fancy water shader
 	CShaderTechniquePtr fancyWaterTech;
@@ -213,7 +213,7 @@ void TerrainRenderer::RenderTerrainOverlayTexture(
 {
 	ENSURE(m->phase == Phase_Render);
 
-	std::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
+	PS::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
 
 	CShaderTechniquePtr debugOverlayTech =
 		g_Renderer.GetShaderManager().LoadEffect(str_debug_overlay);
@@ -318,8 +318,8 @@ void TerrainRenderer::RenderTerrainShader(
 {
 	ENSURE(m->phase == Phase_Render);
 
-	std::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
-	std::vector<CDecalRData*>& visibleDecals = m->visibleDecals[cullGroup];
+	PS::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
+	PS::vector<CDecalRData*>& visibleDecals = m->visibleDecals[cullGroup];
 	if (visiblePatches.empty() && visibleDecals.empty())
 		return;
 
@@ -370,7 +370,7 @@ void TerrainRenderer::RenderPatches(
 {
 	ENSURE(m->phase == Phase_Render);
 
-	std::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
+	PS::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
 	if (visiblePatches.empty())
 		return;
 
@@ -404,7 +404,7 @@ void TerrainRenderer::RenderOutlines(
 {
 	ENSURE(m->phase == Phase_Render);
 
-	std::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
+	PS::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
 	if (visiblePatches.empty())
 		return;
 
@@ -784,7 +784,7 @@ void TerrainRenderer::RenderPriorities(CCanvas2D& canvas, int cullGroup)
 	textRenderer.SetCurrentFont(CStrIntern("mono-stroke-10"));
 	textRenderer.SetCurrentColor(CColor(1.0f, 1.0f, 0.0f, 1.0f));
 
-	std::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
+	PS::vector<CPatchRData*>& visiblePatches = m->visiblePatches[cullGroup];
 	for (size_t i = 0; i < visiblePatches.size(); ++i)
 		visiblePatches[i]->RenderPriorities(textRenderer);
 

@@ -22,6 +22,8 @@
 #include "NetHost.h"
 #include "lib/config2.h"
 #include "lib/types.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "scriptinterface/ScriptTypes.h"
 
 #include <ctime>
@@ -29,8 +31,6 @@
 #include <optional>
 #include <string>
 #include <utility>
-#include <unordered_map>
-#include <vector>
 #include <thread>
 
 class CNetServerSession;
@@ -186,7 +186,7 @@ private:
 	u16 m_PublicPort;
 	CStr m_PublicIp;
 	CStr m_Password;
-	std::unordered_map<std::string, int> m_FailedAttempts;
+	PS::unordered_map<std::string, int> m_FailedAttempts;
 };
 
 /**
@@ -221,8 +221,8 @@ public:
 	/**
 	 * Send a message to all clients who match one of the given states.
 	 */
-	bool Multicast(const CNetMessage* message, const std::vector<NetServerSessionState>& targetStates,
-		const std::optional<std::vector<std::string>>& receivers = std::nullopt);
+	bool Multicast(const CNetMessage* message, const PS::vector<NetServerSessionState>& targetStates,
+		const std::optional<PS::vector<std::string>>& receivers = std::nullopt);
 
 private:
 	friend class CNetServer;
@@ -365,7 +365,7 @@ private:
 	const bool m_LobbyAuth;
 
 	ENetHost* m_Host;
-	std::vector<CNetServerSession*> m_Sessions;
+	PS::vector<CNetServerSession*> m_Sessions;
 
 	CNetStatsTable* m_Stats;
 
@@ -373,15 +373,15 @@ private:
 
 	CStrW m_ServerName;
 
-	std::vector<u32> m_BannedIPs;
-	std::vector<CStrW> m_BannedPlayers;
+	PS::vector<u32> m_BannedIPs;
+	PS::vector<CStrW> m_BannedPlayers;
 
 	CStr m_Password;
 
 	/**
 	 * Holds the GUIDs of all currently paused players.
 	 */
-	std::vector<CStr> m_PausingPlayers;
+	PS::vector<CStr> m_PausingPlayers;
 
 	u32 m_NextHostID;
 
@@ -402,7 +402,7 @@ private:
 	 * turn number, to simplify support for rejoining etc.
 	 * TODO: verify this doesn't use too much RAM.
 	 */
-	std::vector<std::vector<CSimulationMessage>> m_SavedCommands;
+	PS::vector<PS::vector<CSimulationMessage>> m_SavedCommands;
 
 	/**
 	 * The latest copy of the simulation state, received from an existing
@@ -442,10 +442,10 @@ private:
 	bool m_Shutdown;
 
 	// Queues for messages sent by the game thread (protected by m_WorkerMutex):
-	std::vector<bool> m_StartGameQueue;
-	std::vector<std::string> m_InitAttributesQueue;
-	std::vector<std::pair<CStr, CStr>> m_LobbyAuthQueue;
-	std::vector<u32> m_TurnLengthQueue;
+	PS::vector<bool> m_StartGameQueue;
+	PS::vector<std::string> m_InitAttributesQueue;
+	PS::vector<std::pair<CStr, CStr>> m_LobbyAuthQueue;
+	PS::vector<u32> m_TurnLengthQueue;
 };
 
 /// Global network server for the standard game

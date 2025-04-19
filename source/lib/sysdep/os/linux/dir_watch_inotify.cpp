@@ -43,7 +43,7 @@ struct NotificationEvent
 // So we just spawn a thread to push events into this list, then swap it out
 // when someone calls dir_watch_Poll.
 // (We assume STL memory allocation is thread-safe.)
-static std::vector<NotificationEvent> g_notifications;
+static PS::vector<NotificationEvent> g_notifications;
 static pthread_t g_event_loop_thread;
 
 // Mutex must wrap all accesses of g_notifications
@@ -59,7 +59,7 @@ static int initialized = 0;
 static int inotifyfd;
 
 // With inotify, using a map seems to be a good alternative to FAM's userdata
-typedef std::map<int, PDirWatch> DirWatchMap;
+typedef PS::map<int, PDirWatch> DirWatchMap;
 static DirWatchMap g_paths;
 
 struct DirWatch
@@ -228,7 +228,7 @@ Status dir_watch_Poll(DirWatchNotifications& notifications)
 	if(!initialized) // XXX Fix Atlas instead of suppressing the warning
 		return ERR::FAIL; //WARN_RETURN(ERR::LOGIC);
 
-	std::vector<NotificationEvent> polled_notifications;
+	PS::vector<NotificationEvent> polled_notifications;
 
 	pthread_mutex_lock(&g_mutex);
 	g_notifications.swap(polled_notifications);

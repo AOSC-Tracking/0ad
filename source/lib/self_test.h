@@ -141,9 +141,9 @@ bool ts_str_contains(const std::wstring& str1, const std::wstring& str2); // def
 #define TS_ASSERT_WSTR_NOT_CONTAINS(str1, str2) TSM_ASSERT(str1, !ts_str_contains(str1, str2))
 
 template <typename T>
-std::vector<T> ts_make_vector(T* start, size_t size_bytes)
+PS::vector<T> ts_make_vector(T* start, size_t size_bytes)
 {
-	return std::vector<T>(start, start+(size_bytes/sizeof(T)));
+	return PS::vector<T>(start, start+(size_bytes/sizeof(T)));
 }
 #define TS_ASSERT_VECTOR_EQUALS_ARRAY(vec1, array) TS_ASSERT_EQUALS(vec1, ts_make_vector((array), sizeof(array)))
 #define TS_ASSERT_VECTOR_CONTAINS(vec1, element) TS_ASSERT(std::find((vec1).begin(), (vec1).end(), element) != (vec1).end());

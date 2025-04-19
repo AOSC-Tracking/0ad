@@ -18,6 +18,8 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_DESCRIPTORMANAGER
 #define INCLUDED_RENDERER_BACKEND_VULKAN_DESCRIPTORMANAGER
 
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
 #include "renderer/backend/Sampler.h"
 #include "renderer/backend/vulkan/Buffer.h"
@@ -27,9 +29,7 @@
 #include <glad/vulkan.h>
 #include <limits>
 #include <memory>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace Renderer
 {
@@ -59,13 +59,13 @@ public:
 
 	VkDescriptorSet GetSingleTypeDescritorSet(
 		VkDescriptorType type, VkDescriptorSetLayout layout,
-		const std::vector<DeviceObjectUID>& texturesUID,
-		const std::vector<CTexture*>& textures);
+		const PS::vector<DeviceObjectUID>& texturesUID,
+		const PS::vector<CTexture*>& textures);
 
 	VkDescriptorSet GetSingleTypeDescritorSet(
 		VkDescriptorType type, VkDescriptorSetLayout layout,
-		const std::vector<DeviceObjectUID>& buffersUID,
-		const std::vector<CBuffer*>& buffers);
+		const PS::vector<DeviceObjectUID>& buffersUID,
+		const PS::vector<CBuffer*>& buffers);
 
 	uint32_t GetUniformSet() const;
 
@@ -79,7 +79,7 @@ public:
 	const VkDescriptorSetLayout& GetUniformDescriptorSetLayout() const { return m_UniformDescriptorSetLayout; }
 	const VkDescriptorSet& GetDescriptorIndexingSet() { return m_DescriptorIndexingSet; }
 
-	const std::vector<VkDescriptorSetLayout>& GetDescriptorSetLayouts() const { return m_DescriptorSetLayouts; }
+	const PS::vector<VkDescriptorSetLayout>& GetDescriptorSetLayouts() const { return m_DescriptorSetLayouts; }
 
 private:
 	struct SingleTypePool
@@ -94,13 +94,13 @@ private:
 			uint32_t version = 0;
 			int16_t nextFreeIndex = INVALID_INDEX;
 		};
-		std::vector<Element> elements;
+		PS::vector<Element> elements;
 	};
 	SingleTypePool& GetSingleTypePool(const VkDescriptorType type, const uint32_t size);
 
 	std::pair<VkDescriptorSet, bool> GetSingleTypeDescritorSetImpl(
 		VkDescriptorType type, VkDescriptorSetLayout layout,
-		const std::vector<DeviceObjectUID>& uids);
+		const PS::vector<DeviceObjectUID>& uids);
 
 	void OnDeviceObjectDestroy(const DeviceObjectUID uid);
 
@@ -112,7 +112,7 @@ private:
 	VkDescriptorSet m_DescriptorIndexingSet = VK_NULL_HANDLE;
 	VkDescriptorSetLayout m_DescriptorIndexingSetLayout = VK_NULL_HANDLE;
 	VkDescriptorSetLayout m_UniformDescriptorSetLayout = VK_NULL_HANDLE;
-	std::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
+	PS::vector<VkDescriptorSetLayout> m_DescriptorSetLayouts;
 
 	static constexpr uint32_t DESCRIPTOR_INDEXING_BINDING_SIZE = 16384;
 	static constexpr uint32_t NUMBER_OF_BINDINGS_PER_DESCRIPTOR_INDEXING_SET = 3;
@@ -121,14 +121,14 @@ private:
 	{
 		static_assert(std::numeric_limits<int16_t>::max() >= DESCRIPTOR_INDEXING_BINDING_SIZE);
 		int16_t firstFreeIndex = 0;
-		std::vector<int16_t> elements;
-		std::unordered_map<DeviceObjectUID, int16_t> map;
+		PS::vector<int16_t> elements;
+		PS::unordered_map<DeviceObjectUID, int16_t> map;
 	};
 	std::array<DescriptorIndexingBindingMap, NUMBER_OF_BINDINGS_PER_DESCRIPTOR_INDEXING_SET>
 		m_DescriptorIndexingBindings;
-	std::unordered_map<DeviceObjectUID, uint32_t> m_TextureToBindingMap;
+	PS::unordered_map<DeviceObjectUID, uint32_t> m_TextureToBindingMap;
 
-	std::unordered_map<VkDescriptorType, std::vector<SingleTypePool>> m_SingleTypePools;
+	PS::unordered_map<VkDescriptorType, PS::vector<SingleTypePool>> m_SingleTypePools;
 	struct SingleTypePoolReference
 	{
 		VkDescriptorType type = VK_DESCRIPTOR_TYPE_MAX_ENUM;
@@ -136,14 +136,14 @@ private:
 		int16_t elementIndex = SingleTypePool::INVALID_INDEX;
 		uint8_t size = 0;
 	};
-	std::unordered_map<DeviceObjectUID, std::vector<SingleTypePoolReference>> m_UIDToSingleTypePoolMap;
+	PS::unordered_map<DeviceObjectUID, PS::vector<SingleTypePoolReference>> m_UIDToSingleTypePoolMap;
 
-	using SingleTypeCacheKey = std::pair<VkDescriptorSetLayout, std::vector<DeviceObjectUID>>;
+	using SingleTypeCacheKey = std::pair<VkDescriptorSetLayout, PS::vector<DeviceObjectUID>>;
 	struct SingleTypeCacheKeyHash
 	{
 		size_t operator()(const SingleTypeCacheKey& key) const;
 	};
-	std::unordered_map<SingleTypeCacheKey, VkDescriptorSet, SingleTypeCacheKeyHash> m_SingleTypeSets;
+	PS::unordered_map<SingleTypeCacheKey, VkDescriptorSet, SingleTypeCacheKeyHash> m_SingleTypeSets;
 
 	std::unique_ptr<ITexture> m_ErrorTexture;
 };
@@ -154,7 +154,7 @@ class CSingleTypeDescriptorSetBinding
 {
 public:
 	CSingleTypeDescriptorSetBinding(CDevice* device, const VkDescriptorType type,
-		const uint32_t size, std::unordered_map<CStrIntern, uint32_t> mapping)
+		const uint32_t size, PS::unordered_map<CStrIntern, uint32_t> mapping)
 		: m_Device{device}, m_Type{type}, m_Mapping{std::move(mapping)}
 	{
 		m_BoundDeviceObjects.resize(size);
@@ -202,19 +202,19 @@ public:
 
 	VkDescriptorSetLayout GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
 
-	const std::vector<DeviceObject*>& GetBoundDeviceObjects() const { return m_BoundDeviceObjects; }
+	const PS::vector<DeviceObject*>& GetBoundDeviceObjects() const { return m_BoundDeviceObjects; }
 
 private:
 	CDevice* const m_Device;
 	const VkDescriptorType m_Type;
-	const std::unordered_map<CStrIntern, uint32_t> m_Mapping;
+	const PS::unordered_map<CStrIntern, uint32_t> m_Mapping;
 
 	bool m_Outdated{true};
 
 	VkDescriptorSetLayout m_DescriptorSetLayout{VK_NULL_HANDLE};
 
-	std::vector<DeviceObject*> m_BoundDeviceObjects;
-	std::vector<DeviceObjectUID> m_BoundUIDs;
+	PS::vector<DeviceObject*> m_BoundDeviceObjects;
+	PS::vector<DeviceObjectUID> m_BoundUIDs;
 };
 
 } // namespace Vulkan

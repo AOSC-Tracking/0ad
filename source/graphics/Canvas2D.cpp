@@ -208,7 +208,7 @@ CCanvas2D::~CCanvas2D()
 	ENSURE(m->Scissors.empty());
 }
 
-void CCanvas2D::DrawLine(const std::vector<CVector2D>& points, const float width, const CColor& color)
+void CCanvas2D::DrawLine(const PS::vector<CVector2D>& points, const float width, const CColor& color)
 {
 	if (points.empty())
 		return;
@@ -227,7 +227,7 @@ void CCanvas2D::DrawLine(const std::vector<CVector2D>& points, const float width
 		CVector2D normal;
 	};
 	// Normal for the last index is undefined.
-	std::vector<PointIndex> pointsIndices;
+	PS::vector<PointIndex> pointsIndices;
 	pointsIndices.reserve(points.size());
 	pointsIndices.emplace_back(PointIndex{0, 0.0f, CVector2D()});
 	for (size_t index = 0; index < points.size();)
@@ -257,9 +257,9 @@ void CCanvas2D::DrawLine(const std::vector<CVector2D>& points, const float width
 	if (pointsIndices.size() <= 1)
 		return;
 
-	std::vector<std::array<CVector2D, 3>> vertices;
-	std::vector<std::array<CVector2D, 3>> uvs;
-	std::vector<u16> indices;
+	PS::vector<std::array<CVector2D, 3>> vertices;
+	PS::vector<std::array<CVector2D, 3>> uvs;
+	PS::vector<u16> indices;
 	const size_t reserveSize = 2 * pointsIndices.size() - 1;
 	vertices.reserve(reserveSize);
 	uvs.reserve(reserveSize);

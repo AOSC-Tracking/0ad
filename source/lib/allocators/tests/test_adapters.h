@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,11 +24,11 @@
 
 #include "lib/allocators/DynamicArena.h"
 #include "lib/allocators/STLAllocators.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 
 #include <functional>
-#include <map>
-#include <unordered_map>
-#include <vector>
 
 class TestSTLAllocators : public CxxTest::TestSuite
 {
@@ -43,16 +43,16 @@ public:
 	using Allocator = Alloc<D, Allocators::DynamicArena<4096>>;
 
 	template<typename K, typename V, template<typename... Args> typename Alloc>
-	using Map = std::map<K, V, std::less<K>, Allocator<Alloc, typename std::map<K, V>::value_type>>;
+	using Map = PS::map<K, V, std::less<K>, Allocator<Alloc, typename PS::map<K, V>::value_type>>;
 
 	template<typename K, typename V, template<typename... Args> typename Alloc>
-	using UMap = std::unordered_map<K, V, std::hash<K>, std::equal_to<K>, Allocator<Alloc, typename std::unordered_map<K, V>::value_type>>;
+	using UMap = PS::unordered_map<K, V, std::hash<K>, std::equal_to<K>, Allocator<Alloc, typename PS::unordered_map<K, V>::value_type>>;
 
 	void test_CustomAllocator()
 	{
 		Map<int, SomeData, STLAllocator> map;
 		UMap<int, SomeData, STLAllocator> umap;
-		std::vector<SomeData, STLAllocator<SomeData, Allocators::DynamicArena<4096>>> vec;
+		PS::vector<SomeData, STLAllocator<SomeData, Allocators::DynamicArena<4096>>> vec;
 
 		map.emplace(4, 5);
 		umap.emplace(4, 5);
@@ -68,7 +68,7 @@ public:
 		Allocators::DynamicArena<4096> arena;
 		Map<int, SomeData, ProxyAllocator> map(arena);
 		UMap<int, SomeData, ProxyAllocator> umap(arena);
-		std::vector<SomeData, Allocator<ProxyAllocator, SomeData>> vec(arena);
+		PS::vector<SomeData, Allocator<ProxyAllocator, SomeData>> vec(arena);
 
 		map.emplace(4, 5);
 		umap.emplace(4, 5);

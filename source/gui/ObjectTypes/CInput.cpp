@@ -509,7 +509,7 @@ void CInput::ManuallyImmutableHandleKeyDownEvent(const SDL_Keycode keyCode)
 		else if (!SelectingText())
 			m_iBufferPos_Tail = m_iBufferPos;
 
-		std::list<SRow>::iterator current = m_CharacterPositions.begin();
+		PS::list<SRow>::iterator current = m_CharacterPositions.begin();
 		while (current != m_CharacterPositions.end())
 		{
 			if (m_iBufferPos >= current->m_ListStart &&
@@ -548,7 +548,7 @@ void CInput::ManuallyImmutableHandleKeyDownEvent(const SDL_Keycode keyCode)
 		else if (!SelectingText())
 			m_iBufferPos_Tail = m_iBufferPos;
 
-		std::list<SRow>::iterator current = m_CharacterPositions.begin();
+		PS::list<SRow>::iterator current = m_CharacterPositions.begin();
 		while (current != m_CharacterPositions.end())
 		{
 			if (m_iBufferPos >= current->m_ListStart &&
@@ -1289,7 +1289,7 @@ void CInput::DrawContent(CCanvas2D& canvas)
 
 
 		bool done = false;
-		for (std::list<SRow>::const_iterator it = m_CharacterPositions.begin();
+		for (PS::list<SRow>::const_iterator it = m_CharacterPositions.begin();
 			it != m_CharacterPositions.end();
 			++it, buffered_y += ls, x_pointer = 0.f)
 		{
@@ -1395,7 +1395,7 @@ void CInput::DrawContent(CCanvas2D& canvas)
 
 	bool using_selected_color = false;
 
-	for (std::list<SRow>::const_iterator it = m_CharacterPositions.begin();
+	for (PS::list<SRow>::const_iterator it = m_CharacterPositions.begin();
 		it != m_CharacterPositions.end();
 		++it, buffered_y += ls)
 	{
@@ -1568,7 +1568,7 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 
 	CFontMetrics font(font_name);
 
-	std::list<SRow>::iterator current_line;
+	PS::list<SRow>::iterator current_line;
 
 	// Used to ... TODO
 	int check_point_row_start = -1;
@@ -1584,11 +1584,11 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 	{
 		ENSURE(to_before != -1);
 
-		std::list<SRow>::iterator destroy_row_from;
-		std::list<SRow>::iterator destroy_row_to;
+		PS::list<SRow>::iterator destroy_row_from;
+		PS::list<SRow>::iterator destroy_row_to;
 		// Used to check if the above has been set to anything,
 		//  previously a comparison like:
-		//  destroy_row_from == std::list<SRow>::iterator()
+		//  destroy_row_from == PS::list<SRow>::iterator()
 		// ... was used, but it didn't work with GCC.
 		bool destroy_row_from_used = false;
 		bool destroy_row_to_used = false;
@@ -1598,7 +1598,7 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 		//  to be redone. And when going along, we'll delete a row at a time
 		//  when continuing to see how much more after 'to' we need to remake.
 		int i = 0;
-		for (std::list<SRow>::iterator it = m_CharacterPositions.begin();
+		for (PS::list<SRow>::iterator it = m_CharacterPositions.begin();
 		     it != m_CharacterPositions.end();
 		     ++it, ++i)
 		{
@@ -1673,7 +1673,7 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 		// Setup the first row
 		row.m_ListStart = destroy_row_from->m_ListStart;
 
-		std::list<SRow>::iterator temp_it = destroy_row_to;
+		PS::list<SRow>::iterator temp_it = destroy_row_to;
 		--temp_it;
 
 		current_line = m_CharacterPositions.erase(destroy_row_from, destroy_row_to);
@@ -1685,7 +1685,7 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 		int delta = to_after - to_before;
 		if (delta != 0)
 		{
-			for (std::list<SRow>::iterator it = current_line;
+			for (PS::list<SRow>::iterator it = current_line;
 			     it != m_CharacterPositions.end();
 			     ++it)
 				it->m_ListStart += delta;
@@ -1779,11 +1779,11 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 			// check all rows and see if any existing
 			if (row.m_ListStart != check_point_row_start)
 			{
-				std::list<SRow>::iterator destroy_row_from;
-				std::list<SRow>::iterator destroy_row_to;
+				PS::list<SRow>::iterator destroy_row_from;
+				PS::list<SRow>::iterator destroy_row_to;
 				// Are used to check if the above has been set to anything,
 				//  previously a comparison like:
-				//  destroy_row_from == std::list<SRow>::iterator()
+				//  destroy_row_from == PS::list<SRow>::iterator()
 				//  was used, but it didn't work with GCC.
 				bool destroy_row_from_used = false;
 				bool destroy_row_to_used = false;
@@ -1793,7 +1793,7 @@ void CInput::UpdateText(int from, int to_before, int to_after)
 				//  to be redone. And when going along, we'll delete a row at a time
 				//  when continuing to see how much more after 'to' we need to remake.
 
-				for (std::list<SRow>::iterator it = m_CharacterPositions.begin();
+				for (PS::list<SRow>::iterator it = m_CharacterPositions.begin();
 				     it != m_CharacterPositions.end();
 				     ++it)
 				{
@@ -1893,7 +1893,7 @@ int CInput::GetMouseHoveringTextPosition() const
 	// Return position
 	int retPosition;
 
-	std::list<SRow>::const_iterator current = m_CharacterPositions.begin();
+	PS::list<SRow>::const_iterator current = m_CharacterPositions.begin();
 
 	CVector2D mouse = m_pGUI.GetMousePos();
 
@@ -1921,7 +1921,7 @@ int CInput::GetMouseHoveringTextPosition() const
 		if (row > (int)m_CharacterPositions.size()-1)
 			row = (int)m_CharacterPositions.size()-1;
 
-		// TODO Gee (2004-11-21): Okay, I need a 'std::list' for some reasons, but I would really like to
+		// TODO Gee (2004-11-21): Okay, I need a 'PS::list' for some reasons, but I would really like to
 		//  be able to get the specific element here. This is hopefully a temporary hack.
 
 		for (int i = 0; i < row; ++i)
@@ -1946,13 +1946,13 @@ int CInput::GetMouseHoveringTextPosition() const
 }
 
 // Does not process horizontal scrolling, 'x' must be modified before inputted.
-int CInput::GetXTextPosition(const std::list<SRow>::const_iterator& current, const float& x, float& wanted) const
+int CInput::GetXTextPosition(const PS::list<SRow>::const_iterator& current, const float& x, float& wanted) const
 {
 	int ret = 0;
 	float previous = 0.f;
 	int i = 0;
 
-	for (std::vector<float>::const_iterator it = current->m_ListOfX.begin();
+	for (PS::vector<float>::const_iterator it = current->m_ListOfX.begin();
 	     it != current->m_ListOfX.end();
 	     ++it, ++i)
 	{
@@ -2038,10 +2038,10 @@ void CInput::UpdateAutoScroll()
 		float spacing = (float)font.GetLineSpacing();
 		//float height = font.GetHeight();
 
-		// TODO Gee (2004-11-21): Okay, I need a 'std::list' for some reasons, but I would really like to
+		// TODO Gee (2004-11-21): Okay, I need a 'PS::list' for some reasons, but I would really like to
 		//  be able to get the specific element here. This is hopefully a temporary hack.
 
-		std::list<SRow>::iterator current = m_CharacterPositions.begin();
+		PS::list<SRow>::iterator current = m_CharacterPositions.begin();
 		int row = 0;
 		while (current != m_CharacterPositions.end())
 		{

@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -23,18 +23,19 @@
 #ifndef INCLUDED_WFIRMWARE
 #define INCLUDED_WFIRMWARE
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
-namespace wfirmware {
+namespace wfirmware
+{
 
 typedef u32 Provider;
 
 typedef u32 TableId;
-typedef std::vector<TableId> TableIds;
+typedef PS::vector<TableId> TableIds;
 
 extern TableIds GetTableIDs(Provider provider);
 
-typedef std::vector<u8> Table;
+typedef PS::vector<u8> Table;
 
 extern Table GetTable(Provider provider, TableId tableId);
 

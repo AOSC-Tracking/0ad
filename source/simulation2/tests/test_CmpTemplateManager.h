@@ -249,7 +249,7 @@ public:
 		CmpPtr<ICmpTemplateManager> cmpTemplateManager(sim, SYSTEM_ENTITY);
 		TS_ASSERT(cmpTemplateManager);
 
-		std::vector<std::string> templates = cmpTemplateManager->FindAllTemplates(true);
+		PS::vector<std::string> templates = cmpTemplateManager->FindAllTemplates(true);
 		for (size_t i = 0; i < templates.size(); ++i)
 		{
 			std::string name = templates[i];

@@ -86,7 +86,7 @@ bool CTemplateLoader::LoadTemplateFile(CParamNode& node, std::string_view templa
 
 static Status AddToTemplates(const VfsPath& pathname, const CFileInfo& UNUSED(fileInfo), const uintptr_t cbData)
 {
-	std::vector<std::string>& templates = *(std::vector<std::string>*)cbData;
+	PS::vector<std::string>& templates = *(PS::vector<std::string>*)cbData;
 
 	// Strip the .xml extension
 	VfsPath pathstem = pathname.ChangeExtension(L"");
@@ -107,7 +107,7 @@ static Status AddToTemplates(const VfsPath& pathname, const CFileInfo& UNUSED(fi
 
 static Status AddToTemplatesUnrestricted(const VfsPath& pathname, const CFileInfo& UNUSED(fileInfo), const uintptr_t cbData)
 {
-	std::vector<std::string>& templates = *(std::vector<std::string>*)cbData;
+	PS::vector<std::string>& templates = *(PS::vector<std::string>*)cbData;
 
 	VfsPath pathstem = pathname.ChangeExtension(L"");
 	std::string name = pathstem.string8().substr(ARRAY_SIZE(TEMPLATE_ROOT)-1);
@@ -122,7 +122,7 @@ static Status AddToTemplatesUnrestricted(const VfsPath& pathname, const CFileInf
 
 static Status AddActorToTemplates(const VfsPath& pathname, const CFileInfo& UNUSED(fileInfo), const uintptr_t cbData)
 {
-	std::vector<std::string>& templates = *(std::vector<std::string>*)cbData;
+	PS::vector<std::string>& templates = *(PS::vector<std::string>*)cbData;
 
 	// Strip the root from the path
 	std::wstring name = pathname.string().substr(ARRAY_SIZE(ACTOR_ROOT)-1);
@@ -138,9 +138,9 @@ bool CTemplateLoader::TemplateExists(const std::string& templateName) const
 	return VfsFileExists(VfsPath(TEMPLATE_ROOT) / wstring_from_utf8(baseName + ".xml"));
 }
 
-std::vector<std::string> CTemplateLoader::FindTemplates(const std::string& path, bool includeSubdirectories, ETemplatesType templatesType) const
+PS::vector<std::string> CTemplateLoader::FindTemplates(const std::string& path, bool includeSubdirectories, ETemplatesType templatesType) const
 {
-	std::vector<std::string> templates;
+	PS::vector<std::string> templates;
 
 	if (templatesType != SIMULATION_TEMPLATES && templatesType != ACTOR_TEMPLATES && templatesType != ALL_TEMPLATES)
 	{
@@ -159,9 +159,9 @@ std::vector<std::string> CTemplateLoader::FindTemplates(const std::string& path,
 	return templates;
 }
 
-std::vector<std::string> CTemplateLoader::FindTemplatesUnrestricted(const std::string& path, bool includeSubdirectories) const
+PS::vector<std::string> CTemplateLoader::FindTemplatesUnrestricted(const std::string& path, bool includeSubdirectories) const
 {
-	std::vector<std::string> templates;
+	PS::vector<std::string> templates;
 
 	size_t flags = includeSubdirectories ? vfs::DIR_RECURSIVE : 0;
 
@@ -172,7 +172,7 @@ std::vector<std::string> CTemplateLoader::FindTemplatesUnrestricted(const std::s
 
 const CParamNode& CTemplateLoader::GetTemplateFileData(const std::string& templateName)
 {
-	if (std::unordered_map<std::string, CParamNode>::const_iterator it = m_TemplateFileData.find(templateName); it != m_TemplateFileData.end())
+	if (PS::unordered_map<std::string, CParamNode>::const_iterator it = m_TemplateFileData.find(templateName); it != m_TemplateFileData.end())
 		return it->second;
 
 	CParamNode ret;

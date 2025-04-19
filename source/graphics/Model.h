@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -25,8 +25,7 @@
 #include "graphics/Material.h"
 #include "graphics/MeshManager.h"
 #include "graphics/ModelAbstract.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 struct SPropPoint;
 class CObjectEntry;
@@ -198,8 +197,8 @@ public:
 	CModelAbstract* FindFirstAmmoProp();
 
 	// return prop list
-	std::vector<Prop>& GetProps() { return m_Props; }
-	const std::vector<Prop>& GetProps() const { return m_Props; }
+	PS::vector<Prop>& GetProps() { return m_Props; }
+	const PS::vector<Prop>& GetProps() const { return m_Props; }
 
 	// return a clone of this model
 	std::unique_ptr<CModelAbstract> Clone() const override;
@@ -245,7 +244,7 @@ private:
 	 */
 	CMatrix3D* m_BoneMatrices{nullptr};
 	// list of current props on model
-	std::vector<Prop> m_Props;
+	PS::vector<Prop> m_Props;
 
 	/**
 	 * The prop point to which the ammo prop is attached, or NULL if none

@@ -21,9 +21,8 @@
 
 #include "lib/fnv_hash.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/ThreadUtil.h"
-
-#include <unordered_map>
 
 class CStrInternInternals
 {
@@ -62,7 +61,7 @@ struct StringsKeyHash
 };
 
 // To avoid std::string memory allocations when GetString does lookups in the
-// hash table of interned strings, we make use of std::unordered_map's ability
+// hash table of interned strings, we make use of PS::unordered_map's ability
 // to do lookups with a functionally equivalent proxy object:
 
 struct StringsKeyProxy
@@ -89,7 +88,7 @@ struct StringsKeyProxyEq
 
 namespace
 {
-std::unordered_map<StringsKey, CStrInternInternals, StringsKeyHash> g_Strings;
+PS::unordered_map<StringsKey, CStrInternInternals, StringsKeyHash> g_Strings;
 
 CStrInternInternals* GetString(const char* str, size_t len)
 {

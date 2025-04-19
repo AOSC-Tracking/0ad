@@ -427,8 +427,8 @@ public:
 
 
 	u32 tag;
-	std::vector<entity_id_t> added;
-	std::vector<entity_id_t> removed;
+	PS::vector<entity_id_t> added;
+	PS::vector<entity_id_t> removed;
 
 	// CCmpRangeManager wants to store a vector of messages and wants to
 	// swap vectors instead of copying (to save on memory allocations),
@@ -441,7 +441,7 @@ public:
 	CMessageRangeUpdate(u32 tag) : tag(tag)
 	{
 	}
-	CMessageRangeUpdate(u32 tag, const std::vector<entity_id_t>& added, const std::vector<entity_id_t>& removed)
+	CMessageRangeUpdate(u32 tag, const PS::vector<entity_id_t>& added, const PS::vector<entity_id_t>& removed)
 		: tag(tag), added(added), removed(removed)
 	{
 	}
@@ -483,16 +483,16 @@ class CMessageValueModification final : public CMessage
 public:
 	DEFAULT_MESSAGE_IMPL(ValueModification)
 
-	CMessageValueModification(const std::vector<entity_id_t>& entities, std::wstring component, const std::vector<std::wstring>& valueNames) :
+	CMessageValueModification(const PS::vector<entity_id_t>& entities, std::wstring component, const PS::vector<std::wstring>& valueNames) :
 		entities(entities),
 		component(component),
 		valueNames(valueNames)
 	{
 	}
 
-	std::vector<entity_id_t> entities;
+	PS::vector<entity_id_t> entities;
 	std::wstring component;
-	std::vector<std::wstring> valueNames;
+	PS::vector<std::wstring> valueNames;
 };
 
 /**
@@ -551,7 +551,7 @@ class CMessageTemplateModification final : public CMessage
 public:
 	DEFAULT_MESSAGE_IMPL(TemplateModification)
 
-	CMessageTemplateModification(player_id_t player, std::wstring component, const std::vector<std::wstring>& valueNames) :
+	CMessageTemplateModification(player_id_t player, std::wstring component, const PS::vector<std::wstring>& valueNames) :
 		player(player),
 		component(component),
 		valueNames(valueNames)
@@ -560,7 +560,7 @@ public:
 
 	player_id_t player;
 	std::wstring component;
-	std::vector<std::wstring> valueNames;
+	PS::vector<std::wstring> valueNames;
 };
 
 /**

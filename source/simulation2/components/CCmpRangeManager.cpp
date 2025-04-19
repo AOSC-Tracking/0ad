@@ -85,7 +85,7 @@ u32 CalcPlayerLosMask(player_id_t player)
 /**
  * Returns shared LOS mask for given list of players.
  */
-u32 CalcSharedLosMask(std::vector<player_id_t> players)
+u32 CalcSharedLosMask(PS::vector<player_id_t> players)
 {
 	u32 playerMask = 0;
 	for (size_t i = 0; i < players.size(); i++)
@@ -154,7 +154,7 @@ u16 CalcVisionSharingMask(player_id_t player)
  */
 struct Query
 {
-	std::vector<entity_id_t> lastMatch;
+	PS::vector<entity_id_t> lastMatch;
 	CEntityHandle source; // TODO: this could crash if an entity is destroyed while a Query is still referencing it
 	entity_pos_t minRange;
 	entity_pos_t maxRange;
@@ -196,10 +196,10 @@ struct EntityParabolicRangeOutline
 	entity_id_t source;
 	CFixedVector3D position;
 	entity_pos_t range;
-	std::vector<entity_pos_t> outline;
+	PS::vector<entity_pos_t> outline;
 };
 
-static std::map<entity_id_t, EntityParabolicRangeOutline> ParabolicRangesOutlines;
+static PS::map<entity_id_t, EntityParabolicRangeOutline> ParabolicRangesOutlines;
 
 /**
  * Representation of an entity, with the data needed for queries.
@@ -370,7 +370,7 @@ public:
 
 	bool m_DebugOverlayEnabled;
 	bool m_DebugOverlayDirty;
-	std::vector<SOverlayLine> m_DebugOverlayLines;
+	PS::vector<SOverlayLine> m_DebugOverlayLines;
 
 	// Deserialization flag. A lot of different functions are called by Deserialize()
 	// and we don't want to pass isDeserializing bool arguments to all of them...
@@ -384,11 +384,11 @@ public:
 
 	// Range query state:
 	tag_t m_QueryNext; // next allocated id
-	std::map<tag_t, Query> m_Queries;
+	PS::map<tag_t, Query> m_Queries;
 	EntityMap<EntityData> m_EntityData;
 
 	FastSpatialSubdivision m_Subdivision; // spatial index of m_EntityData
-	std::vector<entity_id_t> m_SubdivisionResults;
+	PS::vector<entity_id_t> m_SubdivisionResults;
 
 	// LOS state:
 	static const player_id_t MAX_LOS_PLAYER_ID = 16;
@@ -404,9 +404,9 @@ public:
 	bool m_GlobalVisibilityUpdate;
 	std::array<bool, MAX_LOS_PLAYER_ID> m_GlobalPlayerVisibilityUpdate;
 	Grid<u16> m_DirtyVisibility;
-	Grid<std::set<entity_id_t>> m_LosRegions;
+	Grid<PS::set<entity_id_t>> m_LosRegions;
 	// List of entities that must be updated, regardless of the status of their tile
-	std::vector<entity_id_t> m_ModifiedEntities;
+	PS::vector<entity_id_t> m_ModifiedEntities;
 
 	// Counts of units seeing vertex, per vertex, per player (starting with player 0).
 	// Use u16 to avoid overflows when we have very large (but not infeasibly large) numbers
@@ -429,7 +429,7 @@ public:
 
 	// Cache explored vertices per player (not serialized)
 	u32 m_TotalInworldVertices;
-	std::vector<u32> m_ExploredVertices;
+	PS::vector<u32> m_ExploredVertices;
 
 	static std::string GetSchema()
 	{
@@ -806,7 +806,7 @@ public:
 		std::array<Grid<u16>, MAX_LOS_PLAYER_ID> oldPlayerCounts = m_LosPlayerCounts;
 		Grid<u32> oldStateRevealed = m_LosStateRevealed;
 		FastSpatialSubdivision oldSubdivision = m_Subdivision;
-		Grid<std::set<entity_id_t> > oldLosRegions = m_LosRegions;
+		Grid<PS::set<entity_id_t> > oldLosRegions = m_LosRegions;
 
 		m_Deserializing = true;
 		ResetDerivedData();
@@ -923,7 +923,7 @@ public:
 
 	tag_t CreateActiveQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) override
+		const PS::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) override
 	{
 		tag_t id = m_QueryNext++;
 		m_Queries[id] = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flags, accountForSize);
@@ -933,7 +933,7 @@ public:
 
 	tag_t CreateActiveParabolicQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flags) override
+		const PS::vector<int>& owners, int requiredInterface, u8 flags) override
 	{
 		tag_t id = m_QueryNext++;
 		m_Queries[id] = ConstructParabolicQuery(source, minRange, maxRange, yOrigin, owners, requiredInterface, flags, true);
@@ -954,7 +954,7 @@ public:
 
 	void EnableActiveQuery(tag_t tag) override
 	{
-		std::map<tag_t, Query>::iterator it = m_Queries.find(tag);
+		PS::map<tag_t, Query>::iterator it = m_Queries.find(tag);
 		if (it == m_Queries.end())
 		{
 			LOGERROR("CCmpRangeManager: EnableActiveQuery called with invalid tag %u", tag);
@@ -967,7 +967,7 @@ public:
 
 	void DisableActiveQuery(tag_t tag) override
 	{
-		std::map<tag_t, Query>::iterator it = m_Queries.find(tag);
+		PS::map<tag_t, Query>::iterator it = m_Queries.find(tag);
 		if (it == m_Queries.end())
 		{
 			LOGERROR("CCmpRangeManager: DisableActiveQuery called with invalid tag %u", tag);
@@ -980,7 +980,7 @@ public:
 
 	bool IsActiveQueryEnabled(tag_t tag) const override
 	{
-		std::map<tag_t, Query>::const_iterator it = m_Queries.find(tag);
+		PS::map<tag_t, Query>::const_iterator it = m_Queries.find(tag);
 		if (it == m_Queries.end())
 		{
 			LOGERROR("CCmpRangeManager: IsActiveQueryEnabled called with invalid tag %u", tag);
@@ -991,12 +991,12 @@ public:
 		return q.enabled;
 	}
 
-	std::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos,
+	PS::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) override
+		const PS::vector<int>& owners, int requiredInterface, bool accountForSize) override
 	{
 		Query q = ConstructQuery(INVALID_ENTITY, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize);
-		std::vector<entity_id_t> r;
+		PS::vector<entity_id_t> r;
 		PerformQuery(q, r, pos);
 
 		// Return the list sorted by distance from the entity
@@ -1005,15 +1005,15 @@ public:
 		return r;
 	}
 
-	std::vector<entity_id_t> ExecuteQuery(entity_id_t source,
+	PS::vector<entity_id_t> ExecuteQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) override
+		const PS::vector<int>& owners, int requiredInterface, bool accountForSize) override
 	{
 		PROFILE("ExecuteQuery");
 
 		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, GetEntityFlagMask("normal"), accountForSize);
 
-		std::vector<entity_id_t> r;
+		PS::vector<entity_id_t> r;
 
 		CmpPtr<ICmpPosition> cmpSourcePosition(q.source);
 		if (!cmpSourcePosition || !cmpSourcePosition->IsInWorld())
@@ -1031,13 +1031,13 @@ public:
 		return r;
 	}
 
-	std::vector<entity_id_t> ResetActiveQuery(tag_t tag) override
+	PS::vector<entity_id_t> ResetActiveQuery(tag_t tag) override
 	{
 		PROFILE("ResetActiveQuery");
 
-		std::vector<entity_id_t> r;
+		PS::vector<entity_id_t> r;
 
-		std::map<tag_t, Query>::iterator it = m_Queries.find(tag);
+		PS::map<tag_t, Query>::iterator it = m_Queries.find(tag);
 		if (it == m_Queries.end())
 		{
 			LOGERROR("CCmpRangeManager: ResetActiveQuery called with invalid tag %u", tag);
@@ -1066,24 +1066,24 @@ public:
 		return r;
 	}
 
-	std::vector<entity_id_t> GetEntitiesByPlayer(player_id_t player) const override
+	PS::vector<entity_id_t> GetEntitiesByPlayer(player_id_t player) const override
 	{
 		return GetEntitiesByMask(CalcOwnerMask(player));
 	}
 
-	std::vector<entity_id_t> GetNonGaiaEntities() const override
+	PS::vector<entity_id_t> GetNonGaiaEntities() const override
 	{
 		return GetEntitiesByMask(~3u); // bit 0 for owner=-1 and bit 1 for gaia
 	}
 
-	std::vector<entity_id_t> GetGaiaAndNonGaiaEntities() const override
+	PS::vector<entity_id_t> GetGaiaAndNonGaiaEntities() const override
 	{
 		return GetEntitiesByMask(~1u); // bit 0 for owner=-1
 	}
 
-	std::vector<entity_id_t> GetEntitiesByMask(u32 ownerMask) const
+	PS::vector<entity_id_t> GetEntitiesByMask(u32 ownerMask) const
 	{
-		std::vector<entity_id_t> entities;
+		PS::vector<entity_id_t> entities;
 
 		for (EntityMap<EntityData>::const_iterator it = m_EntityData.begin(); it != m_EntityData.end(); ++it)
 		{
@@ -1112,12 +1112,12 @@ public:
 
 		// Store a queue of all messages before sending any, so we can assume
 		// no entities will move until we've finished checking all the ranges
-		std::vector<std::pair<entity_id_t, CMessageRangeUpdate> > messages;
-		std::vector<entity_id_t> results;
-		std::vector<entity_id_t> added;
-		std::vector<entity_id_t> removed;
+		PS::vector<std::pair<entity_id_t, CMessageRangeUpdate> > messages;
+		PS::vector<entity_id_t> results;
+		PS::vector<entity_id_t> added;
+		PS::vector<entity_id_t> removed;
 
-		for (std::map<tag_t, Query>::iterator it = m_Queries.begin(); it != m_Queries.end(); ++it)
+		for (PS::map<tag_t, Query>::iterator it = m_Queries.begin(); it != m_Queries.end(); ++it)
 		{
 			Query& query = it->second;
 
@@ -1192,7 +1192,7 @@ public:
 	/**
 	 * Returns a list of distinct entity IDs that match the given query, sorted by ID.
 	 */
-	void PerformQuery(const Query& q, std::vector<entity_id_t>& r, CFixedVector2D pos)
+	void PerformQuery(const Query& q, PS::vector<entity_id_t>& r, CFixedVector2D pos)
 	{
 
 		// Special case: range is ALWAYS_IN_RANGE means check all entities ignoring distance.
@@ -1318,7 +1318,7 @@ public:
 		if (angle == entity_pos_t::Zero())
 			numberOfSteps = 1;
 
-		std::vector<entity_pos_t> coords = getParabolicRangeForm(pos, range, range*2, minAngle, maxAngle, numberOfSteps);
+		PS::vector<entity_pos_t> coords = getParabolicRangeForm(pos, range, range*2, minAngle, maxAngle, numberOfSteps);
 
 		entity_pos_t part = entity_pos_t::FromInt(numberOfSteps);
 
@@ -1329,9 +1329,9 @@ public:
 
 	}
 
-	virtual std::vector<entity_pos_t> getParabolicRangeForm(CFixedVector3D pos, entity_pos_t maxRange, entity_pos_t cutoff, entity_pos_t minAngle, entity_pos_t maxAngle, int numberOfSteps) const
+	virtual PS::vector<entity_pos_t> getParabolicRangeForm(CFixedVector3D pos, entity_pos_t maxRange, entity_pos_t cutoff, entity_pos_t minAngle, entity_pos_t maxAngle, int numberOfSteps) const
 	{
-		std::vector<entity_pos_t> r;
+		PS::vector<entity_pos_t> r;
 
 		CmpPtr<ICmpTerrain> cmpTerrain(GetSystemEntity());
 		if (!cmpTerrain)
@@ -1404,7 +1404,7 @@ public:
 
 	Query ConstructQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
+		const PS::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
 	{
 		// Min range must be non-negative.
 		if (minRange < entity_pos_t::Zero())
@@ -1460,7 +1460,7 @@ public:
 
 	Query ConstructParabolicQuery(entity_id_t source,
 		entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
+		const PS::vector<int>& owners, int requiredInterface, u8 flagsMask, bool accountForSize) const
 	{
 		Query q = ConstructQuery(source, minRange, maxRange, owners, requiredInterface, flagsMask, accountForSize);
 		q.parabolic = true;
@@ -1481,7 +1481,7 @@ public:
 		{
 			m_DebugOverlayLines.clear();
 
-			for (std::map<tag_t, Query>::iterator it = m_Queries.begin(); it != m_Queries.end(); ++it)
+			for (PS::map<tag_t, Query>::iterator it = m_Queries.begin(); it != m_Queries.end(); ++it)
 			{
 				Query& q = it->second;
 
@@ -1503,7 +1503,7 @@ public:
 					CFixedVector3D pos3D = cmpSourcePosition->GetPosition();
 					pos3D.Y += q.yOrigin;
 
-					std::vector<entity_pos_t> coords;
+					PS::vector<entity_pos_t> coords;
 
 					// Get the outline from cache if possible
 					if (ParabolicRangesOutlines.find(q.source.GetId()) != ParabolicRangesOutlines.end())
@@ -1545,7 +1545,7 @@ public:
 					// draw the outline (piece by piece)
 					for (size_t i = 3; i < coords.size(); i += 2)
 					{
-						std::vector<float> c;
+						PS::vector<float> c;
 						c.push_back((coords[i - 3] + pos3D.X).ToFloat());
 						c.push_back((coords[i - 2] + pos3D.Z).ToFloat());
 						c.push_back((coords[i - 1] + pos3D.X).ToFloat());
@@ -1568,7 +1568,7 @@ public:
 						continue;
 					CFixedVector2D targetPos = cmpTargetPosition->GetPosition2D();
 
-					std::vector<float> coords;
+					PS::vector<float> coords;
 					coords.push_back(pos.X.ToFloat());
 					coords.push_back(pos.Y.ToFloat());
 					coords.push_back(targetPos.X.ToFloat());
@@ -1847,7 +1847,7 @@ public:
 
 	void RemoveFromRegion(LosRegion region, entity_id_t ent)
 	{
-		std::set<entity_id_t>::const_iterator regionIt = m_LosRegions[region].find(ent);
+		PS::set<entity_id_t>::const_iterator regionIt = m_LosRegions[region].find(ent);
 		if (regionIt != m_LosRegions[region].end())
 			m_LosRegions[region].erase(regionIt);
 	}
@@ -1873,7 +1873,7 @@ public:
 
 		// Calling UpdateVisibility can modify m_ModifiedEntities, so be careful:
 		// infinite loops could be triggered by feedback between entities and their mirages.
-		std::map<entity_id_t, u8> attempts;
+		PS::map<entity_id_t, u8> attempts;
 		while (!m_ModifiedEntities.empty())
 		{
 			entity_id_t ent = m_ModifiedEntities.back();
@@ -1955,7 +1955,7 @@ public:
 		return m_LosCircular;
 	}
 
-	void SetSharedLos(player_id_t player, const std::vector<player_id_t>& players) override
+	void SetSharedLos(player_id_t player, const PS::vector<player_id_t>& players) override
 	{
 		m_SharedLosMasks[player] = CalcSharedLosMask(players);
 
@@ -2051,7 +2051,7 @@ public:
 		// Otherwise, by deleting mirage entities and so on, that code will
 		// change the indexes in the map, leading to segfaults.
 		// So we just remember what entities to mirage and do that later.
-		std::vector<entity_id_t> miragableEntities;
+		PS::vector<entity_id_t> miragableEntities;
 
 		for (EntityMap<EntityData>::const_iterator it = m_EntityData.begin(); it != m_EntityData.end(); ++it)
 		{
@@ -2072,7 +2072,7 @@ public:
 				miragableEntities.push_back(it->first);
 		}
 
-		for (std::vector<entity_id_t>::iterator it = miragableEntities.begin(); it != miragableEntities.end(); ++it)
+		for (PS::vector<entity_id_t>::iterator it = miragableEntities.begin(); it != miragableEntities.end(); ++it)
 		{
 			CmpPtr<ICmpFogging> cmpFogging(GetSimContext(), *it);
 			ENSURE(cmpFogging && "Impossible to retrieve Fogging component, previously achieved");
@@ -2499,10 +2499,10 @@ public:
 		return m_ExploredVertices.at((u8)player) * 100 / m_TotalInworldVertices;
 	}
 
-	u8 GetUnionPercentMapExplored(const std::vector<player_id_t>& players) const override
+	u8 GetUnionPercentMapExplored(const PS::vector<player_id_t>& players) const override
 	{
 		u32 exploredVertices = 0;
-		std::vector<player_id_t>::const_iterator playerIt;
+		PS::vector<player_id_t>::const_iterator playerIt;
 
 		for (i32 j = 0; j < m_LosVerticesPerSide; j++)
 			for (i32 i = 0; i < m_LosVerticesPerSide; i++)

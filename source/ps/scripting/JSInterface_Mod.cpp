@@ -145,9 +145,9 @@ JS::Value GetAvailableMods(const ScriptRequest& rq)
 	return ret.get();
 }
 
-bool AreModsPlayCompatible(const std::vector<Mod::ModData>& a, const std::vector<Mod::ModData>& b)
+bool AreModsPlayCompatible(const PS::vector<Mod::ModData>& a, const PS::vector<Mod::ModData>& b)
 {
-	std::vector<const Mod::ModData*> modsA, modsB;
+	PS::vector<const Mod::ModData*> modsA, modsB;
 	modsA.reserve(a.size());
 	for (const Mod::ModData& mod : a)
 		modsA.push_back(&mod);
@@ -157,7 +157,7 @@ bool AreModsPlayCompatible(const std::vector<Mod::ModData>& a, const std::vector
 	return Mod::AreModsPlayCompatible(modsA, modsB);
 }
 
-bool SetModsAndRestartEngine(const std::vector<CStr>& mods)
+bool SetModsAndRestartEngine(const PS::vector<CStr>& mods)
 {
 	if (!g_Mods.EnableMods(mods, false))
 		return false;

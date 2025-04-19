@@ -22,6 +22,7 @@
 #include "lib/file/io/write_buffer.h"
 #include "lib/file/vfs/vfs.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedMap.h"
 #include "scriptinterface/Object.h"
 #include "scriptinterface/ScriptConversions.h"
 #include "scriptinterface/ScriptExtraHeaders.h"
@@ -29,7 +30,6 @@
 
 #include <libxml/parser.h>
 #include <string_view>
-#include <unordered_map>
 
 const char* XMBStorage::HeaderMagicStr = "XMB0";
 const char* XMBStorage::UnfinishedHeaderMagicStr = "XMBu";
@@ -49,7 +49,7 @@ public:
 	int GetAttributeName(const std::string& name) { return GetName(m_AttributeSize, m_AttributeIDs, name); }
 
 protected:
-	int GetName(int& totalSize, std::unordered_map<std::string, int>& names, const std::string& name)
+	int GetName(int& totalSize, PS::unordered_map<std::string, int>& names, const std::string& name)
 	{
 		int nameIdx = totalSize;
 		auto [iterator, inserted] = names.try_emplace(name, nameIdx);
@@ -58,7 +58,7 @@ protected:
 		return iterator->second;
 	}
 
-	void OutputNames(WriteBuffer& writeBuffer, const std::unordered_map<std::string, int>& names) const;
+	void OutputNames(WriteBuffer& writeBuffer, const PS::unordered_map<std::string, int>& names) const;
 
 	template<typename ...Args>
 	bool OutputElements(WriteBuffer&, Args...)
@@ -69,8 +69,8 @@ protected:
 
 	int m_ElementSize = 0;
 	int m_AttributeSize = 0;
-	std::unordered_map<std::string, int> m_ElementIDs;
-	std::unordered_map<std::string, int> m_AttributeIDs;
+	PS::unordered_map<std::string, int> m_ElementIDs;
+	PS::unordered_map<std::string, int> m_AttributeIDs;
 };
 
 // Output text, prefixed by length in bytes (including null-terminator)
@@ -127,9 +127,9 @@ bool XMBStorageWriter::Load(WriteBuffer& writeBuffer, Args&&... args)
 	return true;
 }
 
-void XMBStorageWriter::OutputNames(WriteBuffer& writeBuffer, const std::unordered_map<std::string, int>& names) const
+void XMBStorageWriter::OutputNames(WriteBuffer& writeBuffer, const PS::unordered_map<std::string, int>& names) const
 {
-	std::vector<std::pair<std::string, int>> orderedElements;
+	PS::vector<std::pair<std::string, int>> orderedElements;
 	for (const std::pair<const std::string, int>& n : names)
 		orderedElements.emplace_back(n);
 	std::sort(orderedElements.begin(), orderedElements.end(), [](const auto& a, const auto&b) { return a.second < b.second; });
@@ -149,8 +149,8 @@ public:
 	bool Setup(XMBStorageWriter& xmb, JS::HandleValue value);
 	bool Output(WriteBuffer& writeBuffer, JS::HandleValue value) const;
 
-	std::vector<std::pair<u32, std::string>> m_Attributes;
-	std::vector<std::pair<u32, JS::Heap<JS::Value>>> m_Children;
+	PS::vector<std::pair<u32, std::string>> m_Attributes;
+	PS::vector<std::pair<u32, JS::Heap<JS::Value>>> m_Children;
 
 	const ScriptInterface& scriptInterface;
 	const ScriptRequest rq;
@@ -195,7 +195,7 @@ bool XMBStorageWriter::OutputElements<JSNodeData&, const u32&, JS::HandleValue&&
 	writeBuffer.Overwrite(&childrenOffset, 4, posChildrenOffset);
 
 	// Output all child elements, making a copy since data will be overwritten.
-	std::vector<std::pair<u32, JS::Heap<JS::Value>>> children = data.m_Children;
+	PS::vector<std::pair<u32, JS::Heap<JS::Value>>> children = data.m_Children;
 	for (const std::pair<u32, JS::Heap<JS::Value>>& child : children)
 	{
 		JS::RootedValue val(data.rq.cx, child.second);
@@ -218,7 +218,7 @@ bool JSNodeData::Setup(XMBStorageWriter& xmb, JS::HandleValue value)
 	if (valType != JSTYPE_OBJECT)
 		return true;
 
-	std::vector<std::string> props;
+	PS::vector<std::string> props;
 	if (!Script::EnumeratePropertyNames(rq, value, true, props))
 	{
 		LOGERROR("Failed to enumerate component properties.");

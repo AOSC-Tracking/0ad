@@ -27,18 +27,17 @@
 
 #include "lib/self_test.h"
 
-#include <queue>
-#include <deque>
-#include <list>
-#include <map>
-#include <stack>
-
 #include "lib/bits.h"
 #include "lib/code_annotation.h"
 #include "lib/sysdep/os/win/win.h"	// HWND
 #include "lib/sysdep/sysdep.h"
 #include "lib/sysdep/os/win/wdbg_sym.h"
 #include "lib/external_libraries/dbghelp.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/List.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Queue.h"
+#include "ps/containers/Stack.h"
 
 
 static void* callers[100];
@@ -176,42 +175,42 @@ class TestWdbgSym : public CxxTest::TestSuite
 	// STL containers and their contents
 	static void m_test_stl()
 	{
-		std::vector<std::wstring> v_wstring;
+		PS::vector<std::wstring> v_wstring;
 		v_wstring.push_back(L"ws1"); v_wstring.push_back(L"ws2");
 
-		std::deque<int> d_int;
+		PS::deque<int> d_int;
 		d_int.push_back(1); d_int.push_back(2); d_int.push_back(3);
-		std::deque<std::string> d_string;
+		PS::deque<std::string> d_string;
 		d_string.push_back("a"); d_string.push_back("b"); d_string.push_back("c");
 
-		std::list<float> l_float;
+		PS::list<float> l_float;
 		l_float.push_back(0.1f); l_float.push_back(0.2f); l_float.push_back(0.3f); l_float.push_back(0.4f);
 
-		std::map<std::string, int> m_string_int;
+		PS::map<std::string, int> m_string_int;
 		m_string_int.insert(std::make_pair<std::string,int>("s5", 5));
 		m_string_int.insert(std::make_pair<std::string,int>("s6", 6));
 		m_string_int.insert(std::make_pair<std::string,int>("s7", 7));
-		std::map<int, std::string> m_int_string;
+		PS::map<int, std::string> m_int_string;
 		m_int_string.insert(std::make_pair<int,std::string>(1, "s1"));
 		m_int_string.insert(std::make_pair<int,std::string>(2, "s2"));
 		m_int_string.insert(std::make_pair<int,std::string>(3, "s3"));
-		std::map<int, int> m_int_int;
+		PS::map<int, int> m_int_int;
 		m_int_int.insert(std::make_pair<int,int>(1, 1));
 		m_int_int.insert(std::make_pair<int,int>(2, 2));
 		m_int_int.insert(std::make_pair<int,int>(3, 3));
 
-		std::set<uintptr_t> s_uintptr;
+		PS::set<uintptr_t> s_uintptr;
 		s_uintptr.insert(0x123); s_uintptr.insert(0x456);
 
 		// empty
-		std::deque<u8> d_u8_empty;
-		std::list<Nested> l_nested_empty;
-		std::map<double,double> m_double_empty;
+		PS::deque<u8> d_u8_empty;
+		PS::list<Nested> l_nested_empty;
+		PS::map<double,double> m_double_empty;
 		std::multimap<int,u8> mm_int_empty;
-		std::set<size_t> s_uint_empty;
+		PS::set<size_t> s_uint_empty;
 		std::multiset<char> ms_char_empty;
-		std::vector<double> v_double_empty;
-		std::queue<double> q_double_empty;
+		PS::vector<double> v_double_empty;
+		PS::queue<double> q_double_empty;
 		std::stack<double> st_double_empty;
 		std::string str_empty;
 		std::wstring wstr_empty;
@@ -219,14 +218,14 @@ class TestWdbgSym : public CxxTest::TestSuite
 		m_test_udt();
 
 		// uninitialized
-		std::deque<u8> d_u8_uninit;
-		std::list<Nested> l_nested_uninit;
-		std::map<double,double> m_double_uninit;
+		PS::deque<u8> d_u8_uninit;
+		PS::list<Nested> l_nested_uninit;
+		PS::map<double,double> m_double_uninit;
 		std::multimap<int,u8> mm_int_uninit;
-		std::set<size_t> s_uint_uninit;
+		PS::set<size_t> s_uint_uninit;
 		std::multiset<char> ms_char_uninit;
-		std::vector<double> v_double_uninit;
-		std::queue<double> q_double_uninit;
+		PS::vector<double> v_double_uninit;
+		PS::queue<double> q_double_uninit;
 		std::stack<double> st_double_uninit;
 		std::string str_uninit;
 		std::wstring wstr_uninit;

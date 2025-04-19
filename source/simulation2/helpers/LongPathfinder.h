@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,12 +21,11 @@
 #include "Pathfinding.h"
 
 #include "graphics/Overlay.h"
+#include "ps/containers/Map.h"
 #include "renderer/Scene.h"
 #include "renderer/TerrainOverlay.h"
 #include "simulation2/helpers/Grid.h"
 #include "simulation2/helpers/PriorityQueue.h"
-
-#include <map>
 
 /**
  * Represents the 2D coordinates of a tile.
@@ -214,7 +213,7 @@ public:
 	 * along the path.
 	 */
 	void ComputePath(const HierarchicalPathfinder& hierPath, entity_pos_t x0, entity_pos_t z0, const PathGoal& origGoal,
-		pass_class_t passClass, std::vector<CircularRegion> excludedRegions, WaypointPath& path);
+		pass_class_t passClass, PS::vector<CircularRegion> excludedRegions, WaypointPath& path);
 
 	void GetDebugData(u32& steps, double& time, Grid<u8>& grid) const
 	{
@@ -275,14 +274,14 @@ private:
 	 * Generate a passability map, stored in the 16th bit of navcells, based on passClass,
 	 * but with a set of impassable circular regions.
 	 */
-	void GenerateSpecialMap(pass_class_t passClass, std::vector<CircularRegion> excludedRegions);
+	void GenerateSpecialMap(pass_class_t passClass, PS::vector<CircularRegion> excludedRegions);
 
 	bool m_UseJPSCache;
 	// Mutable may be used here as caching does not change the external const-ness of the Long Range pathfinder.
 	// This is thread-safe as it is order independent (no change in the output of the function for a given set of params).
 	// Obviously, this means that the cache should actually be a cache and not return different results
 	// from what would happen if things hadn't been cached.
-	mutable std::map<pass_class_t, std::shared_ptr<JumpPointCache>> m_JumpPointCache;
+	mutable PS::map<pass_class_t, std::shared_ptr<JumpPointCache>> m_JumpPointCache;
 };
 
 #endif // INCLUDED_LONGPATHFINDER

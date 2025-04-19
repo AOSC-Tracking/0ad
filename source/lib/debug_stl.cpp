@@ -593,8 +593,8 @@ Status debug_stl_get_container_info(const wchar_t* type_name, const u8* p, size_
 	// (note: Any_queue etc. assumes the underlying container is a deque.
 	// we make sure of that here and otherwise refuse to display it, because
 	// doing so is lots of work for little gain.)
-	CONTAINER(queue, L"std::queue<*,std::deque<*> >")
-	CONTAINER(stack, L"std::stack<*,std::deque<*> >")
+	CONTAINER(queue, L"PS::queue<*,PS::deque<*> >")
+	CONTAINER(stack, L"std::stack<*,PS::deque<*> >")
 
 	// note: do not raise warnings - these can happen for new
 	// STL classes or if the debuggee's memory is corrupted.

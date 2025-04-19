@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,11 +21,13 @@
 #include "IXmppClient.h"
 
 #include "lib/external_libraries/gloox.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/List.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 
 #include <ctime>
-#include <deque>
 #include <string>
-#include <vector>
 
 class ScriptRequest;
 
@@ -126,7 +128,7 @@ protected:
 	bool handleMUCRoomCreation(gloox::MUCRoom*) override { return false; }
 	void handleMUCInviteDecline(gloox::MUCRoom*, const gloox::JID&, const std::string&) override {}
 	void handleMUCInfo(gloox::MUCRoom*, int, const std::string&, const gloox::DataForm*) override {}
-	void handleMUCItems(gloox::MUCRoom*, const std::list<gloox::Disco::Item*, std::allocator<gloox::Disco::Item*> >&) override {}
+	void handleMUCItems(gloox::MUCRoom*, const PS::list<gloox::Disco::Item*, std::allocator<gloox::Disco::Item*> >&) override {}
 
 	/* Log handler */
 	void handleLog(gloox::LogLevel level, gloox::LogArea area, const std::string& message) override;
@@ -185,24 +187,24 @@ private:
 		gloox::MUCRoomRole m_Role;
 		std::string m_Rating;
 	};
-	using PlayerMap = std::map<std::string, SPlayer>;
+	using PlayerMap = PS::map<std::string, SPlayer>;
 
 	/// Map of players
 	PlayerMap m_PlayerMap;
 	/// Whether or not the playermap has changed since the last time the GUI checked.
 	bool m_PlayerMapUpdate;
 	/// List of games
-	std::vector<const gloox::Tag*> m_GameList;
+	PS::vector<const gloox::Tag*> m_GameList;
 	/// List of rankings
-	std::vector<const gloox::Tag*> m_BoardList;
+	PS::vector<const gloox::Tag*> m_BoardList;
 	/// Profile data
-	std::vector<const gloox::Tag*> m_Profile;
+	PS::vector<const gloox::Tag*> m_Profile;
 	/// ScriptInterface to root the values
 	const ScriptInterface* m_ScriptInterface;
 	/// Queue of messages for the GUI
-	std::deque<JS::Heap<JS::Value> > m_GuiMessageQueue;
+	PS::deque<JS::Heap<JS::Value> > m_GuiMessageQueue;
 	/// Cache of all GUI messages received since the login
-	std::vector<JS::Heap<JS::Value> > m_HistoricGuiMessages;
+	PS::vector<JS::Heap<JS::Value> > m_HistoricGuiMessages;
 	/// Current room subject/topic.
 	std::wstring m_Subject;
 };

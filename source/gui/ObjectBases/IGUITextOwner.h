@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -33,9 +33,8 @@ GUI Object Base - Text Owner
 #include "gui/CGUISetting.h"
 #include "gui/SettingTypes/EAlign.h"
 #include "maths/Rect.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrForward.h"
-
-#include <vector>
 
 class CCanvas2D;
 struct CGUIColor;
@@ -108,7 +107,7 @@ protected:
 	/**
 	 * Texts that are generated and ready to be rendered.
 	 */
-	std::vector<CGUIText> m_GeneratedTexts;
+	PS::vector<CGUIText> m_GeneratedTexts;
 
 	/**
 	 * Calculate the position for the text, based on the alignment.

@@ -85,7 +85,7 @@ void CMapWriter::SaveMap(const VfsPath& pathname, CTerrain* pTerrain,
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // GetHandleIndex: return the index of the given handle in the given list; or 0xFFFF if
 // handle isn't in list
-static u16 GetEntryIndex(const CTerrainTextureEntry* entry, const std::vector<CTerrainTextureEntry*>& entries)
+static u16 GetEntryIndex(const CTerrainTextureEntry* entry, const PS::vector<CTerrainTextureEntry*>& entries)
 {
 	const size_t limit = std::min(entries.size(), size_t(0xFFFEu));	// paranoia
 	for (size_t i=0;i<limit;i++) {
@@ -101,11 +101,11 @@ static u16 GetEntryIndex(const CTerrainTextureEntry* entry, const std::vector<CT
 // EnumTerrainTextures: build lists of textures used by map, and tile descriptions for
 // each tile on the terrain
 void CMapWriter::EnumTerrainTextures(CTerrain *pTerrain,
-									 std::vector<CStr>& textures,
-									 std::vector<STileDesc>& tiles)
+									 PS::vector<CStr>& textures,
+									 PS::vector<STileDesc>& tiles)
 {
 	// the list of all handles in use
-	std::vector<CTerrainTextureEntry*> entries;
+	PS::vector<CTerrainTextureEntry*> entries;
 
 	// resize tile array to required size
 	tiles.resize(SQR(pTerrain->GetVerticesPerSide()-1));
@@ -168,9 +168,9 @@ void CMapWriter::PackTerrain(CFilePacker& packer, CTerrain* pTerrain)
 	packer.PackRaw(pTerrain->GetHeightMap(),sizeof(u16)*SQR(pTerrain->GetVerticesPerSide()));
 
 	// the list of textures used by map
-	std::vector<CStr> terrainTextures;
+	PS::vector<CStr> terrainTextures;
 	// descriptions of each tile
-	std::vector<STileDesc> tiles;
+	PS::vector<STileDesc> tiles;
 
 	// build lists by scanning through the terrain
 	EnumTerrainTextures(pTerrain, terrainTextures, tiles);
@@ -340,7 +340,7 @@ void CMapWriter::WriteXML(const VfsPath& filename,
 				CmpPtr<ICmpGarrisonHolder> cmpGarrisonHolder(sim, ent);
 				if (cmpGarrisonHolder)
 				{
-					std::vector<entity_id_t> garrison = cmpGarrisonHolder->GetEntities();
+					PS::vector<entity_id_t> garrison = cmpGarrisonHolder->GetEntities();
 					if (!garrison.empty())
 					{
 						XMLWriter_Element garrisonTag(xmlMapFile, "Garrison");
@@ -355,7 +355,7 @@ void CMapWriter::WriteXML(const VfsPath& filename,
 				CmpPtr<ICmpTurretHolder> cmpTurretHolder(sim, ent);
 				if (cmpTurretHolder)
 				{
-					std::vector<std::pair<std::string, entity_id_t> > turrets = cmpTurretHolder->GetTurrets();
+					PS::vector<std::pair<std::string, entity_id_t> > turrets = cmpTurretHolder->GetTurrets();
 					if (!turrets.empty())
 					{
 						XMLWriter_Element turretTag(xmlMapFile, "Turrets");
@@ -428,15 +428,15 @@ void CMapWriter::WriteXML(const VfsPath& filename,
 		CmpPtr<ICmpCinemaManager> cmpCinemaManager(sim, SYSTEM_ENTITY);
 		if (cmpCinemaManager)
 		{
-			const std::map<CStrW, CCinemaPath>& paths = cmpCinemaManager->GetPaths();
-			std::map<CStrW, CCinemaPath>::const_iterator it = paths.begin();
+			const PS::map<CStrW, CCinemaPath>& paths = cmpCinemaManager->GetPaths();
+			PS::map<CStrW, CCinemaPath>::const_iterator it = paths.begin();
 			XMLWriter_Element pathsTag(xmlMapFile, "Paths");
 
 			for ( ; it != paths.end(); ++it )
 			{
 				fixed timescale = it->second.GetTimescale();
-				const std::vector<SplineData>& position_nodes = it->second.GetAllNodes();
-				const std::vector<SplineData>& target_nodes = it->second.GetTargetSpline().GetAllNodes();
+				const PS::vector<SplineData>& position_nodes = it->second.GetAllNodes();
+				const PS::vector<SplineData>& target_nodes = it->second.GetTargetSpline().GetAllNodes();
 				const CCinemaData* data = it->second.GetData();
 
 				XMLWriter_Element pathTag(xmlMapFile, "Path");
@@ -461,7 +461,7 @@ void CMapWriter::WriteXML(const VfsPath& filename,
 				};
 
 				// All events of a manipulating of camera (position/rotation/target)
-				std::vector<SEvent> events;
+				PS::vector<SEvent> events;
 				events.reserve(position_nodes.size() + target_nodes.size());
 
 				fixed last_position = fixed::Zero();

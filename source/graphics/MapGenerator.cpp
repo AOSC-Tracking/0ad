@@ -27,6 +27,9 @@
 #include "lib/file/vfs/vfs_path.h"
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 #include "ps/FileIo.h"
 #include "ps/Future.h"
 #include "ps/scripting/JSInterface_VFS.h"
@@ -40,9 +43,7 @@
 #include "simulation2/helpers/MapEdgeTiles.h"
 
 #include <boost/random/linear_congruential.hpp>
-#include <set>
 #include <string>
-#include <vector>
 
 namespace
 {
@@ -173,7 +174,7 @@ private:
 	 */
 	JS::Value LoadHeightmapImage(const VfsPath& filename)
 	{
-		std::vector<u16> heightmap;
+		PS::vector<u16> heightmap;
 		if (LoadHeightmapImageVfs(filename, heightmap) != INFO::OK)
 		{
 			LOGERROR("Could not load heightmap file '%s'", filename.string8());
@@ -217,13 +218,13 @@ private:
 		size_t verticesPerSide = patchesPerSide * PATCH_SIZE + 1;
 
 		// unpack heightmap
-		std::vector<u16> heightmap;
+		PS::vector<u16> heightmap;
 		heightmap.resize(SQR(verticesPerSide));
 		unpacker.UnpackRaw(&heightmap[0], SQR(verticesPerSide) * sizeof(u16));
 
 		// unpack texture names
 		size_t textureCount = unpacker.UnpackSize();
-		std::vector<std::string> textureNames;
+		PS::vector<std::string> textureNames;
 		textureNames.reserve(textureCount);
 		for (size_t i = 0; i < textureCount; ++i)
 		{
@@ -234,12 +235,12 @@ private:
 
 		// unpack texture IDs per tile
 		ssize_t tilesPerSide = patchesPerSide * PATCH_SIZE;
-		std::vector<CMapIO::STileDesc> tiles;
+		PS::vector<CMapIO::STileDesc> tiles;
 		tiles.resize(size_t(SQR(tilesPerSide)));
 		unpacker.UnpackRaw(&tiles[0], sizeof(CMapIO::STileDesc) * tiles.size());
 
 		// reorder by patches and store and save texture IDs per tile
-		std::vector<u16> textureIDs;
+		PS::vector<u16> textureIDs;
 		for (ssize_t x = 0; x < tilesPerSide; ++x)
 		{
 			size_t patchX = x / PATCH_SIZE;
@@ -298,7 +299,7 @@ private:
 	/**
 	 * Returns all template names of simulation entity templates.
 	 */
-	std::vector<std::string> FindTemplates(const std::string& path, bool includeSubdirectories)
+	PS::vector<std::string> FindTemplates(const std::string& path, bool includeSubdirectories)
 	{
 		return m_TemplateLoader.FindTemplates(path, includeSubdirectories, SIMULATION_TEMPLATES);
 	}
@@ -306,7 +307,7 @@ private:
 	/**
 	 * Returns all template names of actors.
 	 */
-	std::vector<std::string> FindActorTemplates(const std::string& path, bool includeSubdirectories)
+	PS::vector<std::string> FindActorTemplates(const std::string& path, bool includeSubdirectories)
 	{
 		return m_TemplateLoader.FindTemplates(path, includeSubdirectories, ACTOR_TEMPLATES);
 	}
@@ -319,7 +320,7 @@ private:
 	/**
 	 * Currently loaded script librarynames.
 	 */
-	std::set<VfsPath> m_LoadedLibraries;
+	PS::set<VfsPath> m_LoadedLibraries;
 
 	/**
 	 * Backend to loading template data.

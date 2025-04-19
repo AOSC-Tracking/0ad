@@ -68,7 +68,7 @@ STATUS_ADD_DEFINITIONS(debugStatusDefinitions);
 //   allocate+expand_until_it_fits. these calls are for quick debug output,
 //   not loads of data, anyway.
 
-// rationale: static data instead of std::set to allow setting at any time.
+// rationale: static data instead of PS::set to allow setting at any time.
 // we store FNV hash of tag strings for fast comparison; collisions are
 // extremely unlikely and can only result in displaying more/less text.
 static const size_t MAX_TAGS = 20;

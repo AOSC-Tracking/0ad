@@ -61,7 +61,7 @@ private:
 	static Status CollectFileCB(const VfsPath& pathname, const CFileInfo& fileInfo, const uintptr_t cbData);
 
 	PIVFS m_VFS;
-	std::vector<VfsPath> m_Files;
+	PS::vector<VfsPath> m_Files;
 	OsPath m_TempDir;
 	size_t m_NumBaseMods;
 };

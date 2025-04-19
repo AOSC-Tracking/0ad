@@ -20,10 +20,10 @@
 
 #include "precompiled.h"
 
-#include <deque>
 #include <numeric>
 
 #include "lib/timer.h"
+#include "ps/containers/Deque.h"
 #include "CStr.h"
 #include "Loader.h"
 
@@ -74,7 +74,7 @@ struct LoadRequest
 	}
 };
 
-typedef std::deque<LoadRequest> LoadRequests;
+typedef PS::deque<LoadRequest> LoadRequests;
 static LoadRequests load_requests;
 
 // Returns true if the return code indicates that the `LoadRequest` didn't

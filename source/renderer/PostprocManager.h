@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,13 +20,13 @@
 
 #include "graphics/ShaderTechniquePtr.h"
 #include "ps/CStr.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IFramebuffer.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/backend/ITexture.h"
 
 #include <array>
-#include <vector>
 
 class CPostprocManager
 {
@@ -45,7 +45,7 @@ public:
 	void Resize();
 
 	// Returns a list of xml files found in shaders/effects/postproc.
-	static std::vector<CStrW> GetPostEffects();
+	static PS::vector<CStrW> GetPostEffects();
 
 	// Returns the name of the current effect.
 	const CStrW& GetPostEffect() const
@@ -182,7 +182,7 @@ private:
 	std::unique_ptr<Renderer::Backend::ITexture>
 		m_MultisampleColorTex, m_MultisampleDepthTex;
 	uint32_t m_MultisampleCount;
-	std::vector<uint32_t> m_AllowedSampleCounts;
+	PS::vector<uint32_t> m_AllowedSampleCounts;
 
 	// The current screen dimensions in pixels.
 	uint32_t m_Width, m_Height;

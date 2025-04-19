@@ -21,10 +21,9 @@
 #include "lib/config2.h"
 #include "lib/file/vfs/vfs_path.h"
 #include "lib/types.h"
+#include "ps/containers/Vector.h"
 #include "simulation2/system/Entity.h"
 #include "soundmanager/data/SoundData.h"
-
-#include <vector>
 
 class CVector3D;
 
@@ -81,11 +80,11 @@ private:
 	void SetDefaultValues();
 #if CONFIG2_AUDIO
 	// We store the handles so we can load now and play later
-	std::vector<CSoundData*> m_SoundGroups;
+	PS::vector<CSoundData*> m_SoundGroups;
 #endif
 	u32 m_Seed;
 	// We need the filenames so we can reload when necessary.
-	std::vector<std::wstring> m_Filenames;
+	PS::vector<std::wstring> m_Filenames;
 	// The file path for the list of sound file resources
 	VfsPath m_Filepath;
 	size_t m_CurrentSoundIndex;

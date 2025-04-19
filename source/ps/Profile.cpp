@@ -47,7 +47,7 @@ public:
 	CStr GetName() override;
 	CStr GetTitle() override;
 	size_t GetNumberRows() override;
-	const std::vector<ProfileColumn>& GetColumns() override;
+	const PS::vector<ProfileColumn>& GetColumns() override;
 
 	CStr GetCellText(size_t row, size_t col) override;
 	AbstractProfileTable* GetChild(size_t row) override;
@@ -61,7 +61,7 @@ private:
 	 */
 	struct ColumnDescription
 	{
-		std::vector<ProfileColumn> columns;
+		PS::vector<ProfileColumn> columns;
 
 		ColumnDescription()
 		{
@@ -110,7 +110,7 @@ size_t CProfileNodeTable::GetNumberRows()
 }
 
 // Column description
-const std::vector<ProfileColumn>& CProfileNodeTable::GetColumns()
+const PS::vector<ProfileColumn>& CProfileNodeTable::GetColumns()
 {
 	return columnDescription.columns;
 }

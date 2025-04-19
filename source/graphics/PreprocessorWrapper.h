@@ -18,11 +18,11 @@
 #ifndef INCLUDED_PREPROCESSORWRAPPER
 #define INCLUDED_PREPROCESSORWRAPPER
 
+#include "ps/containers/UnorderedMap.h"
 #include "ps/CStr.h"
 #include "third_party/ogre3d_preprocessor/OgreGLSLPreprocessor.h"
 
 #include <functional>
-#include <unordered_map>
 
 class CShaderDefines;
 
@@ -56,7 +56,7 @@ public:
 private:
 	Ogre::CPreprocessor m_Preprocessor;
 	IncludeRetrieverCallback m_IncludeCallback;
-	std::unordered_map<CStr, CStr> m_IncludeCache;
+	PS::unordered_map<CStr, CStr> m_IncludeCache;
 };
 
 #endif // INCLUDED_PREPROCESSORWRAPPER

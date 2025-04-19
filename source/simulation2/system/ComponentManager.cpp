@@ -219,18 +219,18 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 		}
 
 		// Remove the old component type's message subscriptions
-		std::map<MessageTypeId, std::vector<ComponentTypeId> >::iterator it;
+		PS::map<MessageTypeId, PS::vector<ComponentTypeId> >::iterator it;
 		for (it = m_LocalMessageSubscriptions.begin(); it != m_LocalMessageSubscriptions.end(); ++it)
 		{
-			std::vector<ComponentTypeId>& types = it->second;
-			std::vector<ComponentTypeId>::iterator ctit = find(types.begin(), types.end(), cid);
+			PS::vector<ComponentTypeId>& types = it->second;
+			PS::vector<ComponentTypeId>::iterator ctit = find(types.begin(), types.end(), cid);
 			if (ctit != types.end())
 				types.erase(ctit);
 		}
 		for (it = m_GlobalMessageSubscriptions.begin(); it != m_GlobalMessageSubscriptions.end(); ++it)
 		{
-			std::vector<ComponentTypeId>& types = it->second;
-			std::vector<ComponentTypeId>::iterator ctit = find(types.begin(), types.end(), cid);
+			PS::vector<ComponentTypeId>& types = it->second;
+			PS::vector<ComponentTypeId>::iterator ctit = find(types.begin(), types.end(), cid);
 			if (ctit != types.end())
 				types.erase(ctit);
 		}
@@ -272,7 +272,7 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 	ctWrapper.classInit(*this);
 
 	// Find all the ctor prototype's On* methods, and subscribe to the appropriate messages:
-	std::vector<std::string> methods;
+	PS::vector<std::string> methods;
 
 	if (!Script::EnumeratePropertyNames(rq, protoVal, false, methods))
 	{
@@ -323,8 +323,8 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 	{
 		// For every script component with this cid, we need to switch its
 		// prototype from the old constructor's prototype property to the new one's
-		const std::map<entity_id_t, IComponent*>& comps = m_ComponentsByTypeId[cid];
-		std::map<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
+		const PS::map<entity_id_t, IComponent*>& comps = m_ComponentsByTypeId[cid];
+		PS::map<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
 		for (; eit != comps.end(); ++eit)
 		{
 			JS::RootedValue instance(rq.cx, eit->second->GetJSInstance());
@@ -353,7 +353,7 @@ void CComponentManager::Script_ReRegisterComponentType(int iid, const std::strin
 
 void CComponentManager::Script_RegisterInterface(const std::string& name)
 {
-	std::map<std::string, InterfaceId>::iterator it = m_InterfaceIdsByName.find(name);
+	PS::map<std::string, InterfaceId>::iterator it = m_InterfaceIdsByName.find(name);
 	if (it != m_InterfaceIdsByName.end())
 	{
 		// Redefinitions are fine (and just get ignored) when hotloading; otherwise
@@ -375,7 +375,7 @@ void CComponentManager::Script_RegisterInterface(const std::string& name)
 
 void CComponentManager::Script_RegisterMessageType(const std::string& name)
 {
-	std::map<std::string, MessageTypeId>::iterator it = m_MessageTypeIdsByName.find(name);
+	PS::map<std::string, MessageTypeId>::iterator it = m_MessageTypeIdsByName.find(name);
 	if (it != m_MessageTypeIdsByName.end())
 	{
 		// Redefinitions are fine (and just get ignored) when hotloading; otherwise
@@ -416,9 +416,9 @@ const CParamNode& CComponentManager::Script_GetTemplate(const std::string& templ
 	return *tmpl;
 }
 
-std::vector<int> CComponentManager::Script_GetEntitiesWithInterface(int iid)
+PS::vector<int> CComponentManager::Script_GetEntitiesWithInterface(int iid)
 {
-	std::vector<int> ret;
+	PS::vector<int> ret;
 	const InterfaceListUnordered& ents = GetEntitiesWithInterfaceUnordered(iid);
 	for (InterfaceListUnordered::const_iterator it = ents.begin(); it != ents.end(); ++it)
 		if (!ENTITY_IS_LOCAL(it->first))
@@ -427,9 +427,9 @@ std::vector<int> CComponentManager::Script_GetEntitiesWithInterface(int iid)
 	return ret;
 }
 
-std::vector<IComponent*> CComponentManager::Script_GetComponentsWithInterface(int iid)
+PS::vector<IComponent*> CComponentManager::Script_GetComponentsWithInterface(int iid)
 {
-	std::vector<IComponent*> ret;
+	PS::vector<IComponent*> ret;
 	InterfaceList ents = GetEntitiesWithInterface(iid);
 	for (InterfaceList::const_iterator it = ents.begin(); it != ents.end(); ++it)
 		ret.push_back(it->second); // TODO: maybe we should exclude local entities
@@ -495,10 +495,10 @@ void CComponentManager::ResetState()
 	m_DynamicMessageSubscriptionsNonsyncByComponent.clear();
 
 	// Delete all IComponents in reverse order of creation.
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::reverse_iterator iit = m_ComponentsByTypeId.rbegin();
+	PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::reverse_iterator iit = m_ComponentsByTypeId.rbegin();
 	for (; iit != m_ComponentsByTypeId.rend(); ++iit)
 	{
-		std::map<entity_id_t, IComponent*>::iterator eit = iit->second.begin();
+		PS::map<entity_id_t, IComponent*>::iterator eit = iit->second.begin();
 		for (; eit != iit->second.end(); ++eit)
 		{
 			eit->second->Deinit();
@@ -506,14 +506,14 @@ void CComponentManager::ResetState()
 		}
 	}
 
-	std::vector<std::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
+	PS::vector<PS::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
 	for (; ifcit != m_ComponentsByInterface.end(); ++ifcit)
 		ifcit->clear();
 
 	m_ComponentsByTypeId.clear();
 
 	// Delete all SEntityComponentCaches
-	std::unordered_map<entity_id_t, SEntityComponentCache*>::iterator ccit = m_ComponentCaches.begin();
+	PS::unordered_map<entity_id_t, SEntityComponentCache*>::iterator ccit = m_ComponentCaches.begin();
 	for (; ccit != m_ComponentCaches.end(); ++ccit)
 		free(ccit->second);
 	m_ComponentCaches.clear();
@@ -565,7 +565,7 @@ void CComponentManager::SubscribeToMessageType(MessageTypeId mtid)
 {
 	// TODO: verify mtid
 	ENSURE(m_CurrentComponent != CID__Invalid);
-	std::vector<ComponentTypeId>& types = m_LocalMessageSubscriptions[mtid];
+	PS::vector<ComponentTypeId>& types = m_LocalMessageSubscriptions[mtid];
 	types.push_back(m_CurrentComponent);
 	std::sort(types.begin(), types.end()); // TODO: just sort once at the end of LoadComponents
 }
@@ -574,7 +574,7 @@ void CComponentManager::SubscribeGloballyToMessageType(MessageTypeId mtid)
 {
 	// TODO: verify mtid
 	ENSURE(m_CurrentComponent != CID__Invalid);
-	std::vector<ComponentTypeId>& types = m_GlobalMessageSubscriptions[mtid];
+	PS::vector<ComponentTypeId>& types = m_GlobalMessageSubscriptions[mtid];
 	types.push_back(m_CurrentComponent);
 	std::sort(types.begin(), types.end()); // TODO: just sort once at the end of LoadComponents
 }
@@ -593,7 +593,7 @@ bool CComponentManager::IsGloballySubscribed(MessageTypeId mtid)
 
 void CComponentManager::FlattenDynamicSubscriptions()
 {
-	std::map<MessageTypeId, CDynamicSubscription>::iterator it;
+	PS::map<MessageTypeId, CDynamicSubscription>::iterator it;
 	for (it = m_DynamicMessageSubscriptionsNonsync.begin();
 	     it != m_DynamicMessageSubscriptionsNonsync.end(); ++it)
 	{
@@ -619,11 +619,11 @@ void CComponentManager::DynamicSubscriptionNonsync(MessageTypeId mtid, IComponen
 
 void CComponentManager::RemoveComponentDynamicSubscriptions(IComponent* component)
 {
-	std::map<IComponent*, std::set<MessageTypeId> >::iterator it = m_DynamicMessageSubscriptionsNonsyncByComponent.find(component);
+	PS::map<IComponent*, PS::set<MessageTypeId> >::iterator it = m_DynamicMessageSubscriptionsNonsyncByComponent.find(component);
 	if (it == m_DynamicMessageSubscriptionsNonsyncByComponent.end())
 		return;
 
-	std::set<MessageTypeId>::iterator mtit;
+	PS::set<MessageTypeId>::iterator mtit;
 	for (mtit = it->second.begin(); mtit != it->second.end(); ++mtit)
 	{
 		m_DynamicMessageSubscriptionsNonsync[*mtit].Remove(component);
@@ -637,7 +637,7 @@ void CComponentManager::RemoveComponentDynamicSubscriptions(IComponent* componen
 
 CComponentManager::ComponentTypeId CComponentManager::LookupCID(const std::string& cname) const
 {
-	std::map<std::string, ComponentTypeId>::const_iterator it = m_ComponentTypeIdsByName.find(cname);
+	PS::map<std::string, ComponentTypeId>::const_iterator it = m_ComponentTypeIdsByName.find(cname);
 	if (it == m_ComponentTypeIdsByName.end())
 		return CID__Invalid;
 	return it->second;
@@ -645,7 +645,7 @@ CComponentManager::ComponentTypeId CComponentManager::LookupCID(const std::strin
 
 std::string CComponentManager::LookupComponentTypeName(ComponentTypeId cid) const
 {
-	std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
+	PS::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
 	if (it == m_ComponentTypesById.end())
 		return "";
 	return it->second.name;
@@ -656,12 +656,12 @@ CComponentManager::ComponentTypeId CComponentManager::GetScriptWrapper(Interface
 	if (iid >= IID__LastNative && iid <= (int)m_InterfaceIdsByName.size()) // use <= since IDs start at 1
 		return CID_UnknownScript;
 
-	std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.begin();
+	PS::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.begin();
 	for (; it != m_ComponentTypesById.end(); ++it)
 		if (it->second.iid == iid && it->second.type == CT_ScriptWrapper)
 			return it->first;
 
-	std::map<std::string, InterfaceId>::const_iterator iiit = m_InterfaceIdsByName.begin();
+	PS::map<std::string, InterfaceId>::const_iterator iiit = m_InterfaceIdsByName.begin();
 	for (; iiit != m_InterfaceIdsByName.end(); ++iiit)
 		if (iiit->second == iid)
 		{
@@ -744,7 +744,7 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 {
 	ScriptRequest rq(m_ScriptInterface);
 
-	std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
+	PS::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.find(cid);
 	if (it == m_ComponentTypesById.end())
 	{
 		LOGERROR("Invalid component id %d", cid);
@@ -755,14 +755,14 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 
 	ENSURE((size_t)ct.iid < m_ComponentsByInterface.size());
 
-	std::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface[ct.iid];
+	PS::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface[ct.iid];
 	if (emap1.find(ent.GetId()) != emap1.end())
 	{
 		LOGERROR("Multiple components for interface %d", ct.iid);
 		return NULL;
 	}
 
-	std::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
+	PS::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
 
 	// If this is a scripted component, construct the appropriate JS object first
 	JS::RootedValue obj(rq.cx);
@@ -805,7 +805,7 @@ void CComponentManager::AddMockComponent(CEntityHandle ent, InterfaceId iid, ICo
 	// Just add it into the by-interface map, not the by-component-type map,
 	// so it won't be considered for messages or deletion etc
 
-	std::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface.at(iid);
+	PS::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface.at(iid);
 	if (emap1.find(ent.GetId()) != emap1.end())
 		debug_warn(L"Multiple components for interface");
 	emap1.insert(std::make_pair(ent.GetId(), &component));
@@ -833,7 +833,7 @@ CEntityHandle CComponentManager::AllocateEntityHandle(entity_id_t ent)
 
 CEntityHandle CComponentManager::LookupEntityHandle(entity_id_t ent, bool allowCreate)
 {
-	std::unordered_map<entity_id_t, SEntityComponentCache*>::iterator it;
+	PS::unordered_map<entity_id_t, SEntityComponentCache*>::iterator it;
 	it = m_ComponentCaches.find(ent);
 	if (it == m_ComponentCaches.end())
 	{
@@ -916,10 +916,10 @@ void CComponentManager::FlushDestroyedComponents()
 	{
 		// Make a copy of the destruction queue, so that the iterators won't be invalidated if the
 		// CMessageDestroy handlers try to destroy more entities themselves
-		std::vector<entity_id_t> queue;
+		PS::vector<entity_id_t> queue;
 		queue.swap(m_DestructionQueue);
 
-		for (std::vector<entity_id_t>::iterator it = queue.begin(); it != queue.end(); ++it)
+		for (PS::vector<entity_id_t>::iterator it = queue.begin(); it != queue.end(); ++it)
 		{
 			entity_id_t ent = *it;
 
@@ -938,10 +938,10 @@ void CComponentManager::FlushDestroyedComponents()
 			FlattenDynamicSubscriptions();
 
 			// Destroy the components, and remove from m_ComponentsByTypeId:
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::iterator iit = m_ComponentsByTypeId.begin();
+			PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::iterator iit = m_ComponentsByTypeId.begin();
 			for (; iit != m_ComponentsByTypeId.end(); ++iit)
 			{
-				std::map<entity_id_t, IComponent*>::iterator eit = iit->second.find(ent);
+				PS::map<entity_id_t, IComponent*>::iterator eit = iit->second.find(ent);
 				if (eit != iit->second.end())
 				{
 					eit->second->Deinit();
@@ -956,7 +956,7 @@ void CComponentManager::FlushDestroyedComponents()
 			m_ComponentCaches.erase(ent);
 
 			// Remove from m_ComponentsByInterface
-			std::vector<std::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
+			PS::vector<PS::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
 			for (; ifcit != m_ComponentsByInterface.end(); ++ifcit)
 			{
 				ifcit->erase(ent);
@@ -973,7 +973,7 @@ IComponent* CComponentManager::QueryInterface(entity_id_t ent, InterfaceId iid) 
 		return NULL;
 	}
 
-	std::unordered_map<entity_id_t, IComponent*>::const_iterator eit = m_ComponentsByInterface[iid].find(ent);
+	PS::unordered_map<entity_id_t, IComponent*>::const_iterator eit = m_ComponentsByInterface[iid].find(ent);
 	if (eit == m_ComponentsByInterface[iid].end())
 	{
 		// This entity doesn't implement this interface
@@ -985,7 +985,7 @@ IComponent* CComponentManager::QueryInterface(entity_id_t ent, InterfaceId iid) 
 
 CComponentManager::InterfaceList CComponentManager::GetEntitiesWithInterface(InterfaceId iid) const
 {
-	std::vector<std::pair<entity_id_t, IComponent*> > ret;
+	PS::vector<std::pair<entity_id_t, IComponent*> > ret;
 
 	if ((size_t)iid >= m_ComponentsByInterface.size())
 	{
@@ -995,7 +995,7 @@ CComponentManager::InterfaceList CComponentManager::GetEntitiesWithInterface(Int
 
 	ret.reserve(m_ComponentsByInterface[iid].size());
 
-	std::unordered_map<entity_id_t, IComponent*>::const_iterator it = m_ComponentsByInterface[iid].begin();
+	PS::unordered_map<entity_id_t, IComponent*>::const_iterator it = m_ComponentsByInterface[iid].begin();
 	for (; it != m_ComponentsByInterface[iid].end(); ++it)
 		ret.push_back(*it);
 
@@ -1019,20 +1019,20 @@ const CComponentManager::InterfaceListUnordered& CComponentManager::GetEntitiesW
 void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 {
 	// Send the message to components of ent, that subscribed locally to this message
-	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
+	PS::map<MessageTypeId, PS::vector<ComponentTypeId> >::const_iterator it;
 	it = m_LocalMessageSubscriptions.find(msg.GetType());
 	if (it != m_LocalMessageSubscriptions.end())
 	{
-		std::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
+		PS::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
 		for (; ctit != it->second.end(); ++ctit)
 		{
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.find(ent);
+			PS::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.find(ent);
 			if (eit != emap->second.end())
 				eit->second->HandleMessage(msg, false);
 		}
@@ -1044,20 +1044,20 @@ void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 void CComponentManager::BroadcastMessage(const CMessage& msg)
 {
 	// Send the message to components of all entities that subscribed locally to this message
-	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
+	PS::map<MessageTypeId, PS::vector<ComponentTypeId> >::const_iterator it;
 	it = m_LocalMessageSubscriptions.find(msg.GetType());
 	if (it != m_LocalMessageSubscriptions.end())
 	{
-		std::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
+		PS::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
 		for (; ctit != it->second.end(); ++ctit)
 		{
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
+			PS::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
 				eit->second->HandleMessage(msg, false);
 		}
@@ -1071,11 +1071,11 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 	// (Common functionality for PostMessage and BroadcastMessage)
 
 	// Send the message to components of all entities that subscribed globally to this message
-	std::map<MessageTypeId, std::vector<ComponentTypeId> >::const_iterator it;
+	PS::map<MessageTypeId, PS::vector<ComponentTypeId> >::const_iterator it;
 	it = m_GlobalMessageSubscriptions.find(msg.GetType());
 	if (it != m_GlobalMessageSubscriptions.end())
 	{
-		std::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
+		PS::vector<ComponentTypeId>::const_iterator ctit = it->second.begin();
 		for (; ctit != it->second.end(); ++ctit)
 		{
 			// Special case: Messages for local entities shouldn't be sent to script
@@ -1083,29 +1083,29 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 			// them accidentally picking up non-network-synchronised data.
 			if (ENTITY_IS_LOCAL(ent))
 			{
-				std::map<ComponentTypeId, ComponentType>::const_iterator cit = m_ComponentTypesById.find(*ctit);
+				PS::map<ComponentTypeId, ComponentType>::const_iterator cit = m_ComponentTypesById.find(*ctit);
 				if (cit != m_ComponentTypesById.end() && cit->second.type == CT_Script)
 					continue;
 			}
 
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
+			PS::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
 				eit->second->HandleMessage(msg, true);
 		}
 	}
 
 	// Send the message to component instances that dynamically subscribed to this message
-	std::map<MessageTypeId, CDynamicSubscription>::iterator dit = m_DynamicMessageSubscriptionsNonsync.find(msg.GetType());
+	PS::map<MessageTypeId, CDynamicSubscription>::iterator dit = m_DynamicMessageSubscriptionsNonsync.find(msg.GetType());
 	if (dit != m_DynamicMessageSubscriptionsNonsync.end())
 	{
 		dit->second.Flatten();
-		const std::vector<IComponent*>& dynamic = dit->second.GetComponents();
+		const PS::vector<IComponent*>& dynamic = dit->second.GetComponents();
 		for (size_t i = 0; i < dynamic.size(); i++)
 			dynamic[i]->HandleMessage(msg, false);
 	}
@@ -1137,11 +1137,11 @@ std::string CComponentManager::GenerateSchema() const
 				"</zeroOrMore>"
 			"</define>";
 
-	std::map<InterfaceId, std::vector<std::string> > interfaceComponentTypes;
+	PS::map<InterfaceId, PS::vector<std::string> > interfaceComponentTypes;
 
-	std::vector<std::string> componentTypes;
+	PS::vector<std::string> componentTypes;
 
-	for (std::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.begin(); it != m_ComponentTypesById.end(); ++it)
+	for (PS::map<ComponentTypeId, ComponentType>::const_iterator it = m_ComponentTypesById.begin(); it != m_ComponentTypesById.end(); ++it)
 	{
 		schema +=
 			"<define name='component." + it->second.name + "'>"
@@ -1155,10 +1155,10 @@ std::string CComponentManager::GenerateSchema() const
 	}
 
 	// Declare the implementation of each interface, for documentation
-	for (std::map<std::string, InterfaceId>::const_iterator it = m_InterfaceIdsByName.begin(); it != m_InterfaceIdsByName.end(); ++it)
+	for (PS::map<std::string, InterfaceId>::const_iterator it = m_InterfaceIdsByName.begin(); it != m_InterfaceIdsByName.end(); ++it)
 	{
 		schema += "<define name='interface." + it->first + "'><choice>";
-		std::vector<std::string>& cts = interfaceComponentTypes[it->second];
+		PS::vector<std::string>& cts = interfaceComponentTypes[it->second];
 		for (size_t i = 0; i < cts.size(); ++i)
 			schema += "<ref name='component." + cts[i] + "'/>";
 		schema += "</choice></define>";
@@ -1174,7 +1174,7 @@ std::string CComponentManager::GenerateSchema() const
 			"<element>"
 				"<anyName/>"
 				"<optional><attribute name='parent'/></optional>";
-	for (std::vector<std::string>::const_iterator it = componentTypes.begin(); it != componentTypes.end(); ++it)
+	for (PS::vector<std::string>::const_iterator it = componentTypes.begin(); it != componentTypes.end(); ++it)
 		schema += "<optional><ref name='component." + *it + "'/></optional>";
 	schema +=
 		"</element>"

@@ -106,9 +106,9 @@ std::string GetDriverInformationImpl()
 	return reinterpret_cast<const char*>(glGetString(GL_VERSION));
 }
 
-std::vector<std::string> GetExtensionsImpl()
+PS::vector<std::string> GetExtensionsImpl()
 {
-	std::vector<std::string> extensions;
+	PS::vector<std::string> extensions;
 	const std::string exts = ogl_ExtensionString();
 	boost::split(extensions, exts, boost::algorithm::is_space(), boost::token_compress_on);
 	std::sort(extensions.begin(), extensions.end());

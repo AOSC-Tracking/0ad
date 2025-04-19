@@ -184,7 +184,7 @@ static Status png_decode_impl(MemoryStream* stream, png_structp png_ptr, png_inf
 	std::shared_ptr<u8> data;
 	AllocateAligned(data, img_size, g_PageSize);
 
-	std::vector<RowPtr> rows = tex_codec_alloc_rows(data.get(), h, pitch, TEX_TOP_DOWN, 0);
+	PS::vector<RowPtr> rows = tex_codec_alloc_rows(data.get(), h, pitch, TEX_TOP_DOWN, 0);
 	png_read_image(png_ptr, (png_bytepp)&rows[0]);
 	png_read_end(png_ptr, info_ptr);
 
@@ -225,7 +225,7 @@ static Status png_encode_impl(Tex* t, png_structp png_ptr, png_infop info_ptr, D
 		PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
 	u8* data = t->get_data();
-	std::vector<RowPtr> rows = tex_codec_alloc_rows(data, h, pitch, t->m_Flags, TEX_TOP_DOWN);
+	PS::vector<RowPtr> rows = tex_codec_alloc_rows(data, h, pitch, t->m_Flags, TEX_TOP_DOWN);
 
 	// PNG is native RGB.
 	const int png_transforms = (t->m_Flags & TEX_BGR)? PNG_TRANSFORM_BGR : PNG_TRANSFORM_IDENTITY;

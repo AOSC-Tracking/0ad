@@ -29,13 +29,13 @@
 
 #include "lib/external_libraries/openal.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/Profiler2.h"
 #include "simulation2/system/Entity.h"
 
-#include <map>
 #include <mutex>
-#include <vector>
 
 #define AL_CHECK CSoundManager::al_check(__func__, __LINE__)
 
@@ -46,10 +46,10 @@ struct ALSourceHolder
 	ISoundItem*	SourceItem;
 };
 
-typedef std::vector<VfsPath> PlayList;
-typedef std::vector<ISoundItem*> ItemsList;
-typedef std::map<entity_id_t, ISoundItem*> ItemsMap;
-typedef	std::map<std::wstring, CSoundGroup*> SoundGroupMap;
+typedef PS::vector<VfsPath> PlayList;
+typedef PS::vector<ISoundItem*> ItemsList;
+typedef PS::map<entity_id_t, ISoundItem*> ItemsMap;
+typedef	PS::map<std::wstring, CSoundGroup*> SoundGroupMap;
 
 class CSoundManagerWorker;
 

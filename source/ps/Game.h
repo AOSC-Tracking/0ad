@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,10 +22,9 @@
 #include "ps/CStr.h"
 #include "ps/Errors.h"
 #include "lib/os_path.h"
+#include "ps/containers/Vector.h"
 #include "scriptinterface/ScriptTypes.h"
 #include "simulation2/helpers/Player.h"
-
-#include <vector>
 
 class CGameView;
 class CSimulation2;
@@ -216,7 +215,7 @@ private:
 	void RegisterInit(const JS::HandleValue attribs, const std::string& savedState);
 	IReplayLogger* m_ReplayLogger;
 
-	std::vector<CColor> m_PlayerColors;
+	PS::vector<CColor> m_PlayerColors;
 
 	int LoadInitialState(const std::string& savedState);
 	bool m_IsSavedGame; // true if loading a saved game; false for a new game

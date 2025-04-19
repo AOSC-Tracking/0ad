@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,10 @@
 #ifndef INCLUDED_NETSTATS
 #define INCLUDED_NETSTATS
 
+#include "ps/containers/Vector.h"
 #include "ps/ProfileViewer.h"
 
 #include <mutex>
-#include <vector>
 
 typedef struct _ENetPeer ENetPeer;
 typedef struct _ENetHost ENetHost;
@@ -45,7 +45,7 @@ public:
 	CStr GetName() override;
 	CStr GetTitle() override;
 	size_t GetNumberRows() override;
-	const std::vector<ProfileColumn>& GetColumns() override;
+	const PS::vector<ProfileColumn>& GetColumns() override;
 	CStr GetCellText(size_t row, size_t col) override;
 	AbstractProfileTable* GetChild(size_t row) override;
 
@@ -53,10 +53,10 @@ public:
 
 private:
 	const ENetPeer* m_Peer;
-	std::vector<ProfileColumn> m_ColumnDescriptions;
+	PS::vector<ProfileColumn> m_ColumnDescriptions;
 
 	std::mutex m_Mutex;
-	std::vector<std::vector<CStr>> m_LatchedData; // protected by m_Mutex
+	PS::vector<PS::vector<CStr>> m_LatchedData; // protected by m_Mutex
 };
 
 #endif // INCLUDED_NETSTATS

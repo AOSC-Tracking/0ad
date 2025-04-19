@@ -118,7 +118,7 @@ void CDecalRData::Update(CSimulation2* simulation)
 void CDecalRData::RenderDecals(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-	const std::vector<CDecalRData*>& decals, const CShaderDefines& context, ShadowMap* shadow)
+	const PS::vector<CDecalRData*>& decals, const CShaderDefines& context, ShadowMap* shadow)
 {
 	PROFILE3("render terrain decals");
 	GPU_SCOPED_LABEL(deviceCommandContext, "Render terrain decals");
@@ -127,7 +127,7 @@ void CDecalRData::RenderDecals(
 
 	Arena arena;
 
-	using Batches = std::vector<SDecalBatch, ProxyAllocator<SDecalBatch, Arena>>;
+	using Batches = PS::vector<SDecalBatch, ProxyAllocator<SDecalBatch, Arena>>;
 	Batches batches((Batches::allocator_type(arena)));
 	batches.reserve(decals.size());
 
@@ -295,7 +295,7 @@ void CDecalRData::BuildVertexData()
 
 	CmpPtr<ICmpWaterManager> cmpWaterManager(*m_Simulation, SYSTEM_ENTITY);
 
-	std::vector<SDecalVertex> vertices((i1 - i0 + 1) * (j1 - j0 + 1));
+	PS::vector<SDecalVertex> vertices((i1 - i0 + 1) * (j1 - j0 + 1));
 
 	for (ssize_t j = j0, idx = 0; j <= j1; ++j)
 	{
@@ -330,7 +330,7 @@ void CDecalRData::BuildVertexData()
 	}
 	m_VBDecals->m_Owner->UpdateChunkVertices(m_VBDecals.Get(), vertices.data());
 
-	std::vector<u16> indices((i1 - i0) * (j1 - j0) * 6);
+	PS::vector<u16> indices((i1 - i0) * (j1 - j0) * 6);
 
 	const ssize_t w = i1 - i0 + 1;
 	auto itIdx = indices.begin();

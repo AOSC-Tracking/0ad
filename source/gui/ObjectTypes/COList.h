@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,8 +19,7 @@
 
 #include "gui/ObjectTypes/CList.h"
 #include "gui/SettingTypes/CGUIColor.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 /**
  * Represents a column.
@@ -81,7 +80,7 @@ protected:
 	/**
 	 * Available columns.
 	 */
-	std::vector<COListColumn> m_Columns;
+	PS::vector<COListColumn> m_Columns;
 
 	CGUISimpleSetting<CGUISpriteInstance> m_SpriteHeading;
 	CGUISimpleSetting<bool> m_Sortable;

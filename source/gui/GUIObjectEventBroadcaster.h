@@ -35,7 +35,7 @@ namespace
 	};
 
 	template<class Container>
-	void CollectVisibleObjectsRecursively(const std::vector<IGUIObject*>& objects, Container* visibleObjects)
+	void CollectVisibleObjectsRecursively(const PS::vector<IGUIObject*>& objects, Container* visibleObjects)
 	{
 		for (IGUIObject* const& object : objects)
 			if (!object->IsHidden())
@@ -56,7 +56,7 @@ public:
 		using ObjectListAllocator = ProxyAllocator<VisibleObject, Arena>;
 		Arena arena;
 
-		std::vector<VisibleObject, ObjectListAllocator> visibleObjects((ObjectListAllocator(arena)));
+		PS::vector<VisibleObject, ObjectListAllocator> visibleObjects((ObjectListAllocator(arena)));
 		CollectVisibleObjectsRecursively(object->GetVisibleChildren(), &visibleObjects);
 		for (VisibleObject& visibleObject : visibleObjects)
 			visibleObject.bufferedZ = visibleObject.object->GetBufferedZ();

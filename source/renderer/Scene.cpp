@@ -31,7 +31,7 @@ void SceneCollector::SubmitRecursive(CModelAbstract* model)
 	{
 		SubmitNonRecursive(model->ToCModel());
 
-		const std::vector<CModel::Prop>& props = model->ToCModel()->GetProps();
+		const PS::vector<CModel::Prop>& props = model->ToCModel()->GetProps();
 		for (size_t i = 0; i < props.size(); i++)
 		{
 			if (!props[i].m_Hidden)

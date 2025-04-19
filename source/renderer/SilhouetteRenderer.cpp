@@ -143,7 +143,7 @@ static int EntryGetType(Entry e) { return (e >> 16) & 3; }
 
 struct ActiveList
 {
-	std::vector<u16> m_Ids;
+	PS::vector<u16> m_Ids;
 
 	void Add(u16 id)
 	{
@@ -220,9 +220,9 @@ void SilhouetteRenderer::ComputeSubmissions(const CCamera& camera)
 	m_VisibleModelOccluders.clear();
 	m_VisibleModelCasters.clear();
 
-	std::vector<Occluder> occluders;
-	std::vector<Caster> casters;
-	std::vector<Entry> entries;
+	PS::vector<Occluder> occluders;
+	PS::vector<Caster> casters;
+	PS::vector<Entry> entries;
 
 	occluders.reserve(m_SubmittedModelOccluders.size() + m_SubmittedPatchOccluders.size());
 	casters.reserve(m_SubmittedModelCasters.size());

@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
 * This file is part of 0 A.D.
 *
 * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,14 +20,14 @@
 
 #include "simulation2/system/Interface.h"
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class ICmpGarrisonHolder : public IComponent
 {
 public:
-	virtual std::vector<entity_id_t> GetEntities() const = 0;
+	virtual PS::vector<entity_id_t> GetEntities() const = 0;
 
-	virtual void SetInitEntities(std::vector<entity_id_t>&& entities) = 0;
+	virtual void SetInitEntities(PS::vector<entity_id_t>&& entities) = 0;
 
 	DECLARE_INTERFACE_TYPE(GarrisonHolder)
 };

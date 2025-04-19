@@ -18,13 +18,12 @@
 #ifndef INCLUDED_TURNMANAGER
 #define INCLUDED_TURNMANAGER
 
+#include "ps/containers/Deque.h"
+#include "ps/containers/List.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "simulation2/helpers/SimulationCommand.h"
-
-#include <list>
-#include <map>
-#include <vector>
-#include <deque>
 
 class CSimulationMessage;
 class CSimulation2;
@@ -194,7 +193,7 @@ protected:
 	u32 m_TurnLength;
 
 	/// Commands queued at each turn (index 0 is for m_CurrentTurn+1)
-	std::deque<std::map<u32, std::vector<SimulationCommand>>> m_QueuedCommands;
+	PS::deque<PS::map<u32, PS::vector<SimulationCommand>>> m_QueuedCommands;
 
 	int m_PlayerId;
 	uint m_ClientId;
@@ -212,7 +211,7 @@ private:
 	static const CStr EventNameSavegameLoaded;
 
 	size_t m_TimeWarpNumTurns; // 0 if disabled
-	std::list<std::string> m_TimeWarpStates;
+	PS::list<std::string> m_TimeWarpStates;
 	std::string m_QuickSaveState; // TODO: should implement a proper disk-based quicksave system
 	JS::PersistentRootedValue m_QuickSaveMetadata;
 };

@@ -204,14 +204,14 @@ private:
 		std::shared_ptr<ScriptInterface> m_ScriptInterface;
 
 		JS::PersistentRootedValue m_Obj;
-		std::vector<Script::StructuredClone> m_Commands;
+		PS::vector<Script::StructuredClone> m_Commands;
 	};
 
 public:
 	struct SCommandSets
 	{
 		player_id_t player;
-		std::vector<Script::StructuredClone> commands;
+		PS::vector<Script::StructuredClone> commands;
 	};
 
 	CAIWorker() :
@@ -329,7 +329,7 @@ public:
 		ScriptRequest rq(m_ScriptInterface);
 
 		CFixedVector2D pos, goalPos;
-		std::vector<CFixedVector2D> waypoints;
+		PS::vector<CFixedVector2D> waypoints;
 		JS::RootedValue retVal(rq.cx);
 
 		Script::FromJSVal(rq, position, pos);
@@ -341,7 +341,7 @@ public:
 		return retVal;
 	}
 
-	void ComputePath(const CFixedVector2D& pos, const CFixedVector2D& goal, pass_class_t passClass, std::vector<CFixedVector2D>& waypoints)
+	void ComputePath(const CFixedVector2D& pos, const CFixedVector2D& goal, pass_class_t passClass, PS::vector<CFixedVector2D>& waypoints)
 	{
 		WaypointPath ret;
 		PathGoal pathGoal = { PathGoal::POINT, goal.X, goal.Y };
@@ -361,7 +361,7 @@ public:
 	/**
 	 * Debug function for AI scripts to dump 2D array data (e.g. terrain tile weights).
 	 */
-	void DumpImage(const std::wstring& name, const std::vector<u32>& data, u32 w, u32 h, u32 max)
+	void DumpImage(const std::wstring& name, const PS::vector<u32>& data, u32 w, u32 h, u32 max)
 	{
 		// TODO: this is totally not threadsafe.
 		VfsPath filename = L"screenshots/aidump/" + name;
@@ -487,7 +487,7 @@ public:
 	}
 
 	bool RunGamestateInit(const Script::StructuredClone& gameState, const Grid<NavcellData>& passabilityMap, const Grid<u8>& territoryMap,
-		const std::map<std::string, pass_class_t>& nonPathfindingPassClassMasks, const std::map<std::string, pass_class_t>& pathfindingPassClassMasks)
+		const PS::map<std::string, pass_class_t>& nonPathfindingPassClassMasks, const PS::map<std::string, pass_class_t>& pathfindingPassClassMasks)
 	{
 		// this will be run last by InitGame.js, passing the full game representation.
 		// For now it will run for the shared Component.
@@ -530,7 +530,7 @@ public:
 	}
 
 	void UpdatePathfinder(const Grid<NavcellData>& passabilityMap, bool globallyDirty, const Grid<u8>& dirtinessGrid, bool justDeserialized,
-		const std::map<std::string, pass_class_t>& nonPathfindingPassClassMasks, const std::map<std::string, pass_class_t>& pathfindingPassClassMasks)
+		const PS::map<std::string, pass_class_t>& nonPathfindingPassClassMasks, const PS::map<std::string, pass_class_t>& pathfindingPassClassMasks)
 	{
 		ENSURE(m_CommandsComputed);
 		bool dimensionChange = m_PassabilityMap.m_W != passabilityMap.m_W || m_PassabilityMap.m_H != passabilityMap.m_H;
@@ -610,7 +610,7 @@ public:
 		}
 	}
 
-	void GetCommands(std::vector<SCommandSets>& commands)
+	void GetCommands(PS::vector<SCommandSets>& commands)
 	{
 		WaitToFinishComputation();
 
@@ -623,7 +623,7 @@ public:
 		}
 	}
 
-	void LoadEntityTemplates(const std::vector<std::pair<std::string, const CParamNode*> >& templates)
+	void LoadEntityTemplates(const PS::vector<std::pair<std::string, const CParamNode*> >& templates)
 	{
 		ScriptRequest rq(m_ScriptInterface);
 
@@ -838,14 +838,14 @@ private:
 	JS::PersistentRootedValue m_EntityTemplates;
 	bool m_HasLoadedEntityTemplates;
 
-	std::map<VfsPath, JS::Heap<JS::Value>> m_PlayerMetadata;
-	std::vector<std::shared_ptr<CAIPlayer>> m_Players; // use shared_ptr just to avoid copying
+	PS::map<VfsPath, JS::Heap<JS::Value>> m_PlayerMetadata;
+	PS::vector<std::shared_ptr<CAIPlayer>> m_Players; // use shared_ptr just to avoid copying
 
 	bool m_HasSharedComponent;
 	JS::PersistentRootedValue m_SharedAIObj;
-	std::vector<SCommandSets> m_Commands;
+	PS::vector<SCommandSets> m_Commands;
 
-	std::set<std::wstring> m_LoadedModules;
+	PS::set<std::wstring> m_LoadedModules;
 
 	JS::PersistentRootedValue m_GameState;
 	Grid<NavcellData> m_PassabilityMap;
@@ -853,8 +853,8 @@ private:
 	Grid<u8> m_TerritoryMap;
 	JS::PersistentRootedValue m_TerritoryMapVal;
 
-	std::map<std::string, pass_class_t> m_NonPathfindingPassClasses;
-	std::map<std::string, pass_class_t> m_PathfindingPassClasses;
+	PS::map<std::string, pass_class_t> m_NonPathfindingPassClasses;
+	PS::map<std::string, pass_class_t> m_PathfindingPassClasses;
 	HierarchicalPathfinder m_HierarchicalPathfinder;
 	LongPathfinder m_LongPathfinder;
 
@@ -973,7 +973,7 @@ public:
 			territoryMap = &cmpTerritoryManager->GetTerritoryGrid();
 
 		LoadPathfinderClasses(state);
-		std::map<std::string, pass_class_t> nonPathfindingPassClassMasks, pathfindingPassClassMasks;
+		PS::map<std::string, pass_class_t> nonPathfindingPassClassMasks, pathfindingPassClassMasks;
 		if (cmpPathfinder)
 			cmpPathfinder->GetPassabilityClasses(nonPathfindingPassClassMasks, pathfindingPassClassMasks);
 
@@ -1015,7 +1015,7 @@ public:
 			{
 				const Grid<NavcellData>& passabilityMap = cmpPathfinder->GetPassabilityGrid();
 
-				std::map<std::string, pass_class_t> nonPathfindingPassClassMasks, pathfindingPassClassMasks;
+				PS::map<std::string, pass_class_t> nonPathfindingPassClassMasks, pathfindingPassClassMasks;
 				cmpPathfinder->GetPassabilityClasses(nonPathfindingPassClassMasks, pathfindingPassClassMasks);
 
 				m_Worker.UpdatePathfinder(passabilityMap,
@@ -1042,7 +1042,7 @@ public:
 
 	void PushCommands() override
 	{
-		std::vector<CAIWorker::SCommandSets> commands;
+		PS::vector<CAIWorker::SCommandSets> commands;
 		m_Worker.GetCommands(commands);
 
 		CmpPtr<ICmpCommandQueue> cmpCommandQueue(GetSystemEntity());
@@ -1081,8 +1081,8 @@ private:
 		CmpPtr<ICmpTemplateManager> cmpTemplateManager(GetSystemEntity());
 		ENSURE(cmpTemplateManager);
 
-		std::vector<std::string> templateNames = cmpTemplateManager->FindUsedTemplates();
-		std::vector<std::pair<std::string, const CParamNode*> > usedTemplates;
+		PS::vector<std::string> templateNames = cmpTemplateManager->FindUsedTemplates();
+		PS::vector<std::pair<std::string, const CParamNode*> > usedTemplates;
 		usedTemplates.reserve(templateNames.size());
 		for (const std::string& name : templateNames)
 		{
@@ -1106,9 +1106,9 @@ private:
 		JS::RootedValue classesVal(rq.cx);
 		Script::CreateObject(rq, &classesVal);
 
-		std::map<std::string, pass_class_t> classes;
+		PS::map<std::string, pass_class_t> classes;
 		cmpPathfinder->GetPassabilityClasses(classes);
-		for (std::map<std::string, pass_class_t>::iterator it = classes.begin(); it != classes.end(); ++it)
+		for (PS::map<std::string, pass_class_t>::iterator it = classes.begin(); it != classes.end(); ++it)
 			Script::SetProperty(rq, classesVal, it->first.c_str(), it->second, true);
 
 		Script::SetProperty(rq, state, "passabilityClasses", classesVal, true);

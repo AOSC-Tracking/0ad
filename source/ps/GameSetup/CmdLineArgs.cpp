@@ -19,13 +19,13 @@
 #include "CmdLineArgs.h"
 
 #include "lib/sysdep/sysdep.h"
+#include "ps/containers/UnorderedMap.h"
 #include "scriptinterface/Object.h"
 #include "scriptinterface/ScriptConversions.h"
 
 #include <algorithm>
 #include <iterator>
 #include <string_view>
-#include <unordered_map>
 
 CmdLineArgs g_CmdLineArgs;
 
@@ -94,9 +94,9 @@ CStr CmdLineArgs::Get(const CStr& name) const
 	return it != m_Args.end() ? it->second : "";
 }
 
-std::vector<CStr> CmdLineArgs::GetMultiple(const CStr& name) const
+PS::vector<CStr> CmdLineArgs::GetMultiple(const CStr& name) const
 {
-	std::vector<CStr> values;
+	PS::vector<CStr> values;
 	ArgsT::const_iterator it = m_Args.begin();
 	while ((it = std::find_if(it, m_Args.end(), IsKeyEqualTo(name))) != m_Args.end())
 	{
@@ -117,7 +117,7 @@ const CmdLineArgs::ArgsT& CmdLineArgs::GetArgs() const
 	return m_Args;
 }
 
-std::vector<CStr> CmdLineArgs::GetArgsWithoutName() const
+PS::vector<CStr> CmdLineArgs::GetArgsWithoutName() const
 {
 	return m_ArgsWithoutName;
 }
@@ -127,9 +127,9 @@ template<> void Script::ToJSVal<CmdLineArgs>(const ScriptRequest& rq, JS::Mutabl
 	if (!Script::CreateObject(rq, ret))
 		return;
 
-	std::unordered_map<CStr, std::vector<CStr>> args;
+	PS::unordered_map<CStr, PS::vector<CStr>> args;
 	for (const std::pair<CStr, CStr>& arg : val.GetArgs())
-		args.emplace(arg.first, std::vector<CStr>{}).first->second.emplace_back(arg.second);
+		args.emplace(arg.first, PS::vector<CStr>{}).first->second.emplace_back(arg.second);
 
 	JS::RootedValue argVal(rq.cx);
 	for (const auto& arg : args)

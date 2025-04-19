@@ -105,7 +105,7 @@ void CShaderParams<value_t>::Set(CStrIntern name, const value_t& value)
 	typename SItems::Item addedItem = std::make_pair(name, value);
 
 	// Add the new item in a way that preserves the sortedness and uniqueness of item names
-	for (typename std::vector<typename SItems::Item>::iterator it = items.items.begin(); ; ++it)
+	for (typename PS::vector<typename SItems::Item>::iterator it = items.items.begin(); ; ++it)
 	{
 		if (it == items.items.end() || addedItem.first < it->first)
 		{
@@ -140,9 +140,9 @@ void CShaderParams<value_t>::SetMany(const CShaderParams& params)
 }
 
 template<typename value_t>
-std::map<CStrIntern, value_t> CShaderParams<value_t>::GetMap() const
+PS::map<CStrIntern, value_t> CShaderParams<value_t>::GetMap() const
 {
-	std::map<CStrIntern, value_t> ret;
+	PS::map<CStrIntern, value_t> ret;
 	for (size_t i = 0; i < m_Items->items.size(); ++i)
 		ret[m_Items->items[i].first] = m_Items->items[i].second;
 	return ret;

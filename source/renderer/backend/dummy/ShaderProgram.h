@@ -42,7 +42,7 @@ public:
 
 	int32_t GetBindingSlot(const CStrIntern name) const override;
 
-	std::vector<VfsPath> GetFileDependencies() const override;
+	PS::vector<VfsPath> GetFileDependencies() const override;
 
 protected:
 	friend class CDevice;

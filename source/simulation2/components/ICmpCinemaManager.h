@@ -18,9 +18,8 @@
 #ifndef INCLUDED_ICMPCINEMAMANAGER
 #define INCLUDED_ICMPCINEMAMANAGER
 
-#include <list>
-#include <map>
-
+#include "ps/containers/List.h"
+#include "ps/containers/Map.h"
 #include "ps/CStr.h"
 #include "simulation2/helpers/CinemaPath.h"
 #include "simulation2/system/Interface.h"
@@ -64,9 +63,9 @@ public:
 	*/
 	virtual void ClearQueue() = 0;
 
-	virtual const std::map<CStrW, CCinemaPath>& GetPaths() const = 0;
-	virtual void SetPaths(const std::map<CStrW, CCinemaPath>& newPaths) = 0;
-	virtual const std::list<CCinemaPath>& GetQueue() const = 0;
+	virtual const PS::map<CStrW, CCinemaPath>& GetPaths() const = 0;
+	virtual void SetPaths(const PS::map<CStrW, CCinemaPath>& newPaths) = 0;
+	virtual const PS::list<CCinemaPath>& GetQueue() const = 0;
 
 	virtual bool IsEnabled() const = 0;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,13 +21,13 @@
 
 #include "graphics/ShaderDefines.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/Vector.h"
 #include "ps/Profile.h"
 
 #include <cctype>
-#include <deque>
 #include <string>
 #include <string_view>
-#include <vector>
 
 namespace
 {
@@ -109,8 +109,8 @@ MatchIncludeResult MatchIncludeUntilEOLorEOS(const std::string_view& source, con
 
 bool ResolveIncludesImpl(
 	std::string_view currentPart,
-	std::unordered_map<CStr, CStr>& includeCache, const CPreprocessorWrapper::IncludeRetrieverCallback& includeCallback,
-	std::deque<std::string>& chunks, std::vector<std::string_view>& processedParts)
+	PS::unordered_map<CStr, CStr>& includeCache, const CPreprocessorWrapper::IncludeRetrieverCallback& includeCallback,
+	PS::deque<std::string>& chunks, PS::vector<std::string_view>& processedParts)
 {
 	static const CStr lineDirective = "#line ";
 	for (size_t lineStart = 0, line = 1; lineStart < currentPart.size(); ++line)
@@ -190,8 +190,8 @@ void CPreprocessorWrapper::AddDefine(const char* name, const char* value)
 
 void CPreprocessorWrapper::AddDefines(const CShaderDefines& defines)
 {
-	std::map<CStrIntern, CStrIntern> map = defines.GetMap();
-	for (std::map<CStrIntern, CStrIntern>::const_iterator it = map.begin(); it != map.end(); ++it)
+	PS::map<CStrIntern, CStrIntern> map = defines.GetMap();
+	for (PS::map<CStrIntern, CStrIntern>::const_iterator it = map.begin(); it != map.end(); ++it)
 		m_Preprocessor.Define(it->first.c_str(), it->first.length(), it->second.c_str(), it->second.length());
 }
 
@@ -232,11 +232,11 @@ CStr CPreprocessorWrapper::ResolveIncludes(const CStr& source)
 	// be constructed before views and destroyed after (currently guaranteed
 	// by stack).
 	// Short String Optimisation can make views point to container-managed data,
-	// so push_back must not invalidate pointers (std::deque guarantees that).
-	std::deque<std::string> chunks;
+	// so push_back must not invalidate pointers (PS::deque guarantees that).
+	PS::deque<std::string> chunks;
 	// After resolving the following vector should contain a complete list
 	// to concatenate.
-	std::vector<std::string_view> processedParts;
+	PS::vector<std::string_view> processedParts;
 	if (!ResolveIncludesImpl(source, m_IncludeCache, m_IncludeCallback, chunks, processedParts))
 		return {};
 	std::size_t totalSize = 0;

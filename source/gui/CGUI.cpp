@@ -36,6 +36,8 @@
 #include "lib/utf8.h"
 #include "maths/Size2D.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/UnorderedSet.h"
 #include "ps/Filesystem.h"
 #include "ps/GameSetup/Config.h"
 #include "ps/Globals.h"
@@ -49,8 +51,6 @@
 
 #include <string>
 #include <optional>
-#include <unordered_map>
-#include <unordered_set>
 
 const double SELECT_DBLCLICK_RATE = 0.5;
 const u32 MAX_OBJECT_DEPTH = 100; // Max number of nesting for GUI includes. Used to detect recursive inclusion
@@ -111,7 +111,7 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 				ScriptException::CatchPending(rq);
 		}
 
-		std::map<CStr, std::vector<IGUIObject*> >::iterator it = m_HotkeyObjects.find(hotkey);
+		PS::map<CStr, PS::vector<IGUIObject*> >::iterator it = m_HotkeyObjects.find(hotkey);
 		if (it != m_HotkeyObjects.end())
 			for (IGUIObject* const& obj : it->second)
 			{
@@ -286,22 +286,22 @@ void CGUI::TickObjects()
 
 void CGUI::SendEventToAll(const CStr& eventName)
 {
-	std::unordered_map<CStr, std::vector<IGUIObject*>>::iterator it = m_EventObjects.find(eventName);
+	PS::unordered_map<CStr, PS::vector<IGUIObject*>>::iterator it = m_EventObjects.find(eventName);
 	if (it == m_EventObjects.end())
 		return;
 
-	std::vector<IGUIObject*> copy = it->second;
+	PS::vector<IGUIObject*> copy = it->second;
 	for (IGUIObject* object : copy)
 		object->ScriptEvent(eventName);
 }
 
 void CGUI::SendEventToAll(const CStr& eventName, const JS::HandleValueArray& paramData)
 {
-	std::unordered_map<CStr, std::vector<IGUIObject*>>::iterator it = m_EventObjects.find(eventName);
+	PS::unordered_map<CStr, PS::vector<IGUIObject*>>::iterator it = m_EventObjects.find(eventName);
 	if (it == m_EventObjects.end())
 		return;
 
-	std::vector<IGUIObject*> copy = it->second;
+	PS::vector<IGUIObject*> copy = it->second;
 	for (IGUIObject* object : copy)
 		object->ScriptEvent(eventName, paramData);
 }
@@ -331,7 +331,7 @@ void CGUI::UpdateResolution()
 
 IGUIObject* CGUI::ConstructObject(const CStr& str)
 {
-	std::map<CStr, ConstructObjectFunction>::iterator it = m_ObjectTypes.find(str);
+	PS::map<CStr, ConstructObjectFunction>::iterator it = m_ObjectTypes.find(str);
 
 	if (it == m_ObjectTypes.end())
 		return nullptr;
@@ -442,7 +442,7 @@ void CGUI::UnsetObjectHotkey(IGUIObject* pObject, const CStr& hotkeyTag)
 	if (hotkeyTag.empty())
 		return;
 
-	std::vector<IGUIObject*>& assignment = m_HotkeyObjects[hotkeyTag];
+	PS::vector<IGUIObject*>& assignment = m_HotkeyObjects[hotkeyTag];
 
 	assignment.erase(
 		std::remove_if(
@@ -482,7 +482,7 @@ void CGUI::SetGlobalHotkey(const CStr& hotkeyTag, const CStr& eventName, JS::Han
 
 void CGUI::UnsetGlobalHotkey(const CStr& hotkeyTag, const CStr& eventName)
 {
-	std::map<CStr, std::map<CStr, JS::PersistentRootedValue>>::iterator it = m_GlobalHotkeys.find(hotkeyTag);
+	PS::map<CStr, PS::map<CStr, JS::PersistentRootedValue>>::iterator it = m_GlobalHotkeys.find(hotkeyTag);
 	if (it == m_GlobalHotkeys.end())
 		return;
 
@@ -494,7 +494,7 @@ void CGUI::UnsetGlobalHotkey(const CStr& hotkeyTag, const CStr& eventName)
 
 const SGUIScrollBarStyle* CGUI::GetScrollBarStyle(const CStr& style) const
 {
-	std::map<CStr, const SGUIScrollBarStyle>::const_iterator it = m_ScrollBarStyles.find(style);
+	PS::map<CStr, const SGUIScrollBarStyle>::const_iterator it = m_ScrollBarStyles.find(style);
 	if (it == m_ScrollBarStyles.end())
 		return nullptr;
 
@@ -504,7 +504,7 @@ const SGUIScrollBarStyle* CGUI::GetScrollBarStyle(const CStr& style) const
 /**
  * @callgraph
  */
-void CGUI::LoadXmlFile(const VfsPath& Filename, std::unordered_set<VfsPath>& Paths)
+void CGUI::LoadXmlFile(const VfsPath& Filename, PS::unordered_set<VfsPath>& Paths)
 {
 	Paths.insert(Filename);
 
@@ -542,11 +542,11 @@ void CGUI::LoadedXmlFiles()
 //	XML Reading Xeromyces Specific Sub-Routines
 //===================================================================
 
-void CGUI::Xeromyces_ReadRootObjects(const XMBData& xmb, XMBElement element, std::unordered_set<VfsPath>& Paths)
+void CGUI::Xeromyces_ReadRootObjects(const XMBData& xmb, XMBElement element, PS::unordered_set<VfsPath>& Paths)
 {
 	int el_script = xmb.GetElementID("script");
 
-	std::vector<std::pair<CStr, CStr> > subst;
+	PS::vector<std::pair<CStr, CStr> > subst;
 
 	// Iterate main children
 	//  they should all be <object> or <script> elements
@@ -591,7 +591,7 @@ void CGUI::Xeromyces_ReadRootSetup(const XMBData& xmb, XMBElement element)
 	}
 }
 
-IGUIObject* CGUI::Xeromyces_ReadObject(const XMBData& xmb, XMBElement element, IGUIObject* pParent, std::vector<std::pair<CStr, CStr> >& NameSubst, std::unordered_set<VfsPath>& Paths, u32 nesting_depth)
+IGUIObject* CGUI::Xeromyces_ReadObject(const XMBData& xmb, XMBElement element, IGUIObject* pParent, PS::vector<std::pair<CStr, CStr> >& NameSubst, PS::unordered_set<VfsPath>& Paths, u32 nesting_depth)
 {
 	ENSURE(pParent);
 
@@ -894,7 +894,7 @@ IGUIObject* CGUI::Xeromyces_ReadObject(const XMBData& xmb, XMBElement element, I
 	return object;
 }
 
-void CGUI::Xeromyces_ReadRepeat(const XMBData& xmb, XMBElement element, IGUIObject* pParent, std::vector<std::pair<CStr, CStr> >& NameSubst, std::unordered_set<VfsPath>& Paths, u32 nesting_depth)
+void CGUI::Xeromyces_ReadRepeat(const XMBData& xmb, XMBElement element, IGUIObject* pParent, PS::vector<std::pair<CStr, CStr> >& NameSubst, PS::unordered_set<VfsPath>& Paths, u32 nesting_depth)
 {
 	#define ELMT(x) int elmt_##x = xmb.GetElementID(#x)
 	#define ATTR(x) int attr_##x = xmb.GetAttributeID(#x)
@@ -922,7 +922,7 @@ void CGUI::Xeromyces_ReadRepeat(const XMBData& xmb, XMBElement element, IGUIObje
 	}
 }
 
-void CGUI::Xeromyces_ReadScript(const XMBData& xmb, XMBElement element, std::unordered_set<VfsPath>& Paths)
+void CGUI::Xeromyces_ReadScript(const XMBData& xmb, XMBElement element, PS::unordered_set<VfsPath>& Paths)
 {
 	// Check for a 'file' parameter
 	CStrW fileAttr(element.GetAttributes().GetNamedItem(xmb.GetAttributeID("file")).FromUTF8());

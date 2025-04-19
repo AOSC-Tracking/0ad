@@ -55,7 +55,7 @@ JS::Value GetMods(const ScriptRequest& rq)
 		return JS::NullValue();
 	}
 
-	const std::vector<ModIoModData>& availableMods = g_ModIo->GetMods();
+	const PS::vector<ModIoModData>& availableMods = g_ModIo->GetMods();
 
 	JS::RootedValue mods(rq.cx);
 	Script::CreateArray(rq, &mods, availableMods.size());
@@ -76,7 +76,7 @@ JS::Value GetMods(const ScriptRequest& rq)
 	return mods;
 }
 
-const std::map<DownloadProgressStatus, std::string> statusStrings = {
+const PS::map<DownloadProgressStatus, std::string> statusStrings = {
 	{ DownloadProgressStatus::NONE, "none" },
 	{ DownloadProgressStatus::GAMEID, "gameid" },
 	{ DownloadProgressStatus::READY, "ready" },

@@ -34,8 +34,8 @@
 #include "lib/sysdep/os/win/win.h"
 #include "lib/sysdep/os/win/wutil.h"
 #include "lib/sysdep/os/win/wcpu.h"
+#include "ps/containers/Map.h"
 
-#include <map>
 #include <Psapi.h>
 
 #if ARCH_X86_X64
@@ -221,7 +221,7 @@ struct ProximityDomain
 	// (AffinityMemory's fields are not currently needed)
 };
 
-typedef std::map<u32, ProximityDomain> ProximityDomains;
+typedef PS::map<u32, ProximityDomain> ProximityDomains;
 
 static ProximityDomains ExtractProximityDomainsFromSRAT(const SRAT* srat)
 {

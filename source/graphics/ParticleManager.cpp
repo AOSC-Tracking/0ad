@@ -23,8 +23,6 @@
 #include "ps/Profile.h"
 #include "renderer/Scene.h"
 
-#include <unordered_map>
-
 static Status ReloadChangedFileCB(void* param, const VfsPath& path)
 {
 	return static_cast<CParticleManager*>(param)->ReloadChangedFile(path);
@@ -43,7 +41,7 @@ CParticleManager::~CParticleManager()
 
 CParticleEmitterTypePtr CParticleManager::LoadEmitterType(const VfsPath& path)
 {
-	std::unordered_map<VfsPath, CParticleEmitterTypePtr>::iterator it = m_EmitterTypes.find(path);
+	PS::unordered_map<VfsPath, CParticleEmitterTypePtr>::iterator it = m_EmitterTypes.find(path);
 	if (it != m_EmitterTypes.end())
 		return it->second;
 
@@ -91,7 +89,7 @@ void CParticleManager::RenderSubmit(SceneCollector& collector, const CFrustum& U
 
 	// TODO: should do some frustum culling
 
-	for (std::list<CParticleEmitterPtr>::iterator it = m_UnattachedEmitters.begin(); it != m_UnattachedEmitters.end(); ++it)
+	for (PS::list<CParticleEmitterPtr>::iterator it = m_UnattachedEmitters.begin(); it != m_UnattachedEmitters.end(); ++it)
 		collector.Submit(it->get());
 }
 

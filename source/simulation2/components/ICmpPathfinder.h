@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,10 +20,9 @@
 
 #include "simulation2/system/Interface.h"
 
+#include "ps/containers/Map.h"
 #include "simulation2/components/ICmpObstruction.h"
 #include "simulation2/helpers/Pathfinding.h"
-
-#include <map>
 
 class IObstructionTestFilter;
 class PathGoal;
@@ -63,14 +62,14 @@ public:
 	/**
 	 * Get the list of all known passability classes.
 	 */
-	virtual void GetPassabilityClasses(std::map<std::string, pass_class_t>& passClasses) const = 0;
+	virtual void GetPassabilityClasses(PS::map<std::string, pass_class_t>& passClasses) const = 0;
 
 	/**
 	* Get the list of passability classes, separating pathfinding classes and others.
 	*/
 	virtual void GetPassabilityClasses(
-		std::map<std::string, pass_class_t>& nonPathfindingPassClasses,
-		std::map<std::string, pass_class_t>& pathfindingPassClasses) const = 0;
+		PS::map<std::string, pass_class_t>& nonPathfindingPassClasses,
+		PS::map<std::string, pass_class_t>& pathfindingPassClasses) const = 0;
 
 	/**
 	 * Get the tag for a given passability class name.

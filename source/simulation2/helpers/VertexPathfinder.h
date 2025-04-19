@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 #define INCLUDED_VERTEXPATHFINDER
 
 #include "graphics/Overlay.h"
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/Pathfinding.h"
 #include "simulation2/system/CmpPtr.h"
 
 #include <atomic>
-#include <vector>
 
 // A vertex around the corners of an obstruction
 // (paths will be sequences of these vertexes)
@@ -97,19 +97,19 @@ private:
 	// These vectors are expensive to recreate on every call, so we cache them here.
 	// They are made mutable to allow using them in the otherwise const ComputeShortPath.
 
-	mutable std::vector<Edge> m_EdgesUnaligned;
-	mutable std::vector<EdgeAA> m_EdgesLeft;
-	mutable std::vector<EdgeAA> m_EdgesRight;
-	mutable std::vector<EdgeAA> m_EdgesBottom;
-	mutable std::vector<EdgeAA> m_EdgesTop;
+	mutable PS::vector<Edge> m_EdgesUnaligned;
+	mutable PS::vector<EdgeAA> m_EdgesLeft;
+	mutable PS::vector<EdgeAA> m_EdgesRight;
+	mutable PS::vector<EdgeAA> m_EdgesBottom;
+	mutable PS::vector<EdgeAA> m_EdgesTop;
 
 	// List of obstruction vertexes (plus start/end points); we'll try to find paths through
 	// the graph defined by these vertexes.
-	mutable std::vector<Vertex> m_Vertexes;
+	mutable PS::vector<Vertex> m_Vertexes;
 	// List of collision edges - paths must never cross these.
 	// (Edges are one-sided so intersections are fine in one direction, but not the other direction.)
-	mutable std::vector<Edge> m_Edges;
-	mutable std::vector<Square> m_EdgeSquares; // Axis-aligned squares; equivalent to 4 edges.
+	mutable PS::vector<Edge> m_Edges;
+	mutable PS::vector<Square> m_EdgeSquares; // Axis-aligned squares; equivalent to 4 edges.
 };
 
 /**
@@ -127,13 +127,13 @@ public:
 protected:
 
 	void DebugRenderGoal(const CSimContext& simContext, const PathGoal& goal);
-	void DebugRenderGraph(const CSimContext& simContext, const std::vector<Vertex>& vertexes, const std::vector<Edge>& edges, const std::vector<Square>& edgeSquares);
+	void DebugRenderGraph(const CSimContext& simContext, const PS::vector<Vertex>& vertexes, const PS::vector<Edge>& edges, const PS::vector<Square>& edgeSquares);
 	void DebugRenderEdges(const CSimContext& simContext, bool visible, CFixedVector2D curr, CFixedVector2D npos);
 
 	std::atomic<bool> m_DebugOverlay = false;
 	// The data is double buffered: the first is the 'work-in-progress' state, the second the last RenderSubmit state.
-	std::vector<SOverlayLine> m_DebugOverlayShortPathLines;
-	std::vector<SOverlayLine> m_DebugOverlayShortPathLinesSubmitted;
+	PS::vector<SOverlayLine> m_DebugOverlayShortPathLines;
+	PS::vector<SOverlayLine> m_DebugOverlayShortPathLinesSubmitted;
 };
 
 extern VertexPathfinderDebugOverlay g_VertexPathfinderDebugOverlay;

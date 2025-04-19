@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -107,8 +107,7 @@ library and IO layer. Read and write are zero-copy.
 #include "lib/os_path.h"
 #include "lib/file/vfs/vfs_path.h"
 #include "lib/allocators/dynarray.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 namespace ERR
 {
@@ -341,7 +340,7 @@ public:
 	 **/
 	u8* get_data();
 
-	const std::vector<MIPLevel>& GetMIPLevels() const { return m_MIPLevels; }
+	const PS::vector<MIPLevel>& GetMIPLevels() const { return m_MIPLevels; }
 
 	/**
 	 * return the ARGB value of the 1x1 mipmap level of the texture.
@@ -362,7 +361,7 @@ public:
 private:
 	void UpdateMIPLevels();
 
-	std::vector<MIPLevel> m_MIPLevels;
+	PS::vector<MIPLevel> m_MIPLevels;
 };
 
 

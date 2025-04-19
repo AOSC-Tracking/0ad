@@ -115,8 +115,8 @@ CVertexBuffer::VBChunk* CVertexBuffer::Allocate(
 		return nullptr;
 
 	// trawl free list looking for first free chunk with enough space
-	std::vector<VBChunk*>::iterator best_iter = m_FreeList.end();
-	for (std::vector<VBChunk*>::iterator iter = m_FreeList.begin(); iter != m_FreeList.end(); ++iter)
+	PS::vector<VBChunk*>::iterator best_iter = m_FreeList.end();
+	for (PS::vector<VBChunk*>::iterator iter = m_FreeList.begin(); iter != m_FreeList.end(); ++iter)
 	{
 		if (numberOfVertices == (*iter)->m_Count)
 		{
@@ -180,7 +180,7 @@ void CVertexBuffer::Release(VBChunk* chunk)
 	// Coalesce with any free-list items that are adjacent to this chunk;
 	// merge the found chunk with the new one, and remove the old one
 	// from the list.
-	for (std::vector<VBChunk*>::iterator iter = m_FreeList.begin(); iter != m_FreeList.end();)
+	for (PS::vector<VBChunk*>::iterator iter = m_FreeList.begin(); iter != m_FreeList.end();)
 	{
 		if ((*iter)->m_Index == chunk->m_Index + chunk->m_Count
 		 || (*iter)->m_Index + (*iter)->m_Count == chunk->m_Index)

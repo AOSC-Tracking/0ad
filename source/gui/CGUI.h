@@ -32,14 +32,14 @@
 #include "maths/Rect.h"
 #include "maths/Size2D.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/UnorderedSet.h"
+#include "ps/containers/Vector.h"
 #include "ps/XML/Xeromyces.h"
 #include "scriptinterface/ScriptForward.h"
 
-#include <map>
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 extern const double SELECT_DBLCLICK_RATE;
 
@@ -52,7 +52,7 @@ struct SGUIScrollBarStyle;
 
 class GUIProxyProps;
 
-using map_pObjects = std::map<CStr, IGUIObject*>;
+using map_pObjects = PS::map<CStr, IGUIObject*>;
 
 /**
  * The main object that represents a whole GUI page.
@@ -127,7 +127,7 @@ public:
 	 * @param Filename Name of file
 	 * @param Paths Set of paths; all XML and JS files loaded will be added to this
 	 */
-	void LoadXmlFile(const VfsPath& Filename, std::unordered_set<VfsPath>& Paths);
+	void LoadXmlFile(const VfsPath& Filename, PS::unordered_set<VfsPath>& Paths);
 
 	/**
 	 * Called after all XML files linked in the page file were loaded.
@@ -370,7 +370,7 @@ private:
 	 *
 	 * @see LoadXmlFile()
 	 */
-	void Xeromyces_ReadRootObjects(const XMBData& xmb, XMBElement element, std::unordered_set<VfsPath>& Paths);
+	void Xeromyces_ReadRootObjects(const XMBData& xmb, XMBElement element, PS::unordered_set<VfsPath>& Paths);
 
 	/**
 	 * Reads in the root element \<sprites\> (the DOMElement).
@@ -429,7 +429,7 @@ private:
 	 *
 	 * @see LoadXmlFile()
 	 */
-	IGUIObject* Xeromyces_ReadObject(const XMBData& xmb, XMBElement element, IGUIObject* pParent, std::vector<std::pair<CStr, CStr> >& NameSubst, std::unordered_set<VfsPath>& Paths, u32 nesting_depth);
+	IGUIObject* Xeromyces_ReadObject(const XMBData& xmb, XMBElement element, IGUIObject* pParent, PS::vector<std::pair<CStr, CStr> >& NameSubst, PS::unordered_set<VfsPath>& Paths, u32 nesting_depth);
 
 	/**
 	 * Reads in the element \<repeat\>, which repeats its child \<object\>s
@@ -437,7 +437,7 @@ private:
 	 * 'var' enclosed in square brackets) in its descendants' names with "[0]",
 	 * "[1]", etc.
 	 */
-	void Xeromyces_ReadRepeat(const XMBData& xmb, XMBElement element, IGUIObject* pParent, std::vector<std::pair<CStr, CStr> >& NameSubst, std::unordered_set<VfsPath>& Paths, u32 nesting_depth);
+	void Xeromyces_ReadRepeat(const XMBData& xmb, XMBElement element, IGUIObject* pParent, PS::vector<std::pair<CStr, CStr> >& NameSubst, PS::unordered_set<VfsPath>& Paths, u32 nesting_depth);
 
 	/**
 	 * Reads in the element \<script\> (the XMBElement) and executes
@@ -450,7 +450,7 @@ private:
 	 *
 	 * @see LoadXmlFile()
 	 */
-	void Xeromyces_ReadScript(const XMBData& xmb, XMBElement element, std::unordered_set<VfsPath>& Paths);
+	void Xeromyces_ReadScript(const XMBData& xmb, XMBElement element, PS::unordered_set<VfsPath>& Paths);
 
 	/**
 	 * Reads in the element \<sprite\> (the XMBElement) and stores the
@@ -620,7 +620,7 @@ private:
 	 * IGUIObjects by name... For instance m_ObjectTypes["button"]
 	 * is filled with a function that will "return new CButton();"
 	 */
-	std::map<CStr, ConstructObjectFunction> m_ObjectTypes;
+	PS::map<CStr, ConstructObjectFunction> m_ObjectTypes;
 
 	/**
 	 * This is intended to store the JSFunction when accessing certain properties.
@@ -632,21 +632,21 @@ private:
 	 * An alternative would be to store these on the proxy's prototype,
 	 * but that embarks a lot of un-necessary code.
 	 */
-	std::unordered_map<const js::BaseProxyHandler*, std::unique_ptr<GUIProxyProps>> m_ProxyData;
+	PS::unordered_map<const js::BaseProxyHandler*, std::unique_ptr<GUIProxyProps>> m_ProxyData;
 
 	/**
 	 * Map from hotkey names to objects that listen to the hotkey.
 	 * (This is an optimisation to avoid recursing over the whole GUI
 	 * tree every time a hotkey is pressed).
 	 */
-	std::map<CStr, std::vector<IGUIObject*> > m_HotkeyObjects;
+	PS::map<CStr, PS::vector<IGUIObject*> > m_HotkeyObjects;
 
 	/**
 	 * Map from hotkey names to maps of eventNames to functions that are triggered
 	 * when the hotkey goes through the event. Contrary to object hotkeys, this
 	 * allows for only one global function per hotkey name per event type.
 	 */
-	std::map<CStr, std::map<CStr, JS::PersistentRootedValue>> m_GlobalHotkeys;
+	PS::map<CStr, PS::map<CStr, JS::PersistentRootedValue>> m_GlobalHotkeys;
 
 	/**
 	 * XML and JS can subscribe handlers to events identified by these names.
@@ -676,25 +676,25 @@ private:
 	//--------------------------------------------------------
 
 	// Colors
-	std::map<CStr, const CGUIColor> m_PreDefinedColors;
+	PS::map<CStr, const CGUIColor> m_PreDefinedColors;
 
 	// Sprites
-	std::map<CStr, std::unique_ptr<const CGUISprite>> m_Sprites;
+	PS::map<CStr, std::unique_ptr<const CGUISprite>> m_Sprites;
 
 	// Styles
-	std::map<CStr, const SGUIStyle> m_Styles;
+	PS::map<CStr, const SGUIStyle> m_Styles;
 
 	// Scroll-bar styles
-	std::map<CStr, const SGUIScrollBarStyle> m_ScrollBarStyles;
+	PS::map<CStr, const SGUIScrollBarStyle> m_ScrollBarStyles;
 
 	// Icons
-	std::map<CStr, const SGUIIcon> m_Icons;
+	PS::map<CStr, const SGUIIcon> m_Icons;
 
 public:
 	/**
 	 * Map from event names to object which listen to a given event.
 	 */
-	std::unordered_map<CStr, std::vector<IGUIObject*>> m_EventObjects;
+	PS::unordered_map<CStr, PS::vector<IGUIObject*>> m_EventObjects;
 };
 
 #endif // INCLUDED_CGUI

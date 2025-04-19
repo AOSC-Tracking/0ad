@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,11 +22,10 @@
 #include "graphics/ShaderTechniquePtr.h"
 #include "graphics/Texture.h"
 #include "maths/Rect.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrForward.h"
 #include "ps/CStrIntern.h"
-
-#include <map>
-#include <vector>
 
 class CCanvas2D;
 class CGUI;
@@ -55,7 +54,7 @@ namespace GUIRenderer
 		float m_GrayscaleFactor;
 	};
 
-	class DrawCalls : public std::vector<SDrawCall>
+	class DrawCalls : public PS::vector<SDrawCall>
 	{
 	public:
 		DrawCalls();
@@ -64,7 +63,7 @@ namespace GUIRenderer
 		DrawCalls& operator=(const DrawCalls&);
 	};
 
-	void UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const CStr8& SpriteName, const CRect& Size, std::map<CStr8, std::unique_ptr<const CGUISprite>>& Sprites);
+	void UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const CStr8& SpriteName, const CRect& Size, PS::map<CStr8, std::unique_ptr<const CGUISprite>>& Sprites);
 
 	void Draw(DrawCalls& Calls, CCanvas2D& canvas);
 }

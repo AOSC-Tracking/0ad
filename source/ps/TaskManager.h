@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 #ifndef INCLUDED_THREADING_TASKMANAGER
 #define INCLUDED_THREADING_TASKMANAGER
 
+#include "ps/containers/Vector.h"
 #include "ps/Future.h"
 #include "ps/Singleton.h"
 
 #include <memory>
-#include <vector>
 
 namespace Threading
 {

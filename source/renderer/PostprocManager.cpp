@@ -721,9 +721,9 @@ void CPostprocManager::ApplyPostproc(
 
 
 // Generate list of available effect-sets
-std::vector<CStrW> CPostprocManager::GetPostEffects()
+PS::vector<CStrW> CPostprocManager::GetPostEffects()
 {
-	std::vector<CStrW> effects;
+	PS::vector<CStrW> effects;
 
 	const VfsPath folder(L"shaders/effects/postproc/");
 

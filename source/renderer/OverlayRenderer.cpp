@@ -28,6 +28,7 @@
 #include "lib/hash.h"
 #include "maths/MathUtil.h"
 #include "maths/Quaternion.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/CStrInternStatic.h"
 #include "ps/Game.h"
 #include "ps/Profile.h"
@@ -42,8 +43,6 @@
 #include "simulation2/components/ICmpWaterManager.h"
 #include "simulation2/Simulation2.h"
 #include "simulation2/system/SimContext.h"
-
-#include <unordered_map>
 
 namespace
 {
@@ -137,7 +136,7 @@ public:
 
 	/// Holds the quad overlay structures requested to be rendered in this batch. Must be cleared
 	/// after each frame.
-	std::vector<SOverlayQuad*> m_Quads;
+	PS::vector<SOverlayQuad*> m_Quads;
 
 	/// Start index of this batch into the dedicated quad indices VertexArray (see OverlayInternals).
 	size_t m_IndicesBase;
@@ -151,18 +150,18 @@ public:
 
 struct OverlayRendererInternals
 {
-	using QuadBatchMap = std::unordered_map<QuadBatchKey, QuadBatchData, QuadBatchHash>;
+	using QuadBatchMap = PS::unordered_map<QuadBatchKey, QuadBatchData, QuadBatchHash>;
 
 	OverlayRendererInternals();
 	~OverlayRendererInternals() = default;
 
 	Renderer::Backend::IDevice* device = nullptr;
 
-	std::vector<SOverlayLine*> lines;
-	std::vector<SOverlayTexturedLine*> texlines;
-	std::vector<SOverlaySprite*> sprites;
-	std::vector<SOverlayQuad*> quads;
-	std::vector<SOverlaySphere*> spheres;
+	PS::vector<SOverlayLine*> lines;
+	PS::vector<SOverlayTexturedLine*> texlines;
+	PS::vector<SOverlaySprite*> sprites;
+	PS::vector<SOverlayQuad*> quads;
+	PS::vector<SOverlaySphere*> spheres;
 
 	QuadBatchMap quadBatchMap;
 
@@ -199,8 +198,8 @@ struct OverlayRendererInternals
 	Renderer::Backend::IVertexInputLayout* texturedLineVertexInputLayout = nullptr;
 
 	// Geometry for a unit sphere
-	std::vector<float> sphereVertexes;
-	std::vector<u16> sphereIndexes;
+	PS::vector<float> sphereVertexes;
+	PS::vector<u16> sphereIndexes;
 	void GenerateSphere();
 
 	// Performs one-time setup. Called from CRenderer::Open, after graphics capabilities have
@@ -730,7 +729,7 @@ void OverlayRenderer::RenderForegroundOverlays(
 static void TessellateSphereFace(const CVector3D& a, u16 ai,
 								 const CVector3D& b, u16 bi,
 								 const CVector3D& c, u16 ci,
-								 std::vector<float>& vertexes, std::vector<u16>& indexes, int level)
+								 PS::vector<float>& vertexes, PS::vector<u16>& indexes, int level)
 {
 	if (level == 0)
 	{
@@ -753,7 +752,7 @@ static void TessellateSphereFace(const CVector3D& a, u16 ai,
 	}
 }
 
-static void TessellateSphere(std::vector<float>& vertexes, std::vector<u16>& indexes, int level)
+static void TessellateSphere(PS::vector<float>& vertexes, PS::vector<u16>& indexes, int level)
 {
 	/* Start with a tetrahedron, then tessellate */
 	float s = sqrtf(0.5f);

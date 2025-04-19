@@ -18,11 +18,11 @@
 #ifndef INCLUDED_SCRIPTINTERFACE_OBJECT
 #define INCLUDED_SCRIPTINTERFACE_OBJECT
 
+#include "ps/CLogger.h"
+#include "ps/containers/Vector.h"
 #include "ScriptConversions.h"
 #include "ScriptRequest.h"
 #include "ScriptTypes.h"
-
-#include "ps/CLogger.h"
 
 /**
  * Wraps SM APIs for manipulating JS objects.
@@ -188,7 +188,7 @@ inline bool DeepFreezeObject(const ScriptRequest& rq, JS::HandleValue objVal)
  * require a variant in the vector, and it's not useful for now.
  * @param enumerableOnly - only return enumerable properties.
  */
-inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objVal, bool enumerableOnly, std::vector<std::string>& out)
+inline bool EnumeratePropertyNames(const ScriptRequest& rq, JS::HandleValue objVal, bool enumerableOnly, PS::vector<std::string>& out)
 {
 	if (!objVal.isObjectOrNull())
 	{

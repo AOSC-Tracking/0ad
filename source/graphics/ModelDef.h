@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -28,13 +28,13 @@
 #include "maths/Vector2D.h"
 #include "maths/Vector3D.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "renderer/VertexArray.h"
 
 #include <cstring>
-#include <map>
-#include <unordered_map>
-#include <vector>
 
 class CBoneState;
 class CSkeletonAnimDef;
@@ -173,7 +173,7 @@ public:
 	// accessor: get number of UV sets
 	size_t GetNumUVsPerVertex() const { return m_NumUVsPerVertex; }
 
-	const std::vector<CVector2D>& GetUVCoordinates() const { return m_UVCoordinates;  }
+	const PS::vector<CVector2D>& GetUVCoordinates() const { return m_UVCoordinates;  }
 
 	// accessor: get face data
 	size_t GetNumFaces() const { return m_NumFaces; }
@@ -258,7 +258,7 @@ public:
 	// vertex data
 	size_t m_NumVertices;
 	SModelVertex* m_pVertices;
-	std::vector<CVector2D> m_UVCoordinates;
+	PS::vector<CVector2D> m_UVCoordinates;
 	size_t m_NumUVsPerVertex; // number of UV pairs per vertex
 	// face data
 	size_t m_NumFaces;
@@ -272,17 +272,17 @@ public:
 	SVertexBlend *m_pBlends;
 	size_t* m_pBlendIndices;
 	// prop point data
-	std::vector<SPropPoint> m_PropPoints;
+	PS::vector<SPropPoint> m_PropPoints;
 
 private:
 	VfsPath m_Name;	// filename
 
 	// Maximal bounding box of this mesh for a given animation.
-	std::unordered_map<u32, CBoundingBoxAligned> m_MaxBoundsPerAnimDef;
+	PS::unordered_map<u32, CBoundingBoxAligned> m_MaxBoundsPerAnimDef;
 
 	// renderdata shared by models of the same modeldef,
 	// by render path
-	typedef std::map<const void*, CModelDefRPrivate*> RenderDataMap;
+	typedef PS::map<const void*, CModelDefRPrivate*> RenderDataMap;
 	RenderDataMap m_RenderData;
 };
 

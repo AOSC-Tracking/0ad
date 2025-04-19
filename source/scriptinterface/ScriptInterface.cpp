@@ -22,6 +22,7 @@
 #include "lib/debug.h"
 #include "lib/utf8.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
 #include "ps/Filesystem.h"
 #include "ps/Profile.h"
 #include "scriptinterface/FunctionWrapper.h"
@@ -31,7 +32,6 @@
 #include "scriptinterface/ScriptStats.h"
 #include "scriptinterface/StructuredClone.h"
 
-#include <map>
 #include <string>
 
 #define BOOST_MULTI_INDEX_DISABLE_SERIALIZATION
@@ -517,7 +517,7 @@ void ScriptInterface::DefineCustomObjectType(JSClass *clasp, JSNative constructo
 
 JSObject* ScriptInterface::CreateCustomObject(const std::string& typeName) const
 {
-	std::map<std::string, CustomType>::const_iterator it = m_CustomObjectTypes.find(typeName);
+	PS::map<std::string, CustomType>::const_iterator it = m_CustomObjectTypes.find(typeName);
 
 	if (it == m_CustomObjectTypes.end())
 		throw PSERROR_Scripting_TypeDoesNotExist();

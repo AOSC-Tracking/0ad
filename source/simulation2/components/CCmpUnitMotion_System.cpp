@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,12 +22,12 @@
 
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedSet.h"
+#include "ps/containers/Vector.h"
 #include "ps/Profile.h"
 
 #include <algorithm>
 #include <limits>
-#include <unordered_set>
-#include <vector>
 
 #define DEBUG_STATS 0
 #define DEBUG_RENDER 0
@@ -105,9 +105,9 @@ constexpr int PRESSURE_DISTANCE_FACTOR = 5;
 void RenderDebugOverlay(SceneCollector& collector, const CFrustum& frustum, bool culling);
 
 struct SDebugData {
-	std::vector<SOverlaySphere> m_Spheres;
-	std::vector<SOverlayLine> m_Lines;
-	std::vector<SOverlayQuad> m_Quads;
+	PS::vector<SOverlaySphere> m_Spheres;
+	PS::vector<SOverlayLine> m_Lines;
+	PS::vector<SOverlayQuad> m_Quads;
 } debugDataMotionMgr;
 #endif
 
@@ -416,7 +416,7 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 #endif
 
 	PROFILE2("MotionMgr_Move");
-	std::unordered_set<std::vector<EntityMap<MotionState>::iterator>*> assigned;
+	PS::unordered_set<PS::vector<EntityMap<MotionState>::iterator>*> assigned;
 	for (EntityMap<MotionState>::iterator it = ents.begin(); it != ents.end(); ++it)
 	{
 		if (!it->second.cmpPosition->IsInWorld())
@@ -433,7 +433,7 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 		it->second.angle = it->second.initialAngle;
 		ENSURE(it->second.pos.X.ToInt_RoundToZero() / PUSHING_GRID_SIZE < m_MovingUnits.width() &&
 			   it->second.pos.Y.ToInt_RoundToZero() / PUSHING_GRID_SIZE < m_MovingUnits.height());
-		std::vector<EntityMap<MotionState>::iterator>& subdiv = m_MovingUnits.get(
+		PS::vector<EntityMap<MotionState>::iterator>& subdiv = m_MovingUnits.get(
 			it->second.pos.X.ToInt_RoundToZero() / PUSHING_GRID_SIZE,
 			it->second.pos.Y.ToInt_RoundToZero() / PUSHING_GRID_SIZE
 		);
@@ -441,7 +441,7 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 		assigned.emplace(&subdiv);
 	}
 
-	for (std::vector<EntityMap<MotionState>::iterator>* vec : assigned)
+	for (PS::vector<EntityMap<MotionState>::iterator>* vec : assigned)
 	{
 #if DEBUG_RENDER
 		{
@@ -479,10 +479,10 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 	if (&ents == &m_Units && IsPushingActivated())
 	{
 		PROFILE2("MotionMgr_Pushing");
-		for (std::vector<EntityMap<MotionState>::iterator>* vec : assigned)
+		for (PS::vector<EntityMap<MotionState>::iterator>* vec : assigned)
 		{
 			ENSURE(!vec->empty());
-			std::vector< std::vector<EntityMap<MotionState>::iterator>* > consider = { vec };
+			PS::vector< PS::vector<EntityMap<MotionState>::iterator>* > consider = { vec };
 
 			int x = (*vec)[0]->second.pos.X.ToInt_RoundToZero() / PUSHING_GRID_SIZE;
 			int z = (*vec)[0]->second.pos.Y.ToInt_RoundToZero() / PUSHING_GRID_SIZE;
@@ -530,7 +530,7 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 				line.m_Color = CColor(1, 0, 1, 0.5);
 				debugDataMotionMgr.m_Lines.push_back(line);
 #endif
-				for (std::vector<EntityMap<MotionState>::iterator>* vec2 : consider)
+				for (PS::vector<EntityMap<MotionState>::iterator>* vec2 : consider)
 					for (EntityMap<MotionState>::iterator& it2 : *vec2)
 						if (it->first < it2->first && !it2->second.ignore)
 						{
@@ -547,7 +547,7 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 	{
 		PROFILE2("MotionMgr_PushAdjust");
 		CmpPtr<ICmpPathfinder> cmpPathfinder(GetSystemEntity());
-		for (std::vector<EntityMap<MotionState>::iterator>* vec : assigned)
+		for (PS::vector<EntityMap<MotionState>::iterator>* vec : assigned)
 		{
 			for (EntityMap<MotionState>::iterator& it : *vec)
 			{
@@ -631,13 +631,13 @@ void CCmpUnitMotionManager::Move(EntityMap<MotionState>& ents, fixed dt)
 	}
 #if DEBUG_STATS
 	int size = 0;
-	for (std::vector<EntityMap<MotionState>::iterator>* vec : assigned)
+	for (PS::vector<EntityMap<MotionState>::iterator>* vec : assigned)
 		size += vec->size();
 	double time = timer_Time() - start;
 	if (comparisons > 0)
 		printf(">> %i comparisons over %li grids, %f units per grid in %f secs\n", comparisons, assigned.size(), size / (float)(assigned.size()), time);
 #endif
-	for (std::vector<EntityMap<MotionState>::iterator>* vec : assigned)
+	for (PS::vector<EntityMap<MotionState>::iterator>* vec : assigned)
 		vec->clear();
 }
 

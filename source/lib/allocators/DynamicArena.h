@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,11 +24,11 @@
 #define INCLUDED_ALLOCATORS_DYNAMIC_ARENA
 
 #include "lib/bits.h"
+#include "ps/containers/Vector.h"
 
 #include <cstdlib>
 #include <new> // bad_alloc
 #include <utility>
-#include <vector>
 
 namespace Allocators {
 
@@ -153,7 +153,7 @@ public:
 	}
 
 protected:
-	std::vector<Block> m_Blocks;
+	PS::vector<Block> m_Blocks;
 };
 
 } // namespace Allocators

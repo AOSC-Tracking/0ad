@@ -73,7 +73,7 @@ public:
 		flags_t flags;
 	} Shape;
 
-	std::vector<Shape> m_Shapes;
+	PS::vector<Shape> m_Shapes;
 
 	// Dynamic state:
 
@@ -111,7 +111,7 @@ public:
 	/// Identifier of this entity's obstruction shape, as registered in the obstruction manager. Contains
 	/// structure, but should be treated as opaque here.
 	tag_t m_Tag;
-	std::vector<tag_t> m_ClusterTags;
+	PS::vector<tag_t> m_ClusterTags;
 
 	/// Set of flags affecting the behaviour of this entity's obstruction shape.
 	flags_t m_Flags;
@@ -645,9 +645,9 @@ public:
 			return !cmpObstructionManager->TestStaticShape(filter, pos.X, pos.Y, cmpPosition->GetRotation().Y, m_Size0, m_Size1, NULL );
 	}
 
-	std::vector<entity_id_t> GetEntitiesByFlags(flags_t flags) const override
+	PS::vector<entity_id_t> GetEntitiesByFlags(flags_t flags) const override
 	{
-		std::vector<entity_id_t> ret;
+		PS::vector<entity_id_t> ret;
 
 		CmpPtr<ICmpObstructionManager> cmpObstructionManager(GetSystemEntity());
 		if (!cmpObstructionManager)
@@ -668,17 +668,17 @@ public:
 		return ret;
 	}
 
-	std::vector<entity_id_t> GetEntitiesBlockingMovement() const override
+	PS::vector<entity_id_t> GetEntitiesBlockingMovement() const override
 	{
 		return GetEntitiesByFlags(ICmpObstructionManager::FLAG_BLOCK_MOVEMENT);
 	}
 
-	std::vector<entity_id_t> GetEntitiesBlockingConstruction() const override
+	PS::vector<entity_id_t> GetEntitiesBlockingConstruction() const override
 	{
 		return GetEntitiesByFlags(ICmpObstructionManager::FLAG_BLOCK_CONSTRUCTION);
 	}
 
-	std::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override
+	PS::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override
 	{
 		return GetEntitiesByFlags(ICmpObstructionManager::FLAG_DELETE_UPON_CONSTRUCTION);
 	}
@@ -768,17 +768,17 @@ public:
 		SkipControlGroupsRequireFlagObstructionFilter filter(m_ControlGroup, m_ControlGroup2,
 			ICmpObstructionManager::FLAG_BLOCK_FOUNDATION);
 
-		std::vector<entity_id_t> collisions;
+		PS::vector<entity_id_t> collisions;
 		if (cmpObstructionManager->TestStaticShape(filter, pos.X, pos.Y, cmpPosition->GetRotation().Y, m_Size0, m_Size1, &collisions))
 		{
-			std::vector<entity_id_t> persistentEnts, normalEnts;
+			PS::vector<entity_id_t> persistentEnts, normalEnts;
 
 			if (m_ControlPersist)
 				persistentEnts.push_back(m_ControlGroup);
 			else
 				normalEnts.push_back(GetEntityId());
 
-			for (std::vector<entity_id_t>::iterator it = collisions.begin(); it != collisions.end(); ++it)
+			for (PS::vector<entity_id_t>::iterator it = collisions.begin(); it != collisions.end(); ++it)
 			{
 				entity_id_t ent = *it;
 				if (ent == INVALID_ENTITY)

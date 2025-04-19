@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -26,11 +26,11 @@
 #include "lib/code_annotation.h"
 #include "lib/external_libraries/icu.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Vector.h"
 #include "ps/Singleton.h"
 
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace tinygettext
 {
@@ -109,7 +109,7 @@ public:
 	 *
 	 * @sa http://www.icu-project.org/apiref/icu4c/classicu_1_1Locale.html#a073d70df8c9c8d119c0d42d70de24137
 	 */
-	std::vector<std::string> GetAllLocales() const;
+	PS::vector<std::string> GetAllLocales() const;
 
 	/**
 	 * Saves the specified locale in the game configuration file.
@@ -146,7 +146,7 @@ public:
 	 *
 	 * @sa https://gitea.wildfiregames.com/0ad/0ad/wiki/Implementation_of_Internationalization_and_Localization#LongStringsLocale
 	 */
-	std::vector<std::string> GetSupportedLocaleBaseNames() const;
+	PS::vector<std::string> GetSupportedLocaleBaseNames() const;
 
 	/**
 	 * Returns an array of supported locale names sorted alphabetically by
@@ -164,7 +164,7 @@ public:
 	 *
 	 * @sa https://gitea.wildfiregames.com/0ad/0ad/wiki/Implementation_of_Internationalization_and_Localization#LongStringsLocale
 	 */
-	std::vector<std::wstring> GetSupportedLocaleDisplayNames() const;
+	PS::vector<std::wstring> GetSupportedLocaleDisplayNames() const;
 
 	/**
 	 * Returns the ISO-639 language code of the specified locale code.
@@ -218,7 +218,7 @@ public:
 	 * @return Array of paths to files in the virtual filesystem that provide
 	 * translations for @p locale.
 	 */
-	std::vector<std::wstring> GetDictionariesForLocale(const std::string& locale) const;
+	PS::vector<std::wstring> GetDictionariesForLocale(const std::string& locale) const;
 
 	std::wstring GetFallbackToAvailableDictLocale(const icu::Locale& locale) const;
 
@@ -503,7 +503,7 @@ private:
 	 * @sa GetSupportedLocaleBaseNames()
 	 * @sa GetSupportedLocaleDisplayNames()
 	 */
-	std::vector<icu::Locale> m_AvailableLocales;
+	PS::vector<icu::Locale> m_AvailableLocales;
 
 	/**
 	 * Whether the game is using the default game locale (@c true), 'en_US', or

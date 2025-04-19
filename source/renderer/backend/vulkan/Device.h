@@ -18,6 +18,9 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_DEVICE
 #define INCLUDED_RENDERER_BACKEND_VULKAN_DEVICE
 
+#include "ps/containers/Queue.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IDevice.h"
 #include "renderer/backend/vulkan/DeviceForward.h"
 #include "renderer/backend/vulkan/DeviceSelection.h"
@@ -28,11 +31,8 @@
 #include <glad/vulkan.h>
 #include <memory>
 #include <limits>
-#include <queue>
 #include <string>
 #include <tuple>
-#include <unordered_map>
-#include <vector>
 
 typedef struct SDL_Window SDL_Window;
 
@@ -71,7 +71,7 @@ public:
 	const std::string& GetName() const override { return m_Name; }
 	const std::string& GetVersion() const override { return m_Version; }
 	const std::string& GetDriverInformation() const override { return m_DriverInformation; }
-	const std::vector<std::string>& GetExtensions() const override { return m_Extensions; }
+	const PS::vector<std::string>& GetExtensions() const override { return m_Extensions; }
 
 	void Report(const ScriptRequest& rq, JS::HandleValue settings) override;
 
@@ -195,12 +195,12 @@ private:
 	std::string m_Version;
 	std::string m_VendorID;
 	std::string m_DriverInformation;
-	std::vector<std::string> m_Extensions;
-	std::vector<std::string> m_InstanceExtensions;
-	std::vector<std::string> m_ValidationLayers;
+	PS::vector<std::string> m_Extensions;
+	PS::vector<std::string> m_InstanceExtensions;
+	PS::vector<std::string> m_ValidationLayers;
 
 	SAvailablePhysicalDevice m_ChoosenDevice{};
-	std::vector<SAvailablePhysicalDevice> m_AvailablePhysicalDevices;
+	PS::vector<SAvailablePhysicalDevice> m_AvailablePhysicalDevices;
 
 	Capabilities m_Capabilities{};
 
@@ -222,7 +222,7 @@ private:
 		bool occupied{};
 		bool submitted{};
 	};
-	std::vector<Query> m_Queries;
+	PS::vector<Query> m_Queries;
 
 	std::unique_ptr<CSwapChain> m_SwapChain;
 	std::unique_ptr<CTexture> m_BackbufferReadbackTexture;
@@ -236,9 +236,9 @@ private:
 		uint64_t handle;
 		VmaAllocation allocation;
 	};
-	std::queue<ObjectToDestroy> m_ObjectToDestroyQueue;
-	std::queue<std::pair<uint32_t, DeviceObjectUID>> m_TextureToDestroyQueue;
-	std::queue<std::pair<uint32_t, DeviceObjectUID>> m_BufferToDestroyQueue;
+	PS::queue<ObjectToDestroy> m_ObjectToDestroyQueue;
+	PS::queue<std::pair<uint32_t, DeviceObjectUID>> m_TextureToDestroyQueue;
+	PS::queue<std::pair<uint32_t, DeviceObjectUID>> m_BufferToDestroyQueue;
 
 	std::unique_ptr<CRenderPassManager> m_RenderPassManager;
 	std::unique_ptr<CSamplerManager> m_SamplerManager;

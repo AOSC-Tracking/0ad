@@ -38,7 +38,7 @@ public:
 		CTexturePtr Sampler;
 	};
 
-	typedef std::vector<TextureSampler> SamplersVector;
+	typedef PS::vector<TextureSampler> SamplersVector;
 
 	CMaterial();
 
@@ -68,7 +68,7 @@ public:
 	const CShaderRenderQueries& GetRenderQueries() const { return m_RenderQueries; }
 
 	void AddRequiredSampler(const CStr& samplerName);
-	const std::vector<CStrIntern>& GetRequiredSampler() const { return m_RequiredSamplers; }
+	const PS::vector<CStrIntern>& GetRequiredSampler() const { return m_RequiredSamplers; }
 
 private:
 
@@ -77,7 +77,7 @@ private:
 	CTexturePtr m_DiffuseTexture;
 
 	SamplersVector m_Samplers;
-	std::vector<CStrIntern> m_RequiredSamplers;
+	PS::vector<CStrIntern> m_RequiredSamplers;
 
 	CStrIntern m_ShaderEffect;
 	CShaderDefines m_ShaderDefines;

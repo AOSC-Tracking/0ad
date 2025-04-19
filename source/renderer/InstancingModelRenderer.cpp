@@ -44,7 +44,7 @@ struct IModelDef : public CModelDefRPrivate
 	VertexArray::Attribute m_Tangent;
 
 	/// The number of UVs is determined by the model
-	std::vector<VertexArray::Attribute> m_UVs;
+	PS::vector<VertexArray::Attribute> m_UVs;
 
 	Renderer::Backend::IVertexInputLayout* m_VertexInputLayout = nullptr;
 
@@ -86,7 +86,7 @@ IModelDef::IModelDef(const CModelDefPtr& mdef, bool calculateTangents)
 
 		// the tangent generation can increase the number of vertices temporarily
 		// so reserve a bit more memory to avoid reallocations in GenTangents (in most cases)
-		std::vector<float> newVertices;
+		PS::vector<float> newVertices;
 		newVertices.reserve(numVertexAttrs * numVertices * 2);
 
 		// Generate the tangents
@@ -95,8 +95,8 @@ IModelDef::IModelDef(const CModelDefPtr& mdef, bool calculateTangents)
 		// how many vertices do we have after generating tangents?
 		int newNumVert = newVertices.size() / numVertexAttrs;
 
-		std::vector<int> remapTable(newNumVert);
-		std::vector<float> vertexDataOut(newNumVert * numVertexAttrs);
+		PS::vector<int> remapTable(newNumVert);
+		PS::vector<float> vertexDataOut(newNumVert * numVertexAttrs);
 
 		// re-weld the mesh to remove duplicated vertices
 		int numVertices2 = WeldMesh(&remapTable[0], &vertexDataOut[0],

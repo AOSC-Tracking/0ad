@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,8 +18,9 @@
 #ifndef FSM_H
 #define FSM_H
 
+#include "ps/containers/UnorderedMap.h"
+
 #include <limits>
-#include <unordered_map>
 
 
 constexpr unsigned int FSM_INVALID_STATE{std::numeric_limits<unsigned int>::max()};
@@ -188,7 +189,7 @@ private:
 		unsigned int nextState;
 	};
 
-	using TransitionMap = std::unordered_map<TransitionKey, const Transition,
+	using TransitionMap = PS::unordered_map<TransitionKey, const Transition,
 		typename TransitionKey::Hash>;
 
 	/**

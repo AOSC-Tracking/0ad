@@ -18,6 +18,8 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_SHADERPROGRAM
 #define INCLUDED_RENDERER_BACKEND_VULKAN_SHADERPROGRAM
 
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/backend/vulkan/Buffer.h"
 #include "renderer/backend/vulkan/DescriptorManager.h"
@@ -28,8 +30,6 @@
 #include <glad/vulkan.h>
 #include <memory>
 #include <optional>
-#include <unordered_map>
-#include <vector>
 
 class CShaderDefines;
 class CStr;
@@ -65,7 +65,7 @@ public:
 
 	IDevice* GetDevice() override;
 
-	const std::vector<SVertexAttributeFormat>& GetAttributes() const noexcept { return m_Attributes; }
+	const PS::vector<SVertexAttributeFormat>& GetAttributes() const noexcept { return m_Attributes; }
 
 	using UID = uint32_t;
 	UID GetUID() const { return m_UID; }
@@ -75,7 +75,7 @@ private:
 
 	UID m_UID = 0;
 
-	std::vector<SVertexAttributeFormat> m_Attributes;
+	PS::vector<SVertexAttributeFormat> m_Attributes;
 };
 
 class CShaderProgram final : public IShaderProgram
@@ -87,11 +87,11 @@ public:
 
 	int32_t GetBindingSlot(const CStrIntern name) const override;
 
-	std::vector<VfsPath> GetFileDependencies() const override;
+	PS::vector<VfsPath> GetFileDependencies() const override;
 
 	uint32_t GetStreamLocation(const VertexAttributeStream stream) const;
 
-	const std::vector<VkPipelineShaderStageCreateInfo>& GetStages() const { return m_Stages; }
+	const PS::vector<VkPipelineShaderStageCreateInfo>& GetStages() const { return m_Stages; }
 
 	void Bind();
 	void Unbind();
@@ -146,12 +146,12 @@ private:
 
 	CDevice* m_Device = nullptr;
 
-	std::vector<VkShaderModule> m_ShaderModules;
-	std::vector<VkPipelineShaderStageCreateInfo> m_Stages;
+	PS::vector<VkShaderModule> m_ShaderModules;
+	PS::vector<VkPipelineShaderStageCreateInfo> m_Stages;
 	VkPipelineLayout m_PipelineLayout = VK_NULL_HANDLE;
 	VkPipelineBindPoint m_PipelineBindPoint = VK_PIPELINE_BIND_POINT_MAX_ENUM;
 
-	std::vector<VfsPath> m_FileDependencies;
+	PS::vector<VfsPath> m_FileDependencies;
 
 	struct PushConstant
 	{
@@ -172,16 +172,16 @@ private:
 	std::array<std::byte, 128> m_PushConstantData;
 	uint32_t m_PushConstantDataMask = 0;
 	std::array<VkShaderStageFlags, 32> m_PushConstantDataFlags;
-	std::vector<PushConstant> m_PushConstants;
-	std::vector<Uniform> m_Uniforms;
-	std::unordered_map<CStrIntern, uint32_t> m_UniformMapping;
-	std::unordered_map<CStrIntern, uint32_t> m_PushConstantMapping;
+	PS::vector<PushConstant> m_PushConstants;
+	PS::vector<Uniform> m_Uniforms;
+	PS::unordered_map<CStrIntern, uint32_t> m_UniformMapping;
+	PS::unordered_map<CStrIntern, uint32_t> m_PushConstantMapping;
 
 	std::optional<CSingleTypeDescriptorSetBinding<CTexture>> m_TextureBinding;
 	std::optional<CSingleTypeDescriptorSetBinding<CTexture>> m_StorageImageBinding;
 	std::optional<CSingleTypeDescriptorSetBinding<CBuffer>> m_StorageBufferBinding;
 
-	std::unordered_map<VertexAttributeStream, uint32_t> m_StreamLocations;
+	PS::unordered_map<VertexAttributeStream, uint32_t> m_StreamLocations;
 };
 
 } // namespace Vulkan

@@ -129,7 +129,7 @@ void ModelRenderer::BuildColor4ub(
 }
 
 
-void ModelRenderer::GenTangents(const CModelDefPtr& mdef, std::vector<float>& newVertices, bool gpuSkinning)
+void ModelRenderer::GenTangents(const CModelDefPtr& mdef, PS::vector<float>& newVertices, bool gpuSkinning)
 {
 	MikkTSpace ms(mdef, newVertices, gpuSkinning);
 	ms.Generate();
@@ -194,7 +194,7 @@ struct ShaderModelRenderer::ShaderModelRendererInternals
 	ModelVertexRendererPtr vertexRenderer;
 
 	/// List of submitted models for rendering in this frame
-	std::vector<CModel*> submissions[CSceneRenderer::CULL_MAX];
+	PS::vector<CModel*> submissions[CSceneRenderer::CULL_MAX];
 };
 
 
@@ -344,7 +344,7 @@ struct SMRTechBucket
 	CShaderTechniquePtr tech;
 	PS::span<CModel*> models;
 
-	// Model list is stored as pointers, not as a std::vector,
+	// Model list is stored as pointers, not as a PS::vector,
 	// so that sorting lists of this struct is fast
 };
 
@@ -423,8 +423,8 @@ void ShaderModelRenderer::Render(
 
 	Arena arena;
 	using ModelListAllocator = ProxyAllocator<CModel*, Arena>;
-	using ModelList_t = std::vector<CModel*, ModelListAllocator>;
-	using MaterialBuckets_t = std::unordered_map<
+	using ModelList_t = PS::vector<CModel*, ModelListAllocator>;
+	using MaterialBuckets_t = PS::unordered_map<
 		SMRMaterialBucketKey,
 		ModelList_t,
 		SMRMaterialBucketKeyHash,
@@ -460,10 +460,10 @@ void ShaderModelRenderer::Render(
 	}
 
 	using SortByDistItemsAllocator = ProxyAllocator<SMRSortByDistItem, Arena>;
-	std::vector<SMRSortByDistItem, SortByDistItemsAllocator> sortByDistItems((SortByDistItemsAllocator(arena)));
+	PS::vector<SMRSortByDistItem, SortByDistItemsAllocator> sortByDistItems((SortByDistItemsAllocator(arena)));
 
 	using SortByTechItemsAllocator = ProxyAllocator<CShaderTechniquePtr, Arena>;
-	std::vector<CShaderTechniquePtr, SortByTechItemsAllocator> sortByDistTechs((SortByTechItemsAllocator(arena)));
+	PS::vector<CShaderTechniquePtr, SortByTechItemsAllocator> sortByDistTechs((SortByTechItemsAllocator(arena)));
 		// indexed by sortByDistItems[i].techIdx
 		// (which stores indexes instead of CShaderTechniquePtr directly
 		// to avoid the shared_ptr copy cost when sorting; maybe it'd be better
@@ -471,7 +471,7 @@ void ShaderModelRenderer::Render(
 		// will keep it alive long enough)
 
 	using TechBucketsAllocator =  ProxyAllocator<SMRTechBucket, Arena>;
-	std::vector<SMRTechBucket, TechBucketsAllocator> techBuckets((TechBucketsAllocator(arena)));
+	PS::vector<SMRTechBucket, TechBucketsAllocator> techBuckets((TechBucketsAllocator(arena)));
 
 	{
 		PROFILE3("processing material buckets");
@@ -533,7 +533,7 @@ void ShaderModelRenderer::Render(
 	// (This exists primarily because techBuckets wants a CModel**;
 	// we could avoid the cost of copying into this list by adding
 	// a stride length into techBuckets and not requiring contiguous CModel*s)
-	std::vector<CModel*, ModelListAllocator> sortByDistModels((ModelListAllocator(arena)));
+	PS::vector<CModel*, ModelListAllocator> sortByDistModels((ModelListAllocator(arena)));
 
 	if (!sortByDistItems.empty())
 	{
@@ -587,18 +587,18 @@ void ShaderModelRenderer::Render(
 		// loops to avoid excessive reallocations. The token allocation of 64 elements
 		// should be plenty, though it is reallocated below (at a cost) if necessary.
 		using TextureListAllocator = ProxyAllocator<CTexture*, Arena>;
-		std::vector<CTexture*, TextureListAllocator> currentTexs((TextureListAllocator(arena)));
+		PS::vector<CTexture*, TextureListAllocator> currentTexs((TextureListAllocator(arena)));
 		currentTexs.reserve(64);
 
 		// texBindings holds the identifier bindings in the shader, which can no longer be defined
 		// statically in the ShaderRenderModifier class. texBindingNames uses interned strings to
 		// keep track of when bindings need to be reevaluated.
 		using BindingListAllocator = ProxyAllocator<int32_t, Arena>;
-		std::vector<int32_t, BindingListAllocator> texBindings((BindingListAllocator(arena)));
+		PS::vector<int32_t, BindingListAllocator> texBindings((BindingListAllocator(arena)));
 		texBindings.reserve(64);
 
 		using BindingNamesListAllocator = ProxyAllocator<CStrIntern, Arena>;
-		std::vector<CStrIntern, BindingNamesListAllocator> texBindingNames((BindingNamesListAllocator(arena)));
+		PS::vector<CStrIntern, BindingNamesListAllocator> texBindingNames((BindingNamesListAllocator(arena)));
 		texBindingNames.reserve(64);
 
 		while (idxTechStart < techBuckets.size())

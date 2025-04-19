@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 #ifndef INCLUDED_RLINTERFACE
 #define INCLUDED_RLINTERFACE
 
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/Player.h"
 #include "third_party/mongoose/mongoose.h"
 
 #include <condition_variable>
 #include <mutex>
-#include <vector>
 
 namespace RL
 {
@@ -54,7 +54,7 @@ enum class GameMessageType
 struct GameMessage
 {
 	GameMessageType type;
-	std::vector<GameCommand> commands;
+	PS::vector<GameCommand> commands;
 };
 
 /**
@@ -100,7 +100,7 @@ private:
 	 * Process commands, update the simulation by one turn.
 	 * @return the gamestate after processing commands.
 	 */
-	std::string Step(std::vector<GameCommand>&& commands);
+	std::string Step(PS::vector<GameCommand>&& commands);
 
 	/**
 	 * Reset the game state according to scenario, cleaning up existing games if required.
@@ -117,7 +117,7 @@ private:
 	/**
 	 * @return template data for all templates of @param names.
 	 */
-	std::vector<std::string> GetTemplates(const std::vector<std::string>& names) const;
+	PS::vector<std::string> GetTemplates(const PS::vector<std::string>& names) const;
 
 	/**
 	 * @return true if a game is currently running.

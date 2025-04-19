@@ -18,9 +18,8 @@
 #ifndef INCLUDED_FONTMANAGER
 #define INCLUDED_FONTMANAGER
 
+#include "ps/containers/UnorderedMap.h"
 #include "ps/CStrIntern.h"
-
-#include <unordered_map>
 
 class CFont;
 
@@ -35,7 +34,7 @@ public:
 private:
 	bool ReadFont(CFont* font, CStrIntern fontName);
 
-	using FontsMap = std::unordered_map<CStrIntern, std::shared_ptr<CFont>>;
+	using FontsMap = PS::unordered_map<CStrIntern, std::shared_ptr<CFont>>;
 	FontsMap m_Fonts;
 };
 

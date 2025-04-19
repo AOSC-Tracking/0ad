@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -26,13 +26,13 @@
 #include "simulation2/serialization/SerializeTemplates.h"
 
 #include "lib/types.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 
 #include <array>
-#include <map>
-#include <set>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 template<typename T, size_t N>
 struct SerializeHelper<std::array<T, N>>
@@ -51,9 +51,9 @@ struct SerializeHelper<std::array<T, N>>
 };
 
 template<typename T>
-struct SerializeHelper<std::vector<T>>
+struct SerializeHelper<PS::vector<T>>
 {
-	void operator()(ISerializer& serialize, const char* name, std::vector<T>& value)
+	void operator()(ISerializer& serialize, const char* name, PS::vector<T>& value)
 	{
 		size_t len = value.size();
 		serialize.NumberU32_Unbounded("length", (u32)len);
@@ -61,7 +61,7 @@ struct SerializeHelper<std::vector<T>>
 			Serializer(serialize, name, value[i]);
 	}
 
-	void operator()(IDeserializer& deserialize, const char* name, std::vector<T>& value)
+	void operator()(IDeserializer& deserialize, const char* name, PS::vector<T>& value)
 	{
 		value.clear();
 		u32 len;
@@ -77,16 +77,16 @@ struct SerializeHelper<std::vector<T>>
 };
 
 template<typename T>
-struct SerializeHelper<std::set<T>>
+struct SerializeHelper<PS::set<T>>
 {
-	void operator()(ISerializer& serialize, const char* name, const std::set<T>& value)
+	void operator()(ISerializer& serialize, const char* name, const PS::set<T>& value)
 	{
 		serialize.NumberU32_Unbounded("size", static_cast<u32>(value.size()));
 		for (const T& elem : value)
 			Serializer(serialize, name, elem);
 	}
 
-	void operator()(IDeserializer& deserialize, const char* name, std::set<T>& value)
+	void operator()(IDeserializer& deserialize, const char* name, PS::set<T>& value)
 	{
 		value.clear();
 		u32 size;
@@ -101,14 +101,14 @@ struct SerializeHelper<std::set<T>>
 };
 
 template<typename K, typename V>
-struct SerializeHelper<std::map<K, V>>
+struct SerializeHelper<PS::map<K, V>>
 {
 	template<typename... Args>
-	void operator()(ISerializer& serialize, const char* UNUSED(name), std::map<K, V>& value, Args&&... args)
+	void operator()(ISerializer& serialize, const char* UNUSED(name), PS::map<K, V>& value, Args&&... args)
 	{
 		size_t len = value.size();
 		serialize.NumberU32_Unbounded("length", (u32)len);
-		for (typename std::map<K, V>::iterator it = value.begin(); it != value.end(); ++it)
+		for (typename PS::map<K, V>::iterator it = value.begin(); it != value.end(); ++it)
 		{
 			Serializer(serialize, "key", it->first, std::forward<Args>(args)...);
 			Serializer(serialize, "value", it->second, std::forward<Args>(args)...);
@@ -116,7 +116,7 @@ struct SerializeHelper<std::map<K, V>>
 	}
 
 	template<typename... Args>
-	void operator()(IDeserializer& deserialize, const char* UNUSED(name), std::map<K, V>& value, Args&&... args)
+	void operator()(IDeserializer& deserialize, const char* UNUSED(name), PS::map<K, V>& value, Args&&... args)
 	{
 		value.clear();
 		u32 len;
@@ -134,15 +134,15 @@ struct SerializeHelper<std::map<K, V>>
 
 // We have to order the map before serializing to make things consistent
 template<typename K, typename V>
-struct SerializeHelper<std::unordered_map<K, V>>
+struct SerializeHelper<PS::unordered_map<K, V>>
 {
-	void operator()(ISerializer& serialize, const char* name, std::unordered_map<K, V>& value)
+	void operator()(ISerializer& serialize, const char* name, PS::unordered_map<K, V>& value)
 	{
-		std::map<K, V> ordered_value(value.begin(), value.end());
+		PS::map<K, V> ordered_value(value.begin(), value.end());
 		Serializer(serialize, name, ordered_value);
 	}
 
-	void operator()(IDeserializer& deserialize, const char* name, std::unordered_map<K, V>& value)
+	void operator()(IDeserializer& deserialize, const char* name, PS::unordered_map<K, V>& value)
 	{
 		Serializer(deserialize, name, value);
 	}

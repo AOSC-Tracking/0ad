@@ -41,11 +41,11 @@ public:
 	DEFAULT_COMPONENT_ALLOCATOR(OverlayRenderer)
 
 	// Currently-enabled set of sprites
-	std::vector<SOverlaySprite> m_Sprites;
+	PS::vector<SOverlaySprite> m_Sprites;
 
 	// For each entry in m_Sprites, store the offset of the sprite from the unit's position
 	// (so we can recompute the sprite position after the unit moves)
-	std::vector<CVector3D> m_SpriteOffsets;
+	PS::vector<CVector3D> m_SpriteOffsets;
 
 	// Whether the sprites should be drawn (only valid between Interpolate and RenderSubmit)
 	bool m_Enabled;

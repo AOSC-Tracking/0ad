@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,9 @@
 #ifndef INCLUDED_SCRIPTCONTEXT
 #define INCLUDED_SCRIPTCONTEXT
 
+#include "ps/containers/List.h"
 #include "ScriptTypes.h"
 #include "ScriptExtraHeaders.h"
-
-#include <list>
 
 // Those are minimal defaults. The runtime for the main game is larger and GCs upon a larger growth.
 constexpr int DEFAULT_CONTEXT_SIZE = 16 * 1024 * 1024;
@@ -102,7 +101,7 @@ private:
 	const std::unique_ptr<Script::JobQueue> m_JobQueue;
 
 	void PrepareZonesForIncrementalGC() const;
-	std::list<JS::Realm*> m_Realms;
+	PS::list<JS::Realm*> m_Realms;
 
 	int m_ContextSize;
 	int m_HeapGrowthBytesGCTrigger;

@@ -669,7 +669,7 @@ bool ModIo::ParseGameIdResponse(const ScriptInterface& scriptInterface, const st
  * Only the listed properties are of interest to consumers, and we flatten
  * the modfile structure as that simplifies handling and there are no conflicts.
  */
-bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std::string& responseData, std::vector<ModIoModData>& modData, const PKStruct& pk, std::string& err)
+bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std::string& responseData, PS::vector<ModIoModData>& modData, const PKStruct& pk, std::string& err)
 {
 // Make sure we don't end up passing partial results back
 #define CLEANUP() modData.clear();
@@ -776,7 +776,7 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
 		if (!Script::FromJSProperty(rq, metadata, "dependencies", data.dependencies, true))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get dependencies from metadata_blob.");
 
-		std::vector<std::string> minisigs;
+		PS::vector<std::string> minisigs;
 		if (!Script::FromJSProperty(rq, metadata, "minisigs", minisigs, true))
 			INVALIDATE_DATA_AND_CONTINUE("Failed to get minisigs from metadata_blob.");
 
@@ -797,7 +797,7 @@ bool ModIo::ParseModsResponse(const ScriptInterface& scriptInterface, const std:
  * Parse signatures to find one that matches the public key, and has a valid global signature.
  * Returns true and sets @param sig to the valid matching signature.
  */
-bool ModIo::ParseSignature(const std::vector<std::string>& minisigs, SigStruct& sig, const PKStruct& pk, std::string& err)
+bool ModIo::ParseSignature(const PS::vector<std::string>& minisigs, SigStruct& sig, const PKStruct& pk, std::string& err)
 {
 #define CLEANUP() sig = {};
 	for (const std::string& file_sig : minisigs)
@@ -805,7 +805,7 @@ bool ModIo::ParseSignature(const std::vector<std::string>& minisigs, SigStruct& 
 		// Format of a .minisig file (created using minisign(1) with -SHm file.zip)
 		// untrusted comment: .*\nb64sign_of_file\ntrusted comment: .*\nb64sign_of_sign_of_file_and_trusted_comment
 
-		std::vector<std::string> sig_lines;
+		PS::vector<std::string> sig_lines;
 		boost::split(sig_lines, file_sig, boost::is_any_of("\n"));
 		if (sig_lines.size() < 4)
 			FAIL("Invalid (too short) sig.");

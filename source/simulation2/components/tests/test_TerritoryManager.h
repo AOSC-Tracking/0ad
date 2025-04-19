@@ -41,8 +41,8 @@ public:
 	virtual const Grid<NavcellData>& GetPassabilityGrid() override { return m_PassabilityGrid; }
 
 	// Irrelevant part of the mock.
-	virtual void GetPassabilityClasses(std::map<std::string, pass_class_t>&) const override {}
-	virtual void GetPassabilityClasses(std::map<std::string, pass_class_t>&, std::map<std::string, pass_class_t>&) const override {}
+	virtual void GetPassabilityClasses(PS::map<std::string, pass_class_t>&) const override {}
+	virtual void GetPassabilityClasses(PS::map<std::string, pass_class_t>&, PS::map<std::string, pass_class_t>&) const override {}
 	virtual entity_pos_t GetClearance(pass_class_t) const override { return entity_pos_t::FromInt(1); }
 	virtual entity_pos_t GetMaximumClearance() const override { return entity_pos_t::FromInt(1); }
 	virtual const GridUpdateInformation& GetAIPathfinderDirtinessInformation() const override { static GridUpdateInformation gridInfo; return gridInfo; }
@@ -106,7 +106,7 @@ public:
 	void SetTurretParent(entity_id_t, const CFixedVector3D&) override {}
 	entity_id_t GetTurretParent() const override { return INVALID_ENTITY; }
 	void UpdateTurretPosition() override {}
-	std::set<entity_id_t>* GetTurrets() override { return nullptr; }
+	PS::set<entity_id_t>* GetTurrets() override { return nullptr; }
 	bool IsInWorld() const override { return true; }
 	void MoveOutOfWorld() override {}
 	void MoveTo(entity_pos_t, entity_pos_t) override {}
@@ -209,7 +209,7 @@ public:
 								"777777--"
 								"--------", 8, 5);
 
-		std::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid);
+		PS::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid);
 		TS_ASSERT_EQUALS(1U, boundaries.size());
 		TS_ASSERT_EQUALS(18U, boundaries[0].points.size()); // 2x6 + 2x3
 		TS_ASSERT_EQUALS((player_id_t)7, boundaries[0].owner);
@@ -233,7 +233,7 @@ public:
 								 "-111111-"
 								 "--------", 8, 5);
 
-		std::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid1);
+		PS::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid1);
 
 		size_t expectedNumBoundaries = 5;
 		TS_ASSERT_EQUALS(expectedNumBoundaries, boundaries.size());
@@ -330,7 +330,7 @@ public:
 								 "-2-2223"
 								 "-222333", 7, 6);
 
-		std::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid1);
+		PS::vector<STerritoryBoundary> boundaries = CTerritoryBoundaryCalculator::ComputeBoundaries(&grid1);
 
 		// There should be two boundaries found for the territory of 2's (one outer and one inner edge), plus two regular
 		// outer edges of the territories of 1's and 3's. The order in which they're returned doesn't matter though, so
@@ -438,7 +438,7 @@ private:
 		return grid;
 	}
 
-	void TestBoundaryPointsEqual(const std::vector<CVector2D>& points, int expectedPoints[][2])
+	void TestBoundaryPointsEqual(const PS::vector<CVector2D>& points, int expectedPoints[][2])
 	{
 		// TODO: currently relies on an exact point match, i.e. expectedPoints must be specified going CCW or CW (depending on
 		// whether we're testing an inner or an outer edge) starting from the exact same point that the algorithm happened to

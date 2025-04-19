@@ -24,8 +24,8 @@
 
 #include "lib/file/vfs/vfs_path.h"
 #include "lib/input.h"
+#include "ps/containers/Deque.h"
 
-#include <deque>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -92,8 +92,8 @@ private:
 	// allows implementing other animations than sliding, e.g. fading in/out.
 	float m_VisibleFrac;
 
-	std::deque<std::wstring> m_MsgHistory; // protected by m_Mutex
-	std::deque<std::wstring> m_BufHistory;
+	PS::deque<std::wstring> m_MsgHistory; // protected by m_Mutex
+	PS::deque<std::wstring> m_BufHistory;
 
 	int m_MsgHistPos;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,14 +19,14 @@
 #define INCLUDED_SIMULATION2
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/SimulationCommand.h"
 #include "simulation2/system/CmpPtr.h"
 #include "simulation2/system/Components.h"
 
 #include <ostream>
 #include <string>
-#include <unordered_map>
-#include <vector>
 
 class CFrustum;
 class CMessage;
@@ -168,7 +168,7 @@ public:
 	void InitGame();
 
 	void Update(int turnLength);
-	void Update(int turnLength, const std::vector<SimulationCommand>& commands);
+	void Update(int turnLength, const PS::vector<SimulationCommand>& commands);
 	void Interpolate(float simFrameLength, float frameOffset, float realFrameLength);
 	void RenderSubmit(SceneCollector& collector, const CFrustum& frustum, bool culling);
 
@@ -206,10 +206,10 @@ public:
 	void BroadcastMessage(const CMessage& msg) const;
 
 	using InterfaceList =
-		std::vector<std::pair<entity_id_t, IComponent*> >;
+		PS::vector<std::pair<entity_id_t, IComponent*> >;
 
 	using InterfaceListUnordered =
-		std::unordered_map<entity_id_t, IComponent*>;
+		PS::unordered_map<entity_id_t, IComponent*>;
 
 	/**
 	 * Returns a list of components implementing the given interface, and their
@@ -246,14 +246,14 @@ public:
 	 *
 	 * @return vector of strings containing JSON format data
 	 */
-	std::vector<std::string> GetRMSData();
+	PS::vector<std::string> GetRMSData();
 
 	/**
 	 * Get victory condition data
 	 *
 	 * @return vector of strings containing JSON format data
 	 */
-	std::vector<std::string> GetVictoryConditiondData();
+	PS::vector<std::string> GetVictoryConditiondData();
 
 	/**
 	 * Get player default data

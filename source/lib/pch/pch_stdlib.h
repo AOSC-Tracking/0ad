@@ -49,22 +49,15 @@
 // common C++98 STL headers
 #include <algorithm>
 #include <iterator>
-#include <list>
-#include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <utility>
-#include <vector>
 #endif
 
 #if MINIMAL_PCH < 2
 // all other C++98 STL headers
-#include <deque>
 #include <functional>
 #include <numeric>
-#include <queue>
-#include <stack>
 #endif
 
 #if !MINIMAL_PCH

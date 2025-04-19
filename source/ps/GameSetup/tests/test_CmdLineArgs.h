@@ -60,15 +60,15 @@ public:
 		TS_ASSERT_STR_EQUALS(c.Get("test1"), "one");
 		TS_ASSERT_STR_EQUALS(c.Get("test2"), "none");
 
-		std::vector<CStr> test1 = c.GetMultiple("test1");
+		PS::vector<CStr> test1 = c.GetMultiple("test1");
 		CStr expected1[] = { "one", "two", "three" };
 		TS_ASSERT_VECTOR_EQUALS_ARRAY(test1, expected1);
 
-		std::vector<CStr> test2 = c.GetMultiple("test2");
+		PS::vector<CStr> test2 = c.GetMultiple("test2");
 		CStr expected2[] = { "none" };
 		TS_ASSERT_VECTOR_EQUALS_ARRAY(test2, expected2);
 
-		std::vector<CStr> test3 = c.GetMultiple("test3");
+		PS::vector<CStr> test3 = c.GetMultiple("test3");
 		TS_ASSERT_EQUALS(test3.size(), (size_t)0);
 	}
 

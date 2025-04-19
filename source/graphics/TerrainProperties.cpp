@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,7 +19,6 @@
 #include "TerrainProperties.h"
 
 #include <string>
-#include <vector>
 
 #include <boost/tokenizer.hpp>
 
@@ -27,6 +26,7 @@
 #include "graphics/TerrainTextureManager.h"
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Vector.h"
 #include "ps/Filesystem.h"
 #include "ps/XML/Xeromyces.h"
 

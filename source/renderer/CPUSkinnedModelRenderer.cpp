@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -28,11 +28,10 @@
 #include "lib/sysdep/rtl.h"
 #include "maths/Vector3D.h"
 #include "ps/containers/StaticVector.h"
+#include "ps/containers/Vector.h"
 #include "renderer/Renderer.h"
 #include "renderer/RenderModifiers.h"
 #include "renderer/VertexArray.h"
-
-#include <vector>
 
 namespace
 {
@@ -50,7 +49,7 @@ struct ModelDefRData : public CModelDefRPrivate
 	VertexArray m_Array;
 
 	/// The number of UVs is determined by the model
-	std::vector<VertexArray::Attribute> m_UVs;
+	PS::vector<VertexArray::Attribute> m_UVs;
 
 	Renderer::Backend::IVertexInputLayout* m_VertexInputLayout = nullptr;
 

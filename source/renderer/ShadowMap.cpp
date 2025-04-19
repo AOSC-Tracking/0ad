@@ -670,8 +670,8 @@ void ShadowMap::BindTo(
 	}
 	else
 	{
-		std::vector<float> shadowDistances;
-		std::vector<CMatrix3D> shadowTransforms;
+		PS::vector<float> shadowDistances;
+		PS::vector<CMatrix3D> shadowTransforms;
 		for (const ShadowMapInternals::Cascade& cascade : m->Cascades)
 		{
 			shadowDistances.emplace_back(cascade.Distance);

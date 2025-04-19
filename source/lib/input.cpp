@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -28,8 +28,8 @@
 #include "input.h"
 
 #include "lib/external_libraries/libsdl.h"
+#include "ps/containers/List.h"
 
-#include <list>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -37,7 +37,7 @@ const size_t MAX_HANDLERS = 10;
 static InHandler handler_stack[MAX_HANDLERS];
 static size_t handler_stack_top = 0;
 
-static std::list<SDL_Event_> priority_events;
+static PS::list<SDL_Event_> priority_events;
 
 void in_add_handler(InHandler handler)
 {

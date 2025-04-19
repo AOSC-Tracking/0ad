@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,13 +21,13 @@
 #include "lib/file/vfs/vfs_path.h"
 #include "lib/input.h"
 #include "ps/CStr.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/UnorderedSet.h"
 #include "ps/TemplateLoader.h"
 #include "scriptinterface/StructuredClone.h"
 
-#include <deque>
 #include <optional>
 #include <string>
-#include <unordered_set>
 
 class CCanvas2D;
 class CGUI;
@@ -168,7 +168,7 @@ private:
 		void Refocus(const CloseResult& result);
 
 		std::wstring m_Name;
-		std::unordered_set<VfsPath> inputs; // for hotloading
+		PS::unordered_set<VfsPath> inputs; // for hotloading
 		Script::StructuredClone initData; // data to be passed to the init() function
 		std::shared_ptr<CGUI> gui; // the actual GUI page
 
@@ -193,10 +193,10 @@ private:
 	/**
 	 * The page stack must not move pointers on push/pop, or pushing a page in a page's init method
 	 * may crash (as the pusher page will suddenly have moved, and the stack will be confused).
-	 * Therefore use std::deque over std::vector.
+	 * Therefore use PS::deque over PS::vector.
 	 * Also the elements have to be destructed back to front.
 	 */
-	class PageStackType : public std::deque<SGUIPage>
+	class PageStackType : public PS::deque<SGUIPage>
 	{
 	public:
 		~PageStackType()
@@ -206,8 +206,8 @@ private:
 
 		void clear()
 		{
-			while (!std::deque<SGUIPage>::empty())
-				std::deque<SGUIPage>::pop_back();
+			while (!PS::deque<SGUIPage>::empty())
+				PS::deque<SGUIPage>::pop_back();
 		}
 	};
 	PageStackType m_PageStack;

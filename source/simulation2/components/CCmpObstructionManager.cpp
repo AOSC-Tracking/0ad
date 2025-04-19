@@ -135,14 +135,14 @@ public:
 
 	bool m_DebugOverlayEnabled;
 	bool m_DebugOverlayDirty;
-	std::vector<SOverlayLine> m_DebugOverlayLines;
+	PS::vector<SOverlayLine> m_DebugOverlayLines;
 
 	SpatialSubdivision m_UnitSubdivision;
 	SpatialSubdivision m_StaticSubdivision;
 
-	// TODO: using std::map is a bit inefficient; is there a better way to store these?
-	std::map<u32, UnitShape> m_UnitShapes;
-	std::map<u32, StaticShape> m_StaticShapes;
+	// TODO: using PS::map is a bit inefficient; is there a better way to store these?
+	PS::map<u32, UnitShape> m_UnitShapes;
+	PS::map<u32, StaticShape> m_StaticShapes;
 	u32 m_UnitShapeNext; // next allocated id
 	u32 m_StaticShapeNext;
 
@@ -263,14 +263,14 @@ public:
 		m_UnitSubdivision.Reset(x1, z1, OBSTRUCTION_SUBDIVISION_SIZE);
 		m_StaticSubdivision.Reset(x1, z1, OBSTRUCTION_SUBDIVISION_SIZE);
 
-		for (std::map<u32, UnitShape>::iterator it = m_UnitShapes.begin(); it != m_UnitShapes.end(); ++it)
+		for (PS::map<u32, UnitShape>::iterator it = m_UnitShapes.begin(); it != m_UnitShapes.end(); ++it)
 		{
 			CFixedVector2D center(it->second.x, it->second.z);
 			CFixedVector2D halfSize(it->second.clearance, it->second.clearance);
 			m_UnitSubdivision.Add(it->first, center - halfSize, center + halfSize);
 		}
 
-		for (std::map<u32, StaticShape>::iterator it = m_StaticShapes.begin(); it != m_StaticShapes.end(); ++it)
+		for (PS::map<u32, StaticShape>::iterator it = m_StaticShapes.begin(); it != m_StaticShapes.end(); ++it)
 		{
 			CFixedVector2D center(it->second.x, it->second.z);
 			CFixedVector2D bbHalfSize = Geometry::GetHalfBoundingBox(it->second.u, it->second.v, CFixedVector2D(it->second.hw, it->second.hh));
@@ -482,15 +482,15 @@ public:
 
 	bool TestLine(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, entity_pos_t r, bool relaxClearanceForUnits = false) const override;
 	bool TestUnitLine(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, entity_pos_t r, bool relaxClearanceForUnits) const override;
-	bool TestStaticShape(const IObstructionTestFilter& filter, entity_pos_t x, entity_pos_t z, entity_pos_t a, entity_pos_t w, entity_pos_t h, std::vector<entity_id_t>* out) const override;
-	bool TestUnitShape(const IObstructionTestFilter& filter, entity_pos_t x, entity_pos_t z, entity_pos_t r, std::vector<entity_id_t>* out) const override;
+	bool TestStaticShape(const IObstructionTestFilter& filter, entity_pos_t x, entity_pos_t z, entity_pos_t a, entity_pos_t w, entity_pos_t h, PS::vector<entity_id_t>* out) const override;
+	bool TestUnitShape(const IObstructionTestFilter& filter, entity_pos_t x, entity_pos_t z, entity_pos_t r, PS::vector<entity_id_t>* out) const override;
 
-	void Rasterize(Grid<NavcellData>& grid, const std::vector<PathfinderPassability>& passClasses, bool fullUpdate) override;
-	void GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const override;
-	void GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const override;
-	void GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const override;
-	void GetUnitsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const override;
-	void GetStaticObstructionsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const override;
+	void Rasterize(Grid<NavcellData>& grid, const PS::vector<PathfinderPassability>& passClasses, bool fullUpdate) override;
+	void GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const override;
+	void GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const override;
+	void GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const override;
+	void GetUnitsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const override;
+	void GetStaticObstructionsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const override;
 
 	void SetPassabilityCircular(bool enabled) override
 	{
@@ -526,8 +526,8 @@ private:
 	// Dynamic updates for the long-range pathfinder
 	GridUpdateInformation m_UpdateInformations;
 	// These vectors might contain shapes that were deleted
-	std::vector<u32> m_DirtyStaticShapes;
-	std::vector<u32> m_DirtyUnitShapes;
+	PS::vector<u32> m_DirtyStaticShapes;
+	PS::vector<u32> m_DirtyUnitShapes;
 
 	/**
 	 * Mark all previous Rasterize()d grids as dirty, and the debug display.
@@ -598,13 +598,13 @@ private:
 			CFixedVector2D hbox = Geometry::GetHalfBoundingBox(shape.u, shape.v, CFixedVector2D(shape.hw, shape.hh));
 			CFixedVector2D expand(m_MaxClearance, m_MaxClearance);
 
-			std::vector<u32> staticsNear;
+			PS::vector<u32> staticsNear;
 			m_StaticSubdivision.GetInRange(staticsNear, center - hbox - expand*2, center + hbox + expand*2);
 			for (u32& staticId : staticsNear)
 				if (std::find(m_DirtyStaticShapes.begin(), m_DirtyStaticShapes.end(), staticId) == m_DirtyStaticShapes.end())
 					m_DirtyStaticShapes.push_back(staticId);
 
-			std::vector<u32> unitsNear;
+			PS::vector<u32> unitsNear;
 			m_UnitSubdivision.GetInRange(unitsNear, center - hbox - expand*2, center + hbox + expand*2);
 			for (u32& unitId : unitsNear)
 				if (std::find(m_DirtyUnitShapes.begin(), m_DirtyUnitShapes.end(), unitId) == m_DirtyUnitShapes.end())
@@ -640,13 +640,13 @@ private:
 
 			CFixedVector2D center(shape.x, shape.z);
 
-			std::vector<u32> staticsNear;
+			PS::vector<u32> staticsNear;
 			m_StaticSubdivision.GetNear(staticsNear, center, shape.clearance + m_MaxClearance*2);
 			for (u32& staticId : staticsNear)
 				if (std::find(m_DirtyStaticShapes.begin(), m_DirtyStaticShapes.end(), staticId) == m_DirtyStaticShapes.end())
 					m_DirtyStaticShapes.push_back(staticId);
 
-			std::vector<u32> unitsNear;
+			PS::vector<u32> unitsNear;
 			m_UnitSubdivision.GetNear(unitsNear, center, shape.clearance + m_MaxClearance*2);
 			for (u32& unitId : unitsNear)
 				if (std::find(m_DirtyUnitShapes.begin(), m_DirtyUnitShapes.end(), unitId) == m_DirtyUnitShapes.end())
@@ -881,11 +881,11 @@ bool CCmpObstructionManager::TestLine(const IObstructionTestFilter& filter, enti
 	if (relaxClearanceForUnits)
 		unitUnitRadius -= entity_pos_t::FromInt(1)/2;
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	m_UnitSubdivision.GetInRange(unitShapes, posMin, posMax);
 	for (const entity_id_t& shape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
 		ENSURE(it != m_UnitShapes.end());
 
 		if (!filter.TestShape(UNIT_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, INVALID_ENTITY))
@@ -897,11 +897,11 @@ bool CCmpObstructionManager::TestLine(const IObstructionTestFilter& filter, enti
 			return true;
 	}
 
-	std::vector<entity_id_t> staticShapes;
+	PS::vector<entity_id_t> staticShapes;
 	m_StaticSubdivision.GetInRange(staticShapes, posMin, posMax);
 	for (const entity_id_t& shape : staticShapes)
 	{
-		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
+		PS::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
 		ENSURE(it != m_StaticShapes.end());
 
 		if (!filter.TestShape(STATIC_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, it->second.group2))
@@ -930,11 +930,11 @@ bool CCmpObstructionManager::TestUnitLine(const IObstructionTestFilter& filter, 
 	if (relaxClearanceForUnits)
 		unitUnitRadius -= entity_pos_t::FromInt(1)/2;
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	m_UnitSubdivision.GetInRange(unitShapes, posMin, posMax);
 	for (const entity_id_t& shape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
 		ENSURE(it != m_UnitShapes.end());
 
 		if (!filter.TestShape(UNIT_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, INVALID_ENTITY))
@@ -951,7 +951,7 @@ bool CCmpObstructionManager::TestUnitLine(const IObstructionTestFilter& filter, 
 
 bool CCmpObstructionManager::TestStaticShape(const IObstructionTestFilter& filter,
 	entity_pos_t x, entity_pos_t z, entity_pos_t a, entity_pos_t w, entity_pos_t h,
-	std::vector<entity_id_t>* out) const
+	PS::vector<entity_id_t>* out) const
 {
 	PROFILE("TestStaticShape");
 
@@ -982,11 +982,11 @@ bool CCmpObstructionManager::TestStaticShape(const IObstructionTestFilter& filte
 	CFixedVector2D posMin(x - bbHalfWidth, z - bbHalfHeight);
 	CFixedVector2D posMax(x + bbHalfWidth, z + bbHalfHeight);
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	m_UnitSubdivision.GetInRange(unitShapes, posMin, posMax);
 	for (entity_id_t& shape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
 		ENSURE(it != m_UnitShapes.end());
 
 		if (!filter.TestShape(UNIT_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, INVALID_ENTITY))
@@ -1003,11 +1003,11 @@ bool CCmpObstructionManager::TestStaticShape(const IObstructionTestFilter& filte
 		}
 	}
 
-	std::vector<entity_id_t> staticShapes;
+	PS::vector<entity_id_t> staticShapes;
 	m_StaticSubdivision.GetInRange(staticShapes, posMin, posMax);
 	for (entity_id_t& shape : staticShapes)
 	{
-		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
+		PS::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
 		ENSURE(it != m_StaticShapes.end());
 
 		if (!filter.TestShape(STATIC_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, it->second.group2))
@@ -1032,7 +1032,7 @@ bool CCmpObstructionManager::TestStaticShape(const IObstructionTestFilter& filte
 
 bool CCmpObstructionManager::TestUnitShape(const IObstructionTestFilter& filter,
 	entity_pos_t x, entity_pos_t z, entity_pos_t clearance,
-	std::vector<entity_id_t>* out) const
+	PS::vector<entity_id_t>* out) const
 {
 	PROFILE("TestUnitShape");
 
@@ -1049,11 +1049,11 @@ bool CCmpObstructionManager::TestUnitShape(const IObstructionTestFilter& filter,
 	CFixedVector2D posMin(x - clearance, z - clearance);
 	CFixedVector2D posMax(x + clearance, z + clearance);
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	m_UnitSubdivision.GetInRange(unitShapes, posMin, posMax);
 	for (const entity_id_t& shape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(shape);
 		ENSURE(it != m_UnitShapes.end());
 
 		if (!filter.TestShape(UNIT_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, INVALID_ENTITY))
@@ -1074,11 +1074,11 @@ bool CCmpObstructionManager::TestUnitShape(const IObstructionTestFilter& filter,
 		}
 	}
 
-	std::vector<entity_id_t> staticShapes;
+	PS::vector<entity_id_t> staticShapes;
 	m_StaticSubdivision.GetInRange(staticShapes, posMin, posMax);
 	for (const entity_id_t& shape : staticShapes)
 	{
-		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
+		PS::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(shape);
 		ENSURE(it != m_StaticShapes.end());
 
 		if (!filter.TestShape(STATIC_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, it->second.group2))
@@ -1100,7 +1100,7 @@ bool CCmpObstructionManager::TestUnitShape(const IObstructionTestFilter& filter,
 		return false; // didn't collide, if we got this far
 }
 
-void CCmpObstructionManager::Rasterize(Grid<NavcellData>& grid, const std::vector<PathfinderPassability>& passClasses, bool fullUpdate)
+void CCmpObstructionManager::Rasterize(Grid<NavcellData>& grid, const PS::vector<PathfinderPassability>& passClasses, bool fullUpdate)
 {
 	PROFILE3("Rasterize Obstructions");
 
@@ -1110,7 +1110,7 @@ void CCmpObstructionManager::Rasterize(Grid<NavcellData>& grid, const std::vecto
 	// Pass classes will get shapes rasterized on them depending on their Obstruction value.
 	// Classes with another value than "pathfinding" should not use Clearance.
 
-	std::map<entity_pos_t, u16> pathfindingMasks;
+	PS::map<entity_pos_t, u16> pathfindingMasks;
 	u16 foundationMask = 0;
 	for (const PathfinderPassability& passability : passClasses)
 	{
@@ -1118,7 +1118,7 @@ void CCmpObstructionManager::Rasterize(Grid<NavcellData>& grid, const std::vecto
 		{
 		case PathfinderPassability::PATHFINDING:
 		{
-			std::map<entity_pos_t, u16>::iterator it = pathfindingMasks.find(passability.m_Clearance);
+			PS::map<entity_pos_t, u16>::iterator it = pathfindingMasks.find(passability.m_Clearance);
 			if (it == pathfindingMasks.end())
 				pathfindingMasks[passability.m_Clearance] = passability.m_Mask;
 			else
@@ -1191,23 +1191,23 @@ void CCmpObstructionManager::RasterizeHelper(Grid<NavcellData>& grid, ICmpObstru
 	}
 }
 
-void CCmpObstructionManager::GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const
+void CCmpObstructionManager::GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const
 {
 	GetUnitObstructionsInRange(filter, x0, z0, x1, z1, squares);
 	GetStaticObstructionsInRange(filter, x0, z0, x1, z1, squares);
 }
 
-void CCmpObstructionManager::GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const
+void CCmpObstructionManager::GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const
 {
 	PROFILE("GetObstructionsInRange");
 
 	ENSURE(x0 <= x1 && z0 <= z1);
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	m_UnitSubdivision.GetInRange(unitShapes, CFixedVector2D(x0, z0), CFixedVector2D(x1, z1));
 	for (entity_id_t& unitShape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(unitShape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(unitShape);
 		ENSURE(it != m_UnitShapes.end());
 
 		if (!filter.TestShape(UNIT_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, INVALID_ENTITY))
@@ -1225,17 +1225,17 @@ void CCmpObstructionManager::GetUnitObstructionsInRange(const IObstructionTestFi
 	}
 }
 
-void CCmpObstructionManager::GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const
+void CCmpObstructionManager::GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const
 {
 	PROFILE("GetObstructionsInRange");
 
 	ENSURE(x0 <= x1 && z0 <= z1);
 
-	std::vector<entity_id_t> staticShapes;
+	PS::vector<entity_id_t> staticShapes;
 	m_StaticSubdivision.GetInRange(staticShapes, CFixedVector2D(x0, z0), CFixedVector2D(x1, z1));
 	for (entity_id_t& staticShape : staticShapes)
 	{
-		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(staticShape);
+		PS::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(staticShape);
 		ENSURE(it != m_StaticShapes.end());
 
 		if (!filter.TestShape(STATIC_INDEX_TO_TAG(it->first), it->second.flags, it->second.group, it->second.group2))
@@ -1253,7 +1253,7 @@ void CCmpObstructionManager::GetStaticObstructionsInRange(const IObstructionTest
 	}
 }
 
-void CCmpObstructionManager::GetUnitsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict) const
+void CCmpObstructionManager::GetUnitsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict) const
 {
 	PROFILE("GetUnitsOnObstruction");
 
@@ -1261,18 +1261,18 @@ void CCmpObstructionManager::GetUnitsOnObstruction(const ObstructionSquare& squa
 	// units subject to the RasterizeRectWithClearance of the building's shape with the
 	// unit's clearance covers the navcell the unit is on.
 
-	std::vector<entity_id_t> unitShapes;
+	PS::vector<entity_id_t> unitShapes;
 	CFixedVector2D center(square.x, square.z);
 	CFixedVector2D expandedBox =
 		Geometry::GetHalfBoundingBox(square.u, square.v, CFixedVector2D(square.hw, square.hh)) +
 		CFixedVector2D(m_MaxClearance, m_MaxClearance);
 	m_UnitSubdivision.GetInRange(unitShapes, center - expandedBox, center + expandedBox);
 
-	std::map<entity_pos_t, SimRasterize::Spans> rasterizedRects;
+	PS::map<entity_pos_t, SimRasterize::Spans> rasterizedRects;
 
 	for (const u32& unitShape : unitShapes)
 	{
-		std::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(unitShape);
+		PS::map<u32, UnitShape>::const_iterator it = m_UnitShapes.find(unitShape);
 		ENSURE(it != m_UnitShapes.end());
 
 		const UnitShape& shape = it->second;
@@ -1314,18 +1314,18 @@ void CCmpObstructionManager::GetUnitsOnObstruction(const ObstructionSquare& squa
 	}
 }
 
-void CCmpObstructionManager::GetStaticObstructionsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const
+void CCmpObstructionManager::GetStaticObstructionsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const
 {
 	PROFILE("GetStaticObstructionsOnObstruction");
 
-	std::vector<entity_id_t> staticShapes;
+	PS::vector<entity_id_t> staticShapes;
 	CFixedVector2D center(square.x, square.z);
 	CFixedVector2D expandedBox = Geometry::GetHalfBoundingBox(square.u, square.v, CFixedVector2D(square.hw, square.hh));
 	m_StaticSubdivision.GetInRange(staticShapes, center - expandedBox, center + expandedBox);
 
 	for (const u32& staticShape : staticShapes)
 	{
-		std::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(staticShape);
+		PS::map<u32, StaticShape>::const_iterator it = m_StaticShapes.find(staticShape);
 		ENSURE(it != m_StaticShapes.end());
 
 		const StaticShape& shape = it->second;
@@ -1369,14 +1369,14 @@ void CCmpObstructionManager::RenderSubmit(SceneCollector& collector)
 				(m_WorldX1-m_WorldX0).ToFloat(), (m_WorldZ1-m_WorldZ0).ToFloat(),
 				0, m_DebugOverlayLines.back(), true);
 
-		for (std::map<u32, UnitShape>::iterator it = m_UnitShapes.begin(); it != m_UnitShapes.end(); ++it)
+		for (PS::map<u32, UnitShape>::iterator it = m_UnitShapes.begin(); it != m_UnitShapes.end(); ++it)
 		{
 			m_DebugOverlayLines.push_back(SOverlayLine());
 			m_DebugOverlayLines.back().m_Color = ((it->second.flags & FLAG_MOVING) ? movingColor : defaultColor);
 			SimRender::ConstructSquareOnGround(GetSimContext(), it->second.x.ToFloat(), it->second.z.ToFloat(), it->second.clearance.ToFloat(), it->second.clearance.ToFloat(), 0, m_DebugOverlayLines.back(), true);
 		}
 
-		for (std::map<u32, StaticShape>::iterator it = m_StaticShapes.begin(); it != m_StaticShapes.end(); ++it)
+		for (PS::map<u32, StaticShape>::iterator it = m_StaticShapes.begin(); it != m_StaticShapes.end(); ++it)
 		{
 			m_DebugOverlayLines.push_back(SOverlayLine());
 			m_DebugOverlayLines.back().m_Color = defaultColor;

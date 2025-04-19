@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,8 +19,7 @@
 #define INCLUDED_CGUILIST
 
 #include "gui/SettingTypes/CGUIString.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class CGUIList
 {
@@ -37,7 +36,7 @@ public: // struct:ish (but for consistency I call it _C_GUIList, and
 	 * List of items (as text), the post-processed result is stored in
 	 *  the IGUITextOwner structure of this class.
 	 */
-	std::vector<CGUIString> m_Items;
+	PS::vector<CGUIString> m_Items;
 };
 
 #endif

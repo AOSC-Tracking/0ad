@@ -29,7 +29,7 @@
 
 PIVFS g_VFS;
 
-static std::vector<std::pair<FileReloadFunc, void*> > g_ReloadFuncs;
+static PS::vector<std::pair<FileReloadFunc, void*> > g_ReloadFuncs;
 
 bool VfsFileExists(const VfsPath& pathname)
 {
@@ -77,7 +77,7 @@ Status ReloadChangedFiles()
 {
 	PROFILE3("hotload");
 
-	std::vector<DirWatchNotification> notifications;
+	PS::vector<DirWatchNotification> notifications;
 	RETURN_STATUS_IF_ERR(dir_watch_Poll(notifications));
 	for(size_t i = 0; i < notifications.size(); i++)
 	{

@@ -83,7 +83,7 @@ protected:
 	 * @param indicesOut Output vector of vertex indices for passing to the renderer.
 	 */
 	void CreateLineCap(const SOverlayTexturedLine& line, const CVector3D& corner1, const CVector3D& corner2, const CVector3D& normal,
-		               SOverlayTexturedLine::LineCapType endCapType, std::vector<SVertex>& verticesOut, std::vector<u16>& indicesOut);
+		               SOverlayTexturedLine::LineCapType endCapType, PS::vector<SVertex>& verticesOut, PS::vector<u16>& indicesOut);
 
 	/// Small utility function; grabs the centroid of the positions of two vertices
 	inline CVector3D Centroid(const SVertex& v1, const SVertex& v2)

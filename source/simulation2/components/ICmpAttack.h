@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,16 +18,15 @@
 #ifndef INCLUDED_ICMPATTACK
 #define INCLUDED_ICMPATTACK
 
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "simulation2/system/Interface.h"
-
-#include <vector>
 
 class ICmpAttack : public IComponent
 {
 public:
     virtual float GetRepeatTime(const std::string& type) const = 0;
-    virtual std::vector<CStr> GetAttackTypes() const = 0;
+    virtual PS::vector<CStr> GetAttackTypes() const = 0;
     DECLARE_INTERFACE_TYPE(Attack)
 };
 

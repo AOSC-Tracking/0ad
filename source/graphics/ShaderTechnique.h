@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,11 +23,11 @@
 #include "graphics/ShaderTechniquePtr.h"
 #include "lib/code_annotation.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/PipelineState.h"
 
 #include <functional>
 #include <memory>
-#include <vector>
 
 /**
  * Implements a render pass consisting of a pipeline state and a shader,
@@ -64,7 +64,7 @@ public:
 
 	CShaderTechnique(const VfsPath& path, const CShaderDefines& defines, const PipelineStateDescCallback& callback);
 
-	void SetPasses(std::vector<CShaderPass>&& passes);
+	void SetPasses(PS::vector<CShaderPass>&& passes);
 	void SetComputePipelineState(
 		std::unique_ptr<Renderer::Backend::IComputePipelineState> pipelineState,
 		const CShaderProgramPtr& computeShader);
@@ -94,7 +94,7 @@ public:
 	const PipelineStateDescCallback& GetPipelineStateDescCallback() const { return m_PipelineStateDescCallback; };
 
 private:
-	std::vector<CShaderPass> m_Passes;
+	PS::vector<CShaderPass> m_Passes;
 
 	bool m_SortByDistance = false;
 

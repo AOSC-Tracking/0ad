@@ -36,7 +36,7 @@ class SpatialSubdivision
 {
 	struct SubDivisionGrid
 	{
-		std::vector<uint32_t> items;
+		PS::vector<uint32_t> items;
 
 		inline void push_back(uint32_t value)
 		{
@@ -51,7 +51,7 @@ class SpatialSubdivision
 			items.pop_back();
 		}
 
-		void copy_items_at_end(std::vector<uint32_t>& out) const
+		void copy_items_at_end(PS::vector<uint32_t>& out) const
 		{
 			out.insert(out.end(), items.begin(), items.end());
 		}
@@ -125,8 +125,8 @@ public:
 				return false;
 
 			// don't bother optimizing this, this is only used in the TESTING SUITE
-			std::vector<uint32_t> a = m_Divisions[i].items;
-			std::vector<uint32_t> b = rhs.m_Divisions[i].items;
+			PS::vector<uint32_t> a = m_Divisions[i].items;
+			PS::vector<uint32_t> b = rhs.m_Divisions[i].items;
 			std::sort(a.begin(), a.end());
 			std::sort(b.begin(), b.end());
 			if (a != b)
@@ -244,7 +244,7 @@ public:
 	 * Returns a sorted list of unique items that includes all items
 	 * within the given axis-aligned square range.
 	 */
-	void GetInRange(std::vector<uint32_t>& out, CFixedVector2D posMin, CFixedVector2D posMax) const
+	void GetInRange(PS::vector<uint32_t>& out, CFixedVector2D posMin, CFixedVector2D posMax) const
 	{
 		out.clear();
 		ENSURE(posMin.X <= posMax.X && posMin.Y <= posMax.Y);
@@ -269,7 +269,7 @@ public:
 	 * Returns a sorted list of unique items that includes all items
 	 * within the given circular distance of the given point.
 	 */
-	void GetNear(std::vector<uint32_t>& out, CFixedVector2D pos, entity_pos_t range) const
+	void GetNear(PS::vector<uint32_t>& out, CFixedVector2D pos, entity_pos_t range) const
 	{
 		// TODO: be cleverer and return a circular pattern of divisions,
 		// not this square over-approximation
@@ -368,8 +368,8 @@ class FastSpatialSubdivision
 private:
 	static const int SUBDIVISION_SIZE = 20; // bigger than most buildings and entities
 
-	std::vector<entity_id_t> m_OverSizedData;
-	std::vector<entity_id_t>* m_SpatialDivisionsData;	// fixed size array of subdivisions
+	PS::vector<entity_id_t> m_OverSizedData;
+	PS::vector<entity_id_t>* m_SpatialDivisionsData;	// fixed size array of subdivisions
 	size_t m_ArrayWidth; // number of columns in m_SpatialDivisionsData
 
 	inline size_t Index(fixed position) const
@@ -386,9 +386,9 @@ private:
 	 * Efficiently erase from a vector by swapping with the last element and popping it.
 	 * Returns true if the element was found and erased, else returns false.
 	 */
-	bool EraseFrom(std::vector<entity_id_t>& vector, entity_id_t item)
+	bool EraseFrom(PS::vector<entity_id_t>& vector, entity_id_t item)
 	{
-		std::vector<entity_id_t>::iterator it = std::find(vector.begin(), vector.end(), item);
+		PS::vector<entity_id_t>::iterator it = std::find(vector.begin(), vector.end(), item);
 		if (it == vector.end())
 			return false;
 
@@ -420,7 +420,7 @@ public:
 		delete[] m_SpatialDivisionsData;
 
 		m_ArrayWidth = arrayWidth;
-		m_SpatialDivisionsData = new std::vector<entity_id_t>[m_ArrayWidth*m_ArrayWidth];
+		m_SpatialDivisionsData = new PS::vector<entity_id_t>[m_ArrayWidth*m_ArrayWidth];
 		m_OverSizedData.clear();
 	}
 
@@ -470,7 +470,7 @@ public:
 		}
 		else
 		{
-			std::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[SubdivisionIdx(position)];
+			PS::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[SubdivisionIdx(position)];
 			if (std::find(subdivision.begin(), subdivision.end(), item) == subdivision.end())
 				subdivision.push_back(item);
 		}
@@ -486,7 +486,7 @@ public:
 			EraseFrom(m_OverSizedData, item);
 		else
 		{
-			std::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[SubdivisionIdx(position)];
+			PS::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[SubdivisionIdx(position)];
 			EraseFrom(subdivision, item);
 		}
 	}
@@ -502,10 +502,10 @@ public:
 		if (SubdivisionIdx(newPosition) == SubdivisionIdx(oldPosition))
 			return;
 
-		std::vector<entity_id_t>& oldSubdivision = m_SpatialDivisionsData[SubdivisionIdx(oldPosition)];
+		PS::vector<entity_id_t>& oldSubdivision = m_SpatialDivisionsData[SubdivisionIdx(oldPosition)];
 		if (EraseFrom(oldSubdivision, item))
 		{
-			std::vector<entity_id_t>& newSubdivision = m_SpatialDivisionsData[SubdivisionIdx(newPosition)];
+			PS::vector<entity_id_t>& newSubdivision = m_SpatialDivisionsData[SubdivisionIdx(newPosition)];
 			newSubdivision.push_back(item);
 		}
 	}
@@ -514,7 +514,7 @@ public:
 	 * Returns a (non sorted) list of items that are either in the square or close to it.
 	 * It's the responsibility of the querier to do proper distance checking and entity sorting.
 	 */
-	void GetInRange(std::vector<entity_id_t>& out, CFixedVector2D posMin, CFixedVector2D posMax) const
+	void GetInRange(PS::vector<entity_id_t>& out, CFixedVector2D posMin, CFixedVector2D posMax) const
 	{
 		size_t minX = Index(posMin.X);
 		size_t minY = Index(posMin.Y);
@@ -537,7 +537,7 @@ public:
 		{
 			for (size_t X = minX; X < maxX; ++X)
 			{
-				std::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[X + Y*m_ArrayWidth];
+				PS::vector<entity_id_t>& subdivision = m_SpatialDivisionsData[X + Y*m_ArrayWidth];
 				if (!subdivision.empty())
 					out.insert(out.end(), subdivision.begin(), subdivision.end());
 			}
@@ -548,7 +548,7 @@ public:
 	 * Returns a (non sorted) list of items that are either in the circle or close to it.
 	 * It's the responsibility of the querier to do proper distance checking and entity sorting.
 	 */
-	void GetNear(std::vector<entity_id_t>& out, CFixedVector2D pos, entity_pos_t range) const
+	void GetNear(PS::vector<entity_id_t>& out, CFixedVector2D pos, entity_pos_t range) const
 	{
 		// Because the subdivision size is rather big wrt typical ranges,
 		// this square over-approximation is hopefully not too bad.

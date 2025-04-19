@@ -46,7 +46,7 @@ struct DirWatch
   int reqnum;
 };
 
-typedef std::vector<DirWatch> DirWatchMap;
+typedef PS::vector<DirWatch> DirWatchMap;
 static DirWatchMap g_Paths;
 static DirWatchMap g_RootPaths;
 static DirWatchNotifications g_QueuedDirs;

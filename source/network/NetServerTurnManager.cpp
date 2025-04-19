@@ -137,7 +137,7 @@ void CNetServerTurnManager::NotifyFinishedClientUpdate(CNetServerSession& sessio
 			newest = clientData.second.simulatedTurn;
 
 	// For every set of state hashes that all clients have simulated, check for OOS
-	for (const std::pair<const u32, std::map<int, std::string>>& clientStateHash : m_ClientStateHashes)
+	for (const std::pair<const u32, PS::map<int, std::string>>& clientStateHash : m_ClientStateHashes)
 	{
 		if (clientStateHash.first > newest)
 			break;
@@ -146,7 +146,7 @@ void CNetServerTurnManager::NotifyFinishedClientUpdate(CNetServerSession& sessio
 		std::string expected = clientStateHash.second.begin()->second;
 
 		// Find all players that are OOS on that turn
-		std::vector<CStrW> OOSPlayerNames;
+		PS::vector<CStrW> OOSPlayerNames;
 		for (const std::pair<const int, std::string>& hashPair : clientStateHash.second)
 		{
 			NETSERVERTURN_LOG("sync check %d: %d = %hs\n", clientStateHash.first, hashPair.first, Hexify(hashPair.second).c_str());
@@ -199,7 +199,7 @@ void CNetServerTurnManager::UninitialiseClient(int client)
 	bool checkOOS = m_ClientsData[client].isOOS;
 	m_ClientsData.erase(client);
 
-	for (std::pair<const u32, std::map<int, std::string>>& clientStateHash : m_ClientStateHashes)
+	for (std::pair<const u32, PS::map<int, std::string>>& clientStateHash : m_ClientStateHashes)
 		clientStateHash.second.erase(client);
 
 	// Check whether we're ready for the next turn now that we're not

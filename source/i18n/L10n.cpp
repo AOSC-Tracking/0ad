@@ -47,10 +47,10 @@ namespace
  * translation file prefixed with a locale code followed by a dot, it
  * determines that the game supports that locale.
  */
-std::vector<icu::Locale> LoadListOfAvailableLocales()
+PS::vector<icu::Locale> LoadListOfAvailableLocales()
 {
 	// US is always available.
-	std::vector<icu::Locale> availableLocales{icu::Locale::getUS()};
+	PS::vector<icu::Locale> availableLocales{icu::Locale::getUS()};
 
 	VfsPaths filenames;
 	if (vfs::GetPathnames(g_VFS, L"l10n/", L"*.po", filenames) < 0)
@@ -196,9 +196,9 @@ bool L10n::ValidateLocale(const icu::Locale& locale) const
 	return !GetFallbackToAvailableDictLocale(locale).empty();
 }
 
-std::vector<std::wstring> L10n::GetDictionariesForLocale(const std::string& locale) const
+PS::vector<std::wstring> L10n::GetDictionariesForLocale(const std::string& locale) const
 {
-	std::vector<std::wstring> ret;
+	PS::vector<std::wstring> ret;
 	VfsPaths filenames;
 
 	std::wstring dictName = GetFallbackToAvailableDictLocale(icu::Locale::createCanonical(locale.c_str()));
@@ -289,9 +289,9 @@ void L10n::ReevaluateCurrentLocaleAndReload()
 }
 
 // Get all locales supported by ICU.
-std::vector<std::string> L10n::GetAllLocales() const
+PS::vector<std::string> L10n::GetAllLocales() const
 {
-	std::vector<std::string> ret;
+	PS::vector<std::string> ret;
 	int32_t count;
 	const icu::Locale* icuSupportedLocales = icu::Locale::getAvailableLocales(count);
 	for (int i=0; i<count; ++i)
@@ -300,9 +300,9 @@ std::vector<std::string> L10n::GetAllLocales() const
 }
 
 
-std::vector<std::string> L10n::GetSupportedLocaleBaseNames() const
+PS::vector<std::string> L10n::GetSupportedLocaleBaseNames() const
 {
-	std::vector<std::string> supportedLocaleCodes;
+	PS::vector<std::string> supportedLocaleCodes;
 	for (const icu::Locale& locale : m_AvailableLocales)
 	{
 		if (!InDevelopmentCopy() && strcmp(locale.getBaseName(), "long") == 0)
@@ -312,9 +312,9 @@ std::vector<std::string> L10n::GetSupportedLocaleBaseNames() const
 	return supportedLocaleCodes;
 }
 
-std::vector<std::wstring> L10n::GetSupportedLocaleDisplayNames() const
+PS::vector<std::wstring> L10n::GetSupportedLocaleDisplayNames() const
 {
-	std::vector<std::wstring> supportedLocaleDisplayNames;
+	PS::vector<std::wstring> supportedLocaleDisplayNames;
 	for (const icu::Locale& locale : m_AvailableLocales)
 	{
 		if (strcmp(locale.getBaseName(), "long") == 0)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,11 @@
 #ifndef NETFILETRANSFER_H
 #define NETFILETRANSFER_H
 
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+
 #include <functional>
-#include <map>
 #include <string>
-#include <unordered_map>
 
 class CNetMessage;
 class CFileTransferResponseMessage;
@@ -121,10 +122,10 @@ private:
 		std::string buffer;
 	};
 
-	using FileReceiveTasksMap = std::unordered_map<u32, AsyncFileReceiveTask>;
+	using FileReceiveTasksMap = PS::unordered_map<u32, AsyncFileReceiveTask>;
 	FileReceiveTasksMap m_FileReceiveTasks;
 
-	using FileSendTasksMap = std::map<u32, CNetFileSendTask>;
+	using FileSendTasksMap = PS::map<u32, CNetFileSendTask>;
 	FileSendTasksMap m_FileSendTasks;
 
 	double m_LastProgressReportTime;

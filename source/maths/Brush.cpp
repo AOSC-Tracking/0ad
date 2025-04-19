@@ -99,10 +99,10 @@ struct SliceOpInfo
 	 * Holds information about what happens to each vertex in the original brush after the slice operation.
 	 * Same size as m_Vertices of the brush getting sliced.
 	 */
-	std::vector<SliceOpVertexInfo> ovInfo;
+	PS::vector<SliceOpVertexInfo> ovInfo;
 
 	/// Holds information about newly inserted vertices during a slice operation.
-	std::vector<SliceOpNewVertexInfo> nvInfo;
+	PS::vector<SliceOpNewVertexInfo> nvInfo;
 
 	/**
 	 * Indices into nvInfo; during the execution of the slicing algorithm, holds the previously inserted new vertex on
@@ -374,12 +374,12 @@ void CBrush::Intersect(const CFrustum& frustum, CBrush& result) const
 	ENSURE(prev == &result);
 }
 
-const std::vector<CVector3D>& CBrush::GetVertices() const
+const PS::vector<CVector3D>& CBrush::GetVertices() const
 {
 	return m_Vertices;
 }
 
-void CBrush::GetFaces(std::vector<std::vector<size_t>>& out) const
+void CBrush::GetFaces(PS::vector<PS::vector<size_t>>& out) const
 {
 	// split the back-to-back faces into separate face vectors, so that they're in a
 	// user-friendlier format than the back-to-back vertex index array
@@ -389,7 +389,7 @@ void CBrush::GetFaces(std::vector<std::vector<size_t>>& out) const
 	while (faceStartIdx < m_Faces.size())
 	{
 		// start new face
-		std::vector<size_t> singleFace;
+		PS::vector<size_t> singleFace;
 		singleFace.push_back(m_Faces[faceStartIdx]);
 
 		// step over all the values in the face until we hit the starting value again (which closes the face)

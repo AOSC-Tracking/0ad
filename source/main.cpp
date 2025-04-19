@@ -549,7 +549,7 @@ static void RunGameOrAtlas(const PS::span<const char* const> argv)
 		}
 	}
 
-	std::vector<OsPath> modsToInstall;
+	PS::vector<OsPath> modsToInstall;
 	for (const CStr& arg : args.GetArgsWithoutName())
 	{
 		const OsPath modPath(arg);
@@ -620,7 +620,7 @@ static void RunGameOrAtlas(const PS::span<const char* const> argv)
 
 		// Add mods provided on the command line
 		// NOTE: We do not handle mods in the user mod path here
-		std::vector<CStr> mods = args.GetMultiple("mod");
+		PS::vector<CStr> mods = args.GetMultiple("mod");
 		for (size_t i = 0; i < mods.size(); ++i)
 			builder.AddBaseMod(paths.RData()/"mods"/mods[i]);
 
@@ -651,7 +651,7 @@ static void RunGameOrAtlas(const PS::span<const char* const> argv)
 			continue;
 		}
 
-		std::vector<CStr> installedMods;
+		PS::vector<CStr> installedMods;
 		if (!modsToInstall.empty())
 		{
 			Paths paths(args);

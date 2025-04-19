@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@
 
 #include "simulation2/system/Interface.h"
 
+#include "ps/containers/Vector.h"
 #include "simulation2/components/ICmpObstructionManager.h"
 
 /**
@@ -106,25 +107,25 @@ public:
 	 * Returns a list of entities that have an obstruction matching the given flag and intersect the current obstruction.
 	 * @return vector of blocking entities
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t flags) const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t flags) const = 0;
 
 	/**
 	 * Returns a list of entities that are blocking movement.
 	 * @return vector of blocking entities
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesBlockingMovement() const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesBlockingMovement() const = 0;
 
 	/**
 	 * Returns a list of entities that are blocking construction of a foundation.
 	 * @return vector of blocking entities
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesBlockingConstruction() const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesBlockingConstruction() const = 0;
 
 	/**
 	 * Returns a list of entities that shall be deleted when a construction on this obstruction starts,
 	 * for example sheep carcasses.
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const = 0;
 
 	/**
 	 * Detects collisions between foundation-blocking entities and

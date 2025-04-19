@@ -53,13 +53,13 @@ public:
 private:
 	bool m_DebugEnabled;
 
-	std::vector<CPatch*> m_SubmittedPatchOccluders;
-	std::vector<CModel*> m_SubmittedModelOccluders;
-	std::vector<CModel*> m_SubmittedModelCasters;
+	PS::vector<CPatch*> m_SubmittedPatchOccluders;
+	PS::vector<CModel*> m_SubmittedModelOccluders;
+	PS::vector<CModel*> m_SubmittedModelCasters;
 
-	std::vector<CPatch*> m_VisiblePatchOccluders;
-	std::vector<CModel*> m_VisibleModelOccluders;
-	std::vector<CModel*> m_VisibleModelCasters;
+	PS::vector<CPatch*> m_VisiblePatchOccluders;
+	PS::vector<CModel*> m_VisibleModelOccluders;
+	PS::vector<CModel*> m_VisibleModelCasters;
 
 	struct DebugBounds
 	{
@@ -73,10 +73,10 @@ private:
 		float x0, y0, x1, y1;
 	};
 
-	std::vector<DebugBounds> m_DebugBounds;
-	std::vector<DebugRect> m_DebugRects;
+	PS::vector<DebugBounds> m_DebugBounds;
+	PS::vector<DebugRect> m_DebugRects;
 
-	std::vector<SOverlaySphere> m_DebugSpheres;
+	PS::vector<SOverlaySphere> m_DebugSpheres;
 
 	CShaderTechniquePtr m_ShaderTech;
 	Renderer::Backend::IVertexInputLayout* m_VertexInputLayout = nullptr;

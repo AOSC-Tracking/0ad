@@ -22,10 +22,9 @@
 #include "graphics/Texture.h"
 #include "gui/ObjectBases/IGUIObject.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/Vector.h"
 #include "renderer/VertexArray.h"
-
-#include <deque>
-#include <vector>
 
 class CMatrix3D;
 
@@ -71,9 +70,9 @@ private:
 	// Whether or not the mouse is currently down
 	bool m_Clicking;
 
-	std::deque<MapFlare> m_MapFlares;
+	PS::deque<MapFlare> m_MapFlares;
 
-	std::vector<CTexturePtr> m_FlareTextures;
+	PS::vector<CTexturePtr> m_FlareTextures;
 
 	CGUISimpleSetting<u32> m_FlareTextureCount;
 	CGUISimpleSetting<u32> m_FlareRenderSize;

@@ -81,7 +81,7 @@ public:
 	}
 
 protected:
-	std::unordered_map<std::string, JS::PersistentRootedObject> m_Functions;
+	PS::unordered_map<std::string, JS::PersistentRootedObject> m_Functions;
 };
 }
 
@@ -188,7 +188,7 @@ bool JSI_GUIProxy<T>::get(JSContext* cx, JS::HandleObject proxy, JS::HandleValue
 	if (propName.substr(0, 2) == "on")
 	{
 		CStr eventName(propName.substr(2));
-		std::map<CStr, JS::Heap<JSObject*>>::iterator it = e->m_ScriptHandlers.find(eventName);
+		PS::map<CStr, JS::Heap<JSObject*>>::iterator it = e->m_ScriptHandlers.find(eventName);
 		if (it == e->m_ScriptHandlers.end())
 			vp.setNull();
 		else

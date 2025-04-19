@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,10 +19,9 @@
 #define INCLUDED_MAPWRITER
 
 #include "MapIO.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/FileIo.h"
-
-#include <vector>
 
 
 class CLightEnv;
@@ -55,8 +54,8 @@ private:
 
 	// EnumTerrainTextures: build lists of textures used by map, and indices into this list
 	// for each tile on the terrain
-	void EnumTerrainTextures(CTerrain* pTerrain, std::vector<CStr>& textures,
-		std::vector<STileDesc>& tileIndices);
+	void EnumTerrainTextures(CTerrain* pTerrain, PS::vector<CStr>& textures,
+		PS::vector<STileDesc>& tileIndices);
 
 	// WriteXML: output some other data (entities, etc) in XML format
 	void WriteXML(const VfsPath& pathname, WaterManager* pWaterMan,

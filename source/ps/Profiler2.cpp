@@ -28,6 +28,9 @@
 #include "lib/os_path.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/CStr.h"
 #include "ps/Profiler2GPU.h"
 #include "ps/Pyrogenesis.h"
@@ -36,10 +39,7 @@
 #include <fmt/format.h>
 #include <fstream>
 #include <iomanip>
-#include <map>
-#include <set>
 #include <tuple>
-#include <unordered_map>
 
 CProfiler2 g_Profiler2;
 
@@ -403,18 +403,18 @@ void rewriteBuffer(u8* buffer, u32& bufferSize)
 	double initialTime = -1;
 	double total_time = -1;
 	const char* regionName;
-	std::set<std::string> topLevelArgs;
+	PS::set<std::string> topLevelArgs;
 
-	using infoPerType = std::tuple<const char*, double, std::set<std::string> >;
-	using timeByTypeMap = std::unordered_map<std::string, infoPerType>;
+	using infoPerType = std::tuple<const char*, double, PS::set<std::string> >;
+	using timeByTypeMap = PS::unordered_map<std::string, infoPerType>;
 
 	timeByTypeMap timeByType;
-	std::vector<double> last_time_stack;
-	std::vector<const char*> last_names;
+	PS::vector<double> last_time_stack;
+	PS::vector<const char*> last_names;
 
 	// never too many hacks
 	std::string current_attribute = "";
-	std::map<std::string, double> time_per_attribute;
+	PS::map<std::string, double> time_per_attribute;
 
 	// Let's read the first event
 	{
@@ -572,7 +572,7 @@ void rewriteBuffer(u8* buffer, u32& bufferSize)
 			buffer[writePos] = (u8)CProfiler2::ITEM_ATTRIBUTE;
 			writePos++;
 			std::string basic = attrib;
-			std::map<std::string, double>::iterator time_attrib = time_per_attribute.find(attrib);
+			PS::map<std::string, double>::iterator time_attrib = time_per_attribute.find(attrib);
 			if (time_attrib != time_per_attribute.end())
 				basic += " " + CStr::FromInt(1000000*time_attrib->second) + "us";
 
@@ -819,7 +819,7 @@ const char* CProfiler2::ConstructJSONResponse(std::ostream& stream, const std::s
 
 		std::lock_guard<std::mutex> lock(m_Mutex); // lock against changes to m_Threads or deletions of ThreadStorage
 
-		std::vector<std::unique_ptr<ThreadStorage>>::iterator it =
+		PS::vector<std::unique_ptr<ThreadStorage>>::iterator it =
 			std::find_if(m_Threads.begin(), m_Threads.end(), [&thread](std::unique_ptr<ThreadStorage>& storage) {
 				return storage->GetName() == thread;
 			});

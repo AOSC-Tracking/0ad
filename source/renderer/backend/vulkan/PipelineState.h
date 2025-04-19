@@ -18,6 +18,7 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_PIPELINESTATE
 #define INCLUDED_RENDERER_BACKEND_VULKAN_PIPELINESTATE
 
+#include "ps/containers/UnorderedMap.h"
 #include "renderer/backend/PipelineState.h"
 #include "renderer/backend/vulkan/Framebuffer.h"
 #include "renderer/backend/vulkan/ShaderProgram.h"
@@ -26,7 +27,6 @@
 #include <cstdint>
 #include <glad/vulkan.h>
 #include <memory>
-#include <unordered_map>
 
 namespace Renderer
 {
@@ -84,7 +84,7 @@ private:
 	{
 		bool operator()(const CacheKey& lhs, const CacheKey& rhs) const;
 	};
-	std::unordered_map<CacheKey, VkPipeline, CacheKeyHash, CacheKeyEqual> m_PipelineMap;
+	PS::unordered_map<CacheKey, VkPipeline, CacheKeyHash, CacheKeyEqual> m_PipelineMap;
 };
 
 class CComputePipelineState final : public IComputePipelineState

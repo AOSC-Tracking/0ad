@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -16,7 +16,8 @@
  */
 
 #include "Serialization.h"
-#include <vector>
+
+#include "ps/containers/Vector.h"
 
 // If included from within the NMT Creation process, perform a pass
 #ifdef CREATING_NMT
@@ -116,7 +117,7 @@ public: \
 
 #define NMT_START_ARRAY(_nm) \
 	struct ARRAY_STRUCT_PREFIX(_nm); \
-	std::vector <ARRAY_STRUCT_PREFIX(_nm)> _nm; \
+	PS::vector <ARRAY_STRUCT_PREFIX(_nm)> _nm; \
 	struct ARRAY_STRUCT_PREFIX(_nm) {
 
 #define NMT_END_ARRAY() \
@@ -147,7 +148,7 @@ size_t _nm::GetSerializedLength() const \
 	UNUSED2(thiz);	// preempt any "unused" warning
 
 #define NMT_START_ARRAY(_nm) \
-	std::vector <ARRAY_STRUCT_PREFIX(_nm)>::const_iterator it=_nm.begin(); \
+	PS::vector <ARRAY_STRUCT_PREFIX(_nm)>::const_iterator it=_nm.begin(); \
 	while (it != _nm.end()) \
 	{ \
 		const ARRAY_STRUCT_PREFIX(_nm) *thiz=&*it;\
@@ -192,7 +193,7 @@ u8 *_nm::Serialize(u8 *buffer) const \
 	UNUSED2(thiz);	// preempt any "unused" warning
 
 #define NMT_START_ARRAY(_nm) \
-	std::vector <ARRAY_STRUCT_PREFIX(_nm)>::const_iterator it=_nm.begin(); \
+	PS::vector <ARRAY_STRUCT_PREFIX(_nm)>::const_iterator it=_nm.begin(); \
 	while (it != _nm.end()) \
 	{ \
 		const ARRAY_STRUCT_PREFIX(_nm) *thiz=&*it;\
@@ -303,7 +304,7 @@ CStr _nm::ToStringRaw() const \
 
 #define NMT_START_ARRAY(_nm) \
 	ret+=#_nm ": { "; \
-	std::vector < ARRAY_STRUCT_PREFIX(_nm) >::const_iterator it=_nm.begin(); \
+	PS::vector < ARRAY_STRUCT_PREFIX(_nm) >::const_iterator it=_nm.begin(); \
 	while (it != _nm.end()) \
 	{ \
 		ret+=" { "; \

@@ -250,7 +250,7 @@ struct STileBlend
 struct STileBlendStack
 {
 	u8 i, j;
-	std::vector<STileBlend> blends; // back of vector is lowest-priority texture
+	PS::vector<STileBlend> blends; // back of vector is lowest-priority texture
 };
 
 /**
@@ -265,7 +265,7 @@ struct SBlendLayer
 	};
 
 	CTerrainTextureEntry* m_Texture;
-	std::vector<Tile> m_Tiles;
+	PS::vector<Tile> m_Tiles;
 };
 
 void CPatchRData::BuildBlends()
@@ -274,15 +274,15 @@ void CPatchRData::BuildBlends()
 
 	m_BlendSplats.clear();
 
-	std::vector<SBlendVertex> blendVertices;
-	std::vector<u16> blendIndices;
+	PS::vector<SBlendVertex> blendVertices;
+	PS::vector<u16> blendIndices;
 
 	CTerrain* terrain = m_Patch->m_Parent;
 
-	std::vector<STileBlendStack> blendStacks;
+	PS::vector<STileBlendStack> blendStacks;
 	blendStacks.reserve(PATCH_SIZE*PATCH_SIZE);
 
-	std::vector<STileBlend> blends;
+	PS::vector<STileBlend> blends;
 	blends.reserve(9);
 
 	// For each tile in patch ..
@@ -344,7 +344,7 @@ void CPatchRData::BuildBlends()
 	// (This is effectively a topological sort / linearisation of the partial order induced
 	// by the per-tile stacks, preferring to make tiles with equal textures adjacent.)
 
-	std::vector<SBlendLayer> blendLayers;
+	PS::vector<SBlendLayer> blendLayers;
 
 	while (true)
 	{
@@ -440,7 +440,7 @@ void CPatchRData::BuildBlends()
 	}
 }
 
-void CPatchRData::AddBlend(std::vector<SBlendVertex>& blendVertices, std::vector<u16>& blendIndices,
+void CPatchRData::AddBlend(PS::vector<SBlendVertex>& blendVertices, PS::vector<u16>& blendIndices,
 			   u16 i, u16 j, u8 shape, CTerrainTextureEntry* texture)
 {
 	CTerrain* terrain = m_Patch->m_Parent;
@@ -565,14 +565,14 @@ void CPatchRData::BuildIndices()
 	// PATCH_SIZE must be 2^8-2 or less to not overflow u16 indices buffer. Thankfully this is always true.
 	ENSURE(vsize*vsize < 65536);
 
-	std::vector<unsigned short> indices;
+	PS::vector<unsigned short> indices;
 	indices.reserve(PATCH_SIZE * PATCH_SIZE * 4);
 
 	// release existing splats
 	m_Splats.clear();
 
 	// build grid of textures on this patch
-	std::vector<CTerrainTextureEntry*> textures;
+	PS::vector<CTerrainTextureEntry*> textures;
 	CTerrainTextureEntry* texgrid[PATCH_SIZE][PATCH_SIZE];
 	for (ssize_t j=0;j<PATCH_SIZE;j++) {
 		for (ssize_t i=0;i<PATCH_SIZE;i++) {
@@ -653,7 +653,7 @@ void CPatchRData::BuildVertices()
 	// number of vertices in each direction in each patch
 	ssize_t vsize = PATCH_SIZE + 1;
 
-	std::vector<SBaseVertex> vertices;
+	PS::vector<SBaseVertex> vertices;
 	vertices.resize(vsize * vsize);
 
 	// get index of this patch
@@ -693,7 +693,7 @@ void CPatchRData::BuildVertices()
 	m_VBBase->m_Owner->UpdateChunkVertices(m_VBBase.Get(), &vertices[0]);
 }
 
-void CPatchRData::BuildSide(std::vector<SSideVertex>& vertices, CPatchSideFlags side)
+void CPatchRData::BuildSide(PS::vector<SSideVertex>& vertices, CPatchSideFlags side)
 {
 	ssize_t vsize = PATCH_SIZE + 1;
 	CTerrain* terrain = m_Patch->m_Parent;
@@ -750,7 +750,7 @@ void CPatchRData::BuildSides()
 {
 	PROFILE3("build sides");
 
-	std::vector<SSideVertex> sideVertices;
+	PS::vector<SSideVertex> sideVertices;
 
 	int sideFlags = m_Patch->GetSideFlags();
 
@@ -819,11 +819,11 @@ void CPatchRData::Update(CSimulation2* simulation)
 
 using Arena = Allocators::DynamicArena<1 * MiB>;
 
-// std::map types with appropriate arena allocators and default comparison operator
+// PS::map types with appropriate arena allocators and default comparison operator
 template<class Key, class Value>
-using PooledBatchMap = std::map<Key, Value, std::less<Key>, ProxyAllocator<std::pair<Key const, Value>, Arena>>;
+using PooledBatchMap = PS::map<Key, Value, std::less<Key>, ProxyAllocator<std::pair<Key const, Value>, Arena>>;
 
-// Equivalent to "m[k]", when it returns a arena-allocated std::map (since we can't
+// Equivalent to "m[k]", when it returns a arena-allocated PS::map (since we can't
 // use the default constructor in that case)
 template<typename M>
 typename M::mapped_type& PooledMapGet(M& m, const typename M::key_type& k, Arena& arena)
@@ -833,7 +833,7 @@ typename M::mapped_type& PooledMapGet(M& m, const typename M::key_type& k, Arena
 	)).first->second;
 }
 
-// Equivalent to "m[k]", when it returns a std::pair of arena-allocated std::vectors
+// Equivalent to "m[k]", when it returns a std::pair of arena-allocated PS::vectors
 template<typename M>
 typename M::mapped_type& PooledPairGet(M& m, const typename M::key_type& k, Arena& arena)
 {
@@ -844,7 +844,7 @@ typename M::mapped_type& PooledPairGet(M& m, const typename M::key_type& k, Aren
 }
 
 // Each multidraw batch has a list of index counts, and a list of pointers-to-first-indexes
-using BatchElements = std::pair<std::vector<u32, ProxyAllocator<u32, Arena>>, std::vector<u32, ProxyAllocator<u32, Arena>>>;
+using BatchElements = std::pair<PS::vector<u32, ProxyAllocator<u32, Arena>>, PS::vector<u32, ProxyAllocator<u32, Arena>>>;
 
 // Group batches by index buffer
 using IndexBufferBatches = PooledBatchMap<CVertexBuffer*, BatchElements>;
@@ -861,7 +861,7 @@ using ShaderTechniqueBatches = PooledBatchMap<std::pair<CStrIntern, CShaderDefin
 void CPatchRData::RenderBases(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-	const std::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow)
+	const PS::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow)
 {
 	PROFILE3("render terrain bases");
 	GPU_SCOPED_LABEL(deviceCommandContext, "Render terrain bases");
@@ -1007,12 +1007,12 @@ struct SBlendBatch
 struct SBlendStackItem
 {
 	SBlendStackItem(CVertexBuffer::VBChunk* v, CVertexBuffer::VBChunk* i,
-			const std::vector<CPatchRData::SSplat>& s, Arena& arena) :
+			const PS::vector<CPatchRData::SSplat>& s, Arena& arena) :
 		vertices(v), indices(i), splats(s.begin(), s.end(), SplatStack::allocator_type(arena))
 	{
 	}
 
-	using SplatStack = std::vector<CPatchRData::SSplat, ProxyAllocator<CPatchRData::SSplat, Arena>>;
+	using SplatStack = PS::vector<CPatchRData::SSplat, ProxyAllocator<CPatchRData::SSplat, Arena>>;
 	CVertexBuffer::VBChunk* vertices;
 	CVertexBuffer::VBChunk* indices;
 	SplatStack splats;
@@ -1021,14 +1021,14 @@ struct SBlendStackItem
 void CPatchRData::RenderBlends(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-	const std::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow)
+	const PS::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow)
 {
 	PROFILE3("render terrain blends");
 	GPU_SCOPED_LABEL(deviceCommandContext, "Render terrain blends");
 
 	Arena arena;
 
-	using BatchesStack = std::vector<SBlendBatch, ProxyAllocator<SBlendBatch, Arena>>;
+	using BatchesStack = PS::vector<SBlendBatch, ProxyAllocator<SBlendBatch, Arena>>;
 	BatchesStack batches((BatchesStack::allocator_type(arena)));
 
 	CShaderDefines contextBlend = context;
@@ -1040,7 +1040,7 @@ void CPatchRData::RenderBlends(
  	// to avoid heavy reallocations
  	batches.reserve(256);
 
-	using BlendStacks = std::vector<SBlendStackItem, ProxyAllocator<SBlendStackItem, Arena>>;
+	using BlendStacks = PS::vector<SBlendStackItem, ProxyAllocator<SBlendStackItem, Arena>>;
 	BlendStacks blendStacks((BlendStacks::allocator_type(arena)));
 	blendStacks.reserve(patches.size());
 
@@ -1224,18 +1224,18 @@ void CPatchRData::RenderBlends(
 void CPatchRData::RenderStreams(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-	const std::vector<CPatchRData*>& patches)
+	const PS::vector<CPatchRData*>& patches)
 {
 	PROFILE3("render terrain streams");
 
 	// Each batch has a list of index counts, and a list of pointers-to-first-indexes
-	using StreamBatchElements = std::pair<std::vector<u32>, std::vector<u32>>;
+	using StreamBatchElements = std::pair<PS::vector<u32>, PS::vector<u32>>;
 
 	// Group batches by index buffer
-	using StreamIndexBufferBatches = std::map<CVertexBuffer*, StreamBatchElements>;
+	using StreamIndexBufferBatches = PS::map<CVertexBuffer*, StreamBatchElements>;
 
 	// Group batches by vertex buffer
-	using StreamVertexBufferBatches = std::map<CVertexBuffer*, StreamIndexBufferBatches>;
+	using StreamVertexBufferBatches = PS::map<CVertexBuffer*, StreamIndexBufferBatches>;
 
 	StreamVertexBufferBatches batches;
 
@@ -1285,7 +1285,7 @@ void CPatchRData::RenderOutline()
 	ssize_t gz = m_Patch->m_Z * PATCH_SIZE;
 
 	CVector3D pos;
-	std::vector<CVector3D> line;
+	PS::vector<CVector3D> line;
 	for (ssize_t i = 0, j = 0; i <= PATCH_SIZE; ++i)
 	{
 		terrain->CalcPosition(gx + i, gz + j, pos);
@@ -1313,7 +1313,7 @@ void CPatchRData::RenderOutline()
 void CPatchRData::RenderSides(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 	Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-	const std::vector<CPatchRData*>& patches)
+	const PS::vector<CPatchRData*>& patches)
 {
 	PROFILE3("render terrain sides");
 	GPU_SCOPED_LABEL(deviceCommandContext, "Render terrain sides");
@@ -1397,14 +1397,14 @@ void CPatchRData::BuildWater()
 		return;
 
 	// Build data for water
-	std::vector<SWaterVertex> water_vertex_data;
-	std::vector<u16> water_indices;
+	PS::vector<SWaterVertex> water_vertex_data;
+	PS::vector<u16> water_indices;
 	u16 water_index_map[PATCH_SIZE+1][PATCH_SIZE+1];
 	memset(water_index_map, 0xFF, sizeof(water_index_map));
 
 	// Build data for shore
-	std::vector<SWaterVertex> water_vertex_data_shore;
-	std::vector<u16> water_indices_shore;
+	PS::vector<SWaterVertex> water_vertex_data_shore;
+	PS::vector<u16> water_indices_shore;
 	u16 water_shore_index_map[PATCH_SIZE+1][PATCH_SIZE+1];
 	memset(water_shore_index_map, 0xFF, sizeof(water_shore_index_map));
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -24,11 +24,11 @@
 #include "maths/Rect.h"
 #include "maths/Size2D.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/List.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
 
 #include <array>
-#include <list>
-#include <vector>
 
 class CCanvas2D;
 class CGUI;
@@ -36,7 +36,7 @@ class CGUIString;
 class IGUIObject;
 struct SGenerateTextImage;
 
-using SGenerateTextImages = std::array<std::vector<SGenerateTextImage>, 2>;
+using SGenerateTextImages = std::array<PS::vector<SGenerateTextImage>, 2>;
 
 /**
  * An CGUIText object is a parsed string, divided into
@@ -135,7 +135,7 @@ public:
 		/**
 		 * *IF* an icon, then this is not nullptr.
 		 */
-		std::list<SSpriteCall>::pointer m_pSpriteCall;
+		PS::list<SSpriteCall>::pointer m_pSpriteCall;
 	};
 
 	// The SSpriteCall CGUISpriteInstance makes this uncopyable to avoid invalidating its draw cache.
@@ -173,9 +173,9 @@ public:
 
 	const CSize2D& GetSize() const { return m_Size; }
 
-	const std::list<SSpriteCall>& GetSpriteCalls() const { return m_SpriteCalls; }
+	const PS::list<SSpriteCall>& GetSpriteCalls() const { return m_SpriteCalls; }
 
-	const std::vector<STextCall>& GetTextCalls() const { return m_TextCalls; }
+	const PS::vector<STextCall>& GetTextCalls() const { return m_TextCalls; }
 
 	// Helper functions of the constructor
 	bool ProcessLine(
@@ -195,7 +195,7 @@ public:
 
 	void SetupSpriteCalls(
 		const CGUI& pGUI,
-		const std::array<std::vector<CStr>, 2>& feedbackImages,
+		const std::array<PS::vector<CStr>, 2>& feedbackImages,
 		const float y,
 		const float width,
 		const float bufferZone,
@@ -246,13 +246,13 @@ public:
 	/**
 	 * List of TextCalls, for instance "Hello", "there!"
 	 */
-	std::vector<STextCall> m_TextCalls;
+	PS::vector<STextCall> m_TextCalls;
 
 	/**
 	 * List of sprites, or "icons" that should be rendered
 	 * along with the text.
 	 */
-	std::list<SSpriteCall> m_SpriteCalls; // list for consistent mem addresses
+	PS::list<SSpriteCall> m_SpriteCalls; // list for consistent mem addresses
 										  // so that we can point to elements.
 	/**
 	 * Width and height of the whole output, used when setting up

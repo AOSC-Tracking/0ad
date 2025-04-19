@@ -147,8 +147,8 @@ public:
 	DEFAULT_COMPONENT_ALLOCATOR(UnitMotion)
 
 	bool m_DebugOverlayEnabled;
-	std::vector<SOverlayLine> m_DebugOverlayLongPathLines;
-	std::vector<SOverlayLine> m_DebugOverlayShortPathLines;
+	PS::vector<SOverlayLine> m_DebugOverlayLongPathLines;
+	PS::vector<SOverlayLine> m_DebugOverlayShortPathLines;
 
 	// Template state:
 
@@ -881,7 +881,7 @@ private:
 	/**
 	 * Convert a path into a renderable list of lines
 	 */
-	void RenderPath(const WaypointPath& path, std::vector<SOverlayLine>& lines, CColor color);
+	void RenderPath(const WaypointPath& path, PS::vector<SOverlayLine>& lines, CColor color);
 
 	void RenderSubmit(SceneCollector& collector);
 };
@@ -1890,7 +1890,7 @@ bool CCmpUnitMotion::IsTargetRangeReachable(entity_id_t target, entity_pos_t min
 }
 
 
-void CCmpUnitMotion::RenderPath(const WaypointPath& path, std::vector<SOverlayLine>& lines, CColor color)
+void CCmpUnitMotion::RenderPath(const WaypointPath& path, PS::vector<SOverlayLine>& lines, CColor color)
 {
 	bool floating = false;
 	CmpPtr<ICmpPosition> cmpPosition(GetEntityHandle());
@@ -1898,7 +1898,7 @@ void CCmpUnitMotion::RenderPath(const WaypointPath& path, std::vector<SOverlayLi
 		floating = cmpPosition->CanFloat();
 
 	lines.clear();
-	std::vector<float> waypointCoords;
+	PS::vector<float> waypointCoords;
 	for (size_t i = 0; i < path.m_Waypoints.size(); ++i)
 	{
 		float x = path.m_Waypoints[i].x.ToFloat();

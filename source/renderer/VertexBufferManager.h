@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,11 +23,11 @@
 #define INCLUDED_VERTEXBUFFERMANAGER
 
 #include "lib/types.h"
+#include "ps/containers/Vector.h"
 #include "renderer/VertexBuffer.h"
 
 #include <memory>
 #include <utility>
-#include <vector>
 
 // CVertexBufferManager: owner object for CVertexBuffer objects; acts as
 // 'front end' for their allocation and destruction
@@ -105,7 +105,7 @@ private:
 	Renderer::Backend::IDevice* m_Device{nullptr};
 
 	/// List of all known vertex buffers
-	std::vector<std::unique_ptr<CVertexBuffer>> m_Buffers[static_cast<std::size_t>(Group::COUNT)];
+	PS::vector<std::unique_ptr<CVertexBuffer>> m_Buffers[static_cast<std::size_t>(Group::COUNT)];
 };
 
 #endif // INCLUDED_VERTEXBUFFERMANAGER

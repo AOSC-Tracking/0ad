@@ -94,7 +94,7 @@ void CCinemaManager::DrawSpline(const RNSpline& spline, const CColor& splineColo
 
 	const float start = spline.MaxDistance.ToFloat() / smoothness;
 
-	std::vector<CVector3D> line;
+	PS::vector<CVector3D> line;
 	for (int i = 0; i <= smoothness; ++i)
 	{
 		const float time = start * i / spline.MaxDistance.ToFloat();

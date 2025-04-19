@@ -243,7 +243,7 @@ void CCmpPathfinder::SetAtlasOverlay(bool enable, pass_class_t passClass)
 
 pass_class_t CCmpPathfinder::GetPassabilityClass(const std::string& name) const
 {
-	std::map<std::string, pass_class_t>::const_iterator it = m_PassClassMasks.find(name);
+	PS::map<std::string, pass_class_t>::const_iterator it = m_PassClassMasks.find(name);
 	if (it == m_PassClassMasks.end())
 	{
 		LOGERROR("Invalid passability class name '%s'", name.c_str());
@@ -253,12 +253,12 @@ pass_class_t CCmpPathfinder::GetPassabilityClass(const std::string& name) const
 	return it->second;
 }
 
-void CCmpPathfinder::GetPassabilityClasses(std::map<std::string, pass_class_t>& passClasses) const
+void CCmpPathfinder::GetPassabilityClasses(PS::map<std::string, pass_class_t>& passClasses) const
 {
 	passClasses = m_PassClassMasks;
 }
 
-void CCmpPathfinder::GetPassabilityClasses(std::map<std::string, pass_class_t>& nonPathfindingPassClasses, std::map<std::string, pass_class_t>& pathfindingPassClasses) const
+void CCmpPathfinder::GetPassabilityClasses(PS::map<std::string, pass_class_t>& nonPathfindingPassClasses, PS::map<std::string, pass_class_t>& pathfindingPassClasses) const
 {
 	for (const std::pair<const std::string, pass_class_t>& pair : m_PassClassMasks)
 	{
@@ -556,7 +556,7 @@ void CCmpPathfinder::UpdateGrid()
 	// Update the long-range and hierarchical pathfinders.
 	if (m_DirtinessInformation.globallyDirty)
 	{
-		std::map<std::string, pass_class_t> nonPathfindingPassClasses, pathfindingPassClasses;
+		PS::map<std::string, pass_class_t> nonPathfindingPassClasses, pathfindingPassClasses;
 		GetPassabilityClasses(nonPathfindingPassClasses, pathfindingPassClasses);
 		m_LongPathfinder->Reload(m_Grid);
 		m_PathfinderHier->Recompute(m_Grid, nonPathfindingPassClasses, pathfindingPassClasses);

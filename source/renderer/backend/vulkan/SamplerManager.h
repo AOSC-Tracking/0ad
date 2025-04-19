@@ -18,11 +18,11 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_SAMPLERMANAGER
 #define INCLUDED_RENDERER_BACKEND_VULKAN_SAMPLERMANAGER
 
+#include "ps/containers/UnorderedMap.h"
 #include "renderer/backend/Sampler.h"
 
 #include <glad/vulkan.h>
 #include <memory>
-#include <unordered_map>
 
 namespace Renderer
 {
@@ -63,7 +63,7 @@ private:
 	{
 		bool operator()(const Sampler::Desc& lhs, const Sampler::Desc& rhs) const;
 	};
-	std::unordered_map<Sampler::Desc, VkSampler, SamplerDescHash, SamplerDescEqual> m_SamplerMap;
+	PS::unordered_map<Sampler::Desc, VkSampler, SamplerDescHash, SamplerDescEqual> m_SamplerMap;
 };
 
 } // namespace Vulkan

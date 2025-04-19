@@ -39,7 +39,7 @@ CShaderTechnique::CShaderTechnique(
 {
 }
 
-void CShaderTechnique::SetPasses(std::vector<CShaderPass>&& passes)
+void CShaderTechnique::SetPasses(PS::vector<CShaderPass>&& passes)
 {
 	ENSURE(!m_ComputePipelineState);
 	m_Passes = std::move(passes);

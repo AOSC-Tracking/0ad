@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,9 +19,9 @@
 #define INCLUDED_STDDESERIALIZER
 
 #include "IDeserializer.h"
+#include "ps/containers/Vector.h"
 
 #include <string>
-#include <vector>
 
 class CStdDeserializer : public IDeserializer
 {
@@ -46,12 +46,12 @@ protected:
 
 private:
 	JS::Value ReadScriptVal(const char* name, JS::HandleObject preexistingObject);
-	void ReadStringLatin1(const char* name, std::vector<JS::Latin1Char>& str);
+	void ReadStringLatin1(const char* name, PS::vector<JS::Latin1Char>& str);
 	void ReadStringUTF16(const char* name, std::u16string& str);
 
 	virtual void AddScriptBackref(JS::HandleObject obj);
 	virtual void GetScriptBackref(size_t tag, JS::MutableHandleObject ret);
-	std::vector<JS::Heap<JSObject*> > m_ScriptBackrefs;
+	PS::vector<JS::Heap<JSObject*> > m_ScriptBackrefs;
 
 	const ScriptInterface& m_ScriptInterface;
 

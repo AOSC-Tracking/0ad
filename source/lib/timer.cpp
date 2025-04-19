@@ -168,7 +168,7 @@ double timer_Resolution()
 // acceptable (since timers are added manually), but the list is easy
 // to implement and only has the drawback of exposing TimerClient to users.
 //
-// do not use std::list et al. for this! we must be callable at any time,
+// do not use PS::list et al. for this! we must be callable at any time,
 // especially before NLSO ctors run or before heap init.
 static size_t numClients;
 static TimerClient* clients;

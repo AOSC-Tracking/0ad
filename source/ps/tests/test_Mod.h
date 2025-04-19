@@ -98,7 +98,7 @@ public:
 			Mod::ModData{ "good2", "good2", "0.0.4", { "0ad>=0.0.24" }, false, "" },
 		};
 
-		std::vector<CStr> mods;
+		PS::vector<CStr> mods;
 
 		mods.clear();
 		mods.push_back("public");
@@ -146,7 +146,7 @@ public:
 			Mod::ModData{ "wrong", "wrong_name", "0.10.0", { "0ad=0.0.24" }, false, ""}
 		};
 
-		std::vector<CStr> mods;
+		PS::vector<CStr> mods;
 
 		mods.clear();
 		mods.push_back("public");
@@ -161,7 +161,7 @@ public:
 		Mod::ModData b = { "b", "b", "0.0.1", {}, false, "" };
 		Mod::ModData c = { "c", "c", "0.0.1", {}, true, "" };
 
-		using ModList = std::vector<const Mod::ModData*>;
+		using ModList = PS::vector<const Mod::ModData*>;
 		{
 			ModList l1 = { &a1 };
 			ModList l2 = { &a2 };

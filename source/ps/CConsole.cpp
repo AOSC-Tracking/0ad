@@ -30,6 +30,7 @@
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrInternStatic.h"
 #include "ps/Filesystem.h"
 #include "ps/GameSetup/Config.h"
@@ -43,7 +44,6 @@
 
 #include <algorithm>
 #include <string_view>
-#include <vector>
 #include <wctype.h>
 
 namespace
@@ -213,7 +213,7 @@ void CConsole::Render(CCanvas2D& canvas)
 
 void CConsole::DrawWindow(CCanvas2D& canvas)
 {
-	std::vector<CVector2D> points =
+	PS::vector<CVector2D> points =
 	{
 		CVector2D{m_Width, 0.0f},
 		CVector2D{1.0f, 0.0f},
@@ -243,7 +243,7 @@ void CConsole::DrawHistory(CTextRenderer& textRenderer)
 {
 	int i = 1;
 
-	std::deque<std::wstring>::iterator it; //History iterator
+	PS::deque<std::wstring>::iterator it; //History iterator
 
 	std::lock_guard<std::mutex> lock(m_Mutex); // needed for safe access to m_deqMsgHistory
 
@@ -627,7 +627,7 @@ void CConsole::SaveHistory()
 {
 	WriteBuffer buffer;
 	const int linesToSkip = static_cast<int>(m_BufHistory.size()) - m_MaxHistoryLines;
-	std::deque<std::wstring>::reverse_iterator it = m_BufHistory.rbegin();
+	PS::deque<std::wstring>::reverse_iterator it = m_BufHistory.rbegin();
 	if(linesToSkip > 0)
 		std::advance(it, linesToSkip);
 	for (; it != m_BufHistory.rend(); ++it)

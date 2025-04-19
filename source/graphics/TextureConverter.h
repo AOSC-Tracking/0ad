@@ -24,10 +24,10 @@
 #include "TextureManager.h"
 
 #if CONFIG2_NVTT
+#include "ps/containers/Queue.h"
 #include "ps/Future.h"
 
 #include <memory>
-#include <queue>
 #endif
 
 class MD5;
@@ -150,7 +150,7 @@ public:
 	 */
 	struct SettingsFile
 	{
-		std::vector<Match> patterns;
+		PS::vector<Match> patterns;
 	};
 
 	/**
@@ -175,7 +175,7 @@ public:
 	 * and return the resulting settings.
 	 * Later entries in settingsFiles override earlier entries.
 	 */
-	Settings ComputeSettings(const std::wstring& filename, const std::vector<SettingsFile*>& settingsFiles) const;
+	Settings ComputeSettings(const std::wstring& filename, const PS::vector<SettingsFile*>& settingsFiles) const;
 
 	/**
 	 * Begin converting a texture, using the given settings.
@@ -210,7 +210,7 @@ private:
 #if CONFIG2_NVTT
 	struct ConversionResult;
 
-	std::queue<Future<std::unique_ptr<ConversionResult>>> m_ResultQueue;
+	PS::queue<Future<std::unique_ptr<ConversionResult>>> m_ResultQueue;
 #endif
 };
 

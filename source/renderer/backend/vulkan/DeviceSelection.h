@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_DEVICESELECTION
 #define INCLUDED_RENDERER_BACKEND_VULKAN_DEVICESELECTION
 
+#include "ps/containers/Vector.h"
 #include "scriptinterface/ScriptForward.h"
 
 #include <glad/vulkan.h>
 #include <limits>
-#include <vector>
 
 namespace Renderer
 {
@@ -45,17 +45,17 @@ struct SAvailablePhysicalDevice
 	VkPhysicalDeviceMemoryProperties memoryProperties{};
 	VkPhysicalDeviceFeatures features{};
 	VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures{};
-	std::vector<VkQueueFamilyProperties> queueFamilies;
+	PS::vector<VkQueueFamilyProperties> queueFamilies;
 	bool hasRequiredExtensions = false;
 	bool hasOutputToSurfaceSupport = false;
 	size_t graphicsQueueFamilyIndex = 0;
 	size_t presentQueueFamilyIndex = 0;
 	VkDeviceSize deviceTotalMemory = 0;
 	VkDeviceSize hostTotalMemory = 0;
-	std::vector<std::string> extensions;
+	PS::vector<std::string> extensions;
 	VkSurfaceCapabilitiesKHR surfaceCapabilities;
-	std::vector<VkSurfaceFormatKHR> surfaceFormats;
-	std::vector<VkPresentModeKHR> presentModes;
+	PS::vector<VkSurfaceFormatKHR> surfaceFormats;
+	PS::vector<VkPresentModeKHR> presentModes;
 };
 
 /**
@@ -65,9 +65,9 @@ struct SAvailablePhysicalDevice
  * multiple functions to be able to save some information about available
  * devices before filtering and give a choice to a user.
  */
-std::vector<SAvailablePhysicalDevice> GetAvailablePhysicalDevices(
+PS::vector<SAvailablePhysicalDevice> GetAvailablePhysicalDevices(
 	VkInstance instance, VkSurfaceKHR surface,
-	const std::vector<const char*>& requiredDeviceExtensions);
+	const PS::vector<const char*>& requiredDeviceExtensions);
 
 /**
  * @return true if we can't use the device for our needs. For example, it

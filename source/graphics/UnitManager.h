@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,12 +22,12 @@
 #ifndef INCLUDED_UNITMANAGER
 #define INCLUDED_UNITMANAGER
 
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrForward.h"
 #include "simulation2/system/Entity.h"
 
 #include <memory>
-#include <set>
-#include <vector>
 
 class CUnit;
 class CObjectManager;
@@ -59,7 +59,7 @@ public:
 
 private:
 	// list of all known units
-	std::vector<std::unique_ptr<CUnit>> m_Units;
+	PS::vector<std::unique_ptr<CUnit>> m_Units;
 	// graphical object manager; may be NULL if not set up
 	CObjectManager* m_ObjectManager;
 };

@@ -23,8 +23,8 @@
 #include "lib/status.h"
 
 // Opens the given texture file and stores it in a one-dimensional u16 vector.
-Status LoadHeightmapImageVfs(const VfsPath& filepath, std::vector<u16>& heightmap);
-Status LoadHeightmapImageOs(const OsPath& filepath, std::vector<u16>& heightmap);
+Status LoadHeightmapImageVfs(const VfsPath& filepath, PS::vector<u16>& heightmap);
+Status LoadHeightmapImageOs(const OsPath& filepath, PS::vector<u16>& heightmap);
 
 class CMapIO
 {

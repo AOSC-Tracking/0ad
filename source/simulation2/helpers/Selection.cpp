@@ -41,13 +41,13 @@ entity_id_t EntitySelection::PickEntityAtPoint(CSimulation2& simulation, const C
 	CmpPtr<ICmpUnitRenderer> cmpUnitRenderer(simulation.GetSimContext().GetSystemEntity());
 	ENSURE(cmpUnitRenderer);
 
-	std::vector<std::pair<CEntityHandle, CVector3D> > entities;
+	PS::vector<std::pair<CEntityHandle, CVector3D> > entities;
 	cmpUnitRenderer->PickAllEntitiesAtPoint(entities, origin, dir, allowEditorSelectables);
 	if (entities.empty())
 		return INVALID_ENTITY;
 
 	// Filter for relevent entities in the list of candidates (all entities below the mouse)
-	std::vector<std::pair<float, CEntityHandle> > hits; // (dist^2, entity) pairs
+	PS::vector<std::pair<float, CEntityHandle> > hits; // (dist^2, entity) pairs
 	for (size_t i = 0; i < entities.size(); ++i)
 	{
 		// Find the perpendicular distance from the object's centre to the picker ray
@@ -132,7 +132,7 @@ static bool CheckEntityVisibleAndInRect(CEntityHandle handle, CmpPtr<ICmpRangeMa
 	return CheckEntityInRect(handle, camera, sx0, sy0, sx1, sy1, allowEditorSelectables);
 }
 
-std::vector<entity_id_t> EntitySelection::PickEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, player_id_t owner, bool allowEditorSelectables)
+PS::vector<entity_id_t> EntitySelection::PickEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, player_id_t owner, bool allowEditorSelectables)
 {
 	PROFILE2("PickEntitiesInRect");
 	// Make sure sx0 <= sx1, and sy0 <= sy1
@@ -144,13 +144,13 @@ std::vector<entity_id_t> EntitySelection::PickEntitiesInRect(CSimulation2& simul
 	CmpPtr<ICmpRangeManager> cmpRangeManager(simulation, SYSTEM_ENTITY);
 	ENSURE(cmpRangeManager);
 
-	std::vector<entity_id_t> hitEnts;
+	PS::vector<entity_id_t> hitEnts;
 
 	if (owner != INVALID_PLAYER)
 	{
 		CComponentManager& componentManager = simulation.GetSimContext().GetComponentManager();
-		std::vector<entity_id_t> ents = cmpRangeManager->GetEntitiesByPlayer(owner);
-		for (std::vector<entity_id_t>::iterator it = ents.begin(); it != ents.end(); ++it)
+		PS::vector<entity_id_t> ents = cmpRangeManager->GetEntitiesByPlayer(owner);
+		for (PS::vector<entity_id_t>::iterator it = ents.begin(); it != ents.end(); ++it)
 		{
 			if (CheckEntityVisibleAndInRect(componentManager.LookupEntityHandle(*it), cmpRangeManager, camera, sx0, sy0, sx1, sy1, owner, allowEditorSelectables))
 				hitEnts.push_back(*it);
@@ -169,7 +169,7 @@ std::vector<entity_id_t> EntitySelection::PickEntitiesInRect(CSimulation2& simul
 	return hitEnts;
 }
 
-std::vector<entity_id_t> EntitySelection::PickNonGaiaEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, bool allowEditorSelectables)
+PS::vector<entity_id_t> EntitySelection::PickNonGaiaEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, bool allowEditorSelectables)
 {
 	PROFILE2("PickNonGaiaEntitiesInRect");
 
@@ -182,7 +182,7 @@ std::vector<entity_id_t> EntitySelection::PickNonGaiaEntitiesInRect(CSimulation2
 	CmpPtr<ICmpRangeManager> cmpRangeManager(simulation, SYSTEM_ENTITY);
 	ENSURE(cmpRangeManager);
 
-	std::vector<entity_id_t> hitEnts;
+	PS::vector<entity_id_t> hitEnts;
 
 	CComponentManager& componentManager = simulation.GetSimContext().GetComponentManager();
 	for (entity_id_t ent : cmpRangeManager->GetNonGaiaEntities())
@@ -192,7 +192,7 @@ std::vector<entity_id_t> EntitySelection::PickNonGaiaEntitiesInRect(CSimulation2
 	return hitEnts;
 }
 
-std::vector<entity_id_t> EntitySelection::PickSimilarEntities(CSimulation2& simulation, const CCamera& camera,
+PS::vector<entity_id_t> EntitySelection::PickSimilarEntities(CSimulation2& simulation, const CCamera& camera,
 	const std::string& templateName, player_id_t owner, bool includeOffScreen, bool matchRank,
 	bool allowEditorSelectables, bool allowFoundations)
 {
@@ -200,7 +200,7 @@ std::vector<entity_id_t> EntitySelection::PickSimilarEntities(CSimulation2& simu
 	CmpPtr<ICmpTemplateManager> cmpTemplateManager(simulation, SYSTEM_ENTITY);
 	CmpPtr<ICmpRangeManager> cmpRangeManager(simulation, SYSTEM_ENTITY);
 
-	std::vector<entity_id_t> hitEnts;
+	PS::vector<entity_id_t> hitEnts;
 
  	const CSimulation2::InterfaceListUnordered& ents = simulation.GetEntitiesWithInterfaceUnordered(IID_Selectable);
 	for (CSimulation2::InterfaceListUnordered::const_iterator it = ents.begin(); it != ents.end(); ++it)

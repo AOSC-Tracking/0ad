@@ -1,4 +1,4 @@
-/* Copyright (C) 2012 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 #ifndef INCLUDED_TERRITORYBOUNDARY
 #define INCLUDED_TERRITORYBOUNDARY
 
-#include <vector>
-
 #include "maths/Vector2D.h"
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/Player.h"
 
 template<typename T>
@@ -44,7 +43,7 @@ struct STerritoryBoundary
 	/// The boundary points, in clockwise order for inner boundaries and counter-clockwise order for outer boundaries.
 	/// Note: if you need a way to explicitly find out which winding order these are in, you can have
 	/// CTerritoryBoundCalculator::ComputeBoundaries set it during computation -- see its implementation for details.
-	std::vector<CVector2D> points;
+	PS::vector<CVector2D> points;
 };
 
 /**
@@ -62,7 +61,7 @@ public:
 	 * boundaries have them in CW order (because this matches the winding orders needed by the renderer to offset them
 	 * inwards/outwards appropriately).
 	 */
-	static std::vector<STerritoryBoundary> ComputeBoundaries(const Grid<u8>* territories);
+	static PS::vector<STerritoryBoundary> ComputeBoundaries(const Grid<u8>* territories);
 };
 
 #endif // INCLUDED_TERRITORYBOUNDARY

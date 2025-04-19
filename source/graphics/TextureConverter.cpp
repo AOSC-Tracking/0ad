@@ -61,7 +61,7 @@ constexpr size_t MAX_QUEUE_SIZE_FOR_OPTIMAL_UTILIZATION{12};
  */
 struct BufferOutputHandler : public nvtt::OutputHandler
 {
-	std::vector<u8> buffer;
+	PS::vector<u8> buffer;
 
 	virtual void beginImage(int UNUSED(size), int UNUSED(width), int UNUSED(height), int UNUSED(depth), int UNUSED(face), int UNUSED(miplevel))
 	{
@@ -249,7 +249,7 @@ CTextureConverter::SettingsFile* CTextureConverter::LoadSettings(const VfsPath& 
 	return settings.release();
 }
 
-CTextureConverter::Settings CTextureConverter::ComputeSettings(const std::wstring& filename, const std::vector<SettingsFile*>& settingsFiles) const
+CTextureConverter::Settings CTextureConverter::ComputeSettings(const std::wstring& filename, const PS::vector<SettingsFile*>& settingsFiles) const
 {
 	// Set sensible defaults
 	Settings settings;

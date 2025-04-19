@@ -524,7 +524,7 @@ void CModel::SetPlayerID(player_id_t id)
 {
 	CModelAbstract::SetPlayerID(id);
 
-	for (std::vector<Prop>::iterator it = m_Props.begin(); it != m_Props.end(); ++it)
+	for (PS::vector<Prop>::iterator it = m_Props.begin(); it != m_Props.end(); ++it)
 		it->m_Model->SetPlayerID(id);
 }
 
@@ -532,6 +532,6 @@ void CModel::SetShadingColor(const CColor& color)
 {
 	CModelAbstract::SetShadingColor(color);
 
-	for (std::vector<Prop>::iterator it = m_Props.begin(); it != m_Props.end(); ++it)
+	for (PS::vector<Prop>::iterator it = m_Props.begin(); it != m_Props.end(); ++it)
 		it->m_Model->SetShadingColor(color);
 }

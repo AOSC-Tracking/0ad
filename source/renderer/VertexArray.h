@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,12 +18,11 @@
 #ifndef INCLUDED_VERTEXARRAY
 #define INCLUDED_VERTEXARRAY
 
+#include "ps/containers/Vector.h"
 #include "renderer/backend/Format.h"
 #include "renderer/backend/IBuffer.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/VertexBufferManager.h"
-
-#include <vector>
 
 // Iterator
 template<typename T>
@@ -210,7 +209,7 @@ private:
 	uint32_t m_Usage{0};
 	uint32_t m_MinimumAttributeAlignment{0};
 	size_t m_NumberOfVertices{0};
-	std::vector<Attribute*> m_Attributes;
+	PS::vector<Attribute*> m_Attributes;
 
 	CVertexBufferManager::Handle m_VB;
 	uint32_t m_Stride{0};

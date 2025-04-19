@@ -107,11 +107,11 @@ private:
 	// size of map
 	ssize_t m_PatchesPerSide{0};
 	// heightmap for map
-	std::vector<u16> m_Heightmap;
+	PS::vector<u16> m_Heightmap;
 	// list of terrain textures used by map
-	std::vector<CTerrainTextureEntry*> m_TerrainTextures;
+	PS::vector<CTerrainTextureEntry*> m_TerrainTextures;
 	// tile descriptions for each tile
-	std::vector<STileDesc> m_Tiles;
+	PS::vector<STileDesc> m_Tiles;
 	// lightenv stored in file
 	CLightEnv m_LightEnv;
 	// startup script

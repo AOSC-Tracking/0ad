@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #ifndef INCLUDED_HEIGHTMIPMAP
 #define INCLUDED_HEIGHTMIPMAP
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class Path;
 using VfsPath = Path;
@@ -76,7 +76,7 @@ private:
 	size_t m_MapSize;
 
 	// mipmap list
-	std::vector<SMipmap> m_Mipmap;
+	PS::vector<SMipmap> m_Mipmap;
 };
 
 #endif

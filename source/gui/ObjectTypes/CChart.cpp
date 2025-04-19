@@ -90,7 +90,7 @@ void CChart::Draw(CCanvas2D& canvas)
 	const float height = rect.GetHeight();
 
 	CVector2D scale(width / (m_RightTop.X - m_LeftBottom.X), height / (m_RightTop.Y - m_LeftBottom.Y));
-	std::vector<CVector2D> linePoints;
+	PS::vector<CVector2D> linePoints;
 	for (const CChartData& data : m_Series)
 	{
 		if (data.m_Points.empty())

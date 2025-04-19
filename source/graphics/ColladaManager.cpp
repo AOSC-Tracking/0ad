@@ -310,7 +310,7 @@ public:
 private:
 	PIVFS m_VFS;
 	bool m_skeletonHashInvalidated;
-	std::vector<u64> m_skeletonHashes;
+	PS::vector<u64> m_skeletonHashes;
 };
 
 CColladaManager::CColladaManager(const PIVFS& vfs)

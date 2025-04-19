@@ -95,9 +95,9 @@ public:
 		componentManager.AddSystemComponents(skipScriptedComponents, skipAI);
 	}
 
-	static bool LoadDefaultScripts(CComponentManager& componentManager, std::set<VfsPath>* loadedScripts);
-	static bool LoadScripts(CComponentManager& componentManager, std::set<VfsPath>* loadedScripts, const VfsPath& path);
-	static bool LoadTriggerScripts(CComponentManager& componentManager, JS::HandleValue mapSettings, std::set<VfsPath>* loadedScripts);
+	static bool LoadDefaultScripts(CComponentManager& componentManager, PS::set<VfsPath>* loadedScripts);
+	static bool LoadScripts(CComponentManager& componentManager, PS::set<VfsPath>* loadedScripts, const VfsPath& path);
+	static bool LoadTriggerScripts(CComponentManager& componentManager, JS::HandleValue mapSettings, PS::set<VfsPath>* loadedScripts);
 	Status ReloadChangedFile(const VfsPath& path);
 
 	static Status ReloadChangedFileCB(void* param, const VfsPath& path)
@@ -106,8 +106,8 @@ public:
 	}
 
 	int ProgressiveLoad();
-	void Update(int turnLength, const std::vector<SimulationCommand>& commands);
-	static void UpdateComponents(CSimContext& simContext, fixed turnLengthFixed, const std::vector<SimulationCommand>& commands);
+	void Update(int turnLength, const PS::vector<SimulationCommand>& commands);
+	static void UpdateComponents(CSimContext& simContext, fixed turnLengthFixed, const PS::vector<SimulationCommand>& commands);
 	void Interpolate(float simFrameLength, float frameOffset, float realFrameLength);
 
 	void DumpState();
@@ -121,7 +121,7 @@ public:
 	JS::PersistentRootedValue m_InitAttributes;
 	JS::PersistentRootedValue m_MapSettings;
 
-	std::set<VfsPath> m_LoadedScripts;
+	PS::set<VfsPath> m_LoadedScripts;
 
 	uint32_t m_TurnNumber;
 
@@ -138,7 +138,7 @@ public:
 	std::unique_ptr<CComponentManager> m_SecondaryComponentManager;
 	std::unique_ptr<CTerrain> m_SecondaryTerrain;
 	std::unique_ptr<CSimContext> m_SecondaryContext;
-	std::unique_ptr<std::set<VfsPath>> m_SecondaryLoadedScripts;
+	std::unique_ptr<PS::set<VfsPath>> m_SecondaryLoadedScripts;
 
 	struct SerializationTestState
 	{
@@ -156,10 +156,10 @@ public:
 	void InitRNGSeedSimulation();
 	void InitRNGSeedAI();
 
-	static std::vector<SimulationCommand> CloneCommandsFromOtherCompartment(const ScriptInterface& newScript, const ScriptInterface& oldScript,
-		const std::vector<SimulationCommand>& commands)
+	static PS::vector<SimulationCommand> CloneCommandsFromOtherCompartment(const ScriptInterface& newScript, const ScriptInterface& oldScript,
+		const PS::vector<SimulationCommand>& commands)
 	{
-		std::vector<SimulationCommand> newCommands;
+		PS::vector<SimulationCommand> newCommands;
 		newCommands.reserve(commands.size());
 
 		ScriptRequest rqNew(newScript);
@@ -174,7 +174,7 @@ public:
 	}
 };
 
-bool CSimulation2Impl::LoadDefaultScripts(CComponentManager& componentManager, std::set<VfsPath>* loadedScripts)
+bool CSimulation2Impl::LoadDefaultScripts(CComponentManager& componentManager, PS::set<VfsPath>* loadedScripts)
 {
 	return (
 		LoadScripts(componentManager, loadedScripts, L"simulation/components/interfaces/") &&
@@ -183,7 +183,7 @@ bool CSimulation2Impl::LoadDefaultScripts(CComponentManager& componentManager, s
 	);
 }
 
-bool CSimulation2Impl::LoadScripts(CComponentManager& componentManager, std::set<VfsPath>* loadedScripts, const VfsPath& path)
+bool CSimulation2Impl::LoadScripts(CComponentManager& componentManager, PS::set<VfsPath>* loadedScripts, const VfsPath& path)
 {
 	VfsPaths pathnames;
 	if (vfs::GetPathnames(g_VFS, path, L"*.js", pathnames) < 0)
@@ -201,13 +201,13 @@ bool CSimulation2Impl::LoadScripts(CComponentManager& componentManager, std::set
 	return ok;
 }
 
-bool CSimulation2Impl::LoadTriggerScripts(CComponentManager& componentManager, JS::HandleValue mapSettings, std::set<VfsPath>* loadedScripts)
+bool CSimulation2Impl::LoadTriggerScripts(CComponentManager& componentManager, JS::HandleValue mapSettings, PS::set<VfsPath>* loadedScripts)
 {
 	bool ok = true;
 	ScriptRequest rq(componentManager.GetScriptInterface());
 	if (Script::HasProperty(rq, mapSettings, "TriggerScripts"))
 	{
-		std::vector<std::string> scriptNames;
+		PS::vector<std::string> scriptNames;
 		Script::GetProperty(rq, mapSettings, "TriggerScripts", scriptNames);
 		for (const std::string& triggerScript : scriptNames)
 		{
@@ -351,7 +351,7 @@ void CSimulation2Impl::InitRNGSeedAI()
 		cmpAIManager->SetRNGSeed(seed);
 }
 
-void CSimulation2Impl::Update(int turnLength, const std::vector<SimulationCommand>& commands)
+void CSimulation2Impl::Update(int turnLength, const PS::vector<SimulationCommand>& commands)
 {
 	PROFILE3("sim update");
 	PROFILE2_ATTR("turn %d", (int)m_TurnNumber);
@@ -405,7 +405,7 @@ void CSimulation2Impl::Update(int turnLength, const std::vector<SimulationComman
 		m_SecondaryComponentManager = std::make_unique<CComponentManager>(*m_SecondaryContext, scriptInterface.GetContext());
 		m_SecondaryComponentManager->LoadComponentTypes();
 
-		m_SecondaryLoadedScripts = std::make_unique<std::set<VfsPath>>();
+		m_SecondaryLoadedScripts = std::make_unique<PS::set<VfsPath>>();
 		ENSURE(LoadDefaultScripts(*m_SecondaryComponentManager, m_SecondaryLoadedScripts.get()));
 		ResetComponentState(*m_SecondaryComponentManager, false, false);
 
@@ -505,7 +505,7 @@ void CSimulation2Impl::Update(int turnLength, const std::vector<SimulationComman
 	++m_TurnNumber;
 }
 
-void CSimulation2Impl::UpdateComponents(CSimContext& simContext, fixed turnLengthFixed, const std::vector<SimulationCommand>& commands)
+void CSimulation2Impl::UpdateComponents(CSimContext& simContext, fixed turnLengthFixed, const PS::vector<SimulationCommand>& commands)
 {
 	// TODO: the update process is pretty ugly, with lots of messages and dependencies
 	// between different components. Ought to work out a nicer way to do this.
@@ -743,11 +743,11 @@ void CSimulation2::InitGame()
 
 void CSimulation2::Update(int turnLength)
 {
-	std::vector<SimulationCommand> commands;
+	PS::vector<SimulationCommand> commands;
 	m->Update(turnLength, commands);
 }
 
-void CSimulation2::Update(int turnLength, const std::vector<SimulationCommand>& commands)
+void CSimulation2::Update(int turnLength, const PS::vector<SimulationCommand>& commands)
 {
 	m->Update(turnLength, commands);
 }
@@ -904,7 +904,7 @@ std::string CSimulation2::GenerateSchema()
 	return m->m_ComponentManager.GenerateSchema();
 }
 
-static std::vector<std::string> GetJSONData(const VfsPath& path)
+static PS::vector<std::string> GetJSONData(const VfsPath& path)
 {
 	VfsPaths pathnames;
 	Status ret = vfs::GetPathnames(g_VFS, path, L"*.json", pathnames);
@@ -913,10 +913,10 @@ static std::vector<std::string> GetJSONData(const VfsPath& path)
 		// Some error reading directory
 		wchar_t error[200];
 		LOGERROR("Error reading directory '%s': %s", path.string8(), utf8_from_wstring(StatusDescription(ret, error, ARRAY_SIZE(error))));
-		return std::vector<std::string>();
+		return PS::vector<std::string>();
 	}
 
-	std::vector<std::string> data;
+	PS::vector<std::string> data;
 	for (const VfsPath& p : pathnames)
 	{
 		// Load JSON file
@@ -934,12 +934,12 @@ static std::vector<std::string> GetJSONData(const VfsPath& path)
 	return data;
 }
 
-std::vector<std::string> CSimulation2::GetRMSData()
+PS::vector<std::string> CSimulation2::GetRMSData()
 {
 	return GetJSONData(L"maps/random/");
 }
 
-std::vector<std::string> CSimulation2::GetVictoryConditiondData()
+PS::vector<std::string> CSimulation2::GetVictoryConditiondData()
 {
 	return GetJSONData(L"simulation/data/settings/victory_conditions/");
 }

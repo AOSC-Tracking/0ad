@@ -170,7 +170,7 @@ template<> bool Script::FromJSVal<CGUIString>(const ScriptRequest& rq, JS::Handl
 }
 
 JSVAL_VECTOR(CVector2D)
-JSVAL_VECTOR(std::vector<CVector2D>)
+JSVAL_VECTOR(PS::vector<CVector2D>)
 JSVAL_VECTOR(CGUIString)
 
 template<> void Script::ToJSVal<CGUIColor>(const ScriptRequest& rq, JS::MutableHandleValue ret, const CGUIColor& val)

@@ -25,6 +25,7 @@
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Vector.h"
 #include "ps/Profile.h"
 #include "renderer/backend/vulkan/Buffer.h"
 #include "renderer/backend/vulkan/DescriptorManager.h"
@@ -52,7 +53,6 @@
 #include <string>
 #include <string_view>
 #include <type_traits>
-#include <vector>
 
 // According to https://wiki.libsdl.org/SDL_Vulkan_LoadLibrary the following
 // functionality is supported since SDL 2.0.6.
@@ -74,7 +74,7 @@ namespace
 
 constexpr size_t QUERY_POOL_SIZE{NUMBER_OF_FRAMES_IN_FLIGHT * 1024};
 
-std::vector<const char*> GetRequiredSDLExtensions(SDL_Window* window)
+PS::vector<const char*> GetRequiredSDLExtensions(SDL_Window* window)
 {
 	if (!window)
 		return {};
@@ -83,18 +83,18 @@ std::vector<const char*> GetRequiredSDLExtensions(SDL_Window* window)
 	unsigned int SDLExtensionCount = MAX_EXTENSION_COUNT;
 	const char* SDLExtensions[MAX_EXTENSION_COUNT];
 	ENSURE(SDL_Vulkan_GetInstanceExtensions(window, &SDLExtensionCount, SDLExtensions));
-	std::vector<const char*> requiredExtensions;
+	PS::vector<const char*> requiredExtensions;
 	requiredExtensions.reserve(SDLExtensionCount);
 	std::copy_n(SDLExtensions, SDLExtensionCount, std::back_inserter(requiredExtensions));
 	return requiredExtensions;
 }
 
-std::vector<std::string> GetAvailableValidationLayers()
+PS::vector<std::string> GetAvailableValidationLayers()
 {
 	uint32_t layerCount = 0;
 	ENSURE_VK_SUCCESS(vkEnumerateInstanceLayerProperties(&layerCount, nullptr));
 
-	std::vector<VkLayerProperties> availableLayers(layerCount);
+	PS::vector<VkLayerProperties> availableLayers(layerCount);
 	ENSURE_VK_SUCCESS(vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data()));
 
 	for (const VkLayerProperties& layer : availableLayers)
@@ -107,21 +107,21 @@ std::vector<std::string> GetAvailableValidationLayers()
 			VK_API_VERSION_PATCH(layer.specVersion));
 	}
 
-	std::vector<std::string> availableValidationLayers;
+	PS::vector<std::string> availableValidationLayers;
 	availableValidationLayers.reserve(layerCount);
 	for (const VkLayerProperties& layer : availableLayers)
 		availableValidationLayers.emplace_back(layer.layerName);
 	return availableValidationLayers;
 }
 
-std::vector<std::string> GetAvailableInstanceExtensions(const char* layerName = nullptr)
+PS::vector<std::string> GetAvailableInstanceExtensions(const char* layerName = nullptr)
 {
 	uint32_t extensionCount = 0;
 	ENSURE_VK_SUCCESS(vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, nullptr));
-	std::vector<VkExtensionProperties> extensions(extensionCount);
+	PS::vector<VkExtensionProperties> extensions(extensionCount);
 	ENSURE_VK_SUCCESS(vkEnumerateInstanceExtensionProperties(layerName, &extensionCount, extensions.data()));
 
-	std::vector<std::string> availableExtensions;
+	PS::vector<std::string> availableExtensions;
 	for (const VkExtensionProperties& extension : extensions)
 		availableExtensions.emplace_back(extension.extensionName);
 	return availableExtensions;
@@ -226,7 +226,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	applicationInfo.engineVersion = applicationInfo.applicationVersion;
 	applicationInfo.apiVersion = VK_API_VERSION_1_1;
 
-	std::vector<const char*> requiredInstanceExtensions = GetRequiredSDLExtensions(window);
+	PS::vector<const char*> requiredInstanceExtensions = GetRequiredSDLExtensions(window);
 
 	device->m_ValidationLayers = GetAvailableValidationLayers();
 	auto hasValidationLayer = [&layers = device->m_ValidationLayers](const char* name) -> bool
@@ -251,7 +251,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	if (enableDebugLayers)
 		requiredInstanceExtensions.emplace_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-	std::vector<const char*> requestedValidationLayers;
+	PS::vector<const char*> requestedValidationLayers;
 	const bool enableValidationFeatures = enableDebugMessages && hasValidationLayer("VK_LAYER_KHRONOS_validation");
 	if (enableValidationFeatures)
 		requestedValidationLayers.emplace_back("VK_LAYER_KHRONOS_validation");
@@ -334,11 +334,11 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 	if (window)
 		ENSURE(SDL_Vulkan_CreateSurface(window, device->m_Instance, &device->m_Surface));
 
-	const std::vector<const char*> requiredDeviceExtensions =
+	const PS::vector<const char*> requiredDeviceExtensions =
 	{
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
-	std::vector<SAvailablePhysicalDevice> availablePhyscialDevices =
+	PS::vector<SAvailablePhysicalDevice> availablePhyscialDevices =
 		GetAvailablePhysicalDevices(device->m_Instance, device->m_Surface, requiredDeviceExtensions);
 	for (const SAvailablePhysicalDevice& device : availablePhyscialDevices)
 	{
@@ -445,7 +445,7 @@ std::unique_ptr<CDevice> CDevice::Create(SDL_Window* window)
 		choosenDevice.descriptorIndexingFeatures.descriptorBindingUpdateUnusedWhilePending &&
 		choosenDevice.descriptorIndexingFeatures.descriptorBindingSampledImageUpdateAfterBind;
 
-	std::vector<const char*> deviceExtensions = requiredDeviceExtensions;
+	PS::vector<const char*> deviceExtensions = requiredDeviceExtensions;
 	if (hasDescriptorIndexing)
 		deviceExtensions.emplace_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 

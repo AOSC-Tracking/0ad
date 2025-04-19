@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,11 +22,10 @@
 #include "graphics/RenderableObject.h"
 #include "maths/Vector2D.h"
 #include "maths/Vector3D.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/VertexBufferManager.h"
-
-#include <vector>
 
 class CPatch;
 class CShaderDefines;
@@ -72,19 +71,19 @@ public:
 	static void RenderBases(
 		Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 		Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-		const std::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow);
+		const PS::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow);
 	static void RenderBlends(
 		Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 		Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-		const std::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow);
+		const PS::vector<CPatchRData*>& patches, const CShaderDefines& context, ShadowMap* shadow);
 	static void RenderStreams(
 		Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 		Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-		const std::vector<CPatchRData*>& patches);
+		const PS::vector<CPatchRData*>& patches);
 	static void RenderSides(
 		Renderer::Backend::IDeviceCommandContext* deviceCommandContext,
 		Renderer::Backend::IVertexInputLayout* vertexInputLayout,
-		const std::vector<CPatchRData*>& patches);
+		const PS::vector<CPatchRData*>& patches);
 
 	static void PrepareShader(ShadowMap* shadow);
 
@@ -146,7 +145,7 @@ private:
 	// build this renderdata object
 	void Build();
 
-	void AddBlend(std::vector<SBlendVertex>& blendVertices, std::vector<u16>& blendIndices,
+	void AddBlend(PS::vector<SBlendVertex>& blendVertices, PS::vector<u16>& blendIndices,
 			   u16 i, u16 j, u8 shape, CTerrainTextureEntry* texture);
 
 	void BuildBlends();
@@ -154,7 +153,7 @@ private:
 	void BuildVertices();
 	void BuildSides();
 
-	void BuildSide(std::vector<SSideVertex>& vertices, CPatchSideFlags side);
+	void BuildSide(PS::vector<SSideVertex>& vertices, CPatchSideFlags side);
 
 	// owner patch
 	CPatch* m_Patch;
@@ -175,10 +174,10 @@ private:
 	CVertexBufferManager::Handle m_VBBlendIndices;
 
 	// list of base splats to apply to this patch
-	std::vector<SSplat> m_Splats;
+	PS::vector<SSplat> m_Splats;
 
 	// splats used in blend pass
-	std::vector<SSplat> m_BlendSplats;
+	PS::vector<SSplat> m_BlendSplats;
 
 	// boundary of water in this patch
 	CBoundingBoxAligned m_WaterBounds;

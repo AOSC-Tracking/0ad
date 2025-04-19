@@ -117,7 +117,7 @@ public:
 
 		TS_ASSERT_EQUALS((size_t)0, result.GetVertices().size());
 
-		std::vector<std::vector<size_t> > faces;
+		PS::vector<PS::vector<size_t> > faces;
 		result.GetFaces(faces);
 
 		TS_ASSERT_EQUALS((size_t)0, faces.size());
@@ -126,7 +126,7 @@ public:
 private:
 	size_t GetUniqueVertexIndex(const CBrush& brush, const CVector3D& vertex, float eps = 1e-6f)
 	{
-		std::vector<CVector3D> vertices = brush.GetVertices();
+		PS::vector<CVector3D> vertices = brush.GetVertices();
 
 		for (size_t i = 0; i < vertices.size(); ++i)
 		{
@@ -143,7 +143,7 @@ private:
 
 	void VerifyFacePresent(const CBrush& brush, int count, ...)
 	{
-		std::vector<size_t> face;
+		PS::vector<size_t> face;
 
 		va_list args;
 		va_start(args, count);
@@ -154,7 +154,7 @@ private:
 		if (face.size() == 0)
 			return;
 
-		std::vector<std::vector<size_t> > faces;
+		PS::vector<PS::vector<size_t> > faces;
 		brush.GetFaces(faces);
 
 		// the brush is free to use any starting vertex along the face, and to use any winding order, so have 'face'
@@ -162,14 +162,14 @@ private:
 
 		for (size_t c = 0; c < face.size() - 1; ++c)
 		{
-			std::vector<std::vector<size_t> >::iterator it1 = std::find(faces.begin(), faces.end(), face);
+			PS::vector<PS::vector<size_t> >::iterator it1 = std::find(faces.begin(), faces.end(), face);
 			if (it1 != faces.end())
 				return;
 
 			// no match, try the reverse
-			std::vector<size_t> faceReverse = face;
+			PS::vector<size_t> faceReverse = face;
 			std::reverse(faceReverse.begin(), faceReverse.end());
-			std::vector<std::vector<size_t> >::iterator it2 = std::find(faces.begin(), faces.end(), faceReverse);
+			PS::vector<PS::vector<size_t> >::iterator it2 = std::find(faces.begin(), faces.end(), faceReverse);
 			if (it2 != faces.end())
 				return;
 

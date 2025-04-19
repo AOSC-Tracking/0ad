@@ -30,12 +30,12 @@ class CCmpGarrisonHolderScripted : public ICmpGarrisonHolder
 public:
 	DEFAULT_SCRIPT_WRAPPER(GarrisonHolderScripted)
 
-	std::vector<entity_id_t> GetEntities() const override
+	PS::vector<entity_id_t> GetEntities() const override
 	{
-		return m_Script.Call<std::vector<entity_id_t>>("GetEntities");
+		return m_Script.Call<PS::vector<entity_id_t>>("GetEntities");
 	}
 
-	void SetInitEntities(std::vector<entity_id_t>&& entities) override
+	void SetInitEntities(PS::vector<entity_id_t>&& entities) override
 	{
 		m_Script.CallVoid("SetInitGarrison", entities);
 	}

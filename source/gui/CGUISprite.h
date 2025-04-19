@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -27,12 +27,12 @@
 #include "gui/SettingTypes/CGUISize.h"
 #include "gui/SettingTypes/CGUIColor.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "renderer/backend/Sampler.h"
 
-#include <map>
 #include <memory>
-#include <vector>
 
 class CCanvas2D;
 
@@ -124,7 +124,7 @@ public:
 	void AddImage(std::unique_ptr<SGUIImage> image);
 
 	/// List of images
-	std::vector<std::unique_ptr<SGUIImage>> m_Images;
+	PS::vector<std::unique_ptr<SGUIImage>> m_Images;
 };
 
 // An instance of a sprite, usually stored in IGUIObjects - basically a string
@@ -139,7 +139,7 @@ public:
 	CGUISpriteInstance();
 	CGUISpriteInstance(const CStr& SpriteName);
 
-	void Draw(CGUI& pGUI, CCanvas2D& canvas, const CRect& Size, std::map<CStr, std::unique_ptr<const CGUISprite>>& Sprites) const;
+	void Draw(CGUI& pGUI, CCanvas2D& canvas, const CRect& Size, PS::map<CStr, std::unique_ptr<const CGUISprite>>& Sprites) const;
 
 	/**
 	 * Whether this Sprite has no texture name set.

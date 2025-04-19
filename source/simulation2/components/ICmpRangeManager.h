@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,12 +20,10 @@
 
 #include "maths/FixedVector3D.h"
 #include "maths/FixedVector2D.h"
-
+#include "ps/containers/Vector.h"
 #include "simulation2/system/Interface.h"
 #include "simulation2/helpers/Position.h"
 #include "simulation2/helpers/Player.h"
-
-#include <vector>
 
 class FastSpatialSubdivision;
 
@@ -131,8 +129,8 @@ public:
 	 * @param accountForSize if true, compensate for source/target entity sizes.
 	 * @return list of entities matching the query, ordered by increasing distance from the source entity.
 	 */
-	virtual std::vector<entity_id_t> ExecuteQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
+	virtual PS::vector<entity_id_t> ExecuteQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange,
+		const PS::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
 
 	/**
 	 * Execute a passive query.
@@ -144,8 +142,8 @@ public:
 	 * @param accountForSize if true, compensate for source/target entity sizes.
 	 * @return list of entities matching the query, ordered by increasing distance from the source entity.
 	 */
-	virtual std::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
+	virtual PS::vector<entity_id_t> ExecuteQueryAroundPos(const CFixedVector2D& pos, entity_pos_t minRange, entity_pos_t maxRange,
+		const PS::vector<int>& owners, int requiredInterface, bool accountForSize) = 0;
 
 	/**
 	 * Construct an active query. The query will be disabled by default.
@@ -159,7 +157,7 @@ public:
 	 * @return unique non-zero identifier of query.
 	 */
 	virtual tag_t CreateActiveQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange,
-		const std::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) = 0;
+		const PS::vector<int>& owners, int requiredInterface, u8 flags, bool accountForSize) = 0;
 
     /**
 	 * Construct an active query of a paraboloic form around the unit.
@@ -177,7 +175,7 @@ public:
 	 * @return unique non-zero identifier of query.
 	 */
 	virtual tag_t CreateActiveParabolicQuery(entity_id_t source, entity_pos_t minRange, entity_pos_t maxRange, entity_pos_t yOrigin,
-		const std::vector<int>& owners, int requiredInterface, u8 flags) = 0;
+		const PS::vector<int>& owners, int requiredInterface, u8 flags) = 0;
 
 
 	/**
@@ -230,7 +228,7 @@ public:
 	 * @param tag identifier of query.
 	 * @return list of entities matching the query, ordered by increasing distance from the source entity.
 	 */
-	virtual std::vector<entity_id_t> ResetActiveQuery(tag_t tag) = 0;
+	virtual PS::vector<entity_id_t> ResetActiveQuery(tag_t tag) = 0;
 
 	/**
 	 * Returns a list of all entities for a specific player.
@@ -238,17 +236,17 @@ public:
 	 * Maybe it should be extended to be more like ExecuteQuery without
 	 * the range parameter.)
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesByPlayer(player_id_t player) const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesByPlayer(player_id_t player) const = 0;
 
 	/**
 	 * Returns a list of all entities of all players except gaia.
 	 */
-	virtual std::vector<entity_id_t> GetNonGaiaEntities() const = 0;
+	virtual PS::vector<entity_id_t> GetNonGaiaEntities() const = 0;
 
 	/**
 	 * Returns a list of all entities owned by a player or gaia.
 	 */
-	virtual std::vector<entity_id_t> GetGaiaAndNonGaiaEntities() const = 0;
+	virtual PS::vector<entity_id_t> GetGaiaAndNonGaiaEntities() const = 0;
 
 	/**
 	 * Toggle the rendering of debug info.
@@ -360,7 +358,7 @@ public:
 	/**
 	 * Sets shared LOS data for player to the given list of players.
 	 */
-	virtual void SetSharedLos(player_id_t player, const std::vector<player_id_t>& players) = 0;
+	virtual void SetSharedLos(player_id_t player, const PS::vector<player_id_t>& players) = 0;
 
 	/**
 	 * Returns shared LOS mask for player.
@@ -376,7 +374,7 @@ public:
 	 * Get percent map explored statistics for specified set of players.
 	 * Note: this function computes statistics from scratch and should not be called too often.
 	 */
-	virtual u8 GetUnionPercentMapExplored(const std::vector<player_id_t>& players) const = 0;
+	virtual u8 GetUnionPercentMapExplored(const PS::vector<player_id_t>& players) const = 0;
 
 	/**
 	 * @return The number of LOS vertices.

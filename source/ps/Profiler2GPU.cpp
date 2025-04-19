@@ -25,14 +25,13 @@
 #include "Profiler2GPU.h"
 
 #include "ps/ConfigDB.h"
+#include "ps/containers/Deque.h"
+#include "ps/containers/Stack.h"
+#include "ps/containers/Vector.h"
 #include "ps/Profiler2.h"
 #include "ps/VideoMode.h"
 #include "renderer/backend/IDevice.h"
 #include "renderer/Renderer.h"
-
-#include <deque>
-#include <stack>
-#include <vector>
 
 /**
  * At each enter/leave-region event, we do an async GPU timestamp query.
@@ -56,10 +55,10 @@ class CProfiler2GPUImpl
 
 		double syncTimeStart; // CPU time at start of this frame.
 
-		std::vector<SEvent> events;
+		PS::vector<SEvent> events;
 	};
 
-	std::deque<SFrame> m_Frames;
+	PS::deque<SFrame> m_Frames;
 
 public:
 	CProfiler2GPUImpl(CProfiler2& profiler)
@@ -162,7 +161,7 @@ private:
 			const double timestampMultiplier{
 				device->GetCapabilities().timestampMultiplier};
 
-			std::vector<std::pair<int, uint64_t>> stack;
+			PS::vector<std::pair<int, uint64_t>> stack;
 
 			// The frame's queries are now available, so retrieve and record all their results:
 			for (size_t i = 0; i < frame.events.size(); ++i)
@@ -216,7 +215,7 @@ private:
 	CProfiler2& m_Profiler;
 	CProfiler2::ThreadStorage& m_Storage;
 
-	std::vector<uint32_t> m_FreeQueries; // query objects that are allocated but not currently in used
+	PS::vector<uint32_t> m_FreeQueries; // query objects that are allocated but not currently in used
 };
 
 CProfiler2GPU::CProfiler2GPU(CProfiler2& profiler) :

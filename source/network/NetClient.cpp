@@ -479,7 +479,7 @@ void CNetClient::SendAssignPlayerMessage(const int playerID, const CStr& guid)
 }
 
 void CNetClient::SendChatMessage(const std::wstring& text,
-	std::optional<std::vector<std::string>> receivers)
+	std::optional<PS::vector<std::string>> receivers)
 {
 	CChatMessage chat;
 	chat.m_Message = text;
@@ -963,7 +963,7 @@ bool CNetClient::OnClientsLoading(CNetClient* client, CFsmEvent *event)
 
 	CClientsLoadingMessage* message = static_cast<CClientsLoadingMessage*>(event->GetParamRef());
 
-	std::vector<CStr> guids;
+	PS::vector<CStr> guids;
 	guids.reserve(message->m_Clients.size());
 	for (const CClientsLoadingMessage::S_m_Clients& mClient : message->m_Clients)
 		guids.push_back(mClient.m_GUID);

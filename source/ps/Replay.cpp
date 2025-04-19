@@ -88,7 +88,7 @@ void CReplayLogger::StartGame(JS::MutableHandleValue attribs)
 	*m_Stream << "start " << Script::StringifyJSON(rq, attribs, false) << "\n";
 }
 
-void CReplayLogger::Turn(u32 n, u32 turnLength, std::vector<SimulationCommand>& commands)
+void CReplayLogger::Turn(u32 n, u32 turnLength, PS::vector<SimulationCommand>& commands)
 {
 	ScriptRequest rq(m_ScriptInterface);
 
@@ -167,7 +167,7 @@ void CReplayPlayer::Load(const OsPath& path)
 
 namespace
 {
-CStr ModListToString(const std::vector<const Mod::ModData*>& list)
+CStr ModListToString(const PS::vector<const Mod::ModData*>& list)
 {
 	CStr text;
 	for (const Mod::ModData* data : list)
@@ -175,9 +175,9 @@ CStr ModListToString(const std::vector<const Mod::ModData*>& list)
 	return text;
 }
 
-void CheckReplayMods(const std::vector<Mod::ModData>& replayMods)
+void CheckReplayMods(const PS::vector<Mod::ModData>& replayMods)
 {
-	std::vector<const Mod::ModData*> replayData;
+	PS::vector<const Mod::ModData*> replayData;
 	replayData.reserve(replayMods.size());
 	for (const Mod::ModData& data : replayMods)
 		replayData.push_back(&data);
@@ -200,7 +200,7 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 	const int heapGrowthBytesGCTrigger = 20 * 1024 * 1024;
 	g_ScriptContext = ScriptContext::CreateContext(contextSize, heapGrowthBytesGCTrigger);
 
-	std::vector<SimulationCommand> commands;
+	PS::vector<SimulationCommand> commands;
 	u32 turn = 0;
 	u32 turnLength = 0;
 
@@ -225,7 +225,7 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 				}
 
 				// Load the mods specified in the replay.
-				std::vector<Mod::ModData> replayMods;
+				PS::vector<Mod::ModData> replayMods;
 				if (!Script::GetProperty(rq, attribs, "mods", replayMods))
 				{
 					LOGERROR("Could not get replay mod information.");
@@ -233,7 +233,7 @@ void CReplayPlayer::Replay(const bool serializationtest, const int rejointesttur
 					ENSURE(false);
 				}
 
-				std::vector<CStr> mods;
+				PS::vector<CStr> mods;
 				for (const Mod::ModData& data : replayMods)
 					mods.emplace_back(data.m_Pathname);
 

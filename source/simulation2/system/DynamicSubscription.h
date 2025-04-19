@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,9 +19,8 @@
 #define INCLUDED_DYNAMICSUBSCRIPTION
 
 #include "IComponent.h"
-
-#include <set>
-#include <vector>
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 
 /**
  * A list of components that are dynamically subscribed to a particular
@@ -56,13 +55,13 @@ public:
 	void Add(IComponent* cmp);
 	void Remove(IComponent* cmp);
 	void Flatten();
-	const std::vector<IComponent*>& GetComponents();
+	const PS::vector<IComponent*>& GetComponents();
 	void DebugDump();
 
 private:
-	std::vector<IComponent*> m_Components; // always in CompareIComponent order
-	std::set<IComponent*, CompareIComponent> m_Added;
-	std::set<IComponent*, CompareIComponent> m_Removed;
+	PS::vector<IComponent*> m_Components; // always in CompareIComponent order
+	PS::set<IComponent*, CompareIComponent> m_Added;
+	PS::set<IComponent*, CompareIComponent> m_Removed;
 };
 
 #endif // INCLUDED_DYNAMICSUBSCRIPTION

@@ -36,7 +36,7 @@ public:
 
 	DEFAULT_COMPONENT_ALLOCATOR(CommandQueue)
 
-	std::vector<SimulationCommand> m_LocalQueue;
+	PS::vector<SimulationCommand> m_LocalQueue;
 
 	static std::string GetSchema()
 	{
@@ -100,13 +100,13 @@ public:
 			g_Game->GetTurnManager()->PostCommand(cmd);
 	}
 
-	void FlushTurn(const std::vector<SimulationCommand>& commands) override
+	void FlushTurn(const PS::vector<SimulationCommand>& commands) override
 	{
 		const ScriptInterface& scriptInterface = GetSimContext().GetScriptInterface();
 		ScriptRequest rq(scriptInterface);
 
 		JS::RootedValue global(rq.cx, rq.globalValue());
-		std::vector<SimulationCommand> localCommands;
+		PS::vector<SimulationCommand> localCommands;
 		m_LocalQueue.swap(localCommands);
 
 		for (size_t i = 0; i < localCommands.size(); ++i)

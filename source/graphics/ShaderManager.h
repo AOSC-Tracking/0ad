@@ -21,13 +21,13 @@
 #include "graphics/ShaderDefines.h"
 #include "graphics/ShaderProgram.h"
 #include "graphics/ShaderTechnique.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
 #include "renderer/backend/IDevice.h"
 #include "renderer/backend/PipelineState.h"
 
 #include <functional>
 #include <memory>
-#include <set>
-#include <unordered_map>
 
 /**
  * Shader manager: loads and caches shader programs.
@@ -88,7 +88,7 @@ private:
 	// The compiled state depends solely on the filename and list of defines,
 	// so we store that in CacheKey.
 	// TODO: is this cache useful when we already have an effect cache?
-	std::map<CacheKey, CShaderProgramPtr> m_ProgramCache;
+	PS::map<CacheKey, CShaderProgramPtr> m_ProgramCache;
 
 	/**
 	 * Key for effect cache lookups.
@@ -110,14 +110,14 @@ private:
 		size_t operator()(const EffectCacheKey& key) const;
 	};
 
-	using EffectCacheMap = std::unordered_map<EffectCacheKey, CShaderTechniquePtr, EffectCacheKeyHash>;
+	using EffectCacheMap = PS::unordered_map<EffectCacheKey, CShaderTechniquePtr, EffectCacheKeyHash>;
 	EffectCacheMap m_EffectCache;
 
 	// Store the set of shaders that need to be reloaded when the given file is modified
 	template<typename T>
-	using HotloadFilesMap = std::unordered_map<
+	using HotloadFilesMap = PS::unordered_map<
 		VfsPath,
-		std::set<std::weak_ptr<T>, std::owner_less<std::weak_ptr<T>>>>;
+		PS::set<std::weak_ptr<T>, std::owner_less<std::weak_ptr<T>>>>;
 	HotloadFilesMap<CShaderTechnique> m_HotloadTechniques;
 	HotloadFilesMap<CShaderProgram> m_HotloadPrograms;
 

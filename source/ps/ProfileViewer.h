@@ -23,10 +23,9 @@
 #define INCLUDED_PROFILE_VIEWER
 
 #include "lib/input.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/Singleton.h"
-
-#include <vector>
 
 class CCanvas2D;
 
@@ -90,7 +89,7 @@ public:
 	 *
 	 * @return A vector describing all columns of the table.
 	 */
-	virtual const std::vector<ProfileColumn>& GetColumns() = 0;
+	virtual const PS::vector<ProfileColumn>& GetColumns() = 0;
 
 	/**
 	 * GetCellText

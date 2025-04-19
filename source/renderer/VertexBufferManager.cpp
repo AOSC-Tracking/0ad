@@ -124,7 +124,7 @@ CVertexBufferManager::Handle CVertexBufferManager::AllocateChunk(
 
 	// TODO, RC - run some sanity checks on allocation request
 
-	std::vector<std::unique_ptr<CVertexBuffer>>& buffers = m_Buffers[static_cast<int>(group)];
+	PS::vector<std::unique_ptr<CVertexBuffer>>& buffers = m_Buffers[static_cast<int>(group)];
 
 #if DUMP_VB_STATS
 	debug_printf("\n============================\n# allocate vsize=%zu nverts=%zu\n\n", vertexSize, numVertices);

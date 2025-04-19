@@ -31,6 +31,9 @@
 #include "ps/CacheLoader.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/UnorderedSet.h"
 #include "ps/Filesystem.h"
 #include "ps/Profile.h"
 #include "ps/Util.h"
@@ -40,10 +43,7 @@
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <iomanip>
-#include <set>
 #include <sstream>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace
 {
@@ -794,7 +794,7 @@ public:
 	{
 		fs::wpath srcPath = texture->m_Properties.m_Path.string();
 
-		std::vector<CTextureConverter::SettingsFile*> files;
+		PS::vector<CTextureConverter::SettingsFile*> files;
 		VfsPath p;
 		for (fs::wpath::iterator it = srcPath.begin(); it != srcPath.end(); ++it)
 		{
@@ -846,7 +846,7 @@ public:
 		if (files != m_HotloadFiles.end())
 		{
 			// Flag all textures using this file as needing reloading
-			for (std::set<std::weak_ptr<CTexture>>::iterator it = files->second.begin(); it != files->second.end(); ++it)
+			for (PS::set<std::weak_ptr<CTexture>>::iterator it = files->second.begin(); it != files->second.end(); ++it)
 			{
 				if (std::shared_ptr<CTexture> texture = it->lock())
 				{
@@ -901,19 +901,19 @@ private:
 
 	// Cache of all loaded textures
 	using TextureCache =
-		std::unordered_set<CTexturePtr, TPhash, TPequal_to>;
+		PS::unordered_set<CTexturePtr, TPhash, TPequal_to>;
 	TextureCache m_TextureCache;
 	// TODO: we ought to expire unused textures from the cache eventually
 
 	// Store the set of textures that need to be reloaded when the given file
 	// (a source file or settings.xml) is modified
 	using HotloadFilesMap =
-		std::unordered_map<VfsPath, std::set<std::weak_ptr<CTexture>, std::owner_less<std::weak_ptr<CTexture>>>>;
+		PS::unordered_map<VfsPath, PS::set<std::weak_ptr<CTexture>, std::owner_less<std::weak_ptr<CTexture>>>>;
 	HotloadFilesMap m_HotloadFiles;
 
 	// Cache for the conversion settings files
 	using SettingsFilesMap =
-		std::unordered_map<VfsPath, std::shared_ptr<CTextureConverter::SettingsFile>>;
+		PS::unordered_map<VfsPath, std::shared_ptr<CTextureConverter::SettingsFile>>;
 	SettingsFilesMap m_SettingsFiles;
 
 	bool m_HasS3TC = false;

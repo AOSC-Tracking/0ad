@@ -149,7 +149,7 @@ private:
 
 
 // unlimited expansion by allocating larger storage and copying.
-// (basically equivalent to std::vector, although Growth_Exponential
+// (basically equivalent to PS::vector, although Growth_Exponential
 // is much more cache and allocator-friendly than the GCC STL)
 template<class Allocator = Allocator_Heap, class GrowthPolicy = Growth_Exponential<> >
 class Storage_Reallocate

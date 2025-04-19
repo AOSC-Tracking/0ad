@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,9 +23,8 @@
 #include "gui/ObjectBases/IGUIScrollBarOwner.h"
 #include "gui/SettingTypes/CGUIString.h"
 #include "lib/external_libraries/libsdl.h"
-
-#include <list>
-#include <vector>
+#include "ps/containers/List.h"
+#include "ps/containers/Vector.h"
 
 /**
  * Text field where you can input and edit the text.
@@ -56,7 +55,7 @@ public:
 
 	// Same as above, but only on one row in X, and a given value, not the mouse's.
 	//  wanted is filled with x if the row didn't extend as far as the mouse pos.
-	int GetXTextPosition(const std::list<SRow>::const_iterator& c, const float& x, float& wanted) const;
+	int GetXTextPosition(const PS::list<SRow>::const_iterator& c, const float& x, float& wanted) const;
 
 protected:
 
@@ -168,14 +167,14 @@ protected:
 		int m_ListStart;
 
 		// List of X values for each character.
-		std::vector<float> m_ListOfX;
+		PS::vector<float> m_ListOfX;
 	};
 
 	/**
 	 * List of rows to ease changing its size, so iterators stay valid.
 	 * For one-liners only one row is used.
 	 */
-	std::list<SRow> m_CharacterPositions;
+	PS::list<SRow> m_CharacterPositions;
 
 	// *** Things for a multi-lined input control *** //
 

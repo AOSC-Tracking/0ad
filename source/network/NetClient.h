@@ -24,11 +24,10 @@
 #include "network/NetHost.h"
 #include "network/NetMessage.h"
 #include "scriptinterface/Object.h"
-
+#include "ps/containers/Deque.h"
 #include "ps/CStr.h"
 
 #include <ctime>
-#include <deque>
 #include <optional>
 #include <thread>
 
@@ -236,7 +235,7 @@ public:
 	 * @param receivers The GUID of the receiving clients. If empty send it to
 	 *	all clients.
 	 */
-	void SendChatMessage(const std::wstring& text, std::optional<std::vector<std::string>> receivers);
+	void SendChatMessage(const std::wstring& text, std::optional<PS::vector<std::string>> receivers);
 
 	void SendReadyMessage(const int status);
 
@@ -359,7 +358,7 @@ private:
 	CStr m_GUID;
 
 	/// Queue of messages for GuiPoll
-	std::deque<JS::Heap<JS::Value>> m_GuiMessageQueue;
+	PS::deque<JS::Heap<JS::Value>> m_GuiMessageQueue;
 
 	/// Serialized game state received when joining an in-progress game
 	std::string m_JoinSyncBuffer;

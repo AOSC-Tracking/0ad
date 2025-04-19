@@ -49,7 +49,7 @@ static void ProcessCommandLineArgs(const CmdLineArgs& args)
 	// be documented somewhere for users.
 
 	// Handle "-conf=key:value" (potentially multiple times)
-	std::vector<CStr> conf = args.GetMultiple("conf");
+	PS::vector<CStr> conf = args.GetMultiple("conf");
 	for (size_t i = 0; i < conf.size(); ++i)
 	{
 		CStr name_value = conf[i];

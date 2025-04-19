@@ -244,7 +244,7 @@ void SendNetworkChat(const ScriptRequest& rq, const CStrW& message, JS::HandleVa
 		return;
 	}
 
-	auto receivers = std::make_optional<std::vector<std::string>>();
+	auto receivers = std::make_optional<PS::vector<std::string>>();
 	if (!Script::FromJSVal(rq, handle, *receivers))
 	{
 		ScriptException::Raise(rq, "The second argument to `SendNetworkChat` has to be either an Array "

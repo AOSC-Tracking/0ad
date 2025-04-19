@@ -154,9 +154,9 @@ private:
 		float time;
 	};
 
-	std::vector<Projectile> m_Projectiles;
+	PS::vector<Projectile> m_Projectiles;
 
-	std::vector<ProjectileImpactAnimation> m_ProjectileImpactAnimations;
+	PS::vector<ProjectileImpactAnimation> m_ProjectileImpactAnimations;
 
 	uint32_t m_ActorSeed;
 

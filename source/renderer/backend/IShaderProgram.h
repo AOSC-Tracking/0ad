@@ -82,7 +82,7 @@ class IShaderProgram : public IDeviceObject<IShaderProgram>
 public:
 	virtual int32_t GetBindingSlot(const CStrIntern name) const = 0;
 
-	virtual std::vector<VfsPath> GetFileDependencies() const = 0;
+	virtual PS::vector<VfsPath> GetFileDependencies() const = 0;
 };
 
 } // namespace Backend

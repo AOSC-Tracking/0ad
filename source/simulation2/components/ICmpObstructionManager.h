@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,9 +21,8 @@
 #include "simulation2/system/Interface.h"
 
 #include "maths/FixedVector2D.h"
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/Position.h"
-
-#include <vector>
 
 class IObstructionTestFilter;
 template<typename T>
@@ -266,7 +265,7 @@ public:
 	 */
 	virtual bool TestStaticShape(const IObstructionTestFilter& filter,
 		entity_pos_t x, entity_pos_t z, entity_pos_t a, entity_pos_t w, entity_pos_t h,
-		std::vector<entity_id_t>* out) const = 0;
+		PS::vector<entity_id_t>* out) const = 0;
 
 	/**
 	 * Collision test a unit shape against the current set of registered shapes, and optionally writes a list of the colliding
@@ -282,14 +281,14 @@ public:
 	 */
 	virtual bool TestUnitShape(const IObstructionTestFilter& filter,
 		entity_pos_t x, entity_pos_t z, entity_pos_t clearance,
-		std::vector<entity_id_t>* out) const = 0;
+		PS::vector<entity_id_t>* out) const = 0;
 
 	/**
 	 * Convert the current set of shapes onto a navcell grid, for all passability classes contained in @p passClasses.
 	 * If @p fullUpdate is false, the function will only go through dirty shapes.
 	 * Shapes are expanded by the @p passClasses clearances, by ORing their masks onto the @p grid.
 	 */
-	virtual void Rasterize(Grid<NavcellData>& grid, const std::vector<PathfinderPassability>& passClasses, bool fullUpdate) = 0;
+	virtual void Rasterize(Grid<NavcellData>& grid, const PS::vector<PathfinderPassability>& passClasses, bool fullUpdate) = 0;
 
 	/**
 	 * Gets dirtiness information and resets it afterwards. Then it's the role of CCmpPathfinder
@@ -307,10 +306,10 @@ public:
 	 * @param z1 Z coordinate of top edge of range
 	 * @param squares output list of obstructions
 	 */
-	virtual void GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const = 0;
-	virtual void GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const = 0;
-	virtual void GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, std::vector<ObstructionSquare>& squares) const = 0;
-	virtual void GetStaticObstructionsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const = 0;
+	virtual void GetObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const = 0;
+	virtual void GetStaticObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const = 0;
+	virtual void GetUnitObstructionsInRange(const IObstructionTestFilter& filter, entity_pos_t x0, entity_pos_t z0, entity_pos_t x1, entity_pos_t z1, PS::vector<ObstructionSquare>& squares) const = 0;
+	virtual void GetStaticObstructionsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter) const = 0;
 
 	/**
 	 * Returns the entity IDs of all unit shapes that intersect the given
@@ -320,7 +319,7 @@ public:
 	 * @param filter filter for the obstructing units
 	 * @param strict whether to be strict in the check or more permissive (ie rasterize more or less). Default false.
 	 */
-	virtual void GetUnitsOnObstruction(const ObstructionSquare& square, std::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const = 0;
+	virtual void GetUnitsOnObstruction(const ObstructionSquare& square, PS::vector<entity_id_t>& out, const IObstructionTestFilter& filter, bool strict = false) const = 0;
 
 	/**
 	 * Get the obstruction square representing the given shape.

@@ -52,7 +52,7 @@ public:
 	void UnRegisterContext(const JSContext* cx) { m_Contexts.remove(cx); }
 
 private:
-	std::list<const JSContext*> m_Contexts;
+	PS::list<const JSContext*> m_Contexts;
 };
 
 #endif // INCLUDED_SCRIPTENGINE

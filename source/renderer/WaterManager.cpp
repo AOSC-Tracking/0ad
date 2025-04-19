@@ -515,7 +515,7 @@ void WaterManager::CreateWaveMeshes()
 	size_t SideSize = m_MapSize;
 
 	// First step: get the points near the coast.
-	std::set<int> CoastalPointsSet;
+	PS::set<int> CoastalPointsSet;
 	for (size_t z = 1; z < SideSize-1; ++z)
 		for (size_t x = 1; x < SideSize-1; ++x)
 			// get the points not on the shore but near it, ocean-side
@@ -525,14 +525,14 @@ void WaterManager::CreateWaveMeshes()
 	// Second step: create chains out of those coastal points.
 	static const int around[8][2] = { { -1,-1 }, { -1,0 }, { -1,1 }, { 0,1 }, { 1,1 }, { 1,0 }, { 1,-1 }, { 0,-1 } };
 
-	std::vector<std::deque<CoastalPoint> > CoastalPointsChains;
+	PS::vector<PS::deque<CoastalPoint> > CoastalPointsChains;
 	while (!CoastalPointsSet.empty())
 	{
 		int index = *(CoastalPointsSet.begin());
 		int x = index % SideSize;
 		int y = (index - x ) / SideSize;
 
-		std::deque<CoastalPoint> Chain;
+		PS::deque<CoastalPoint> Chain;
 
 		Chain.push_front(CoastalPoint(index,CVector2D(x*4,y*4)));
 
@@ -636,7 +636,7 @@ void WaterManager::CreateWaveMeshes()
 	u16 waveSizes = 14;	// maximal size in width.
 
 	// Construct indices buffer (we can afford one for all of them)
-	std::vector<u16> water_indices;
+	PS::vector<u16> water_indices;
 	for (u16 a = 0; a < waveSizes - 1; ++a)
 	{
 		for (u16 rect = 0; rect < 7; ++rect)
@@ -659,7 +659,7 @@ void WaterManager::CreateWaveMeshes()
 
 	float diff = (rand() % 50) / 5.0f;
 
-	std::vector<SWavesVertex> vertices, reversed;
+	PS::vector<SWavesVertex> vertices, reversed;
 	for (size_t i = 0; i < CoastalPointsChains.size(); ++i)
 	{
 		for (size_t j = 0; j < CoastalPointsChains[i].size()-waveSizes; ++j)
@@ -1000,8 +1000,8 @@ void WaterManager::RecomputeWindStrength()
 		float windStrength;
 	};
 
-	std::vector<SWindPoint> startingPoints;
-	std::vector<std::pair<int, int>> movement; // Every increment, move each starting point by all of these.
+	PS::vector<SWindPoint> startingPoints;
+	PS::vector<std::pair<int, int>> movement; // Every increment, move each starting point by all of these.
 
 	// Compute starting points (one or two edges of the map) and how much to move each computation increment.
 	if (fabs(windDir.X) < 0.01f)

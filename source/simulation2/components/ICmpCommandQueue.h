@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,9 +20,8 @@
 
 #include "simulation2/system/Interface.h"
 
+#include "ps/containers/Vector.h"
 #include "simulation2/helpers/SimulationCommand.h"
-
-#include <vector>
 
 /**
  * Command queue, for sending orders to entities.
@@ -53,7 +52,7 @@ public:
 	 * Calls the ProcessCommand(player, cmd) global script function for each command in the
 	 * local queue and in @p commands, and empties the local queue.
 	 */
-	virtual void FlushTurn(const std::vector<SimulationCommand>& commands) = 0;
+	virtual void FlushTurn(const PS::vector<SimulationCommand>& commands) = 0;
 
 	DECLARE_INTERFACE_TYPE(CommandQueue)
 };

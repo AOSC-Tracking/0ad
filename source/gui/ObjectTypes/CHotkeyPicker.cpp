@@ -162,7 +162,7 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 
 		if (ev->ev.type == SDL_KEYDOWN)
 		{
-			std::vector<Key>::const_iterator it = \
+			PS::vector<Key>::const_iterator it = \
 				std::find_if(m_KeysPressed.begin(), m_KeysPressed.end(), [&scancode](Key& k) { return k.code == scancode; });
 			// Can happen if multiple keys are mapped the same.
 			if (it != m_KeysPressed.end())
@@ -171,7 +171,7 @@ InReaction CHotkeyPicker::PreemptEvent(const SDL_Event_* ev)
 		}
 		else
 		{
-			std::vector<Key>::const_iterator it = \
+			PS::vector<Key>::const_iterator it = \
 				std::find_if(m_KeysPressed.begin(), m_KeysPressed.end(), [&scancode](Key& k) { return k.code == scancode; });
 			// Might happen if a key was down before this object is created.
 			if (it == m_KeysPressed.end())

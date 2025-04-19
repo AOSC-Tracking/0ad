@@ -25,9 +25,9 @@
 #include "simulation2/helpers/Pathfinding.h"
 #include "simulation2/components/ICmpTerritoryManager.h"
 
-std::vector<STerritoryBoundary> CTerritoryBoundaryCalculator::ComputeBoundaries(const Grid<u8>* territory)
+PS::vector<STerritoryBoundary> CTerritoryBoundaryCalculator::ComputeBoundaries(const Grid<u8>* territory)
 {
-	std::vector<STerritoryBoundary> boundaries;
+	PS::vector<STerritoryBoundary> boundaries;
 
 	// Copy the territories grid so we can mess with it
 	Grid<u8> grid(*territory);
@@ -115,7 +115,7 @@ std::vector<STerritoryBoundary> CTerritoryBoundaryCalculator::ComputeBoundaries(
 			boundaries.push_back(STerritoryBoundary());
 			boundaries.back().owner = (tileState & ICmpTerritoryManager::TERRITORY_PLAYER_MASK);
 			boundaries.back().blinking = (tileState & ICmpTerritoryManager::TERRITORY_BLINKING_MASK) != 0;
-			std::vector<CVector2D>& points = boundaries.back().points;
+			PS::vector<CVector2D>& points = boundaries.back().points;
 
 			u8 dir = TILE_BOTTOM;
 

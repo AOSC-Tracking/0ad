@@ -27,7 +27,7 @@
 # pragma warning(pop)
 #endif
 
-#include <queue>
+#include "ps/containers/Queue.h"
 
 class ScriptInterface;
 
@@ -58,7 +58,7 @@ private:
 		const ScriptInterface& scriptInterface;
 		JS::PersistentRootedObject job;
 	};
-	using QueueType = std::queue<QueueElement>;
+	using QueueType = PS::queue<QueueElement>;
 	QueueType m_Jobs;
 };
 }

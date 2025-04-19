@@ -47,11 +47,11 @@ CRect IGUIPanel::GetComputedSize()
 	return m_CachedLayoutActualSize;
 }
 
-const std::vector<IGUIObject*>& IGUIPanel::GetVisibleChildren() const
+const PS::vector<IGUIObject*>& IGUIPanel::GetVisibleChildren() const
 {
 	if (m_Drawing)
 		return m_Children;
 
-	static std::vector<IGUIObject*> emptyVector;
+	static PS::vector<IGUIObject*> emptyVector;
 	return emptyVector;
 }

@@ -47,10 +47,10 @@ public:
 	bool profileVisible;
 
 	/// List of root tables
-	std::vector<AbstractProfileTable*> rootTables;
+	PS::vector<AbstractProfileTable*> rootTables;
 
 	/// Path from a root table (path[0]) to the currently visible table (path[size-1])
-	std::vector<AbstractProfileTable*> path;
+	PS::vector<AbstractProfileTable*> path;
 
 	/// Helper functions
 	void TableIsDeleted(AbstractProfileTable* table);
@@ -157,7 +157,7 @@ void CProfileViewer::RenderProfile(CCanvas2D& canvas)
 	PROFILE3("profile viewer");
 
 	AbstractProfileTable* table = m->path[m->path.size() - 1];
-	const std::vector<ProfileColumn>& columns = table->GetColumns();
+	const PS::vector<ProfileColumn>& columns = table->GetColumns();
 	size_t numrows = table->GetNumberRows();
 
 	CStrIntern font_name("mono-stroke-10");
@@ -347,12 +347,12 @@ namespace
 
 		void operator() (AbstractProfileTable* table)
 		{
-			std::vector<CStr> data; // 2d array of (rows+head)*columns elements
+			PS::vector<CStr> data; // 2d array of (rows+head)*columns elements
 
-			const std::vector<ProfileColumn>& columns = table->GetColumns();
+			const PS::vector<ProfileColumn>& columns = table->GetColumns();
 
 			// Add column headers to 'data'
-			for (std::vector<ProfileColumn>::const_iterator col_it = columns.begin();
+			for (PS::vector<ProfileColumn>::const_iterator col_it = columns.begin();
 					col_it != columns.end(); ++col_it)
 				data.push_back(col_it->title);
 
@@ -361,7 +361,7 @@ namespace
 
 			// Calculate the width of each column ( = the maximum width of
 			// any value in that column)
-			std::vector<size_t> columnWidths;
+			PS::vector<size_t> columnWidths;
 			size_t cols = columns.size();
 			for (size_t c = 0; c < cols; ++c)
 			{
@@ -393,9 +393,9 @@ namespace
 			}
 		}
 
-		void WriteRows(int indent, AbstractProfileTable* table, std::vector<CStr>& data)
+		void WriteRows(int indent, AbstractProfileTable* table, PS::vector<CStr>& data)
 		{
-			const std::vector<ProfileColumn>& columns = table->GetColumns();
+			const PS::vector<ProfileColumn>& columns = table->GetColumns();
 
 			for (size_t r = 0; r < table->GetNumberRows(); ++r)
 			{
@@ -456,11 +456,11 @@ namespace
 			Script::SetProperty(rq, m_Root, table->GetTitle().c_str(), t);
 		}
 
-		std::vector<std::string> DumpCols(AbstractProfileTable* table)
+		PS::vector<std::string> DumpCols(AbstractProfileTable* table)
 		{
-			std::vector<std::string> titles;
+			PS::vector<std::string> titles;
 
-			const std::vector<ProfileColumn>& columns = table->GetColumns();
+			const PS::vector<ProfileColumn>& columns = table->GetColumns();
 
 			for (size_t c = 0; c < columns.size(); ++c)
 				titles.push_back(columns[c].title);
@@ -475,7 +475,7 @@ namespace
 			JS::RootedValue data(rq.cx);
 			Script::CreateObject(rq, &data);
 
-			const std::vector<ProfileColumn>& columns = table->GetColumns();
+			const PS::vector<ProfileColumn>& columns = table->GetColumns();
 
 			for (size_t r = 0; r < table->GetNumberRows(); ++r)
 			{
@@ -535,7 +535,7 @@ void CProfileViewer::SaveToFile()
 	m->outputStream << "================================================================\n\n";
 	m->outputStream << "PS profiler snapshot - " << asctime(localtime(&t));
 
-	std::vector<AbstractProfileTable*> tables = m->rootTables;
+	PS::vector<AbstractProfileTable*> tables = m->rootTables;
 	sort(tables.begin(), tables.end(), SortByName);
 	for_each(tables.begin(), tables.end(), WriteTable(m->outputStream));
 

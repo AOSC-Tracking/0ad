@@ -208,7 +208,7 @@ private:
 	bool m_Enabled;
 
 	const char* TEXTURE_BASE_PATH = "art/textures/selection/";
-	std::vector<RangeOverlayData> m_RangeOverlayData;
+	PS::vector<RangeOverlayData> m_RangeOverlayData;
 	CColor m_Color;
 };
 

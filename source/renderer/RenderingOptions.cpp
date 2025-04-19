@@ -37,8 +37,8 @@ CRenderingOptions g_RenderingOptions;
 class CRenderingOptions::ConfigHooks
 {
 public:
-	std::vector<CConfigDBHook>::iterator begin() { return hooks.begin(); }
-	std::vector<CConfigDBHook>::iterator end() { return hooks.end(); }
+	PS::vector<CConfigDBHook>::iterator begin() { return hooks.begin(); }
+	PS::vector<CConfigDBHook>::iterator end() { return hooks.end(); }
 	template<typename T>
 	void Setup(CStr8 name, T& variable)
 	{
@@ -52,7 +52,7 @@ public:
 	}
 	void clear() { hooks.clear(); }
 private:
-	std::vector<CConfigDBHook> hooks;
+	PS::vector<CConfigDBHook> hooks;
 };
 
 RenderPath RenderPathEnum::FromString(const CStr8& name)

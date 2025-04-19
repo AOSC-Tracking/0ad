@@ -24,7 +24,9 @@
 #include "graphics/ShaderManager.h"
 #include "graphics/TextureManager.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
 #include "ps/containers/StaticVector.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/Filesystem.h"
 #include "ps/Profile.h"
 #include "ps/XML/Xeromyces.h"
@@ -40,9 +42,7 @@
 #endif
 
 #include <algorithm>
-#include <map>
 #include <tuple>
-#include <unordered_map>
 
 namespace Renderer
 {
@@ -189,7 +189,7 @@ int GetAttributeLocationFromStream(
 
 bool PreprocessShaderFile(
 	bool arb, const CShaderDefines& defines, const VfsPath& path, const char* stage,
-	CStr& source, std::vector<VfsPath>& fileDependencies)
+	CStr& source, PS::vector<VfsPath>& fileDependencies)
 {
 	CVFSFile file;
 	if (file.Load(g_VFS, path) != PSRETURN_OK)
@@ -332,15 +332,15 @@ public:
 		CDevice* device,
 		const VfsPath& path, const VfsPath& vertexFilePath, const VfsPath& fragmentFilePath,
 		const CShaderDefines& defines,
-		const std::map<CStrIntern, std::pair<CStr, int>>& vertexIndices,
-		const std::map<CStrIntern, std::pair<CStr, int>>& fragmentIndices,
+		const PS::map<CStrIntern, std::pair<CStr, int>>& vertexIndices,
+		const PS::map<CStrIntern, std::pair<CStr, int>>& fragmentIndices,
 		int streamflags)
 		: CShaderProgram(streamflags), m_Device(device)
 	{
 		glGenProgramsARB(1, &m_VertexProgram);
 		glGenProgramsARB(1, &m_FragmentProgram);
 
-		std::vector<VfsPath> newFileDependencies = {path, vertexFilePath, fragmentFilePath};
+		PS::vector<VfsPath> newFileDependencies = {path, vertexFilePath, fragmentFilePath};
 
 		CStr vertexCode;
 		if (!PreprocessShaderFile(true, defines, vertexFilePath, "STAGE_VERTEX", vertexCode, newFileDependencies))
@@ -554,7 +554,7 @@ public:
 		ogl_WarnIfError();
 	}
 
-	std::vector<VfsPath> GetFileDependencies() const override
+	PS::vector<VfsPath> GetFileDependencies() const override
 	{
 		return m_FileDependencies;
 	}
@@ -635,13 +635,13 @@ private:
 
 	CDevice* m_Device = nullptr;
 
-	std::vector<VfsPath> m_FileDependencies;
+	PS::vector<VfsPath> m_FileDependencies;
 
 	GLuint m_VertexProgram;
 	GLuint m_FragmentProgram;
 
-	std::vector<BindingSlot> m_BindingSlots;
-	std::unordered_map<CStrIntern, int32_t> m_BindingSlotsMapping;
+	PS::vector<BindingSlot> m_BindingSlots;
+	PS::unordered_map<CStrIntern, int32_t> m_BindingSlotsMapping;
 };
 
 #endif // !CONFIG2_GLES
@@ -653,13 +653,13 @@ public:
 		CDevice* device, const CStr& name,
 		const VfsPath& programPath, PS::span<const std::tuple<VfsPath, GLenum>> shaderStages,
 		const CShaderDefines& defines,
-		const std::map<CStrIntern, int>& vertexAttribs,
+		const PS::map<CStrIntern, int>& vertexAttribs,
 		int streamflags) :
 	CShaderProgram(streamflags),
 		m_Device(device), m_Name(name),
 		m_VertexAttribs(vertexAttribs)
 	{
-		for (std::map<CStrIntern, int>::iterator it = m_VertexAttribs.begin(); it != m_VertexAttribs.end(); ++it)
+		for (PS::map<CStrIntern, int>::iterator it = m_VertexAttribs.begin(); it != m_VertexAttribs.end(); ++it)
 			m_ActiveVertexAttributes.emplace_back(it->second);
 		std::sort(m_ActiveVertexAttributes.begin(), m_ActiveVertexAttributes.end());
 
@@ -675,7 +675,7 @@ public:
 		m_Device->GetActiveCommandContext()->SetGraphicsPipelineState(
 			MakeDefaultGraphicsPipelineStateDesc());
 
-		std::vector<VfsPath> newFileDependencies = {programPath};
+		PS::vector<VfsPath> newFileDependencies = {programPath};
 		for (const auto& [path, type] : shaderStages)
 		{
 			GLuint shader = glCreateShader(type);
@@ -758,7 +758,7 @@ public:
 		// Set up the attribute bindings explicitly, since apparently drivers
 		// don't always pick the most efficient bindings automatically,
 		// and also this lets us hardcode indexes into VertexPointer etc
-		for (std::map<CStrIntern, int>::iterator it = m_VertexAttribs.begin(); it != m_VertexAttribs.end(); ++it)
+		for (PS::map<CStrIntern, int>::iterator it = m_VertexAttribs.begin(); it != m_VertexAttribs.end(); ++it)
 			glBindAttribLocation(m_Program, it->second, it->first.c_str());
 
 		glLinkProgram(m_Program);
@@ -796,7 +796,7 @@ public:
 
 		// Reorder sampler units to decrease redundant texture unit changes when
 		// samplers bound in a different order.
-		const std::unordered_map<CStrIntern, int> requiredUnits =
+		const PS::unordered_map<CStrIntern, int> requiredUnits =
 		{
 			{CStrIntern("baseTex"), 0},
 			{CStrIntern("normTex"), 1},
@@ -806,7 +806,7 @@ public:
 			{CStrIntern("losTex"), 5},
 		};
 
-		std::vector<uint8_t> occupiedUnits;
+		PS::vector<uint8_t> occupiedUnits;
 
 #if !CONFIG2_GLES
 		const bool isStorageSupported{m_Device->GetCapabilities().storage};
@@ -1046,8 +1046,8 @@ public:
 
 		if (previousShaderProgramGLSL)
 		{
-			std::vector<int>::iterator itPrevious = previousShaderProgramGLSL->m_ActiveVertexAttributes.begin();
-			std::vector<int>::iterator itNext = m_ActiveVertexAttributes.begin();
+			PS::vector<int>::iterator itPrevious = previousShaderProgramGLSL->m_ActiveVertexAttributes.begin();
+			PS::vector<int>::iterator itNext = m_ActiveVertexAttributes.begin();
 			while (
 				itPrevious != previousShaderProgramGLSL->m_ActiveVertexAttributes.end() ||
 				itNext != m_ActiveVertexAttributes.end())
@@ -1250,7 +1250,7 @@ public:
 		const VertexAttributeRate rate, const void* data) override
 	{
 		const int attributeLocation = GetAttributeLocationFromStream(m_Device, stream);
-		std::vector<int>::const_iterator it =
+		PS::vector<int>::const_iterator it =
 			std::lower_bound(m_ActiveVertexAttributes.begin(), m_ActiveVertexAttributes.end(), attributeLocation);
 		if (it == m_ActiveVertexAttributes.end() || *it != attributeLocation)
 			return;
@@ -1273,7 +1273,7 @@ public:
 		m_ValidStreams |= GetStreamMask(stream);
 	}
 
-	std::vector<VfsPath> GetFileDependencies() const override
+	PS::vector<VfsPath> GetFileDependencies() const override
 	{
 		return m_FileDependencies;
 	}
@@ -1288,11 +1288,11 @@ private:
 	CDevice* m_Device = nullptr;
 
 	CStr m_Name;
-	std::vector<VfsPath> m_FileDependencies;
+	PS::vector<VfsPath> m_FileDependencies;
 
-	std::map<CStrIntern, int> m_VertexAttribs;
+	PS::map<CStrIntern, int> m_VertexAttribs;
 	// Sorted list of active vertex attributes.
-	std::vector<int> m_ActiveVertexAttributes;
+	PS::vector<int> m_ActiveVertexAttributes;
 
 	GLuint m_Program;
 	// 5 = max(compute, vertex + tesselation (control + evaluation) + geometry + fragment).
@@ -1310,8 +1310,8 @@ private:
 		bool isTexture;
 		bool isStorageBuffer;
 	};
-	std::vector<BindingSlot> m_BindingSlots;
-	std::unordered_map<CStrIntern, int32_t> m_BindingSlotsMapping;
+	PS::vector<BindingSlot> m_BindingSlots;
+	PS::unordered_map<CStrIntern, int32_t> m_BindingSlotsMapping;
 
 	GLint m_UniformBufferLocation{-1};
 	uint32_t m_UniformBufferSize{0};
@@ -1378,9 +1378,9 @@ std::unique_ptr<CShaderProgram> CShaderProgram::Create(CDevice* device, const CS
 	VfsPath vertexFile;
 	VfsPath fragmentFile;
 	CShaderDefines defines = baseDefines;
-	std::map<CStrIntern, std::pair<CStr, int>> vertexUniforms;
-	std::map<CStrIntern, std::pair<CStr, int>> fragmentUniforms;
-	std::map<CStrIntern, int> vertexAttribs;
+	PS::map<CStrIntern, std::pair<CStr, int>> vertexUniforms;
+	PS::map<CStrIntern, std::pair<CStr, int>> fragmentUniforms;
+	PS::map<CStrIntern, int> vertexAttribs;
 	int streamFlags = 0;
 
 	VfsPath computeFile;

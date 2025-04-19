@@ -242,15 +242,15 @@ std::unique_ptr<CShaderProgram> CShaderProgram::Create(
 	};
 
 	uint32_t texturesDescriptorSetSize = 0;
-	std::unordered_map<CStrIntern, uint32_t> textureMapping;
+	PS::unordered_map<CStrIntern, uint32_t> textureMapping;
 
 	VkDescriptorType storageImageDescriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	uint32_t storageImageDescriptorSetSize = 0;
-	std::unordered_map<CStrIntern, uint32_t> storageImageMapping;
+	PS::unordered_map<CStrIntern, uint32_t> storageImageMapping;
 
 	VkDescriptorType storageBufferDescriptorType = VK_DESCRIPTOR_TYPE_MAX_ENUM;
 	uint32_t storageBufferDescriptorSetSize = 0;
-	std::unordered_map<CStrIntern, uint32_t> storageBufferMapping;
+	PS::unordered_map<CStrIntern, uint32_t> storageBufferMapping;
 
 	auto addDescriptorSets = [&](const XMBElement& element) -> bool
 	{
@@ -526,7 +526,7 @@ std::unique_ptr<CShaderProgram> CShaderProgram::Create(
 
 	for (size_t index = 0; index < shaderProgram->m_PushConstants.size(); ++index)
 		shaderProgram->m_PushConstantMapping[shaderProgram->m_PushConstants[index].name] = index;
-	std::vector<VkPushConstantRange> pushConstantRanges;
+	PS::vector<VkPushConstantRange> pushConstantRanges;
 	pushConstantRanges.reserve(shaderProgram->m_PushConstants.size());
 	std::transform(
 		shaderProgram->m_PushConstants.begin(), shaderProgram->m_PushConstants.end(),
@@ -576,7 +576,7 @@ std::unique_ptr<CShaderProgram> CShaderProgram::Create(
 			std::make_unique<std::byte[]>(shaderProgram->m_MaterialConstantsDataSize);
 	}
 
-	std::vector<VkDescriptorSetLayout> layouts =
+	PS::vector<VkDescriptorSetLayout> layouts =
 		device->GetDescriptorManager().GetDescriptorSetLayouts();
 	if (texturesDescriptorSetSize > 0)
 	{
@@ -649,7 +649,7 @@ int32_t CShaderProgram::GetBindingSlot(const CStrIntern name) const
 	return -1;
 }
 
-std::vector<VfsPath> CShaderProgram::GetFileDependencies() const
+PS::vector<VfsPath> CShaderProgram::GetFileDependencies() const
 {
 	return m_FileDependencies;
 }

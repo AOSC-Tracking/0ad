@@ -23,6 +23,7 @@
 
 #include "gui/GUIManager.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Queue.h"
 #include "ps/Game.h"
 #include "ps/GameSetup/GameSetup.h"
 #include "ps/Loader.h"
@@ -34,7 +35,6 @@
 #include "simulation2/components/ICmpTemplateManager.h"
 #include "simulation2/system/LocalTurnManager.h"
 
-#include <queue>
 #include <sstream>
 #include <tuple>
 
@@ -70,7 +70,7 @@ std::string Interface::SendGameMessage(GameMessage&& msg)
 	return m_ReturnValue;
 }
 
-std::string Interface::Step(std::vector<GameCommand>&& commands)
+std::string Interface::Step(PS::vector<GameCommand>&& commands)
 {
 	std::lock_guard<std::mutex> lock(m_Lock);
 	return SendGameMessage({ GameMessageType::Commands, std::move(commands) });
@@ -90,13 +90,13 @@ std::string Interface::Evaluate(std::string&& code)
 	return SendGameMessage({ GameMessageType::Evaluate });
 }
 
-std::vector<std::string> Interface::GetTemplates(const std::vector<std::string>& names) const
+PS::vector<std::string> Interface::GetTemplates(const PS::vector<std::string>& names) const
 {
 	std::lock_guard<std::mutex> lock(m_Lock);
 	CSimulation2& simulation = *g_Game->GetSimulation2();
 	CmpPtr<ICmpTemplateManager> cmpTemplateManager(simulation.GetSimContext().GetSystemEntity());
 
-	std::vector<std::string> templates;
+	PS::vector<std::string> templates;
 	for (const std::string& templateName : names)
 	{
 		const CParamNode* node = cmpTemplateManager->GetTemplate(templateName);
@@ -182,7 +182,7 @@ void* Interface::MgCallback(mg_event event, struct mg_connection *conn, const st
 			std::string data = GetRequestContent(conn);
 			std::stringstream postStream(data);
 			std::string line;
-			std::vector<GameCommand> commands;
+			PS::vector<GameCommand> commands;
 
 			while (std::getline(postStream, line, '\n'))
 			{
@@ -242,7 +242,7 @@ void* Interface::MgCallback(mg_event event, struct mg_connection *conn, const st
 			}
 			std::stringstream postStream(data);
 			std::string line;
-			std::vector<std::string> templateNames;
+			PS::vector<std::string> templateNames;
 			while (std::getline(postStream, line, '\n'))
 				templateNames.push_back(line);
 

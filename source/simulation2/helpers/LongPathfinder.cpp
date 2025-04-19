@@ -68,7 +68,7 @@ class JumpPointCache
 	 */
 	struct RowRaw
 	{
-		std::vector<u16> data;
+		PS::vector<u16> data;
 
 		size_t GetMemoryUsage() const
 		{
@@ -129,7 +129,7 @@ class JumpPointCache
 			u32 data;
 		};
 
-		std::vector<Interval> data;
+		PS::vector<Interval> data;
 
 		size_t GetMemoryUsage() const
 		{
@@ -153,7 +153,7 @@ class JumpPointCache
 		 * array), and then each range is split into two sub-ranges with a pivot in
 		 * the middle (to ensure the tree remains balanced) and ConstructTree recurses.
 		 */
-		void ConstructTree(std::vector<Interval>& tree, size_t x0, size_t pivot, size_t x1, size_t idx_tree)
+		void ConstructTree(PS::vector<Interval>& tree, size_t x0, size_t pivot, size_t x1, size_t idx_tree)
 		{
 			ENSURE(x0 < data.size());
 			ENSURE(x1 <= data.size());
@@ -173,7 +173,7 @@ class JumpPointCache
 		{
 			// Convert the sorted interval list into a balanced binary tree
 
-			std::vector<Interval> tree;
+			PS::vector<Interval> tree;
 
 			if (!data.empty())
 			{
@@ -214,10 +214,10 @@ class JumpPointCache
 public:
 	int m_Width;
 	int m_Height;
-	std::vector<Row> m_JumpPointsRight;
-	std::vector<Row> m_JumpPointsLeft;
-	std::vector<Row> m_JumpPointsUp;
-	std::vector<Row> m_JumpPointsDown;
+	PS::vector<Row> m_JumpPointsRight;
+	PS::vector<Row> m_JumpPointsLeft;
+	PS::vector<Row> m_JumpPointsUp;
+	PS::vector<Row> m_JumpPointsDown;
 
 	/**
 	 * Compute the cached obstruction/jump points for each cell,
@@ -225,7 +225,7 @@ public:
 	 * (+i) direction; set 'transpose' to switch to upwards (+j),
 	 * and/or set 'mirror' to reverse the direction.
 	 */
-	void ComputeRows(std::vector<Row>& rows,
+	void ComputeRows(PS::vector<Row>& rows,
 		const Grid<NavcellData>& terrain, pass_class_t passClass,
 		bool transpose, bool mirror)
 	{
@@ -722,7 +722,7 @@ void LongPathfinder::ComputeJPSPath(const HierarchicalPathfinder& hierPath, enti
 		// Needs to lock for construction, or several threads might try doing that at the same time.
 		static std::mutex JPCMutex;
 		std::unique_lock<std::mutex> lock(JPCMutex);
-		std::map<pass_class_t, std::shared_ptr<JumpPointCache>>::const_iterator it = m_JumpPointCache.find(passClass);
+		PS::map<pass_class_t, std::shared_ptr<JumpPointCache>>::const_iterator it = m_JumpPointCache.find(passClass);
 		if (it != m_JumpPointCache.end())
 			state.jpc = it->second.get();
 
@@ -939,8 +939,8 @@ void LongPathfinder::ImprovePathWaypoints(WaypointPath& path, pass_class_t passC
 	if (path.m_Waypoints.size() < 2)
 		return;
 
-	std::vector<Waypoint>& waypoints = path.m_Waypoints;
-	std::vector<Waypoint> newWaypoints;
+	PS::vector<Waypoint>& waypoints = path.m_Waypoints;
+	PS::vector<Waypoint> newWaypoints;
 
 	CFixedVector2D prev(waypoints.front().x, waypoints.front().z);
 	newWaypoints.push_back(waypoints.front());
@@ -1009,7 +1009,7 @@ void LongPathfinder::ComputePath(const HierarchicalPathfinder& hierPath, entity_
 	ComputeJPSPath(hierPath, x0, z0, origGoal, passClass, path);
 }
 void LongPathfinder::ComputePath(const HierarchicalPathfinder& hierPath, entity_pos_t x0, entity_pos_t z0, const PathGoal& origGoal,
-	pass_class_t passClass, std::vector<CircularRegion> excludedRegions, WaypointPath& path)
+	pass_class_t passClass, PS::vector<CircularRegion> excludedRegions, WaypointPath& path)
 {
 	GenerateSpecialMap(passClass, excludedRegions);
 	ComputeJPSPath(hierPath, x0, z0, origGoal, SPECIAL_PASS_CLASS, path);
@@ -1023,7 +1023,7 @@ inline bool InRegion(u16 i, u16 j, CircularRegion region)
 	return CFixedVector2D(cellX - region.x, cellZ - region.z).CompareLength(region.r) <= 0;
 }
 
-void LongPathfinder::GenerateSpecialMap(pass_class_t passClass, std::vector<CircularRegion> excludedRegions)
+void LongPathfinder::GenerateSpecialMap(pass_class_t passClass, PS::vector<CircularRegion> excludedRegions)
 {
 	for (u16 j = 0; j < m_Grid->m_H; ++j)
 	{
@@ -1105,7 +1105,7 @@ public:
 		// Render the most recently generated path
 		if (m_Pathfinder.m_Debug.Path && !m_Pathfinder.m_Debug.Path->m_Waypoints.empty())
 		{
-			std::vector<Waypoint>& waypoints = m_Pathfinder.m_Debug.Path->m_Waypoints;
+			PS::vector<Waypoint>& waypoints = m_Pathfinder.m_Debug.Path->m_Waypoints;
 			u16 ip = 0, jp = 0;
 			for (size_t k = 0; k < waypoints.size(); ++k)
 			{

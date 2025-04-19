@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,8 +24,7 @@
 #define INCLUDED_VFS_PATH
 
 #include "lib/path.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 /**
  * VFS path of the form "(dir/)*file?"
@@ -39,8 +38,8 @@
  * arrays, prefer PATH_MAX.
  **/
 
-typedef Path VfsPath;
+using VfsPath = Path;
 
-typedef std::vector<VfsPath> VfsPaths;
+using VfsPaths = PS::vector<VfsPath>;
 
 #endif	//	#ifndef INCLUDED_VFS_PATH

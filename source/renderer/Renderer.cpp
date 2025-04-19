@@ -89,7 +89,7 @@ public:
 	CStr GetName() override;
 	CStr GetTitle() override;
 	size_t GetNumberRows() override;
-	const std::vector<ProfileColumn>& GetColumns() override;
+	const PS::vector<ProfileColumn>& GetColumns() override;
 	CStr GetCellText(size_t row, size_t col) override;
 	AbstractProfileTable* GetChild(size_t row) override;
 
@@ -98,7 +98,7 @@ private:
 	const CRenderer::Stats& Stats;
 
 	/// Column descriptions
-	std::vector<ProfileColumn> columnDescriptions;
+	PS::vector<ProfileColumn> columnDescriptions;
 
 	enum
 	{
@@ -143,7 +143,7 @@ size_t CRendererStatsTable::GetNumberRows()
 	return NumberRows;
 }
 
-const std::vector<ProfileColumn>& CRendererStatsTable::GetColumns()
+const PS::vector<ProfileColumn>& CRendererStatsTable::GetColumns()
 {
 	return columnDescriptions;
 }
@@ -278,11 +278,11 @@ public:
 
 	struct VertexAttributesHash
 	{
-		size_t operator()(const std::vector<Renderer::Backend::SVertexAttributeFormat>& attributes) const;
+		size_t operator()(const PS::vector<Renderer::Backend::SVertexAttributeFormat>& attributes) const;
 	};
 
-	std::unordered_map<
-		std::vector<Renderer::Backend::SVertexAttributeFormat>,
+	PS::unordered_map<
+		PS::vector<Renderer::Backend::SVertexAttributeFormat>,
 		std::unique_ptr<Renderer::Backend::IVertexInputLayout>, VertexAttributesHash> vertexInputLayouts;
 
 	Internals(Renderer::Backend::IDevice* device) :
@@ -296,7 +296,7 @@ public:
 };
 
 size_t CRenderer::Internals::VertexAttributesHash::operator()(
-	const std::vector<Renderer::Backend::SVertexAttributeFormat>& attributes) const
+	const PS::vector<Renderer::Backend::SVertexAttributeFormat>& attributes) const
 {
 	size_t seed = 0;
 	hash_combine(seed, attributes.size());
@@ -906,7 +906,7 @@ Renderer::Backend::IVertexInputLayout* CRenderer::GetVertexInputLayout(
 	const PS::span<const Renderer::Backend::SVertexAttributeFormat> attributes)
 {
 	const auto [it, inserted] = m->vertexInputLayouts.emplace(
-		std::vector<Renderer::Backend::SVertexAttributeFormat>{attributes.begin(), attributes.end()}, nullptr);
+		PS::vector<Renderer::Backend::SVertexAttributeFormat>{attributes.begin(), attributes.end()}, nullptr);
 	if (inserted)
 		it->second = m->device->CreateVertexInputLayout(attributes);
 	return it->second.get();

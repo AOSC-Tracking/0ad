@@ -18,6 +18,8 @@
 #ifndef INCLUDED_RENDERER_BACKEND_GL_DEVICE
 #define INCLUDED_RENDERER_BACKEND_GL_DEVICE
 
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/Format.h"
 #include "renderer/backend/gl/Buffer.h"
 #include "renderer/backend/gl/DeviceForward.h"
@@ -30,8 +32,6 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <unordered_map>
-#include <vector>
 
 typedef struct SDL_Window SDL_Window;
 typedef void* SDL_GLContext;
@@ -62,7 +62,7 @@ public:
 	const std::string& GetName() const override { return m_Name; }
 	const std::string& GetVersion() const override { return m_Version; }
 	const std::string& GetDriverInformation() const override { return m_DriverInformation; }
-	const std::vector<std::string>& GetExtensions() const override { return m_Extensions; }
+	const PS::vector<std::string>& GetExtensions() const override { return m_Extensions; }
 
 	void Report(const ScriptRequest& rq, JS::HandleValue settings) override;
 
@@ -144,7 +144,7 @@ private:
 	std::string m_Name;
 	std::string m_Version;
 	std::string m_DriverInformation;
-	std::vector<std::string> m_Extensions;
+	PS::vector<std::string> m_Extensions;
 
 	// GL can have the only one command context at once.
 	// TODO: remove as soon as we have no GL code outside backend, currently
@@ -158,10 +158,10 @@ private:
 	{
 		size_t operator()(const BackbufferKey& key) const;
 	};
-	// We use std::unordered_map to avoid storing sizes of Attachment*Op
+	// We use PS::unordered_map to avoid storing sizes of Attachment*Op
 	// enumerations. If it becomes a performance issue we'll replace it
 	// by an array.
-	std::unordered_map<
+	PS::unordered_map<
 		BackbufferKey, std::unique_ptr<CFramebuffer>, BackbufferKeyHash> m_Backbuffers;
 	bool m_BackbufferAcquired = false;
 	bool m_UseFramebufferInvalidating = false;
@@ -171,7 +171,7 @@ private:
 		GLuint query{};
 		bool occupied{};
 	};
-	std::vector<Query> m_Queries;
+	PS::vector<Query> m_Queries;
 
 	Capabilities m_Capabilities{};
 };

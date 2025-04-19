@@ -122,7 +122,7 @@ CGUIText::CGUIText(const CGUI& pGUI, const CGUIString& string, const CStrW& font
 // Loop through our images queues, to see if images have been added.
 void CGUIText::SetupSpriteCalls(
 	const CGUI& pGUI,
-	const std::array<std::vector<CStr>, 2>& feedbackImages,
+	const std::array<PS::vector<CStr>, 2>& feedbackImages,
 	const float y,
 	const float width,
 	const float bufferZone,

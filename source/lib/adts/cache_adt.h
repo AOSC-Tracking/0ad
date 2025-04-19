@@ -27,10 +27,11 @@
 #ifndef INCLUDED_CACHE_ADT
 #define INCLUDED_CACHE_ADT
 
+#include "ps/containers/List.h"
+#include "ps/containers/Queue.h"
+#include "ps/containers/UnorderedMap.h"
+
 #include <cfloat>
-#include <list>
-#include <queue> // std::priority_queue
-#include <unordered_map>
 
 /*
 Cache for items of variable size and value/"cost".
@@ -98,7 +99,7 @@ Manager is a template parameterized on typename Key and class Entry.
 	//      note: an intrusive linked-list doesn't make sense because
 	//      entries to be returned need to be copied anyway (they are
 	//      removed from the manager's storage).
-	void remove_least_valuable(std::list<Entry>& entry_list)
+	void remove_least_valuable(PS::list<Entry>& entry_list)
 */
 
 
@@ -267,7 +268,7 @@ public:
 		mcd_calc.notify_increased_or_removed(entry);
 	}
 
-	void remove_least_valuable(std::list<Entry>& entry_list)
+	void remove_least_valuable(PS::list<Entry>& entry_list)
 	{
 		// we are required to evict at least one entry. one iteration
 		// ought to suffice, due to definition of min_credit_density and
@@ -305,7 +306,7 @@ again:
 	}
 
 protected:
-	class Map : public std::unordered_map<Key, Entry>
+	class Map : public PS::unordered_map<Key, Entry>
 	{
 	public:
 		static Entry& entry_from_it(typename Map::iterator it) { return it->second; }
@@ -423,7 +424,7 @@ public:
 		pri_q.ensure_heap_order();
 	}
 
-	void remove_least_valuable(std::list<Entry>& entry_list)
+	void remove_least_valuable(PS::list<Entry>& entry_list)
 	{
 		MapIt least_valuable_it = pri_q.top(); pri_q.pop();
 		Entry& entry = Map::entry_from_it(least_valuable_it);
@@ -462,7 +463,7 @@ private:
 	// - deriving from an STL container is a bit dirty, but we need this
 	//   to get at the underlying data (priority_queue interface is not
 	//   very capable).
-	class PriQ: public std::priority_queue<MapIt, std::vector<MapIt>, CD_greater>
+	class PriQ: public PS::priority_queue<MapIt, PS::vector<MapIt>, CD_greater>
 	{
 	public:
 		void ensure_heap_order()
@@ -574,7 +575,7 @@ public:
 		DEBUG_WARN_ERR(ERR::LOGIC);	// entry not found in list
 	}
 
-	void remove_least_valuable(std::list<Entry>& entry_list)
+	void remove_least_valuable(PS::list<Entry>& entry_list)
 	{
 		entry_list.push_back(lru.front().entry);
 		lru.pop_front();
@@ -593,7 +594,7 @@ private:
 		Entry entry;
 	};
 
-	typedef std::list<KeyAndEntry> List;
+	typedef PS::list<KeyAndEntry> List;
 	typedef typename List::iterator It;
 	typedef typename List::const_iterator CIt;
 	List lru;
@@ -729,7 +730,7 @@ private:
 	typedef CacheEntry<Item, Divider> Entry;
 
 	// see note in remove_least_valuable().
-	std::list<Entry> entries_awaiting_eviction;
+	PS::list<Entry> entries_awaiting_eviction;
 
 	Manager<Key, Entry> mgr;
 };

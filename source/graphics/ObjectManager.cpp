@@ -91,32 +91,32 @@ std::pair<bool, CActorDef&> CObjectManager::FindActorDef(const CStrW& actorName)
 	return { success, *m_ActorDefs.insert_or_assign(actorName, std::move(actor)).first->second.obj };
 }
 
-CObjectEntry* CObjectManager::FindObjectVariation(const CActorDef* actor, const std::vector<std::set<CStr>>& selections, uint32_t seed)
+CObjectEntry* CObjectManager::FindObjectVariation(const CActorDef* actor, const PS::vector<PS::set<CStr>>& selections, uint32_t seed)
 {
 	if (!actor)
 		return nullptr;
 
 	const std::shared_ptr<CObjectBase>& base = actor->GetBase(m_QualityLevel);
 
-	std::vector<const std::set<CStr>*> completeSelections;
-	for (const std::set<CStr>& selectionSet : selections)
+	PS::vector<const PS::set<CStr>*> completeSelections;
+	for (const PS::set<CStr>& selectionSet : selections)
 		completeSelections.emplace_back(&selectionSet);
 	// To maintain a consistent look between quality levels, first complete with the highest-quality variants.
 	// then complete again at the required quality level (since not all variants may be available).
-	std::set<CStr> highQualitySelections = actor->GetBase(255)->CalculateRandomRemainingSelections(seed, selections);
+	PS::set<CStr> highQualitySelections = actor->GetBase(255)->CalculateRandomRemainingSelections(seed, selections);
 	completeSelections.emplace_back(&highQualitySelections);
 	// We don't have to pass the high-quality selections here because they have higher priority anyways.
-	std::set<CStr> remainingSelections = base->CalculateRandomRemainingSelections(seed, selections);
+	PS::set<CStr> remainingSelections = base->CalculateRandomRemainingSelections(seed, selections);
 	completeSelections.emplace_back(&remainingSelections);
 	return FindObjectVariation(base, completeSelections);
 }
 
-CObjectEntry* CObjectManager::FindObjectVariation(const std::shared_ptr<CObjectBase>& base, const std::vector<const std::set<CStr>*>& completeSelections)
+CObjectEntry* CObjectManager::FindObjectVariation(const std::shared_ptr<CObjectBase>& base, const PS::vector<const PS::set<CStr>*>& completeSelections)
 {
 	PROFILE2("FindObjectVariation");
 
 	// Look to see whether this particular variation has already been loaded
-	std::vector<u8> choices = base->CalculateVariationKey(completeSelections);
+	PS::vector<u8> choices = base->CalculateVariationKey(completeSelections);
 	ObjectKey key (base->GetIdentifier(), choices);
 	decltype(m_Objects)::iterator it = m_Objects.find(key);
 	if (it != m_Objects.end() && !it->second.outdated)

@@ -20,10 +20,10 @@
 
 #include "lib/file/vfs/vfs_path.h"
 #include "maths/Fixed.h"
+#include "ps/containers/Map.h"
 #include "ps/Errors.h"
 #include "scriptinterface/ScriptTypes.h"
 
-#include <map>
 #include <string>
 
 class XMBData;
@@ -150,7 +150,7 @@ class ScriptRequest;
 class CParamNode
 {
 public:
-	typedef std::map<std::string, CParamNode> ChildrenMap;
+	typedef PS::map<std::string, CParamNode> ChildrenMap;
 
 	/**
 	 * Constructs a new, empty node.

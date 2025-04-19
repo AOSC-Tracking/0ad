@@ -58,7 +58,7 @@ public:
 
 	void Serialize(ISerializer& serialize) override
 	{
-		std::map<std::string, std::vector<entity_id_t>> templateMap;
+		PS::map<std::string, PS::vector<entity_id_t>> templateMap;
 
 		for (const std::pair<const entity_id_t, std::string>& templateEnt : m_LatestTemplates)
 			if (!ENTITY_IS_LOCAL(templateEnt.first))
@@ -71,9 +71,9 @@ public:
 	{
 		Init(paramNode);
 
-		std::map<std::string, std::vector<entity_id_t>> templateMap;
+		PS::map<std::string, PS::vector<entity_id_t>> templateMap;
 		Serializer(deserialize, "templates", templateMap);
-		for (const std::pair<const std::string, std::vector<entity_id_t>>& mapEl : templateMap)
+		for (const std::pair<const std::string, PS::vector<entity_id_t>>& mapEl : templateMap)
 			for (entity_id_t id : mapEl.second)
 				m_LatestTemplates[id] = mapEl.first;
 	}
@@ -111,13 +111,13 @@ public:
 
 	std::string GetCurrentTemplateName(entity_id_t ent) const override;
 
-	std::vector<std::string> FindAllTemplates(bool includeActors) const override;
+	PS::vector<std::string> FindAllTemplates(bool includeActors) const override;
 
-	std::vector<std::vector<std::wstring>> GetCivData() override;
+	PS::vector<PS::vector<std::wstring>> GetCivData() override;
 
-	std::vector<std::string> FindUsedTemplates() const override;
+	PS::vector<std::string> FindUsedTemplates() const override;
 
-	std::vector<entity_id_t> GetEntitiesUsingTemplate(const std::string& templateName) const override;
+	PS::vector<entity_id_t> GetEntitiesUsingTemplate(const std::string& templateName) const override;
 
 private:
 	// Template loader
@@ -132,11 +132,11 @@ private:
 	// Map from template name to schema validation status.
 	// (Some files, e.g. inherited parent templates, may not be valid themselves but we still need to load
 	// them and use them; we only reject invalid templates that were requested directly by GetTemplate/etc)
-	std::map<std::string, bool> m_TemplateSchemaValidity;
+	PS::map<std::string, bool> m_TemplateSchemaValidity;
 
 	// Remember the template used by each entity, so we can return them
 	// again for deserialization.
-	std::map<entity_id_t, std::string> m_LatestTemplates;
+	PS::map<entity_id_t, std::string> m_LatestTemplates;
 };
 
 REGISTER_COMPONENT_TYPE(TemplateManager)
@@ -197,7 +197,7 @@ bool CCmpTemplateManager::TemplateExists(const std::string& templateName) const
 
 const CParamNode* CCmpTemplateManager::LoadLatestTemplate(entity_id_t ent)
 {
-	std::map<entity_id_t, std::string>::const_iterator it = m_LatestTemplates.find(ent);
+	PS::map<entity_id_t, std::string>::const_iterator it = m_LatestTemplates.find(ent);
 	if (it == m_LatestTemplates.end())
 		return NULL;
 	return LoadTemplate(ent, it->second);
@@ -205,28 +205,28 @@ const CParamNode* CCmpTemplateManager::LoadLatestTemplate(entity_id_t ent)
 
 std::string CCmpTemplateManager::GetCurrentTemplateName(entity_id_t ent) const
 {
-	std::map<entity_id_t, std::string>::const_iterator it = m_LatestTemplates.find(ent);
+	PS::map<entity_id_t, std::string>::const_iterator it = m_LatestTemplates.find(ent);
 	if (it == m_LatestTemplates.end())
 		return "";
 	return it->second;
 }
 
-std::vector<std::string> CCmpTemplateManager::FindAllTemplates(bool includeActors) const
+PS::vector<std::string> CCmpTemplateManager::FindAllTemplates(bool includeActors) const
 {
 	ETemplatesType templatesType = includeActors ? ALL_TEMPLATES : SIMULATION_TEMPLATES;
 	return m_templateLoader.FindTemplates("", true, templatesType);
 }
 
-std::vector<std::vector<std::wstring>> CCmpTemplateManager::GetCivData()
+PS::vector<PS::vector<std::wstring>> CCmpTemplateManager::GetCivData()
 {
-	std::vector<std::vector<std::wstring>> data;
+	PS::vector<PS::vector<std::wstring>> data;
 
-	std::vector<std::string> names = m_templateLoader.FindTemplatesUnrestricted("special/players/", false);
+	PS::vector<std::string> names = m_templateLoader.FindTemplatesUnrestricted("special/players/", false);
 	data.reserve(names.size());
 	for (const std::string& name : names)
 	{
 		const CParamNode& identity = GetTemplate(name)->GetChild("Identity");
-		data.push_back(std::vector<std::wstring> {
+		data.push_back(PS::vector<std::wstring> {
 			identity.GetChild("Civ").ToWString(),
 			identity.GetChild("GenericName").ToWString()
 		});
@@ -234,9 +234,9 @@ std::vector<std::vector<std::wstring>> CCmpTemplateManager::GetCivData()
 	return data;
 }
 
-std::vector<std::string> CCmpTemplateManager::FindUsedTemplates() const
+PS::vector<std::string> CCmpTemplateManager::FindUsedTemplates() const
 {
-	std::vector<std::string> usedTemplates;
+	PS::vector<std::string> usedTemplates;
 	for (const std::pair<const entity_id_t, std::string>& p : m_LatestTemplates)
 		if (std::find(usedTemplates.begin(), usedTemplates.end(), p.second) == usedTemplates.end())
 			usedTemplates.push_back(p.second);
@@ -246,9 +246,9 @@ std::vector<std::string> CCmpTemplateManager::FindUsedTemplates() const
 /**
  * Get the list of entities using the specified template
  */
-std::vector<entity_id_t> CCmpTemplateManager::GetEntitiesUsingTemplate(const std::string& templateName) const
+PS::vector<entity_id_t> CCmpTemplateManager::GetEntitiesUsingTemplate(const std::string& templateName) const
 {
-	std::vector<entity_id_t> entities;
+	PS::vector<entity_id_t> entities;
 	for (const std::pair<const entity_id_t, std::string>& p : m_LatestTemplates)
 		if (p.second == templateName)
 			entities.push_back(p.first);

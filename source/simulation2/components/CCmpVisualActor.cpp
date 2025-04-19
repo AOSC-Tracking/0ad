@@ -84,7 +84,7 @@ private:
 	fixed m_AnimSyncRepeatTime; // 0.0 if not synced
 	fixed m_AnimSyncOffsetTime;
 
-	std::map<CStr, CStr> m_VariantSelections;
+	PS::map<CStr, CStr> m_VariantSelections;
 
 	u32 m_Seed; // seed used for random variations
 

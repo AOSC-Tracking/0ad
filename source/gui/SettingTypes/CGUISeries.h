@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
 * This file is part of 0 A.D.
 *
 * 0 A.D. is free software: you can redistribute it and/or modify
@@ -20,8 +20,7 @@
 #define INCLUDED_CGUISERIES
 
 #include "maths/Vector2D.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class CGUISeries
 {
@@ -30,7 +29,7 @@ public:
 	MOVABLE(CGUISeries);
 	CGUISeries() = default;
 
-	std::vector<std::vector<CVector2D>> m_Series;
+	PS::vector<PS::vector<CVector2D>> m_Series;
 };
 
 #endif // INCLUDED_CGUISERIES

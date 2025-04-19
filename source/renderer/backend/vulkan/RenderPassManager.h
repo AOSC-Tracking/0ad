@@ -18,12 +18,12 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_RENDERPASSMANAGER
 #define INCLUDED_RENDERER_BACKEND_VULKAN_RENDERPASSMANAGER
 
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IFramebuffer.h"
 
 #include <glad/vulkan.h>
 #include <optional>
-#include <unordered_map>
-#include <vector>
 
 namespace Renderer
 {
@@ -77,7 +77,7 @@ private:
 	{
 		bool operator()(const Desc& lhs, const Desc& rhs) const;
 	};
-	std::unordered_map<Desc, VkRenderPass, DescHash, DescEqual> m_RenderPassMap;
+	PS::unordered_map<Desc, VkRenderPass, DescHash, DescEqual> m_RenderPassMap;
 };
 
 } // namespace Vulkan

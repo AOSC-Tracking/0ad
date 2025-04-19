@@ -160,7 +160,7 @@ CDescriptorManager::SingleTypePool& CDescriptorManager::GetSingleTypePool(
 	const VkDescriptorType type, const uint32_t size)
 {
 	ENSURE(size > 0 && size <= 16);
-	std::vector<SingleTypePool>& pools = m_SingleTypePools[type];
+	PS::vector<SingleTypePool>& pools = m_SingleTypePools[type];
 	if (pools.size() <= size)
 		pools.resize(size + 1);
 	SingleTypePool& pool = pools[size];
@@ -220,7 +220,7 @@ size_t CDescriptorManager::SingleTypeCacheKeyHash::operator()(const SingleTypeCa
 
 std::pair<VkDescriptorSet, bool> CDescriptorManager::GetSingleTypeDescritorSetImpl(
 	VkDescriptorType type, VkDescriptorSetLayout layout,
-	const std::vector<DeviceObjectUID>& uids)
+	const PS::vector<DeviceObjectUID>& uids)
 {
 	ENSURE(!uids.empty());
 	const SingleTypeCacheKey key{layout, uids};
@@ -262,8 +262,8 @@ std::pair<VkDescriptorSet, bool> CDescriptorManager::GetSingleTypeDescritorSetIm
 
 VkDescriptorSet CDescriptorManager::GetSingleTypeDescritorSet(
 	VkDescriptorType type, VkDescriptorSetLayout layout,
-	const std::vector<DeviceObjectUID>& texturesUID,
-	const std::vector<CTexture*>& textures)
+	const PS::vector<DeviceObjectUID>& texturesUID,
+	const PS::vector<CTexture*>& textures)
 {
 	ENSURE(texturesUID.size() == textures.size());
 	ENSURE(!texturesUID.empty());
@@ -309,8 +309,8 @@ VkDescriptorSet CDescriptorManager::GetSingleTypeDescritorSet(
 
 VkDescriptorSet CDescriptorManager::GetSingleTypeDescritorSet(
 	VkDescriptorType type, VkDescriptorSetLayout layout,
-	const std::vector<DeviceObjectUID>& buffersUID,
-	const std::vector<CBuffer*>& buffers)
+	const PS::vector<DeviceObjectUID>& buffersUID,
+	const PS::vector<CBuffer*>& buffers)
 {
 	ENSURE(buffersUID.size() == buffers.size());
 	ENSURE(!buffersUID.empty());

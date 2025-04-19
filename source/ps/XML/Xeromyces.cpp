@@ -17,9 +17,6 @@
 
 #include "precompiled.h"
 
-#include <vector>
-#include <set>
-#include <map>
 #include <mutex>
 #include <stack>
 #include <algorithm>
@@ -27,6 +24,9 @@
 #include "maths/MD5.h"
 #include "ps/CacheLoader.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 #include "ps/Filesystem.h"
 
 #include "RelaxNG.h"
@@ -36,7 +36,7 @@
 #include <type_traits>
 
 static std::mutex g_ValidatorCacheLock;
-static std::map<const std::string, RelaxNGValidator> g_ValidatorCache;
+static PS::map<const std::string, RelaxNGValidator> g_ValidatorCache;
 
 static void errorHandler(void* UNUSED(userData),
 	std::conditional_t<LIBXML_VERSION >= 21200, const xmlError, xmlError>* error)
@@ -80,7 +80,7 @@ bool CXeromycesEngine::AddValidator(const PIVFS& vfs, const std::string& name, c
 	}
 	{
 		std::lock_guard<std::mutex> lock(g_ValidatorCacheLock);
-		std::map<const std::string, RelaxNGValidator>::iterator it = g_ValidatorCache.find(name);
+		PS::map<const std::string, RelaxNGValidator>::iterator it = g_ValidatorCache.find(name);
 		if (it != g_ValidatorCache.end())
 			g_ValidatorCache.erase(it);
 		g_ValidatorCache.insert(std::make_pair(name, validator));

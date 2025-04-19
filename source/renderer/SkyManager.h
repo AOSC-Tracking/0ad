@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,13 +23,13 @@
 #define INCLUDED_SKYMANAGER
 
 #include "graphics/Texture.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/backend/ITexture.h"
 #include "renderer/VertexArray.h"
 
 #include <memory>
-#include <vector>
 
 /**
  * Class SkyManager: Maintain sky settings and textures, and render the sky.
@@ -64,7 +64,7 @@ public:
 	 * Return a sorted list of available sky sets, in a form suitable
 	 * for passing to SetSkySet.
 	 */
-	std::vector<CStrW> GetSkySets() const;
+	PS::vector<CStrW> GetSkySets() const;
 
 	bool IsSkyVisible() const
 	{

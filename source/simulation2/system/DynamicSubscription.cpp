@@ -36,7 +36,7 @@ void CDynamicSubscription::Flatten()
 	if (m_Added.empty() && m_Removed.empty())
 		return;
 
-	std::vector<IComponent*> tmp;
+	PS::vector<IComponent*> tmp;
 	tmp.reserve(m_Components.size() + m_Added.size());
 
 	// tmp = m_Components - m_Removed
@@ -59,7 +59,7 @@ void CDynamicSubscription::Flatten()
 	m_Removed.clear();
 }
 
-const std::vector<IComponent*>& CDynamicSubscription::GetComponents()
+const PS::vector<IComponent*>& CDynamicSubscription::GetComponents()
 {
 	// Must be flattened before calling this function
 	ENSURE(m_Added.empty() && m_Removed.empty());
@@ -69,7 +69,7 @@ const std::vector<IComponent*>& CDynamicSubscription::GetComponents()
 
 void CDynamicSubscription::DebugDump()
 {
-	std::set<IComponent*, CompareIComponent>::iterator it;
+	PS::set<IComponent*, CompareIComponent>::iterator it;
 
 	debug_printf("components:");
 	for (size_t i = 0; i < m_Components.size(); i++)

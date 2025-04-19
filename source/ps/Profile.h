@@ -22,10 +22,9 @@
 #ifndef INCLUDED_PROFILE
 #define INCLUDED_PROFILE
 
-#include <vector>
-
 #include "lib/adts/ring_buf.h"
 #include "lib/posix/posix_pthread.h"
+#include "ps/containers/Vector.h"
 #include "ps/Profiler2.h"
 #include "ps/Singleton.h"
 
@@ -50,8 +49,8 @@ class CProfileNode
 {
 	NONCOPYABLE(CProfileNode);
 public:
-	typedef std::vector<CProfileNode*>::iterator profile_iterator;
-	typedef std::vector<CProfileNode*>::const_iterator const_profile_iterator;
+	typedef PS::vector<CProfileNode*>::iterator profile_iterator;
+	typedef PS::vector<CProfileNode*>::const_iterator const_profile_iterator;
 
 	CProfileNode( const char* name, CProfileNode* parent );
 	~CProfileNode();
@@ -65,8 +64,8 @@ public:
 
 	const CProfileNode* GetChild( const char* name ) const;
 	const CProfileNode* GetScriptChild( const char* name ) const;
-	const std::vector<CProfileNode*>* GetChildren() const { return( &children ); }
-	const std::vector<CProfileNode*>* GetScriptChildren() const { return( &script_children ); }
+	const PS::vector<CProfileNode*>* GetChildren() const { return( &children ); }
+	const PS::vector<CProfileNode*>* GetScriptChildren() const { return( &script_children ); }
 
 	bool CanExpand();
 
@@ -105,8 +104,8 @@ private:
 	int recursion;
 
 	CProfileNode* parent;
-	std::vector<CProfileNode*> children;
-	std::vector<CProfileNode*> script_children;
+	PS::vector<CProfileNode*> children;
+	PS::vector<CProfileNode*> script_children;
 	CProfileNodeTable* display_table;
 };
 

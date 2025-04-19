@@ -20,7 +20,7 @@
 
 #include "simulation2/system/Interface.h"
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class ICmpTurretHolder : public IComponent
 {
@@ -29,12 +29,12 @@ public:
 	 * Returns the correlation between garrisoned turrets (their ID) and which
 	 *	turret point they occupy (name).
 	 */
-	virtual std::vector<std::pair<std::string, entity_id_t>> GetTurrets() const = 0;
+	virtual PS::vector<std::pair<std::string, entity_id_t>> GetTurrets() const = 0;
 
 	/**
 	 * Correlation between entities (ID) and the turret point they ought to occupy (name).
 	 */
-	virtual void SetInitEntities(std::vector<std::pair<std::string, entity_id_t>>&& entities) = 0;
+	virtual void SetInitEntities(PS::vector<std::pair<std::string, entity_id_t>>&& entities) = 0;
 
 	DECLARE_INTERFACE_TYPE(TurretHolder)
 };

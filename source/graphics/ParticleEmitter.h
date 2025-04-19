@@ -21,11 +21,10 @@
 #include "graphics/ModelAbstract.h"
 #include "graphics/ParticleEmitterType.h"
 #include "maths/Quaternion.h"
+#include "ps/containers/Map.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
 #include "renderer/VertexArray.h"
-
-#include <map>
 
 /**
  * Simulation state for a single particle.
@@ -157,9 +156,9 @@ public:
 	CVector3D m_Pos;
 	CQuaternion m_Rot;
 
-	std::map<std::string, float> m_EntityVariables;
+	PS::map<std::string, float> m_EntityVariables;
 
-	std::vector<SParticle> m_Particles;
+	PS::vector<SParticle> m_Particles;
 	size_t m_NextParticleIdx;
 
 	float m_LastUpdateTime;

@@ -47,13 +47,13 @@ private:
 	bool m_HasSyncError = false;
 
 	// Contains the commands of every player on each turn
-	std::map<u32, std::vector<std::pair<player_id_t, std::string>>> m_ReplayCommands;
+	PS::map<u32, PS::vector<std::pair<player_id_t, std::string>>> m_ReplayCommands;
 
 	// Contains the length of every turn
-	std::map<u32, u32> m_ReplayTurnLengths;
+	PS::map<u32, u32> m_ReplayTurnLengths;
 
 	// Contains all replay hash values and weather or not the quick hash method was used
-	std::map<u32, std::pair<std::string, bool>> m_ReplayHash;
+	PS::map<u32, std::pair<std::string, bool>> m_ReplayHash;
 };
 
 #endif // INCLUDED_REPLAYTURNMANAGER

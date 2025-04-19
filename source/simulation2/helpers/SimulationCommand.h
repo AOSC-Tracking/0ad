@@ -36,7 +36,7 @@ struct SimulationCommand
 	{
 	}
 
-	// std::vector::insert requires the move assignment operator at compilation time,
+	// PS::vector::insert requires the move assignment operator at compilation time,
 	// but apparently never uses it (it uses the move constructor).
 	SimulationCommand& operator=(SimulationCommand&& other)
 	{

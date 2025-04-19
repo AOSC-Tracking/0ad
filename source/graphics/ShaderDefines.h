@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,14 +18,13 @@
 #ifndef INCLUDED_SHADERDEFINES
 #define INCLUDED_SHADERDEFINES
 
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/CStrIntern.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/IShaderProgram.h"
-
-#include <map>
-#include <unordered_map>
-#include <vector>
 
 class CVector4D;
 
@@ -62,7 +61,7 @@ public:
 	/**
 	 * Return a copy of the current name/value mapping.
 	 */
-	std::map<CStrIntern, value_t> GetMap() const;
+	PS::map<CStrIntern, value_t> GetMap() const;
 
 	/**
 	 * Return a hash of the current mapping.
@@ -101,7 +100,7 @@ public:
 		using Item = std::pair<CStrIntern, value_t>;
 
 		// Sorted by name; no duplicated names
-		std::vector<Item> items;
+		PS::vector<Item> items;
 
 		size_t hash;
 
@@ -122,7 +121,7 @@ protected:
  	SItems* m_Items; // interned value
 
 private:
-	using InternedItems_t = std::unordered_map<SItems, std::shared_ptr<SItems>, SItemsHash>;
+	using InternedItems_t = PS::unordered_map<SItems, std::shared_ptr<SItems>, SItemsHash>;
 	static InternedItems_t s_InternedItems;
 
 	/**
@@ -208,7 +207,7 @@ public:
 	size_t GetSize() const { return m_Items.size(); }
 	RenderQuery GetItem(size_t i) const { return m_Items[i]; }
 private:
-	std::vector<RenderQuery> m_Items;
+	PS::vector<RenderQuery> m_Items;
 };
 
 #endif // INCLUDED_SHADERDEFINES

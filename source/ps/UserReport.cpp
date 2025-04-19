@@ -27,13 +27,13 @@
 #include "lib/os_path.h"
 #include "lib/sysdep/sysdep.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Deque.h"
 #include "ps/Filesystem.h"
 #include "ps/Profiler2.h"
 #include "ps/Pyrogenesis.h"
 #include "ps/Threading.h"
 
 #include <condition_variable>
-#include <deque>
 #include <fstream>
 #include <mutex>
 #include <string>
@@ -482,7 +482,7 @@ private:
 
 	// Shared by main thread and worker thread:
 	// These variables are all protected by m_WorkerMutex
-	std::deque<std::shared_ptr<CUserReport>> m_ReportQueue;
+	PS::deque<std::shared_ptr<CUserReport>> m_ReportQueue;
 	bool m_Enabled;
 	bool m_Shutdown;
 	std::string m_Status;

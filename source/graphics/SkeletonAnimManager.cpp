@@ -52,7 +52,7 @@ CSkeletonAnimDef* CSkeletonAnimManager::GetAnimation(const VfsPath& pathname)
 	VfsPath name = pathname.ChangeExtension(L"");
 
 	// Find if it's already been loaded
-	std::unordered_map<VfsPath, std::unique_ptr<CSkeletonAnimDef>>::iterator iter = m_Animations.find(name);
+	PS::unordered_map<VfsPath, std::unique_ptr<CSkeletonAnimDef>>::iterator iter = m_Animations.find(name);
 	if (iter != m_Animations.end())
 		return iter->second.get();
 

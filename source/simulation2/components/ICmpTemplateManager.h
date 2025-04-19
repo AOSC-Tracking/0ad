@@ -20,7 +20,7 @@
 
 #include "simulation2/system/Interface.h"
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 /**
  * Template manager: Handles the loading of entity template files for the initialisation
@@ -94,26 +94,26 @@ public:
 	/**
 	 * Returns the list of entities having the specified template.
 	 */
-	virtual std::vector<entity_id_t> GetEntitiesUsingTemplate(const std::string& templateName) const = 0;
+	virtual PS::vector<entity_id_t> GetEntitiesUsingTemplate(const std::string& templateName) const = 0;
 
 	/**
 	 * Returns a list of strings that could be validly passed as @c templateName to LoadTemplate.
 	 * (This includes "actor|foo" etc names).
 	 * Intended for use by the map editor. This is likely to be quite slow.
 	 */
-	virtual std::vector<std::string> FindAllTemplates(bool includeActors) const = 0;
+	virtual PS::vector<std::string> FindAllTemplates(bool includeActors) const = 0;
 
 	/**
 	 * Returns some data of the civs from the templates.
 	 * Intended for use by the map editor.
 	 */
-	virtual std::vector<std::vector<std::wstring>> GetCivData() = 0;
+	virtual PS::vector<PS::vector<std::wstring>> GetCivData() = 0;
 
 	/**
 	 * Returns a list of strings that could be validly passed as @c templateName to LoadTemplate.
 	 * Intended for use by the AI manager.
 	 */
-	virtual std::vector<std::string> FindUsedTemplates() const = 0;
+	virtual PS::vector<std::string> FindUsedTemplates() const = 0;
 
 	/**
 	 * Permanently disable XML validation (intended solely for test cases).

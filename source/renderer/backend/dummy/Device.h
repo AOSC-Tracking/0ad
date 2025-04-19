@@ -18,12 +18,12 @@
 #ifndef INCLUDED_RENDERER_BACKEND_DUMMY_DEVICE
 #define INCLUDED_RENDERER_BACKEND_DUMMY_DEVICE
 
+#include "ps/containers/Vector.h"
 #include "renderer/backend/dummy/DeviceForward.h"
 #include "renderer/backend/IDevice.h"
 
 #include <memory>
 #include <string>
-#include <vector>
 
 class CShaderDefines;
 
@@ -49,7 +49,7 @@ public:
 	const std::string& GetName() const override { return m_Name; }
 	const std::string& GetVersion() const override { return m_Version; }
 	const std::string& GetDriverInformation() const override { return m_DriverInformation; }
-	const std::vector<std::string>& GetExtensions() const override { return m_Extensions; }
+	const PS::vector<std::string>& GetExtensions() const override { return m_Extensions; }
 
 	void Report(const ScriptRequest& rq, JS::HandleValue settings) override;
 
@@ -116,7 +116,7 @@ protected:
 	std::string m_Name;
 	std::string m_Version;
 	std::string m_DriverInformation;
-	std::vector<std::string> m_Extensions;
+	PS::vector<std::string> m_Extensions;
 
 	std::unique_ptr<IFramebuffer> m_Backbuffer;
 

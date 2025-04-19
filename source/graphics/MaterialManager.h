@@ -18,9 +18,9 @@
 #ifndef INCLUDED_MATERIALMANAGER
 #define INCLUDED_MATERIALMANAGER
 
-#include <map>
 #include "Material.h"
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
 
 class CMaterialManager
 {
@@ -29,7 +29,7 @@ public:
 	CMaterial LoadMaterial(const VfsPath& pathname);
 
 private:
-	std::map<VfsPath, CMaterial> m_Materials;
+	PS::map<VfsPath, CMaterial> m_Materials;
 	float qualityLevel;
 };
 

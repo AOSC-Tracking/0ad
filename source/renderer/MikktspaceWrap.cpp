@@ -19,7 +19,7 @@
 
 #include "renderer/MikktspaceWrap.h"
 
-MikkTSpace::MikkTSpace(const CModelDefPtr& m, std::vector<float>& v, bool gpuSkinning) : m_Model(m),
+MikkTSpace::MikkTSpace(const CModelDefPtr& m, PS::vector<float>& v, bool gpuSkinning) : m_Model(m),
 			m_NewVertices(v), m_GpuSkinning(gpuSkinning)
 {
 	// ensure that m_NewVertices is empty

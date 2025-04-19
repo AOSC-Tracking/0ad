@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 #define INCLUDED_CMDLINEARGS
 
 #include "lib/os_path.h"
+#include "ps/containers/Vector.h"
 #include "ps/containers/Span.h"
 #include "ps/CStr.h"
 
 #include <utility>
-#include <vector>
 
 class ScriptRequest;
 
@@ -31,7 +31,7 @@ class ScriptRequest;
 class CmdLineArgs
 {
 public:
-	using ArgsT = std::vector<std::pair<CStr, CStr>>;
+	using ArgsT = PS::vector<std::pair<CStr, CStr>>;
 
 	CmdLineArgs() {}
 
@@ -61,7 +61,7 @@ public:
 	 * Get all the values given to the named parameter. Returns values in the
 	 * same order as they were given in argv.
 	 */
-	std::vector<CStr> GetMultiple(const CStr& name) const;
+	PS::vector<CStr> GetMultiple(const CStr& name) const;
 
 	/**
 	 * Get the value of argv[0], which is typically meant to be the name/path of
@@ -77,12 +77,12 @@ public:
 	/**
 	 * Returns all arguments that don't have a name (string started with '-').
 	 */
-	std::vector<CStr> GetArgsWithoutName() const;
+	PS::vector<CStr> GetArgsWithoutName() const;
 
 private:
 	ArgsT m_Args;
 	OsPath m_Arg0;
-	std::vector<CStr> m_ArgsWithoutName;
+	PS::vector<CStr> m_ArgsWithoutName;
 };
 
 extern CmdLineArgs g_CmdLineArgs;

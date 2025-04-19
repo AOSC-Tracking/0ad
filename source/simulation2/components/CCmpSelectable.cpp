@@ -596,7 +596,7 @@ void CCmpSelectable::UpdateDynamicOverlay(float frameOffset)
 		halfSizeZ /= 2.0f;
 	}
 
-	std::vector<CVector2D> points;
+	PS::vector<CVector2D> points;
 	points.push_back(CVector2D(position + unitX *(-halfSizeX)   + unitZ *  halfSizeZ));  // top left
 	points.push_back(CVector2D(position + unitX *(-halfSizeX)   + unitZ *(-halfSizeZ))); // bottom left
 	points.push_back(CVector2D(position + unitX *  halfSizeX    + unitZ *(-halfSizeZ))); // bottom right

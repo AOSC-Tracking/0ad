@@ -18,7 +18,7 @@
 #ifndef INCLUDED_HELPER_RENDER
 #define INCLUDED_HELPER_RENDER
 
-#include <vector>
+#include "ps/containers/Vector.h"
 
 class CSimContext;
 class CVector2D;
@@ -34,14 +34,14 @@ struct SOverlayTexturedLine;
 struct SDashedLine
 {
 	/// Packed array of consecutive dashes' points. Use m_StartIndices to navigate it.
-	std::vector<CVector2D> m_Points;
+	PS::vector<CVector2D> m_Points;
 
 	/**
 	 * Start indices in m_Points of each dash. Dash n starts at point m_StartIndices[n] and ends at the point with index
 	 * m_StartIndices[n+1] - 1, or at the end of the m_Points vector. Use the GetEndIndex(n) convenience method to abstract away the
 	 * difference and get the (exclusive) end index of dash n.
 	 */
-	std::vector<size_t> m_StartIndices;
+	PS::vector<size_t> m_StartIndices;
 
 	/// Returns the (exclusive) end point index (i.e. index within m_Points) of dash n.
 	size_t GetEndIndex(size_t i)
@@ -63,7 +63,7 @@ namespace SimRender
  * @param[in] heightOffset Height above terrain to offset the line.
  */
 void ConstructLineOnGround(
-		const CSimContext& context, const std::vector<float>& xz,
+		const CSimContext& context, const PS::vector<float>& xz,
 		SOverlayLine& overlay,
 		bool floating, float heightOffset = 0.25f);
 
@@ -151,7 +151,7 @@ void ConstructAxesMarker(const CMatrix3D& coordSystem, SOverlayLine& outX, SOver
  * @param[in] closed if true, then the points are treated as a closed path (the last is connected
  *	to the first).
  */
-void SmoothPointsAverage(std::vector<CVector2D>& points, bool closed);
+void SmoothPointsAverage(PS::vector<CVector2D>& points, bool closed);
 
 /**
  * Updates the given points to include intermediate points interpolating between the original
@@ -164,7 +164,7 @@ void SmoothPointsAverage(std::vector<CVector2D>& points, bool closed);
  *	the direction of the curve.
  * @param[in] segmentSamples Amount of intermediate points to sample between every two control points.
  */
-void InterpolatePointsRNS(std::vector<CVector2D>& points, bool closed, float offset, int segmentSamples = 4);
+void InterpolatePointsRNS(PS::vector<CVector2D>& points, bool closed, float offset, int segmentSamples = 4);
 
 /**
  * Creates a dashed line from the given line, dash length, and blank space between.
@@ -174,7 +174,7 @@ void InterpolatePointsRNS(std::vector<CVector2D>& points, bool closed, float off
  * @param[in] dashLength Length of a single dash. Must be strictly positive.
  * @param[in] blankLength Length of a single blank between dashes. Must be strictly positive.
  */
-void ConstructDashedLine(const std::vector<CVector2D>& linePoints, SDashedLine& dashedLineOut,
+void ConstructDashedLine(const PS::vector<CVector2D>& linePoints, SDashedLine& dashedLineOut,
 		const float dashLength, const float blankLength);
 
 /**
@@ -186,7 +186,7 @@ void ConstructDashedLine(const std::vector<CVector2D>& linePoints, SDashedLine& 
  * @param closed Should the provided list of points be treated as a closed shape? If true, the resulting list of points will include
  *        extra subdivided points between the last and the first point.
  */
-void SubdividePoints(std::vector<CVector2D>& points, float maxSegmentLength, bool closed);
+void SubdividePoints(PS::vector<CVector2D>& points, float maxSegmentLength, bool closed);
 
 /**
  * Sets the coordinates of a rectangular textured overlay, for example used by selection rings of structures.

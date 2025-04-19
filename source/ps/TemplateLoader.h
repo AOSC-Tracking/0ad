@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,10 @@
 #ifndef INCLUDED_TEMPLATELOADER
 #define INCLUDED_TEMPLATELOADER
 
+#include "ps/containers/UnorderedMap.h"
 #include "simulation2/system/ParamNode.h"
 
 #include <string_view>
-#include <unordered_map>
 
 enum ETemplatesType
 {
@@ -65,13 +65,13 @@ public:
 	 * Returns a list of strings that could be validly passed as @c templateName to LoadTemplateFile.
 	 * (This includes "actor|foo" etc names).
 	 */
-	std::vector<std::string> FindTemplates(const std::string& path, bool includeSubdirectories, ETemplatesType templatesType) const;
+	PS::vector<std::string> FindTemplates(const std::string& path, bool includeSubdirectories, ETemplatesType templatesType) const;
 
 	/**
 	 * Returns a list of strings that could validly be passed as @c templateName to LoadTemplateFile.
 	 * Not ignoring any special directories.
 	 */
-	std::vector<std::string> FindTemplatesUnrestricted(const std::string& path, bool includeSubdirectories) const;
+	PS::vector<std::string> FindTemplatesUnrestricted(const std::string& path, bool includeSubdirectories) const;
 
 private:
 	/**
@@ -95,7 +95,7 @@ private:
 	 * (Failed loads won't remove existing entries under the same name, so we behave more nicely
 	 * when hotloading broken files)
 	 */
-	std::unordered_map<std::string, CParamNode> m_TemplateFileData;
+	PS::unordered_map<std::string, CParamNode> m_TemplateFileData;
 };
 
 #endif // INCLUDED_TEMPLATELOADER

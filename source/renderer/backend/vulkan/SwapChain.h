@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,13 +18,13 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_SWAPCHAIN
 #define INCLUDED_RENDERER_BACKEND_VULKAN_SWAPCHAIN
 
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IFramebuffer.h"
 
 #include <glad/vulkan.h>
 #include <memory>
 #include <tuple>
-#include <unordered_map>
-#include <vector>
 
 namespace Renderer
 {
@@ -82,8 +82,8 @@ private:
 
 	uint32_t m_CurrentImageIndex = std::numeric_limits<uint32_t>::max();
 
-	std::vector<VkImage> m_Images;
-	std::vector<std::unique_ptr<CTexture>> m_Textures;
+	PS::vector<VkImage> m_Images;
+	PS::vector<std::unique_ptr<CTexture>> m_Textures;
 	std::unique_ptr<CTexture> m_DepthTexture;
 	VkFormat m_ImageFormat = VK_FORMAT_UNDEFINED;
 
@@ -96,7 +96,7 @@ private:
 		{
 			size_t operator()(const BackbufferKey& key) const;
 		};
-		std::unordered_map<
+		PS::unordered_map<
 			BackbufferKey, std::unique_ptr<CFramebuffer>, BackbufferKeyHash> backbuffers;
 
 		SwapChainBackbuffer();
@@ -107,7 +107,7 @@ private:
 		SwapChainBackbuffer(SwapChainBackbuffer&& other);
 		SwapChainBackbuffer& operator=(SwapChainBackbuffer&& other);
 	};
-	std::vector<SwapChainBackbuffer> m_Backbuffers;
+	PS::vector<SwapChainBackbuffer> m_Backbuffers;
 };
 
 } // namespace Vulkan

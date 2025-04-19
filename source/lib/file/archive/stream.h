@@ -29,7 +29,7 @@
 
 #include "lib/file/archive/codec.h"
 
-// note: this is similar in function to std::vector, but we don't need
+// note: this is similar in function to PS::vector, but we don't need
 // iterators etc. and would prefer to avoid initializing each byte.
 class OutputBufferManager
 {

@@ -41,10 +41,10 @@ public:
 	EFoundationCheck CheckFoundation(const std::string& UNUSED(className), bool UNUSED(onlyCenterPoint)) const override { return EFoundationCheck(); }
 	std::string CheckFoundation_wrapper(const std::string& UNUSED(className), bool UNUSED(onlyCenterPoint)) const override { return std::string(); }
 	bool CheckDuplicateFoundation() const override { return true; }
-	std::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t UNUSED(flags)) const override { return std::vector<entity_id_t>(); }
-	std::vector<entity_id_t> GetEntitiesBlockingMovement() const override { return std::vector<entity_id_t>(); }
-	std::vector<entity_id_t> GetEntitiesBlockingConstruction() const override { return std::vector<entity_id_t>(); }
-	std::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override { return std::vector<entity_id_t>(); }
+	PS::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t UNUSED(flags)) const override { return PS::vector<entity_id_t>(); }
+	PS::vector<entity_id_t> GetEntitiesBlockingMovement() const override { return PS::vector<entity_id_t>(); }
+	PS::vector<entity_id_t> GetEntitiesBlockingConstruction() const override { return PS::vector<entity_id_t>(); }
+	PS::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override { return PS::vector<entity_id_t>(); }
 	void ResolveFoundationCollisions() const override { }
 	void SetActive(bool UNUSED(active)) override { }
 	void SetMovingFlag(bool UNUSED(enabled)) override { }
@@ -139,7 +139,7 @@ public:
 	 */
 	void test_simple_collisions()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 		NullObstructionFilter nullFilter;
 
 		// Collision-test a simple shape nested inside shape3 against all shapes in the scene. Since the tested shape
@@ -177,7 +177,7 @@ public:
 	 */
 	void test_filter_null()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 
 		// Collision test a scene-covering shape against all shapes in the scene. We should find all registered shapes
 		// in the result.
@@ -205,7 +205,7 @@ public:
 	 */
 	void test_filter_stationary_only()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 
 		// Collision test a scene-covering shape against all shapes in the scene, but skipping shapes that are moving,
 		// i.e. shapes that have the MOVING flag. Since only shape 1 is flagged as moving, we should find
@@ -232,7 +232,7 @@ public:
 	 */
 	void test_filter_skip_tag()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 
 		// Collision-test shape 2's obstruction shape against all shapes in the scene, but skipping tests against
 		// shape 2. Since shape 2 overlaps only with shape 1, we should find only shape 1's entity ID in the result.
@@ -256,7 +256,7 @@ public:
 	 */
 	void test_filter_skip_tag_require_flag()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 
 		// Collision-test a scene-covering shape against all shapes in the scene, but skipping tests against shape 1
 		// and requiring the BLOCK_MOVEMENT flag. Since shape 1 is being ignored and shape 2 does not have the required
@@ -313,7 +313,7 @@ public:
 	 */
 	void test_filter_skip_controlgroups_require_flag()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 
 		// Collision-test a shape that overlaps the entire scene, but ignoring shapes from shape1's control group
 		// (which also includes shape 2), and requiring that either the BLOCK_FOUNDATION or the
@@ -447,7 +447,7 @@ public:
 
 	void test_adjacent_shapes()
 	{
-		std::vector<entity_id_t> out;
+		PS::vector<entity_id_t> out;
 		NullObstructionFilter nullFilter;
 		SkipTagObstructionFilter ignoreShape1(shape1);
 		SkipTagObstructionFilter ignoreShape2(shape2);

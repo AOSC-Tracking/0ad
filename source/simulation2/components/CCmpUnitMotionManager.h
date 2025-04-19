@@ -117,7 +117,7 @@ public:
 
 	// Turn-local state below, not serialised.
 
-	Grid<std::vector<EntityMap<MotionState>::iterator>> m_MovingUnits;
+	Grid<PS::vector<EntityMap<MotionState>::iterator>> m_MovingUnits;
 	bool m_ComputingMotion;
 
 	static std::string GetSchema()

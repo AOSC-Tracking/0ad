@@ -117,11 +117,11 @@ Status tex_codec_transform(Tex* t, size_t transforms)
 //
 // note: we don't allocate the data param ourselves because this function is
 // needed for encoding, too (where data is already present).
-std::vector<RowPtr> tex_codec_alloc_rows(const u8* data, size_t h, size_t pitch, size_t src_flags, size_t dst_orientation)
+PS::vector<RowPtr> tex_codec_alloc_rows(const u8* data, size_t h, size_t pitch, size_t src_flags, size_t dst_orientation)
 {
 	const bool flip = !tex_orientations_match(src_flags, dst_orientation);
 
-	std::vector<RowPtr> rows(h);
+	PS::vector<RowPtr> rows(h);
 
 	// determine start position and direction
 	RowPtr pos        = flip? data+pitch*(h-1) : data;

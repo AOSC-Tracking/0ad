@@ -22,16 +22,16 @@
 #include "KeyName.h"
 
 #include "lib/external_libraries/libsdl.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 
 #include <algorithm>
 #include <cstring>
-#include <unordered_map>
-#include <vector>
 
 // Some scancodes <-> names that SDL doesn't recognise.
 // Those are tested first so they override SDL defaults (useful for UNIFIED keys).
-static const std::unordered_map<int, std::vector<CStr>> scancodemap {{
+static const PS::unordered_map<int, PS::vector<CStr>> scancodemap {{
 	{ SDL_SCANCODE_DOWN, { "DownArrow" } },
 	{ SDL_SCANCODE_UP, { "UpArrow" } },
 	{ SDL_SCANCODE_LEFT, { "LeftArrow" } },
@@ -90,8 +90,8 @@ static const std::unordered_map<int, std::vector<CStr>> scancodemap {{
 SDL_Scancode FindScancode(const CStr8& keyname)
 {
 	// Find (ignoring case) a corresponding scancode, if one exists.
-	std::unordered_map<int, std::vector<CStr>>::const_iterator it =
-		std::find_if(scancodemap.begin(), scancodemap.end(), [&keyname](const std::pair<int, std::vector<CStr>>& names) {
+	PS::unordered_map<int, PS::vector<CStr>>::const_iterator it =
+		std::find_if(scancodemap.begin(), scancodemap.end(), [&keyname](const std::pair<int, PS::vector<CStr>>& names) {
 			return std::find_if(names.second.begin(), names.second.end(), [&keyname](const CStr& t) {
 				return t.LowerCase() == keyname.LowerCase();
 			})!= names.second.end();
@@ -125,7 +125,7 @@ CStr FindScancodeName(SDL_Scancode scancode)
 
 // Rename some SDL key names (!scancodes) for easier readability.
 // NB: this does not intend to be exhaustive, merely cover the usual suspects.
-static const std::unordered_map<SDL_Keycode, CStr> keyNames {{
+static const PS::unordered_map<SDL_Keycode, CStr> keyNames {{
 	{ SDLK_COMMA, "Comma" },
 	{ SDLK_SEMICOLON, "Semicolon" },
 	{ SDLK_COLON, "Colon" },

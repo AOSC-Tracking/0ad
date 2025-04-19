@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -25,8 +25,7 @@
 #include "gui/SettingTypes/CGUISeries.h"
 #include "maths/Size2D.h"
 #include "maths/Vector2D.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 struct CChartData
 {
@@ -36,7 +35,7 @@ struct CChartData
 	CChartData() = default;
 
 	CGUIColor m_Color;
-	std::vector<CVector2D> m_Points;
+	PS::vector<CVector2D> m_Points;
 };
 
 /**
@@ -72,11 +71,11 @@ protected:
 
 	void SetupText();
 
-	std::vector<CChartData> m_Series;
+	PS::vector<CChartData> m_Series;
 
 	CVector2D m_LeftBottom, m_RightTop;
 
-	std::vector<CVector2D> m_TextPositions;
+	PS::vector<CVector2D> m_TextPositions;
 
 	bool m_EqualX, m_EqualY;
 

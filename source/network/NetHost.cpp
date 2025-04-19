@@ -22,6 +22,7 @@
 #include "lib/external_libraries/enet.h"
 #include "network/NetMessage.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Vector.h"
 
 bool CNetHost::SendMessage(const CNetMessage* message, ENetPeer* peer, const char* peerName)
 {
@@ -53,7 +54,7 @@ ENetPacket* CNetHost::CreatePacket(const CNetMessage* message)
 	ENSURE(size); // else we'll fail when accessing the 0th element
 
 	// Adjust buffer for message
-	std::vector<u8> buffer;
+	PS::vector<u8> buffer;
 	buffer.resize(size);
 
 	// Save message to internal buffer

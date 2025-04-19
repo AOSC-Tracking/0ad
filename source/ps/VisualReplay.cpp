@@ -119,7 +119,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 	ScriptRequest rq(scriptInterface);
 
 	// Maps the filename onto the index, mtime and size
-	using replayCacheMap = std::map<OsPath, std::tuple<u32, u64, off_t>>;
+	using replayCacheMap = PS::map<OsPath, std::tuple<u32, u64, off_t>>;
 
 	replayCacheMap fileList;
 
@@ -153,7 +153,7 @@ JS::HandleObject VisualReplay::ReloadReplayCache(const ScriptInterface& scriptIn
 		return replays;
 
 	bool newReplays = false;
-	std::vector<u32> copyFromOldCache;
+	PS::vector<u32> copyFromOldCache;
 	// Specifies where the next replay should be kept
 	u32 i = 0;
 

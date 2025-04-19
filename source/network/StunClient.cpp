@@ -24,12 +24,12 @@
 #include "lib/external_libraries/enet.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 
 #include <chrono>
 #include <cstddef>
 #include <thread>
-#include <vector>
 
 namespace StunClient
 {
@@ -81,7 +81,7 @@ ENetAddress m_PublicAddress;
  * TODO: this should be optimised & moved to byte_order.h
  */
 template<typename T, size_t n = sizeof(T)>
-void AddToBuffer(std::vector<u8>& buffer, const T value)
+void AddToBuffer(PS::vector<u8>& buffer, const T value)
 {
 	static_assert(std::is_pod_v<T>, "T must be POD");
 	buffer.reserve(buffer.size() + n);
@@ -100,7 +100,7 @@ void AddToBuffer(std::vector<u8>& buffer, const T value)
  * TODO: this should be optimised & moved to byte_order.h
  */
 template<typename T, size_t n = sizeof(T)>
-bool GetFromBuffer(const std::vector<u8>& buffer, u32& offset, T& result)
+bool GetFromBuffer(const PS::vector<u8>& buffer, u32& offset, T& result)
 {
 	static_assert(std::is_pod_v<T>, "T must be POD");
 	if (offset + n > buffer.size())
@@ -121,7 +121,7 @@ bool GetFromBuffer(const std::vector<u8>& buffer, u32& offset, T& result)
 
 void SendStunRequest(ENetHost& transactionHost, ENetAddress addr)
 {
-	std::vector<u8> buffer;
+	PS::vector<u8> buffer;
 	AddToBuffer<u16>(buffer, m_MethodTypeBinding);
 	AddToBuffer<u16>(buffer, 0); // length
 	AddToBuffer<u32>(buffer, m_MagicCookie);
@@ -166,7 +166,7 @@ bool CreateStunRequest(ENetHost& transactionHost)
 /**
  * Gets the response from the STUN server and checks it for its validity.
  */
-bool ReceiveStunResponse(ENetHost& transactionHost, std::vector<u8>& buffer)
+bool ReceiveStunResponse(ENetHost& transactionHost, PS::vector<u8>& buffer)
 {
 	// TransportAddress sender;
 	const int LEN = 2048;
@@ -213,7 +213,7 @@ bool ReceiveStunResponse(ENetHost& transactionHost, std::vector<u8>& buffer)
 	return true;
 }
 
-bool ParseStunResponse(const std::vector<u8>& buffer)
+bool ParseStunResponse(const PS::vector<u8>& buffer)
 {
 	u32 offset = 0;
 
@@ -326,7 +326,7 @@ bool STUNRequestAndResponse(ENetHost& transactionHost)
 	if (!CreateStunRequest(transactionHost))
 		return false;
 
-	std::vector<u8> buffer;
+	PS::vector<u8> buffer;
 	return ReceiveStunResponse(transactionHost, buffer) &&
 	       ParseStunResponse(buffer);
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -29,8 +29,6 @@
 
 #include <cstring>
 #include <cstdio>
-#include <vector>
-#include <set>
 #include <algorithm>
 
 #include "lib/posix/posix_pthread.h"
@@ -39,6 +37,8 @@
 #include "lib/module_init.h"
 #include "lib/sysdep/cpu.h"
 #include "lib/sysdep/os_cpu.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 
 #if MSC_VERSION
 # include <intrin.h>	// __rdtsc
@@ -450,7 +450,7 @@ double ClockFrequency()
 	// ok for using the TSC as a time reference)
 	if(timer_Resolution() >= 1e-3)
 		numSamples = 8;
-	std::vector<double> samples(numSamples);
+	PS::vector<double> samples(numSamples);
 
 	for(size_t i = 0; i < numSamples; i++)
 	{

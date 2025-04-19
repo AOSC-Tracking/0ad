@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,11 +19,11 @@
 #define INCLUDED_CGUISTRING
 
 #include "gui/CGUIText.h"
+#include "ps/containers/List.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
 
 #include <array>
-#include <list>
-#include <vector>
 
 class CGUI;
 
@@ -101,7 +101,7 @@ public:
 			/**
 			 * Some tags need an additional attributes
 			 */
-			std::vector<TagAttribute> m_TagAttributes;
+			PS::vector<TagAttribute> m_TagAttributes;
 		};
 
 		/**
@@ -112,7 +112,7 @@ public:
 		/**
 		 * Tags that are present. [a][b]
 		 */
-		std::vector<Tag> m_Tags;
+		PS::vector<Tag> m_Tags;
 	};
 
 	/**
@@ -137,15 +137,15 @@ public:
 		/**
 		 * Image stacks, for left and right floating images.
 		 */
-		std::array<std::vector<CStr>, 2> m_Images; // left and right
+		std::array<PS::vector<CStr>, 2> m_Images; // left and right
 
 		/**
 		 * Text and Sprite Calls.
 		 */
-		std::vector<CGUIText::STextCall> m_TextCalls;
+		PS::vector<CGUIText::STextCall> m_TextCalls;
 
 		// list for consistent mem addresses so that we can point to elements.
-		std::list<CGUIText::SSpriteCall> m_SpriteCalls;
+		PS::list<CGUIText::SSpriteCall> m_SpriteCalls;
 
 		/**
 		 * Width and Height *feedback*
@@ -203,13 +203,13 @@ public:
 	/**
 	 * Words
 	 */
-	std::vector<int> m_Words;
+	PS::vector<int> m_Words;
 
 private:
 	/**
 	 * TextChunks
 	 */
-	std::vector<TextChunk> m_TextChunks;
+	PS::vector<TextChunk> m_TextChunks;
 
 	/**
 	 * The full raw string. Stripped of tags.

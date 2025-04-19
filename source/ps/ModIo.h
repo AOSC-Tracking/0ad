@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -25,12 +25,12 @@
 
 #include "lib/external_libraries/curl.h"
 #include "lib/os_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "scriptinterface/ScriptForward.h"
 
-#include <map>
 #include <sodium.h>
 #include <string>
-#include <vector>
 
 // TODO: Allocate instance of the below two using sodium_malloc?
 struct PKStruct
@@ -49,8 +49,8 @@ struct SigStruct
 
 struct ModIoModData
 {
-	std::map<std::string, std::string> properties;
-	std::vector<std::string> dependencies;
+	PS::map<std::string, std::string> properties;
+	PS::vector<std::string> dependencies;
 	SigStruct sig;
 };
 
@@ -150,7 +150,7 @@ public:
 	 */
 	void CancelRequest();
 
-	const std::vector<ModIoModData>& GetMods() const
+	const PS::vector<ModIoModData>& GetMods() const
 	{
 		return m_ModData;
 	}
@@ -175,8 +175,8 @@ private:
 
 	// Utility methods for parsing mod.io responses and metadata
 	static bool ParseGameIdResponse(const ScriptInterface& scriptInterface, const std::string& responseData, int& id, std::string& err);
-	static bool ParseModsResponse(const ScriptInterface& scriptInterface, const std::string& responseData, std::vector<ModIoModData>& modData, const PKStruct& pk, std::string& err);
-	static bool ParseSignature(const std::vector<std::string>& minisigs, SigStruct& sig, const PKStruct& pk, std::string& err);
+	static bool ParseModsResponse(const ScriptInterface& scriptInterface, const std::string& responseData, PS::vector<ModIoModData>& modData, const PKStruct& pk, std::string& err);
+	static bool ParseSignature(const PS::vector<std::string>& minisigs, SigStruct& sig, const PKStruct& pk, std::string& err);
 
 	// Url parts
 	std::string m_BaseUrl;
@@ -201,7 +201,7 @@ private:
 
 	PKStruct m_pk;
 
-	std::vector<ModIoModData> m_ModData;
+	PS::vector<ModIoModData> m_ModData;
 
 	friend class TestModIo;
 };

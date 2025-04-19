@@ -20,6 +20,7 @@
 
 #include "graphics/Color.h"
 #include "ps/containers/Span.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/Backend.h"
 #include "renderer/backend/Format.h"
 #include "renderer/backend/IBuffer.h"
@@ -33,7 +34,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 class CShaderDefines;
 class CStr;
@@ -72,7 +72,7 @@ public:
 	virtual const std::string& GetName() const = 0;
 	virtual const std::string& GetVersion() const = 0;
 	virtual const std::string& GetDriverInformation() const = 0;
-	virtual const std::vector<std::string>& GetExtensions() const = 0;
+	virtual const PS::vector<std::string>& GetExtensions() const = 0;
 
 	virtual void Report(const ScriptRequest& rq, JS::HandleValue settings) = 0;
 

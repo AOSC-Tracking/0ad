@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,6 +19,11 @@
 #define INCLUDED_OBJECTBASE
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/UnorderedSet.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/CStrIntern.h"
 
@@ -29,11 +34,7 @@ class CXeromyces;
 class XMBElement;
 
 #include <boost/random/mersenne_twister.hpp>
-#include <map>
 #include <memory>
-#include <set>
-#include <unordered_set>
-#include <vector>
 
 /**
  * Maintains the tree of possible objects from a specific actor definition at a given quality level.
@@ -114,9 +115,9 @@ public:
 		VfsPath m_Particles;
 		CStr m_Color;
 
-		std::vector<Anim> m_Anims;
-		std::vector<Prop> m_Props;
-		std::vector<Samp> m_Samplers;
+		PS::vector<Anim> m_Anims;
+		PS::vector<Prop> m_Props;
+		PS::vector<Samp> m_Samplers;
 	};
 
 	struct Variation
@@ -133,20 +134,20 @@ public:
 	CObjectBase(CObjectManager& objectManager, CActorDef& actorDef, u8 QualityLevel);
 
 	// Returns a set of selection such that, added to initialSelections, CalculateVariationKey can proceed.
-	std::set<CStr> CalculateRandomRemainingSelections(uint32_t seed, const std::vector<std::set<CStr>>& initialSelections) const;
+	PS::set<CStr> CalculateRandomRemainingSelections(uint32_t seed, const PS::vector<PS::set<CStr>>& initialSelections) const;
 
 	// Get the variation key (indices of chosen variants from each group)
 	// based on the selection strings.
 	// Should not have to make a random choice: the selections should be complete.
-	std::vector<u8> CalculateVariationKey(const std::vector<const std::set<CStr>*>& selections) const;
+	PS::vector<u8> CalculateVariationKey(const PS::vector<const PS::set<CStr>*>& selections) const;
 
 	// Get the final actor data, combining all selected variants
-	const Variation BuildVariation(const std::vector<u8>& variationKey) const;
+	const Variation BuildVariation(const PS::vector<u8>& variationKey) const;
 
 	// Get a list of variant groups for this object, plus for all possible
 	// props. Duplicated groups are removed, if several props share the same
 	// variant names.
-	std::vector<std::vector<CStr> > GetVariantGroups() const;
+	PS::vector<PS::vector<CStr> > GetVariantGroups() const;
 
 	// Return a string identifying this actor uniquely (includes quality level information);
 	const CStr& GetIdentifier() const;
@@ -184,14 +185,14 @@ private:
 	// in large grids of the same actor with consecutive seeds, e.g. forests),
 	// so use a better one that appears to avoid those patterns
 	using rng_t = boost::mt19937;
-	std::set<CStr> CalculateRandomRemainingSelections(rng_t& rng, const std::vector<std::set<CStr>>& initialSelections) const;
+	PS::set<CStr> CalculateRandomRemainingSelections(rng_t& rng, const PS::vector<PS::set<CStr>>& initialSelections) const;
 
 	/**
 	 * Get all quality levels at which this object changes (includes props).
 	 * Intended to be called by CActorFef.
 	 * @param splits - a sorted vector of unique quality splits.
 	 */
-	void GetQualitySplits(std::vector<u8>& splits) const;
+	void GetQualitySplits(PS::vector<u8>& splits) const;
 
 	[[nodiscard]] bool Load(const CXeromyces& XeroFile, const XMBElement& base);
 	[[nodiscard]] bool LoadVariant(const CXeromyces& XeroFile, const XMBElement& variant, Variant& currentVariant);
@@ -203,7 +204,7 @@ private:
 	// Used to identify this actor uniquely in the ObjectManager (and for debug).
 	CStr m_Identifier;
 
-	std::vector< std::vector<Variant> > m_VariantGroups;
+	PS::vector< PS::vector<Variant> > m_VariantGroups;
 	CObjectManager& m_ObjectManager;
 };
 
@@ -223,14 +224,14 @@ public:
 
 	CActorDef(CObjectManager& objectManager);
 
-	std::vector<u8> QualityLevels() const;
+	PS::vector<u8> QualityLevels() const;
 
 	VfsPath GetPathname() const { return m_Pathname; }
 
 	/**
 	 * Return a list of selections specifying a particular variant in all groups, based on the seed.
 	 */
-	std::set<CStr> PickSelectionsAtRandom(uint32_t seed) const;
+	PS::set<CStr> PickSelectionsAtRandom(uint32_t seed) const;
 
 // Interface accessible from CObjectManager / CObjectBase
 protected:
@@ -264,9 +265,9 @@ private:
 	CObjectManager& m_ObjectManager;
 
 	// std::shared_ptr to avoid issues during hotloading.
-	std::vector<std::shared_ptr<CObjectBase>> m_ObjectBases;
+	PS::vector<std::shared_ptr<CObjectBase>> m_ObjectBases;
 
-	std::unordered_set<VfsPath> m_UsedFiles;
+	PS::unordered_set<VfsPath> m_UsedFiles;
 };
 
 #endif

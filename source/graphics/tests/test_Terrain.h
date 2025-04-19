@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -23,9 +23,9 @@
 #include "graphics/RenderableObject.h"
 #include "maths/Fixed.h"
 #include "maths/FixedVector3D.h"
+#include "ps/containers/Vector.h"
 
 #include <sstream>
-#include <vector>
 
 class TestTerrain : public CxxTest::TestSuite
 {
@@ -204,8 +204,8 @@ public:
 		struct ResizeTestCase
 		{
 			ssize_t horizontalOffset, verticalOffset;
-			std::vector<std::vector<u16>> sourcePatches;
-			std::vector<std::vector<u16>> expectedPatches;
+			PS::vector<PS::vector<u16>> sourcePatches;
+			PS::vector<PS::vector<u16>> expectedPatches;
 		};
 		const ResizeTestCase testCases[] = {
 			// Without offset.
@@ -382,7 +382,7 @@ public:
 
 			CTerrain terrain;
 			{
-				std::vector<u16> heightmap(sourceMapSize * sourceMapSize);
+				PS::vector<u16> heightmap(sourceMapSize * sourceMapSize);
 				for (ssize_t jTile = 0; jTile < sourceSize; ++jTile)
 				{
 					TS_ASSERT_EQUALS(sourceSize, testCase.sourcePatches[jTile].size());

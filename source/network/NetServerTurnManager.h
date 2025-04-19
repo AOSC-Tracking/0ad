@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,10 +18,10 @@
 #ifndef INCLUDED_NETSERVERTURNMANAGER
 #define INCLUDED_NETSERVERTURNMANAGER
 
+#include "ps/containers/Map.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
-
-#include <map>
-#include <unordered_map>
 
 class CNetServerWorker;
 class CNetServerSession;
@@ -83,13 +83,13 @@ private:
 		bool isOOS = false;
 	};
 
-	std::unordered_map<int, Client> m_ClientsData;
+	PS::unordered_map<int, Client> m_ClientsData;
 
 	// Cached value - is any client OOS? This is reset when the OOS client leaves.
 	bool m_HasSyncError = false;
 
 	// Map of turn -> {Client ID -> state hash}; old indexes <= min(m_ClientsSimulated) are deleted
-	std::map<u32, std::map<int, std::string>> m_ClientStateHashes;
+	PS::map<u32, PS::map<int, std::string>> m_ClientStateHashes;
 
 	/// The latest turn for which we have received all commands from all clients
 	u32 m_ReadyTurn;
@@ -98,7 +98,7 @@ private:
 	u32 m_TurnLength;
 
 	// Turn lengths for all previously executed turns
-	std::vector<u32> m_SavedTurnLengths;
+	PS::vector<u32> m_SavedTurnLengths;
 
 	CNetServerWorker& m_NetServer;
 };

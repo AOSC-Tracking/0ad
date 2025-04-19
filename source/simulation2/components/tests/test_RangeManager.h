@@ -44,7 +44,7 @@ public:
 	void SetTurretParent(entity_id_t UNUSED(id), const CFixedVector3D& UNUSED(pos)) override {}
 	entity_id_t GetTurretParent() const override {return INVALID_ENTITY;}
 	void UpdateTurretPosition() override {}
-	std::set<entity_id_t>* GetTurrets() override { return nullptr; }
+	PS::set<entity_id_t>* GetTurrets() override { return nullptr; }
 	bool IsInWorld() const override { return true; }
 	void MoveOutOfWorld() override { }
 	void MoveTo(entity_pos_t UNUSED(x), entity_pos_t UNUSED(z)) override { }
@@ -97,10 +97,10 @@ public:
 	EFoundationCheck CheckFoundation(const std::string& , bool) const override { return {}; };
 	std::string CheckFoundation_wrapper(const std::string&, bool) const override { return {}; };
 	bool CheckDuplicateFoundation() const override { return {}; };
-	std::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t) const override { return {}; };
-	std::vector<entity_id_t> GetEntitiesBlockingMovement() const override { return {}; };
-	std::vector<entity_id_t> GetEntitiesBlockingConstruction() const override { return {}; };
-	std::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override { return {}; };
+	PS::vector<entity_id_t> GetEntitiesByFlags(ICmpObstructionManager::flags_t) const override { return {}; };
+	PS::vector<entity_id_t> GetEntitiesBlockingMovement() const override { return {}; };
+	PS::vector<entity_id_t> GetEntitiesBlockingConstruction() const override { return {}; };
+	PS::vector<entity_id_t> GetEntitiesDeletedUponConstruction() const override { return {}; };
 	void ResolveFoundationCollisions() const override {};
 	void SetActive(bool) override {};
 	void SetMovingFlag(bool) override {};
@@ -233,42 +233,42 @@ public:
 		move(100, position, fixed::FromInt(10), fixed::FromInt(10));
 		move(101, position2, fixed::FromInt(10), fixed::FromInt(20));
 
-		std::vector<entity_id_t> nearby = cmp->ExecuteQuery(100, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{});
+		PS::vector<entity_id_t> nearby = cmp->ExecuteQuery(100, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{});
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(4), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 
 		move(101, position2, fixed::FromInt(10), fixed::FromInt(10));
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(4), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{});
 
 		move(101, position2, fixed::FromInt(10), fixed::FromInt(13));
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(4), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{});
 
 		move(101, position2, fixed::FromInt(10), fixed::FromInt(15));
 		// In range thanks to self obstruction size.
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 		// In range thanks to target obstruction size.
 		nearby = cmp->ExecuteQuery(101, fixed::FromInt(0), fixed::FromInt(4), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{100});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{100});
 
 		// Trickier: min-range is closest-to-closest, but rotation may change the real distance.
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(2), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(5), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{101});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{101});
 		nearby = cmp->ExecuteQuery(100, fixed::FromInt(6), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{});
 		nearby = cmp->ExecuteQuery(101, fixed::FromInt(5), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{100});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{100});
 		nearby = cmp->ExecuteQuery(101, fixed::FromInt(6), fixed::FromInt(50), {1}, 0, true);
-		TS_ASSERT_EQUALS(nearby, std::vector<entity_id_t>{});
+		TS_ASSERT_EQUALS(nearby, PS::vector<entity_id_t>{});
 
 	}
 

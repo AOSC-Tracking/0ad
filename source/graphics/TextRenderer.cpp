@@ -198,16 +198,16 @@ void CTextRenderer::Render(
 	Renderer::Backend::IShaderProgram* shader,
 	const CVector2D& transformScale, const CVector2D& translation)
 {
-	std::vector<u16> indices;
-	std::vector<CVector2D> positions;
-	std::vector<CVector2D> uvs;
+	PS::vector<u16> indices;
+	PS::vector<CVector2D> positions;
+	PS::vector<CVector2D> uvs;
 
 	// Try to merge non-consecutive batches that share the same font/color/translate:
 	// sort the batch list by font, then merge the runs of adjacent compatible batches
 	m_Batches.sort(SBatchCompare());
-	for (std::list<SBatch>::iterator it = m_Batches.begin(); it != m_Batches.end(); )
+	for (PS::list<SBatch>::iterator it = m_Batches.begin(); it != m_Batches.end(); )
 	{
-		std::list<SBatch>::iterator next = std::next(it);
+		PS::list<SBatch>::iterator next = std::next(it);
 		if (next != m_Batches.end() && it->chars + next->chars <= MAX_CHAR_COUNT_PER_BATCH && it->font == next->font && it->color == next->color && it->translate == next->translate)
 		{
 			it->chars += next->chars;
@@ -226,7 +226,7 @@ void CTextRenderer::Render(
 	bool translationChanged = false;
 
 	CTexture* lastTexture = nullptr;
-	for (std::list<SBatch>::iterator it = m_Batches.begin(); it != m_Batches.end(); ++it)
+	for (PS::list<SBatch>::iterator it = m_Batches.begin(); it != m_Batches.end(); ++it)
 	{
 		SBatch& batch = *it;
 
@@ -278,7 +278,7 @@ void CTextRenderer::Render(
 			idx = 0;
 		};
 
-		for (std::list<SBatchRun>::iterator runit = batch.runs.begin(); runit != batch.runs.end(); ++runit)
+		for (PS::list<SBatchRun>::iterator runit = batch.runs.begin(); runit != batch.runs.end(); ++runit)
 		{
 			SBatchRun& run = *runit;
 			i16 x = run.x;

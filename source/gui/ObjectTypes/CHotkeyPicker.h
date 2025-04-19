@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,9 +21,8 @@
 #include "gui/CGUI.h"
 #include "gui/ObjectBases/IGUIObject.h"
 #include "lib/external_libraries/libsdl.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
-
-#include <vector>
 
 /**
  * When in focus, returns all currently pressed keys.
@@ -69,7 +68,7 @@ protected:
 	double m_LastKeyChange;
 
 	// Keep track of which keys we are pressing, and precompute their name for JS code.
-	std::vector<Key> m_KeysPressed;
+	PS::vector<Key> m_KeysPressed;
 
 	static const CStr EventNameCombination;
 	static const CStr EventNameKeyChange;

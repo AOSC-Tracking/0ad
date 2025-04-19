@@ -46,7 +46,7 @@ DrawCalls::DrawCalls()
 // in practice?)
 
 DrawCalls::DrawCalls(const DrawCalls&)
-	: std::vector<SDrawCall>()
+	: PS::vector<SDrawCall>()
 {
 }
 
@@ -56,7 +56,7 @@ DrawCalls& DrawCalls::operator=(const DrawCalls&)
 }
 
 
-void GUIRenderer::UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const CStr& SpriteName, const CRect& Size, std::map<CStr, std::unique_ptr<const CGUISprite>>& Sprites)
+void GUIRenderer::UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const CStr& SpriteName, const CRect& Size, PS::map<CStr, std::unique_ptr<const CGUISprite>>& Sprites)
 {
 	// This is called only when something has changed (like the size of the
 	// sprite), so it doesn't need to be particularly efficient.
@@ -70,7 +70,7 @@ void GUIRenderer::UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const 
 	if (Size.left == Size.right && Size.top == Size.bottom)
 		return;
 
-	std::map<CStr, std::unique_ptr<const CGUISprite>>::iterator it(Sprites.find(SpriteName));
+	PS::map<CStr, std::unique_ptr<const CGUISprite>>::iterator it(Sprites.find(SpriteName));
 	if (it == Sprites.end())
 	{
 		/*
@@ -174,7 +174,7 @@ void GUIRenderer::UpdateDrawCallCache(const CGUI& pGUI, DrawCalls& Calls, const 
 
 	// Iterate through all the sprite's images, loading the texture and
 	// calculating the texture coordinates
-	std::vector<std::unique_ptr<SGUIImage>>::const_iterator cit;
+	PS::vector<std::unique_ptr<SGUIImage>>::const_iterator cit;
 	for (cit = it->second->m_Images.begin(); cit != it->second->m_Images.end(); ++cit)
 	{
 		SDrawCall Call(cit->get()); // pointers are safe since we never modify sprites/images after startup

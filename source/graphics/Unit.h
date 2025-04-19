@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,12 +18,12 @@
 #ifndef INCLUDED_UNIT
 #define INCLUDED_UNIT
 
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
 #include "ps/CStr.h"
 #include "simulation2/system/Entity.h"	// entity_id_t
 
-#include <map>
 #include <memory>
-#include <set>
 
 class CActorDef;
 class CModelAbstract;
@@ -66,19 +66,19 @@ public:
 	// Sets the entity-selection, and updates the unit to use the new
 	// actor variation. Either set one key at a time, or a complete map.
 	void SetEntitySelection(const CStr& key, const CStr& selection);
-	void SetEntitySelection(const std::map<CStr, CStr>& selections);
+	void SetEntitySelection(const PS::map<CStr, CStr>& selections);
 
 	// Most units have a hopefully-unique ID number, so they can be referred to
 	// persistently despite saving/loading maps. Default for new units is -1; should
 	// usually be set to CUnitManager::GetNewID() after creation.
 	entity_id_t GetID() const { return m_ID; }
 
-	const std::set<CStr>& GetActorSelections() const { return m_ActorSelections; }
+	const PS::set<CStr>& GetActorSelections() const { return m_ActorSelections; }
 
 	/**
 	 * Overwrite the seed-selected actor selections. Likely only useful for Atlas or debugging.
 	 */
-	void SetActorSelections(const std::set<CStr>& selections);
+	void SetActorSelections(const PS::set<CStr>& selections);
 
 private:
 	// Actor for the unit
@@ -100,9 +100,9 @@ private:
 	// Actor-level selections for this unit. This is normally set at init time,
 	// so that we always re-use the same aesthetic variants.
 	// These have lower priority than entity-level selections.
-	std::set<CStr> m_ActorSelections;
+	PS::set<CStr> m_ActorSelections;
 	// Entity-level selections for this unit (used for e.g. animation variants).
-	std::map<CStr, CStr> m_EntitySelections;
+	PS::map<CStr, CStr> m_EntitySelections;
 
 	// object manager which looks after this unit's objectentry
 	CObjectManager& m_ObjectManager;

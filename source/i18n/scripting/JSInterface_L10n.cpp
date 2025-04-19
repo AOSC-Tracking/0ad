@@ -37,9 +37,9 @@ L10n* L10nGetter(const ScriptRequest&, JS::CallArgs&)
 	return &g_L10n.GetSingleton();
 }
 
-std::vector<std::string> TranslateArray(const std::vector<std::string>& sourceArray)
+PS::vector<std::string> TranslateArray(const PS::vector<std::string>& sourceArray)
 {
-	std::vector<std::string> translatedArray;
+	PS::vector<std::string> translatedArray;
 	if (g_L10n.IsInitialised())
 		for (const std::string& elem : sourceArray)
 			translatedArray.push_back(g_L10n.Translate(elem));

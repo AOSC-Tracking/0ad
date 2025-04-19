@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,10 +22,9 @@
 #include "graphics/ShaderProgram.h"
 #include "maths/Rect.h"
 #include "maths/Vector2D.h"
+#include "ps/containers/List.h"
 #include "ps/CStrIntern.h"
 #include "renderer/backend/IDeviceCommandContext.h"
-
-#include <list>
 
 class CFont;
 class CMatrix3D;
@@ -156,7 +155,7 @@ private:
 		CVector2D translate;
 		CColor color;
 		std::shared_ptr<CFont> font;
-		std::list<SBatchRun> runs;
+		PS::list<SBatchRun> runs;
 	};
 
 	void PutString(float x, float y, const std::wstring* buf, bool owned);
@@ -170,7 +169,7 @@ private:
 
 	bool m_Dirty = true;
 
-	std::list<SBatch> m_Batches;
+	PS::list<SBatch> m_Batches;
 };
 
 #endif // INCLUDED_TEXTRENDERER

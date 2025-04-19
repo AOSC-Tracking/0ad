@@ -25,6 +25,7 @@
 #include "gui/Scripting/JSInterface_GUIProxy.h"
 #include "js/Conversions.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedMap.h"
 #include "ps/Profile.h"
 #include "scriptinterface/Object.h"
 #include "scriptinterface/ScriptContext.h"
@@ -34,7 +35,6 @@
 
 #include <algorithm>
 #include <string_view>
-#include <unordered_map>
 
 
 const CStr IGUIObject::EventNameMouseEnter = "MouseEnter";
@@ -76,7 +76,7 @@ void IGUIObject::RegisterChild(IGUIObject* child)
 
 void IGUIObject::UnregisterChild(IGUIObject* child)
 {
-	std::vector<IGUIObject*>::iterator it = std::find(m_Children.begin(), m_Children.end(), child);
+	PS::vector<IGUIObject*>::iterator it = std::find(m_Children.begin(), m_Children.end(), child);
 	if (it != m_Children.end())
 	{
 		(*it)->m_pParent = nullptr;
@@ -107,7 +107,7 @@ bool IGUIObject::SettingExists(const CStr& Setting) const
 
 bool IGUIObject::SetSettingFromString(const CStr& Setting, const CStrW& Value, const bool SendMessage)
 {
-	const std::map<CStr, IGUISetting*>::iterator it = m_Settings.find(Setting);
+	const PS::map<CStr, IGUISetting*>::iterator it = m_Settings.find(Setting);
 	if (it == m_Settings.end())
 	{
 		LOGERROR("GUI object '%s' has no property called '%s', can't set parse and set value '%s'", GetPresentableName().c_str(), Setting.c_str(), Value.ToUTF8().c_str());
@@ -344,7 +344,7 @@ void IGUIObject::SetScriptHandler(const CStr& eventName, JS::HandleObject Functi
 
 void IGUIObject::UnsetScriptHandler(const CStr& eventName)
 {
-	std::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
+	PS::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
 
 	if (it == m_ScriptHandlers.end())
 		return;
@@ -354,11 +354,11 @@ void IGUIObject::UnsetScriptHandler(const CStr& eventName)
 	if (m_ScriptHandlers.empty())
 		JS_RemoveExtraGCRootsTracer(ScriptRequest(m_pGUI.GetScriptInterface()).cx, Trace, this);
 
-	std::unordered_map<CStr, std::vector<IGUIObject*>>::iterator it2 = m_pGUI.m_EventObjects.find(eventName);
+	PS::unordered_map<CStr, PS::vector<IGUIObject*>>::iterator it2 = m_pGUI.m_EventObjects.find(eventName);
 	if (it2 == m_pGUI.m_EventObjects.end())
 		return;
 
-	std::vector<IGUIObject*>& handlers = it2->second;
+	PS::vector<IGUIObject*>& handlers = it2->second;
 	handlers.erase(std::remove(handlers.begin(), handlers.end(), this), handlers.end());
 
 	if (handlers.empty())
@@ -397,7 +397,7 @@ InReaction IGUIObject::SendMouseEvent(EGUIMessageType type, const CStr& eventNam
 
 	const CVector2D& mousePos = m_pGUI.GetMousePos();
 
-	std::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
+	PS::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
 	if (it != m_ScriptHandlers.end())
 	{
 		Script::CreateObject(
@@ -449,7 +449,7 @@ void IGUIObject::ScriptEvent(const CStr& eventName, const JS::HandleValueArray& 
 
 bool IGUIObject::ScriptEventWithReturn(const CStr& eventName, const JS::HandleValueArray& paramData)
 {
-	std::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
+	PS::map<CStr, JS::Heap<JSObject*> >::iterator it = m_ScriptHandlers.find(eventName);
 	if (it == m_ScriptHandlers.end())
 		return false;
 

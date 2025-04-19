@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -35,12 +35,11 @@
 #include "graphics/Terrain.h"
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Vector.h"
 #include "ps/TaskManager.h"
 #include "renderer/TerrainOverlay.h"
 #include "simulation2/components/ICmpObstructionManager.h"
 #include "simulation2/helpers/Grid.h"
-
-#include <vector>
 
 class HierarchicalPathfinder;
 class LongPathfinder;
@@ -76,8 +75,8 @@ public:
 
 	// Template state:
 
-	std::map<std::string, pass_class_t> m_PassClassMasks;
-	std::vector<PathfinderPassability> m_PassClasses;
+	PS::map<std::string, pass_class_t> m_PassClassMasks;
+	PS::vector<PathfinderPassability> m_PassClasses;
 	u16 m_MaxSameTurnMoves; // Compute only this many paths when useMax is true in StartProcessingMoves.
 
 	// Dynamic state:
@@ -95,18 +94,18 @@ public:
 	GridUpdateInformation m_AIPathfinderDirtinessInformation;
 	bool m_TerrainDirty;
 
-	std::vector<VertexPathfinder> m_VertexPathfinders;
+	PS::vector<VertexPathfinder> m_VertexPathfinders;
 	std::unique_ptr<HierarchicalPathfinder> m_PathfinderHier;
 	std::unique_ptr<LongPathfinder> m_LongPathfinder;
 
 	// One per live asynchronous path computing task.
-	std::vector<Future<void>> m_Futures;
+	PS::vector<Future<void>> m_Futures;
 
 	template<typename T>
 	class PathRequests {
 	public:
-		std::vector<T> m_Requests;
-		std::vector<PathResult> m_Results;
+		PS::vector<T> m_Requests;
+		PS::vector<PathResult> m_Results;
 		// This is the array index of the next path to compute.
 		std::atomic<size_t> m_NextPathToCompute = 0;
 		// This is false until all scheduled paths have been computed.
@@ -164,10 +163,10 @@ public:
 
 	pass_class_t GetPassabilityClass(const std::string& name) const override;
 
-	void GetPassabilityClasses(std::map<std::string, pass_class_t>& passClasses) const override;
+	void GetPassabilityClasses(PS::map<std::string, pass_class_t>& passClasses) const override;
 	void GetPassabilityClasses(
-		std::map<std::string, pass_class_t>& nonPathfindingPassClasses,
-		std::map<std::string, pass_class_t>& pathfindingPassClasses) const override;
+		PS::map<std::string, pass_class_t>& nonPathfindingPassClasses,
+		PS::map<std::string, pass_class_t>& pathfindingPassClasses) const override;
 
 	const PathfinderPassability* GetPassabilityFromMask(pass_class_t passClass) const;
 
@@ -238,10 +237,10 @@ public:
 	void StartProcessingMoves(bool useMax) override;
 
 	template <typename T>
-	std::vector<T> GetMovesToProcess(std::vector<T>& requests, bool useMax = false, size_t maxMoves = 0);
+	PS::vector<T> GetMovesToProcess(PS::vector<T>& requests, bool useMax = false, size_t maxMoves = 0);
 
 	template <typename T>
-	void PushRequestsToWorkers(std::vector<T>& from);
+	void PushRequestsToWorkers(PS::vector<T>& from);
 
 	/**
 	 * Regenerates the grid based on the current obstruction list, if necessary

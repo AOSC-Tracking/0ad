@@ -30,15 +30,15 @@
 
 static bool unified[UNIFIED_LAST - UNIFIED_SHIFT];
 
-std::unordered_map<int, KeyMapping> g_HotkeyMap;
+PS::unordered_map<int, KeyMapping> g_HotkeyMap;
 
 namespace {
-	std::unordered_map<std::string, bool> g_HotkeyStatus;
+	PS::unordered_map<std::string, bool> g_HotkeyStatus;
 
 	struct PressedHotkey
 	{
 		PressedHotkey(const SHotkeyMapping* m, bool t) : mapping(m), retriggered(t) {};
-		// NB: this points to one of g_HotkeyMap's mappings. It works because that std::unordered_map is stable once constructed.
+		// NB: this points to one of g_HotkeyMap's mappings. It works because that PS::unordered_map is stable once constructed.
 		const SHotkeyMapping* mapping;
 		// Whether the hotkey was triggered by a key release (silences "press" and "up" events).
 		bool retriggered;
@@ -54,7 +54,7 @@ namespace {
 	// 'In-flight' state used because the hotkey triggering process is split in two phase.
 	// These hotkeys may still be stopped if the event responsible for triggering them is handled
 	// before it can be used to generate the hotkeys.
-	std::vector<PressedHotkey> newPressedHotkeys;
+	PS::vector<PressedHotkey> newPressedHotkeys;
 	// Stores the 'specificity' of the newly pressed hotkeys.
 	size_t closestMapMatch = 0;
 	// This is merely used to ensure consistency in EventWillFireHotkey.
@@ -62,11 +62,11 @@ namespace {
 
 	// List of currently pressed hotkeys. This is used to quickly reset hotkeys.
 	// This is an unsorted vector because there will generally be very few elements,
-	// so it's presumably faster than std::set.
-	std::vector<PressedHotkey> pressedHotkeys;
+	// so it's presumably faster than PS::set.
+	PS::vector<PressedHotkey> pressedHotkeys;
 
 	// List of active keys relevant for hotkeys.
-	std::vector<SDL_Scancode_> activeScancodes;
+	PS::vector<SDL_Scancode_> activeScancodes;
 }
 
 static_assert(std::is_integral<std::underlying_type<SDL_Scancode>::type>::value, "SDL_Scancode is not an integral enum.");
@@ -93,7 +93,7 @@ static void LoadConfigBindings(CConfigDB& configDB)
 
 		for (const CStr& hotkey : configPair.second)
 		{
-			std::vector<SKey> keyCombination;
+			PS::vector<SKey> keyCombination;
 
 			// Iterate through multiple-key bindings (e.g. Ctrl+I)
 			boost::char_separator<char> sep("+");
@@ -113,7 +113,7 @@ static void LoadConfigBindings(CConfigDB& configDB)
 				keyCombination.push_back(key);
 			}
 
-			std::vector<SKey>::iterator itKey, itKey2;
+			PS::vector<SKey>::iterator itKey, itKey2;
 			for (itKey = keyCombination.begin(); itKey != keyCombination.end(); ++itKey)
 			{
 				SHotkeyMapping bindCode;
@@ -291,7 +291,7 @@ InReaction HotkeyInputPrepHandler(const SDL_Event_* ev)
 
 	if (!isInstantaneous)
 	{
-		std::vector<SDL_Scancode_>::iterator it = std::find(activeScancodes.begin(), activeScancodes.end(), scancode);
+		PS::vector<SDL_Scancode_>::iterator it = std::find(activeScancodes.begin(), activeScancodes.end(), scancode);
 		// This prevents duplicates, assuming we might end up in a weird state - feels safer with input.
 		if (isReleasedKey && it != activeScancodes.end())
 			activeScancodes.erase(it);
@@ -299,7 +299,7 @@ InReaction HotkeyInputPrepHandler(const SDL_Event_* ev)
 			activeScancodes.emplace_back(scancode);
 	}
 
-	std::vector<SDL_Scancode_> triggers;
+	PS::vector<SDL_Scancode_> triggers;
 	if (!isReleasedKey || isInstantaneous)
 		triggers.push_back(scancode);
 	else
@@ -354,7 +354,7 @@ InReaction HotkeyInputActualHandler(const SDL_Event_* ev)
 
 	// TODO: it's probably possible to break hotkeys somewhat if the "Up" event that would release a hotkey is handled
 	// by a priori handler - it might be safer to do that in the 'Prep' phase.
-	std::vector<ReleasedHotkey> releasedHotkeys;
+	PS::vector<ReleasedHotkey> releasedHotkeys;
 
 	// For instantaneous events, we don't update the pressedHotkeys (i.e. currently active hotkeys),
 	// we just fire/release the triggered hotkeys transiently.

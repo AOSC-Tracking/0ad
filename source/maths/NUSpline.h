@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -28,8 +28,7 @@
 
 #include "FixedVector3D.h"
 #include "Vector3D.h"
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 /**
  * Describes a node of the spline
@@ -60,14 +59,14 @@ public:
 	void BuildSpline();
 	CVector3D GetPosition(float time) const;
 	CVector3D GetRotation(float time) const;
-	const std::vector<SplineData>& GetAllNodes() const;
+	const PS::vector<SplineData>& GetAllNodes() const;
 
 	fixed MaxDistance;
 	int NodeCount;
 
 protected:
 
-	std::vector<SplineData> Node;
+	PS::vector<SplineData> Node;
 	CVector3D GetStartVelocity(int index);
 	CVector3D GetEndVelocity(int index);
 };

@@ -21,6 +21,7 @@
 
 #include "lib/code_annotation.h"
 #include "lib/config2.h"
+#include "ps/containers/Vector.h"
 #include "renderer/backend/vulkan/Device.h"
 #include "renderer/backend/vulkan/Utilities.h"
 #include "scriptinterface/JSON.h"
@@ -32,7 +33,6 @@
 #include <limits>
 #include <string>
 #include <type_traits>
-#include <vector>
 
 namespace Renderer
 {
@@ -46,14 +46,14 @@ namespace Vulkan
 namespace
 {
 
-std::vector<std::string> GetPhysicalDeviceExtensions(VkPhysicalDevice device)
+PS::vector<std::string> GetPhysicalDeviceExtensions(VkPhysicalDevice device)
 {
 	uint32_t extensionCount = 0;
 	ENSURE_VK_SUCCESS(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr));
-	std::vector<VkExtensionProperties> extensions(extensionCount);
+	PS::vector<VkExtensionProperties> extensions(extensionCount);
 	ENSURE_VK_SUCCESS(vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, extensions.data()));
 
-	std::vector<std::string> availableExtensions;
+	PS::vector<std::string> availableExtensions;
 	availableExtensions.reserve(extensions.size());
 	for (const VkExtensionProperties& extension : extensions)
 		availableExtensions.emplace_back(extension.extensionName);
@@ -156,9 +156,9 @@ struct ReportFormatHelper<T, typename std::enable_if_t<std::is_array_v<T>>>
 {
 	using HelperType = ReportFormatHelper<std::remove_extent_t<T>>;
 	using ElementType = std::invoke_result_t<HelperType, std::remove_extent_t<T>>;
-	std::vector<ElementType> operator()(const T& value) const
+	PS::vector<ElementType> operator()(const T& value) const
 	{
-		std::vector<ElementType> arr;
+		PS::vector<ElementType> arr;
 		arr.reserve(std::size(value));
 		HelperType helper{};
 		for (const auto& element : value)
@@ -169,7 +169,7 @@ struct ReportFormatHelper<T, typename std::enable_if_t<std::is_array_v<T>>>
 
 SAvailablePhysicalDevice MakeAvailablePhysicalDevice(
 	const uint32_t physicalDeviceIndex, VkPhysicalDevice physicalDevice,
-	VkSurfaceKHR surface, const std::vector<const char*>& requiredDeviceExtensions)
+	VkSurfaceKHR surface, const PS::vector<const char*>& requiredDeviceExtensions)
 {
 	SAvailablePhysicalDevice availablePhysicalDevice{};
 
@@ -274,19 +274,19 @@ SAvailablePhysicalDevice MakeAvailablePhysicalDevice(
 
 } // anonymous namespace
 
-std::vector<SAvailablePhysicalDevice> GetAvailablePhysicalDevices(
+PS::vector<SAvailablePhysicalDevice> GetAvailablePhysicalDevices(
 	VkInstance instance, VkSurfaceKHR surface,
-	const std::vector<const char*>& requiredDeviceExtensions)
+	const PS::vector<const char*>& requiredDeviceExtensions)
 {
 	uint32_t physicalDeviceCount = 0;
 	ENSURE_VK_SUCCESS(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr));
 	if (physicalDeviceCount == 0)
 		return {};
 
-	std::vector<SAvailablePhysicalDevice> availablePhysicalDevices;
+	PS::vector<SAvailablePhysicalDevice> availablePhysicalDevices;
 	availablePhysicalDevices.reserve(physicalDeviceCount);
 
-	std::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
+	PS::vector<VkPhysicalDevice> physicalDevices(physicalDeviceCount);
 	ENSURE_VK_SUCCESS(vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, physicalDevices.data()));
 	for (uint32_t physicalDeviceIndex = 0; physicalDeviceIndex < physicalDeviceCount; ++physicalDeviceIndex)
 	{

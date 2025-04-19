@@ -41,7 +41,7 @@ public:
 	 */
 	void OnDestroyConnection();
 
-	void OnSyncError(u32 turn, const CStr& expectedHash, const std::vector<CSyncErrorMessage::S_m_PlayerNames>& playerNames);
+	void OnSyncError(u32 turn, const CStr& expectedHash, const PS::vector<CSyncErrorMessage::S_m_PlayerNames>& playerNames);
 
 private:
 	void NotifyFinishedOwnCommands(u32 turn) override;

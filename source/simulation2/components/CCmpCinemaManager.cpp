@@ -201,17 +201,17 @@ public:
 		m_Paths.erase(name);
 	}
 
-	const std::map<CStrW, CCinemaPath>& GetPaths() const override
+	const PS::map<CStrW, CCinemaPath>& GetPaths() const override
 	{
 		return m_Paths;
 	}
 
-	void SetPaths(const std::map<CStrW, CCinemaPath>& newPaths) override
+	void SetPaths(const PS::map<CStrW, CCinemaPath>& newPaths) override
 	{
 		m_Paths = newPaths;
 	}
 
-	const std::list<CCinemaPath>& GetQueue() const override
+	const PS::list<CCinemaPath>& GetQueue() const override
 	{
 		return m_PathQueue;
 	}
@@ -267,7 +267,7 @@ private:
 		serializer.Bool("LookAtTarget", data->m_LookAtTarget);
 
 		serializer.NumberU32("NumberOfNodes", path.GetAllNodes().size(), 1, MAX_SPLINE_NODES);
-		const std::vector<SplineData>& nodes = path.GetAllNodes();
+		const PS::vector<SplineData>& nodes = path.GetAllNodes();
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			if (i > 0)
@@ -287,7 +287,7 @@ private:
 		if (!data->m_LookAtTarget)
 			return;
 
-		const std::vector<SplineData>& targetNodes = path.GetTargetSpline().GetAllNodes();
+		const PS::vector<SplineData>& targetNodes = path.GetTargetSpline().GetAllNodes();
 		serializer.NumberU32("NumberOfTargetNodes", targetNodes.size(), 1, MAX_SPLINE_NODES);
 		for (size_t i = 0; i < targetNodes.size(); ++i)
 		{
@@ -352,8 +352,8 @@ private:
 	}
 
 	bool m_Enabled;
-	std::map<CStrW, CCinemaPath> m_Paths;
-	std::list<CCinemaPath> m_PathQueue;
+	PS::map<CStrW, CCinemaPath> m_Paths;
+	PS::list<CCinemaPath> m_PathQueue;
 
 	// States before playing
 	bool m_MapRevealed;

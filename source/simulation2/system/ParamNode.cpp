@@ -137,20 +137,20 @@ void CParamNode::ApplyLayer(const XMBData& xmb, const XMBElement& element, const
 				CParamNode& node = m_Childs[name];
 
 				// Split into tokens
-				std::vector<std::string> oldTokens;
-				std::vector<std::string> newTokens;
+				PS::vector<std::string> oldTokens;
+				PS::vector<std::string> newTokens;
 				if (!replacing && !node.m_Value.empty()) // ignore the old tokens if replace="" was given
 					boost::algorithm::split(oldTokens, node.m_Value, boost::algorithm::is_space(), boost::algorithm::token_compress_on);
 				if (!value.empty())
 					boost::algorithm::split(newTokens, value, boost::algorithm::is_space(), boost::algorithm::token_compress_on);
 
 				// Merge the two lists
-				std::vector<std::string> tokens = oldTokens;
+				PS::vector<std::string> tokens = oldTokens;
 				for (const std::string& newToken : newTokens)
 				{
 					if (newToken[0] == '-')
 					{
-						std::vector<std::string>::iterator tokenIt =
+						PS::vector<std::string>::iterator tokenIt =
 							std::find(tokens.begin(), tokens.end(),
 								std::string_view{newToken}.substr(1));
 						if (tokenIt != tokens.end())
@@ -424,7 +424,7 @@ void CParamNode::ConstructJSVal(const ScriptRequest& rq, JS::MutableHandleValue 
 	}
 
 	JS::RootedValue childVal(rq.cx);
-	for (std::map<std::string, CParamNode>::const_iterator it = m_Childs.begin(); it != m_Childs.end(); ++it)
+	for (PS::map<std::string, CParamNode>::const_iterator it = m_Childs.begin(); it != m_Childs.end(); ++it)
 	{
 		it->second.ConstructJSVal(rq, &childVal);
 		if (!JS_SetProperty(rq.cx, obj, it->first.c_str(), childVal))

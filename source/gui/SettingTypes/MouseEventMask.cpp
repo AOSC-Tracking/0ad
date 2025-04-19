@@ -148,7 +148,7 @@ public:
 
 private:
 	// This uses the bool specialization on purpose for the 'compression' effect.
-	std::vector<bool> m_Data;
+	PS::vector<bool> m_Data;
 	u16 m_Width;
 	u16 m_Height;
 };

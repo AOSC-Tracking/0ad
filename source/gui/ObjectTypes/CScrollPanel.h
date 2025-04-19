@@ -26,7 +26,7 @@
 class CScrollPanel : public IGUIPanel, public IGUIScrollBarOwner
 {
 	GUI_OBJECT(CScrollPanel)
-	mutable std::vector<IGUIObject*> m_ModifiedChildren; // To store the modified vector
+	mutable PS::vector<IGUIObject*> m_ModifiedChildren; // To store the modified vector
 public:
 	CScrollPanel(CGUI& pGUI);
 	virtual ~CScrollPanel();

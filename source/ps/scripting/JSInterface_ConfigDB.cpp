@@ -21,17 +21,17 @@
 
 #include "ps/ConfigDB.h"
 #include "ps/CLogger.h"
+#include "ps/containers/UnorderedSet.h"
 #include "ps/VideoMode.h"
 #include "scriptinterface/FunctionWrapper.h"
 #include "scriptinterface/ScriptRequest.h"
 
 #include <string>
-#include <unordered_set>
 
 namespace JSI_ConfigDB
 {
 // These entries will not be readable nor writable for JS, so that e.g. malicious mods can't leak personal or sensitive data
-static const std::unordered_set<std::string> g_ProtectedConfigNames = {
+static const PS::unordered_set<std::string> g_ProtectedConfigNames = {
 	"modio.public_key", // See ModIO.cpp
 	"modio.v1.baseurl",
 	"modio.v1.api_key",
@@ -117,7 +117,7 @@ bool CreateValue(const std::wstring& cfgNsString, const std::string& name, const
 	return true;
 }
 
-bool CreateValues(const std::wstring& cfgNsString, const std::string& name, const std::vector<CStr>& values)
+bool CreateValues(const std::wstring& cfgNsString, const std::string& name, const PS::vector<CStr>& values)
 {
 	if (IsProtectedConfigName(name))
 		return false;

@@ -135,7 +135,7 @@ static void AllocateAndCopyTables(std::atomic<const AcpiTable**>& tables, size_t
 
 //-----------------------------------------------------------------------------
 
-// note: avoid global std::map etc. because we may be called before _cinit
+// note: avoid global PS::map etc. because we may be called before _cinit
 static std::atomic<const AcpiTable**> tables{ nullptr };	// tables == nullptr <=> not initialized
 static const AcpiTable* invalidTables;	// tables == &invalidTables => init failed
 static size_t numTables;

@@ -230,7 +230,7 @@ public:
 		printf("Erasing 200K non-existing elements: %lfs\n", tt);
 
 		// prep random vector
-		std::vector<int> vec;
+		PS::vector<int> vec;
 		for (int i = 1; i <= 200000; ++i)
 			vec.push_back(i);
 

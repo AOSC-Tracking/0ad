@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,11 +19,10 @@
 #define INCLUDED_DEBUGRENDERER
 
 #include "graphics/ShaderTechniquePtr.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStrIntern.h"
 #include "renderer/backend/IShaderProgram.h"
-
-#include <unordered_map>
-#include <vector>
 
 class CBoundingBoxAligned;
 class CBrush;
@@ -45,7 +44,7 @@ public:
 	 */
 	void DrawLine(const CVector3D& from, const CVector3D& to,
 		const CColor& color, const float width, const bool depthTestEnabled = true);
-	void DrawLine(const std::vector<CVector3D>& line,
+	void DrawLine(const PS::vector<CVector3D>& line,
 		const CColor& color, const float width, const bool depthTestEnabled = true);
 
 	/**
@@ -92,7 +91,7 @@ private:
 	{
 		bool operator()(const ShaderTechniqueKey& lhs, const ShaderTechniqueKey& rhs) const;
 	};
-	std::unordered_map<ShaderTechniqueKey, CShaderTechniquePtr, ShaderTechniqueKeyHash, ShaderTechniqueKeyEqual>
+	PS::unordered_map<ShaderTechniqueKey, CShaderTechniquePtr, ShaderTechniqueKeyHash, ShaderTechniqueKeyEqual>
 		m_ShaderTechniqueMapping;
 
 	Renderer::Backend::IVertexInputLayout* m_VertexInputLayout = nullptr;

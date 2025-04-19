@@ -35,6 +35,7 @@
 #include "ps/ConfigDB.h"
 #include "ps/GUID.h"
 #include "ps/Hashing.h"
+#include "ps/containers/Set.h"
 #include "ps/Profile.h"
 #include "ps/Threading.h"
 #include "scriptinterface/ScriptContext.h"
@@ -50,7 +51,6 @@
 #include <miniupnpc/upnperrors.h>
 #endif
 
-#include <set>
 #include <string>
 
 /**
@@ -357,8 +357,8 @@ bool CNetServerWorker::SendMessage(ENetPeer* peer, const CNetMessage* message)
 }
 
 bool CNetServerWorker::Multicast(const CNetMessage* message,
-	const std::vector<NetServerSessionState>& targetStates,
-	const std::optional<std::vector<std::string>>& receivers /* = std::nullopt */)
+	const PS::vector<NetServerSessionState>& targetStates,
+	const std::optional<PS::vector<std::string>>& receivers /* = std::nullopt */)
 {
 	ENSURE(m_Host);
 
@@ -428,10 +428,10 @@ bool CNetServerWorker::RunStep()
 
 	ScriptRequest rq(m_ScriptInterface);
 
-	std::vector<bool> newStartGame;
-	std::vector<std::string> newGameAttributes;
-	std::vector<std::pair<CStr, CStr>> newLobbyAuths;
-	std::vector<u32> newTurnLength;
+	PS::vector<bool> newStartGame;
+	PS::vector<std::string> newGameAttributes;
+	PS::vector<std::pair<CStr, CStr>> newLobbyAuths;
+	PS::vector<u32> newTurnLength;
 
 	{
 		std::lock_guard<std::mutex> lock(m_WorkerMutex);
@@ -723,7 +723,7 @@ void CNetServerWorker::OnUserJoin(CNetServerSession* session)
 
 void CNetServerWorker::OnUserLeave(CNetServerSession* session)
 {
-	std::vector<CStr>::iterator pausing = std::find(m_PausingPlayers.begin(), m_PausingPlayers.end(), session->GetGUID());
+	PS::vector<CStr>::iterator pausing = std::find(m_PausingPlayers.begin(), m_PausingPlayers.end(), session->GetGUID());
 	if (pausing != m_PausingPlayers.end())
 		m_PausingPlayers.erase(pausing);
 
@@ -739,7 +739,7 @@ void CNetServerWorker::OnUserLeave(CNetServerSession* session)
 void CNetServerWorker::AddPlayer(const CStr& guid, const CStrW& name)
 {
 	// Find all player IDs in active use; we mustn't give them to a second player (excluding the unassigned ID: -1)
-	std::set<i32> usedIDs;
+	PS::set<i32> usedIDs;
 	for (const std::pair<const CStr, PlayerAssignment>& p : m_PlayerAssignments)
 		if (p.second.m_Enabled && p.second.m_PlayerID != -1)
 			usedIDs.insert(p.second.m_PlayerID);
@@ -807,7 +807,7 @@ void CNetServerWorker::ClearAllPlayerReady()
 void CNetServerWorker::KickPlayer(const CStrW& playerName, const bool ban)
 {
 	// Find the user with that name
-	std::vector<CNetServerSession*>::iterator it = std::find_if(m_Sessions.begin(), m_Sessions.end(),
+	PS::vector<CNetServerSession*>::iterator it = std::find_if(m_Sessions.begin(), m_Sessions.end(),
 		[&](CNetServerSession* session) { return session->GetUserName() == playerName; });
 
 	// and return if no one or the host has that name
@@ -890,7 +890,7 @@ void CNetServerWorker::ProcessLobbyAuth(const CStr& name, const CStr& token)
 {
 	LOGMESSAGE("Net Server: Received lobby auth message from %s with %s", name, token);
 	// Find the user with that guid
-	std::vector<CNetServerSession*>::iterator it = std::find_if(m_Sessions.begin(), m_Sessions.end(),
+	PS::vector<CNetServerSession*>::iterator it = std::find_if(m_Sessions.begin(), m_Sessions.end(),
 		[&](CNetServerSession* session)
 		{ return session->GetGUID() == token; });
 
@@ -1006,7 +1006,7 @@ bool CNetServerWorker::OnAuthenticate(CNetServerSession* session, CFsmEvent* eve
 		username = server.DeduplicatePlayerName(username);
 	else
 	{
-		std::vector<CNetServerSession*>::iterator it = std::find_if(
+		PS::vector<CNetServerSession*>::iterator it = std::find_if(
 			server.m_Sessions.begin(), server.m_Sessions.end(),
 			[&username] (const CNetServerSession* session)
 			{ return session->GetUserName() == username; });
@@ -1261,14 +1261,14 @@ bool CNetServerWorker::OnChat(CNetServerSession* session, CFsmEvent* event)
 
 	message->m_SenderGUID = session->GetGUID();
 
-	const std::vector<NetServerSessionState> receivingStates{NSS_PREGAME, NSS_INGAME};
-	const std::vector messageReceivers{std::exchange(message->m_Receivers, {})};
+	const PS::vector<NetServerSessionState> receivingStates{NSS_PREGAME, NSS_INGAME};
+	const PS::vector<CChatMessage::S_m_Receivers> messageReceivers{std::exchange(message->m_Receivers, {})};
 
 	if (messageReceivers.empty())
 		server.Multicast(message, receivingStates);
 	else
 	{
-		auto receivers = std::make_optional<std::vector<std::string>>();
+		auto receivers = std::make_optional<PS::vector<std::string>>();
 		std::transform(messageReceivers.begin(), messageReceivers.end(), std::back_inserter(*receivers),
 			std::mem_fn(&CChatMessage::S_m_Receivers::m_ReceiverGUID));
 		server.Multicast(message, receivingStates, std::move(receivers));
@@ -1523,7 +1523,7 @@ bool CNetServerWorker::OnClientPaused(CNetServerSession* session, CFsmEvent* eve
 	message->m_GUID = session->GetGUID();
 
 	// Update the list of pausing players.
-	std::vector<CStr>::iterator player = std::find(server.m_PausingPlayers.begin(), server.m_PausingPlayers.end(), session->GetGUID());
+	PS::vector<CStr>::iterator player = std::find(server.m_PausingPlayers.begin(), server.m_PausingPlayers.end(), session->GetGUID());
 
 	if (message->m_Pause)
 	{
@@ -1721,7 +1721,7 @@ bool CNetServer::SetConnectionData()
 
 bool CNetServer::CheckPasswordAndIncrement(const std::string& username, const std::string& password, const std::string& salt)
 {
-	std::unordered_map<std::string, int>::iterator it = m_FailedAttempts.find(username);
+	PS::unordered_map<std::string, int>::iterator it = m_FailedAttempts.find(username);
 	if (m_Worker->CheckPassword(password, salt))
 	{
 		if (it != m_FailedAttempts.end())
@@ -1737,7 +1737,7 @@ bool CNetServer::CheckPasswordAndIncrement(const std::string& username, const st
 
 bool CNetServer::IsBanned(const std::string& username) const
 {
-	std::unordered_map<std::string, int>::const_iterator it = m_FailedAttempts.find(username);
+	PS::unordered_map<std::string, int>::const_iterator it = m_FailedAttempts.find(username);
 	return it != m_FailedAttempts.end() && it->second >= FAILED_PASSWORD_TRIES_BEFORE_BAN;
 }
 

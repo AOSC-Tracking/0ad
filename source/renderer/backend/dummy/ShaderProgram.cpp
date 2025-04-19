@@ -52,7 +52,7 @@ int32_t CShaderProgram::GetBindingSlot(const CStrIntern UNUSED(name)) const
 	return -1;
 }
 
-std::vector<VfsPath> CShaderProgram::GetFileDependencies() const
+PS::vector<VfsPath> CShaderProgram::GetFileDependencies() const
 {
 	return {};
 }

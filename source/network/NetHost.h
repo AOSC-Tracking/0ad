@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 #ifndef NETHOST_H
 #define NETHOST_H
 
+#include "ps/containers/Map.h"
 #include "ps/CStr.h"
-
-#include <map>
 
 /**
  * @file
@@ -51,7 +50,7 @@ struct PlayerAssignment
 	u8 m_Status;
 };
 
-typedef std::map<CStr, PlayerAssignment> PlayerAssignmentMap; // map from GUID -> assignment
+using PlayerAssignmentMap = PS::map<CStr, PlayerAssignment>; // map from GUID -> assignment
 
 /**
  * Reasons sent by server to clients in disconnection messages.

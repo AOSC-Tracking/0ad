@@ -23,8 +23,7 @@
 #include "simulation2/helpers/Position.h"
 #include "maths/FixedVector3D.h"
 #include "maths/FixedVector2D.h"
-
-#include <set>
+#include "ps/containers/Set.h"
 
 class CMatrix3D;
 
@@ -78,7 +77,7 @@ public:
 	/**
 	 * Get the list of turrets to read or edit
 	 */
-	virtual std::set<entity_id_t>* GetTurrets() = 0;
+	virtual PS::set<entity_id_t>* GetTurrets() = 0;
 
 	/**
 	 * Returns true if the entity currently exists at a defined position in the world.

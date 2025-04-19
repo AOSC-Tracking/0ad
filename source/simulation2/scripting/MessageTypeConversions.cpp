@@ -418,9 +418,9 @@ JS::Value CMessageValueModification::ToJSVal(const ScriptRequest& rq) const
 CMessage* CMessageValueModification::FromJSVal(const ScriptRequest& rq, JS::HandleValue val)
 {
 	FROMJSVAL_SETUP();
-	GET_MSG_PROPERTY(std::vector<entity_id_t>, entities);
+	GET_MSG_PROPERTY(PS::vector<entity_id_t>, entities);
 	GET_MSG_PROPERTY(std::wstring, component);
-	GET_MSG_PROPERTY(std::vector<std::wstring>, valueNames);
+	GET_MSG_PROPERTY(PS::vector<std::wstring>, valueNames);
 	return new CMessageValueModification(entities, component, valueNames);
 }
 
@@ -440,7 +440,7 @@ CMessage* CMessageTemplateModification::FromJSVal(const ScriptRequest& rq, JS::H
 	FROMJSVAL_SETUP();
 	GET_MSG_PROPERTY(player_id_t, player);
 	GET_MSG_PROPERTY(std::wstring, component);
-	GET_MSG_PROPERTY(std::vector<std::wstring>, valueNames);
+	GET_MSG_PROPERTY(PS::vector<std::wstring>, valueNames);
 	return new CMessageTemplateModification(player, component, valueNames);
 }
 

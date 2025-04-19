@@ -27,14 +27,14 @@
 #include "lib/status.h"
 #include "lib/tex/tex.h"
 #include "maths/MathUtil.h"
+#include "ps/containers/Vector.h"
 #include "ps/Filesystem.h"
 
 #include <algorithm>
-#include <vector>
 
-Status ParseHeightmapImage(const std::shared_ptr<u8>& fileData, size_t fileSize, std::vector<u16>& heightmap);
+Status ParseHeightmapImage(const std::shared_ptr<u8>& fileData, size_t fileSize, PS::vector<u16>& heightmap);
 
-Status LoadHeightmapImageVfs(const VfsPath& filepath, std::vector<u16>& heightmap)
+Status LoadHeightmapImageVfs(const VfsPath& filepath, PS::vector<u16>& heightmap)
 {
 	std::shared_ptr<u8> fileData;
 	size_t fileSize;
@@ -44,7 +44,7 @@ Status LoadHeightmapImageVfs(const VfsPath& filepath, std::vector<u16>& heightma
 	return ParseHeightmapImage(fileData, fileSize, heightmap);
 }
 
-Status LoadHeightmapImageOs(const OsPath& filepath, std::vector<u16>& heightmap)
+Status LoadHeightmapImageOs(const OsPath& filepath, PS::vector<u16>& heightmap)
 {
 	File file;
 	RETURN_STATUS_IF_ERR(file.Open(OsString(filepath), O_RDONLY));
@@ -63,7 +63,7 @@ Status LoadHeightmapImageOs(const OsPath& filepath, std::vector<u16>& heightmap)
 	return ParseHeightmapImage(fileData, fileSize, heightmap);
 }
 
-Status ParseHeightmapImage(const std::shared_ptr<u8>& fileData, size_t fileSize, std::vector<u16>& heightmap)
+Status ParseHeightmapImage(const std::shared_ptr<u8>& fileData, size_t fileSize, PS::vector<u16>& heightmap)
 {
 	// Decode to a raw pixel format
 	Tex tex;

@@ -40,8 +40,8 @@ public:
 
 	const u16 mapSize = 240;
 
-	std::map<std::string, pass_class_t> pathClassMask;
-	std::map<std::string, pass_class_t> nonPathClassMask;
+	PS::map<std::string, pass_class_t> pathClassMask;
+	PS::map<std::string, pass_class_t> nonPathClassMask;
 
 	void debug_grid(Grid<NavcellData>& grid)
 	{
@@ -94,7 +94,7 @@ public:
 		TS_ASSERT(hierPath.m_Edges[PASS_1][hierPath.Get(20,  20,  PASS_1)].size() == 2);
 		TS_ASSERT(hierPath.m_Edges[PASS_1][hierPath.Get(220, 220, PASS_1)].size() == 2);
 
-		std::set<HierarchicalPathfinder::RegionID> reachables;
+		PS::set<HierarchicalPathfinder::RegionID> reachables;
 		hierPath.FindReachableRegions(hierPath.Get(120, 120, PASS_1), reachables, PASS_1);
 		TS_ASSERT(reachables.size() == 9);
 		reachables.clear();
@@ -104,11 +104,11 @@ public:
 
 	void test_reachability_and_update()
 	{
-		pathClassMask = std::map<std::string, pass_class_t> {
+		pathClassMask = PS::map<std::string, pass_class_t> {
 			{ "1", 1 },
 			{ "2", 2 },
 		};
-		nonPathClassMask = std::map<std::string, pass_class_t> {
+		nonPathClassMask = PS::map<std::string, pass_class_t> {
 			{ "3", 4 }
 		};
 
@@ -161,7 +161,7 @@ public:
 		TS_ASSERT(hierPath.m_Edges[PASS_1][hierPath.Get(20,  20,  PASS_1)].size() == 2);
 		TS_ASSERT(hierPath.m_Edges[PASS_1][hierPath.Get(220, 220, PASS_1)].size() == 2);
 
-		std::set<HierarchicalPathfinder::RegionID> reachables;
+		PS::set<HierarchicalPathfinder::RegionID> reachables;
 		hierPath.FindReachableRegions(hierPath.Get(120, 120, PASS_1), reachables, PASS_1);
 		TS_ASSERT(reachables.size() == 6);
 		reachables.clear();
@@ -284,11 +284,11 @@ public:
 
 	void test_passability()
 	{
-		pathClassMask = std::map<std::string, pass_class_t> {
+		pathClassMask = PS::map<std::string, pass_class_t> {
 			{ "1", 1 },
 			{ "2", 2 },
 		};
-		nonPathClassMask = std::map<std::string, pass_class_t> {
+		nonPathClassMask = PS::map<std::string, pass_class_t> {
 			{ "3", 4 }
 		};
 
@@ -488,11 +488,11 @@ public:
 	{
 		// Partial test of region inner flood filling.
 		// This highlights that internal region IDs can become higher than the number of regions.
-		pathClassMask = std::map<std::string, pass_class_t> {
+		pathClassMask = PS::map<std::string, pass_class_t> {
 			{ "1", 1 },
 			{ "2", 2 },
 		};
-		nonPathClassMask = std::map<std::string, pass_class_t> {
+		nonPathClassMask = PS::map<std::string, pass_class_t> {
 			{ "3", 4 }
 		};
 

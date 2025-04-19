@@ -23,12 +23,11 @@
 #if CONFIG2_AUDIO
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
 #include "ps/CStr.h"
 
-#include <map>
-
 class CSoundData;
-typedef std::map<std::wstring, CSoundData*> DataMap;
+typedef PS::map<std::wstring, CSoundData*> DataMap;
 
 
 class CSoundData

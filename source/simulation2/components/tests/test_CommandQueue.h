@@ -28,7 +28,7 @@ public:
 		ComponentTestHelper test(*g_ScriptContext);
 		ScriptRequest rq(test.GetScriptInterface());
 
-		std::vector<SimulationCommand> empty;
+		PS::vector<SimulationCommand> empty;
 
 		ICmpCommandQueue* cmp = test.Add<ICmpCommandQueue>(CID_CommandQueue, "", SYSTEM_ENTITY);
 

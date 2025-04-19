@@ -67,7 +67,7 @@ std::unique_ptr<CSwapChain> CSwapChain::Create(
 	if (swapChainWidth == 0 || swapChainHeight == 0)
 		return nullptr;
 
-	std::vector<VkSurfaceFormatKHR> surfaceFormats;
+	PS::vector<VkSurfaceFormatKHR> surfaceFormats;
 	uint32_t surfaceFormatCount = 0;
 	ENSURE_VK_SUCCESS(vkGetPhysicalDeviceSurfaceFormatsKHR(
 		physicalDevice, surface, &surfaceFormatCount, nullptr));
@@ -78,7 +78,7 @@ std::unique_ptr<CSwapChain> CSwapChain::Create(
 			physicalDevice, surface, &surfaceFormatCount, surfaceFormats.data()));
 	}
 
-	std::vector<VkPresentModeKHR> presentModes;
+	PS::vector<VkPresentModeKHR> presentModes;
 	uint32_t presentModeCount = 0;
 	ENSURE_VK_SUCCESS(vkGetPhysicalDeviceSurfacePresentModesKHR(
 		physicalDevice, surface, &presentModeCount, nullptr));

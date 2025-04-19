@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,12 +22,12 @@
 #ifndef INCLUDED_VERTEXBUFFER
 #define INCLUDED_VERTEXBUFFER
 
+#include "ps/containers/Vector.h"
 #include "renderer/backend/IBuffer.h"
 #include "renderer/backend/IDevice.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 
 #include <memory>
-#include <vector>
 
 /**
  * CVertexBuffer: encapsulation of backend buffers, also supplying
@@ -151,9 +151,9 @@ private:
 	/// Number of vertices of above size in this buffer
 	size_t m_MaxVertices;
 	/// List of free chunks in this buffer
-	std::vector<VBChunk*> m_FreeList;
+	PS::vector<VBChunk*> m_FreeList;
 	/// List of allocated chunks
-	std::vector<VBChunk*> m_AllocList;
+	PS::vector<VBChunk*> m_AllocList;
 	/// Available free vertices - total of all free vertices in the free list
 	size_t m_FreeVertices;
 

@@ -121,7 +121,7 @@ public:
 		m_Heap.clear();
 	}
 
-	std::vector<Item> m_Heap;
+	PS::vector<Item> m_Heap;
 };
 
 /**
@@ -202,7 +202,7 @@ public:
 		m_List.clear();
 	}
 
-	std::vector<Item> m_List;
+	PS::vector<Item> m_List;
 };
 
 #endif // INCLUDED_PRIORITYQUEUE

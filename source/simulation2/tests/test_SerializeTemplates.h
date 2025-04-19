@@ -17,13 +17,13 @@
 
 #include "lib/self_test.h"
 
+#include "ps/containers/Set.h"
+#include "ps/containers/Vector.h"
 #include "scriptinterface/ScriptInterface.h"
 #include "simulation2/helpers/Grid.h"
 #include "simulation2/serialization/DebugSerializer.h"
 
-#include <set>
 #include <sstream>
-#include <vector>
 
 #include "simulation2/serialization/SerializedTypes.h"
 
@@ -49,7 +49,7 @@ public:
 		std::stringstream stream;
 
 		CDebugSerializer serialize(script, stream);
-		std::vector<u32> value = {
+		PS::vector<u32> value = {
 			3, 0, 1, 4, 1, 5
 		};
 		Serializer(serialize, "E", value);
@@ -62,7 +62,7 @@ public:
 		std::stringstream stream;
 
 		CDebugSerializer serialize(script, stream);
-		std::set<u32> value = {
+		PS::set<u32> value = {
 			3, 0, 1, 4, 1, 5
 		};
 		Serializer(serialize, "E", value);

@@ -34,10 +34,10 @@ public:
 	 * @return - Correlation between garrisoned turrets (their ID) and which
 	 *	turret point they occupy (name).
 	 */
-	std::vector<std::pair<std::string, entity_id_t> > GetTurrets() const override
+	PS::vector<std::pair<std::string, entity_id_t> > GetTurrets() const override
 	{
-		std::vector<std::pair<std::string, entity_id_t> > turrets;
-		std::vector<entity_id_t> entities = m_Script.Call<std::vector<entity_id_t>>("GetEntities");
+		PS::vector<std::pair<std::string, entity_id_t> > turrets;
+		PS::vector<entity_id_t> entities = m_Script.Call<PS::vector<entity_id_t>>("GetEntities");
 		for (entity_id_t entity : entities)
 			turrets.push_back(std::make_pair(
 				m_Script.Call<std::string>("GetOccupiedTurretPointName", entity),
@@ -50,7 +50,7 @@ public:
 	/**
 	 * Correlation between entities (ID) and the turret point they ought to occupy (name).
 	 */
-	void SetInitEntities(std::vector<std::pair<std::string, entity_id_t>>&& entities) override
+	void SetInitEntities(PS::vector<std::pair<std::string, entity_id_t>>&& entities) override
 	{
 		for (const std::pair<std::string, entity_id_t>& p : entities)
 			m_Script.CallVoid("SetInitEntity", p.first, p.second);

@@ -157,11 +157,11 @@ protected:
 	std::atomic<bool> m_HasLowPriorityWork = false;
 	std::mutex m_GlobalMutex;
 	std::mutex m_GlobalLowPriorityMutex;
-	std::deque<QueueItem> m_GlobalQueue;
-	std::deque<QueueItem> m_GlobalLowPriorityQueue;
+	PS::deque<QueueItem> m_GlobalQueue;
+	PS::deque<QueueItem> m_GlobalLowPriorityQueue;
 
 	// Ideally this would be a vector, since it does get iterated, but that requires movable types.
-	std::deque<WorkerThread> m_Workers;
+	PS::deque<WorkerThread> m_Workers;
 };
 
 TaskManager::TaskManager() : TaskManager(GetDefaultNumberOfWorkers())
@@ -196,7 +196,7 @@ void TaskManager::DoPushTask(std::function<void()>&& task, TaskPriority priority
 void TaskManager::Impl::PushTask(std::function<void()>&& task, TaskPriority priority)
 {
 	std::mutex& mutex = priority == TaskPriority::NORMAL ? m_GlobalMutex : m_GlobalLowPriorityMutex;
-	std::deque<QueueItem>& queue = priority == TaskPriority::NORMAL ? m_GlobalQueue : m_GlobalLowPriorityQueue;
+	PS::deque<QueueItem>& queue = priority == TaskPriority::NORMAL ? m_GlobalQueue : m_GlobalLowPriorityQueue;
 	std::atomic<bool>& hasWork = priority == TaskPriority::NORMAL ? m_HasWork : m_HasLowPriorityWork;
 	{
 		std::lock_guard<std::mutex> lock(mutex);
@@ -212,7 +212,7 @@ template<TaskPriority Priority>
 bool TaskManager::Impl::PopTask(std::function<void()>& taskOut)
 {
 	std::mutex& mutex = Priority == TaskPriority::NORMAL ? m_GlobalMutex : m_GlobalLowPriorityMutex;
-	std::deque<QueueItem>& queue = Priority == TaskPriority::NORMAL ? m_GlobalQueue : m_GlobalLowPriorityQueue;
+	PS::deque<QueueItem>& queue = Priority == TaskPriority::NORMAL ? m_GlobalQueue : m_GlobalLowPriorityQueue;
 	std::atomic<bool>& hasWork = Priority == TaskPriority::NORMAL ? m_HasWork : m_HasLowPriorityWork;
 
 	// Particularly critical section since we're locking the global queue.

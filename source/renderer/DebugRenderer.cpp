@@ -56,7 +56,7 @@ void CDebugRenderer::DrawLine(
 }
 
 void CDebugRenderer::DrawLine(
-	const std::vector<CVector3D>& line, const CColor& color,
+	const PS::vector<CVector3D>& line, const CColor& color,
 	const float width, const bool depthTestEnabled)
 {
 	if (line.size() <= 1)
@@ -82,7 +82,7 @@ void CDebugRenderer::DrawLine(
 
 	const CVector3D cameraIn = viewCamera.GetOrientation().GetIn();
 
-	std::vector<float> vertices;
+	PS::vector<float> vertices;
 	vertices.reserve(line.size() * 6 * 3);
 #define ADD(position) \
 	vertices.emplace_back((position).X); \
@@ -143,7 +143,7 @@ void CDebugRenderer::DrawCircle(const CVector3D& origin, const float radius, con
 	const CVector3D cameraUp = camera.GetOrientation().GetUp();
 	const CVector3D cameraLeft = camera.GetOrientation().GetLeft();
 
-	std::vector<float> vertices;
+	PS::vector<float> vertices;
 #define ADD(position) \
 	vertices.emplace_back((position).X); \
 	vertices.emplace_back((position).Y); \
@@ -198,7 +198,7 @@ void CDebugRenderer::DrawCameraFrustum(const CCamera& camera, const CColor& colo
 	deviceCommandContext->SetUniform(
 		overlayShader->GetBindingSlot(str_color), color.AsFloatArray());
 
-	std::vector<float> vertices;
+	PS::vector<float> vertices;
 #define ADD(position) \
 	vertices.emplace_back((position).X); \
 	vertices.emplace_back((position).Y); \
@@ -296,7 +296,7 @@ void CDebugRenderer::DrawBoundingBox(
 	deviceCommandContext->SetUniform(
 		shader->GetBindingSlot(str_color), color.AsFloatArray());
 
-	std::vector<float> data;
+	PS::vector<float> data;
 
 #define ADD_FACE(x, y, z) \
 	ADD_PT(0, 0, x, y, z); ADD_PT(1, 0, x, y, z); ADD_PT(1, 1, x, y, z); \
@@ -345,9 +345,9 @@ void CDebugRenderer::DrawBrush(const CBrush& brush, const CColor& color, bool wi
 	deviceCommandContext->SetUniform(
 		shader->GetBindingSlot(str_color), color.AsFloatArray());
 
-	std::vector<float> data;
+	PS::vector<float> data;
 
-	std::vector<std::vector<size_t>> faces;
+	PS::vector<PS::vector<size_t>> faces;
 	brush.GetFaces(faces);
 
 #define ADD_VERT(a) \

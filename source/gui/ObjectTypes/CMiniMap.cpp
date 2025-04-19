@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -35,6 +35,7 @@
 #include "maths/MathUtil.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Vector.h"
 #include "ps/Filesystem.h"
 #include "ps/Game.h"
 #include "ps/GameSetup/Config.h"
@@ -52,13 +53,12 @@
 
 #include <array>
 #include <cmath>
-#include <vector>
 
 namespace
 {
 
 // Adds segments pieces lying inside the circle to lines.
-void CropPointsByCircle(const std::array<CVector3D, 4>& points, const CVector3D& center, const float radius, std::vector<CVector3D>* lines)
+void CropPointsByCircle(const std::array<CVector3D, 4>& points, const CVector3D& center, const float radius, PS::vector<CVector3D>* lines)
 {
 	constexpr float EPS = 1e-3f;
 	lines->reserve(points.size() * 2);
@@ -279,7 +279,7 @@ void CMiniMap::DrawViewRect(CCanvas2D& canvas) const
 		camera->GetWorldCoordinates(0, 0, sampleHeight)
 	};
 
-	std::vector<CVector3D> worldSpaceLines;
+	PS::vector<CVector3D> worldSpaceLines;
 	// We need to prevent drawing view bounds out of the map.
 	const float halfMapSize = static_cast<float>((m_MapSize - 1) * TERRAIN_TILE_SIZE) * 0.5f;
 	CropPointsByCircle(hitPoints, CVector3D(halfMapSize, 0.0f, halfMapSize), halfMapSize * m_MapScale, &worldSpaceLines);

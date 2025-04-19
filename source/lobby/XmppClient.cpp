@@ -377,7 +377,7 @@ void XmppClient::SendIqGameReport(const ScriptRequest& rq, JS::HandleValue data)
 	gloox::Tag* report = new gloox::Tag("game");
 
 	// Iterate through all the properties reported and add them to the stanza.
-	std::vector<std::string> properties;
+	PS::vector<std::string> properties;
 	Script::EnumeratePropertyNames(rq, data, true, properties);
 	for (const std::string& p : properties)
 	{
@@ -411,7 +411,7 @@ void XmppClient::SendIqRegisterGame(const ScriptRequest& rq, JS::HandleValue dat
 	gloox::Tag* game = new gloox::Tag("game");
 
 	// Iterate through all the properties reported and add them to the stanza.
-	std::vector<std::string> properties;
+	PS::vector<std::string> properties;
 	Script::EnumeratePropertyNames(rq, data, true, properties);
 	for (const std::string& p : properties)
 	{
@@ -1285,7 +1285,7 @@ std::time_t XmppClient::ComputeTimestamp(const gloox::Message& msg)
 		return std::time(nullptr);
 
 	// The locale is irrelevant, because the XMPP date format doesn't contain written month names
-	for (const std::string& format : std::vector<std::string>{ "Y-M-d'T'H:m:sZ", "Y-M-d'T'H:m:s.SZ" })
+	for (const std::string& format : PS::vector<std::string>{ "Y-M-d'T'H:m:sZ", "Y-M-d'T'H:m:s.SZ" })
 	{
 		UDate dateTime = g_L10n.ParseDateTime(msg.when()->stamp(), format, icu::Locale::getUS());
 		if (dateTime)
@@ -1345,7 +1345,7 @@ const char* XmppClient::GetRoleString(const gloox::MUCRoomRole role)
  */
 std::string XmppClient::CertificateErrorToString(gloox::CertStatus status)
 {
-	std::map<gloox::CertStatus, std::string> certificateErrorStrings = {
+	PS::map<gloox::CertStatus, std::string> certificateErrorStrings = {
 		{ gloox::CertInvalid, g_L10n.Translate("The certificate is not trusted.") },
 		{ gloox::CertSignerUnknown, g_L10n.Translate("The certificate hasn't got a known issuer.") },
 		{ gloox::CertRevoked, g_L10n.Translate("The certificate has been revoked.") },
@@ -1357,7 +1357,7 @@ std::string XmppClient::CertificateErrorToString(gloox::CertStatus status)
 
 	std::string result;
 
-	for (std::map<gloox::CertStatus, std::string>::iterator it = certificateErrorStrings.begin(); it != certificateErrorStrings.end(); ++it)
+	for (PS::map<gloox::CertStatus, std::string>::iterator it = certificateErrorStrings.begin(); it != certificateErrorStrings.end(); ++it)
 		if (status & it->first)
 			result += "\n" + it->second;
 

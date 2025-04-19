@@ -85,7 +85,7 @@ public:
 	VertexArray m_UVArray;
 
 	// The number of UVs is determined by the model
-	std::vector<VertexArray::Attribute> m_UVs;
+	PS::vector<VertexArray::Attribute> m_UVs;
 
 	Renderer::Backend::IVertexInputLayout* m_VertexInputLayout{nullptr};
 
@@ -144,7 +144,7 @@ ModelDefRData::ModelDefRData(const CModelDefPtr& modelDef)
 
 	// the tangent generation can increase the number of vertices temporarily
 	// so reserve a bit more memory to avoid reallocations in GenTangents (in most cases)
-	std::vector<float> newVertices;
+	PS::vector<float> newVertices;
 	newVertices.reserve(numberOfFloatsPerVertex * modelDef->GetNumVertices() * 2);
 
 	// Generate the tangents.
@@ -153,8 +153,8 @@ ModelDefRData::ModelDefRData(const CModelDefPtr& modelDef)
 	// How many vertices do we have after generating tangents?
 	const uint32_t newNumberOfVertices{static_cast<uint32_t>(newVertices.size()) / numberOfFloatsPerVertex};
 
-	std::vector<int> remapTable(newNumberOfVertices);
-	std::vector<float> vertexDataOut(newNumberOfVertices * numberOfFloatsPerVertex);
+	PS::vector<int> remapTable(newNumberOfVertices);
+	PS::vector<float> vertexDataOut(newNumberOfVertices * numberOfFloatsPerVertex);
 
 	// Re-weld the mesh to remove duplicated vertices.
 	const int finalNumberOfVertices{WeldMesh(
@@ -353,7 +353,7 @@ void GPUSkinnedModelModelRenderer::UpdateModelsData(
 	GPU_SCOPED_LABEL(deviceCommandContext, "Compute Skinning");
 
 	// Models with up to 192 bones.
-	std::vector<CModel*> models192;
+	PS::vector<CModel*> models192;
 
 	deviceCommandContext->InsertMemoryBarrier(
 		Renderer::Backend::PipelineStage::VERTEX_INPUT, Renderer::Backend::PipelineStage::COMPUTE_SHADER,

@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,13 +18,12 @@
 #ifndef INCLUDED_SELECTION
 #define INCLUDED_SELECTION
 
+#include "ps/containers/Vector.h"
 #include "ps/Profiler2.h"
 #include "simulation2/helpers/Player.h"
 #include "simulation2/Simulation2.h"
 #include "simulation2/system/Entity.h"
 #include "simulation2/system/IComponent.h"
-
-#include <vector>
 
 class CSimulation2;
 class CCamera;
@@ -62,13 +61,13 @@ entity_id_t PickEntityAtPoint(CSimulation2& simulation, const CCamera& camera, i
  *
  * @return unordered list of selected entities.
  */
-std::vector<entity_id_t> PickEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, player_id_t owner, bool allowEditorSelectables);
+PS::vector<entity_id_t> PickEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, player_id_t owner, bool allowEditorSelectables);
 
 /**
  * Finds all selectable entities within the given screen coordinate rectangle,
  * belonging to any given player (excluding Gaia). Used for status bars.
  */
-std::vector<entity_id_t> PickNonGaiaEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, bool allowEditorSelectables);
+PS::vector<entity_id_t> PickNonGaiaEntitiesInRect(CSimulation2& simulation, const CCamera& camera, int sx0, int sy0, int sx1, int sy1, bool allowEditorSelectables);
 
 /**
  * Finds all entities with a given component belonging to any given player.
@@ -81,7 +80,7 @@ struct DefaultComponentFilter
 	}
 };
 template<typename Filter = DefaultComponentFilter>
-std::vector<entity_id_t> GetEntitiesWithComponentInRect(CSimulation2& simulation, int cid, const CCamera& camera, int sx0, int sy0, int sx1, int sy1)
+PS::vector<entity_id_t> GetEntitiesWithComponentInRect(CSimulation2& simulation, int cid, const CCamera& camera, int sx0, int sy0, int sx1, int sy1)
 {
 	PROFILE2("GetEntitiesWithObstructionInRect");
 
@@ -91,7 +90,7 @@ std::vector<entity_id_t> GetEntitiesWithComponentInRect(CSimulation2& simulation
 	if (sy0 > sy1)
 		std::swap(sy0, sy1);
 
-	std::vector<entity_id_t> hitEnts;
+	PS::vector<entity_id_t> hitEnts;
 
 	Filter filter;
 	const CSimulation2::InterfaceListUnordered& entities = simulation.GetEntitiesWithInterfaceUnordered(cid);
@@ -126,7 +125,7 @@ std::vector<entity_id_t> GetEntitiesWithComponentInRect(CSimulation2& simulation
  * @return unordered list of selected entities.
  * @see ICmpIdentity
  */
-std::vector<entity_id_t> PickSimilarEntities(CSimulation2& simulation, const CCamera& camera, const std::string& templateName,
+PS::vector<entity_id_t> PickSimilarEntities(CSimulation2& simulation, const CCamera& camera, const std::string& templateName,
 	player_id_t owner, bool includeOffScreen, bool matchRank, bool allowEditorSelectables, bool allowFoundations);
 
 } // namespace

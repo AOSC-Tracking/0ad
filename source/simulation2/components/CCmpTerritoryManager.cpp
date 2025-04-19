@@ -25,6 +25,7 @@
 #include "graphics/TextureManager.h"
 #include "graphics/TerritoryBoundary.h"
 #include "maths/MathUtil.h"
+#include "ps/containers/Queue.h"
 #include "ps/Profile.h"
 #include "ps/XML/Xeromyces.h"
 #include "renderer/Renderer.h"
@@ -40,8 +41,6 @@
 #include "simulation2/components/ICmpTerritoryInfluence.h"
 #include "simulation2/helpers/Grid.h"
 #include "simulation2/helpers/Render.h"
-
-#include <queue>
 
 class CCmpTerritoryManager;
 
@@ -89,7 +88,7 @@ public:
 	// processed flag in bit 7 (TERRITORY_PROCESSED_MASK)
 	Grid<u8>* m_Territories;
 
-	std::vector<u16> m_TerritoryCellCounts;
+	PS::vector<u16> m_TerritoryCellCounts;
 	u16 m_TerritoryTotalPassableCellCount;
 
 	// Saves the cost per tile (to stop territory on impassable tiles)
@@ -107,7 +106,7 @@ public:
 		SOverlayTexturedLine overlay;
 	};
 
-	std::vector<SBoundaryLine> m_BoundaryLines;
+	PS::vector<SBoundaryLine> m_BoundaryLines;
 	bool m_BoundaryLinesDirty;
 
 	double m_AnimTime; // time since start of rendering, in seconds
@@ -115,7 +114,7 @@ public:
 	TerritoryOverlay* m_DebugOverlay;
 
 	bool m_EnableLineDebugOverlays; ///< Enable node debugging overlays for boundary lines?
-	std::vector<SOverlayLine> m_DebugBoundaryLineNodes;
+	PS::vector<SOverlayLine> m_DebugBoundaryLineNodes;
 
 	void Init(const CParamNode& UNUSED(paramNode)) override
 	{
@@ -249,7 +248,7 @@ public:
 	}
 
 	player_id_t GetOwner(entity_pos_t x, entity_pos_t z) override;
-	std::vector<u32> GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected) override;
+	PS::vector<u32> GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected) override;
 	bool IsConnected(entity_pos_t x, entity_pos_t z) override;
 
 	void SetTerritoryBlinking(entity_pos_t x, entity_pos_t z, bool enable) override;
@@ -299,7 +298,7 @@ public:
 
 	u8 GetTerritoryPercentage(player_id_t player) override;
 
-	std::vector<STerritoryBoundary> ComputeBoundaries();
+	PS::vector<STerritoryBoundary> ComputeBoundaries();
 
 	void UpdateBoundaryLines();
 
@@ -358,7 +357,7 @@ void Floodfill(const Tile& origin, const Tile& gridSize, Decider decider)
 
 	constexpr std::array<std::array<int, 2>, 8> neighbours{{{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1},
 		{-1, -1}, {1, -1}, {-1, 1}}};
-	std::queue<Tile> openTiles;
+	PS::queue<Tile> openTiles;
 
 	const auto emplaceIfRequested = [decider = std::move(decider), &openTiles](
 		const Tile* currentTile, const Tile& neighbourTile)
@@ -466,7 +465,7 @@ void CCmpTerritoryManager::CalculateTerritories()
 	CComponentManager::InterfaceList influences = GetSimContext().GetComponentManager().GetEntitiesWithInterface(IID_TerritoryInfluence);
 
 	// Split influence entities into per-player lists, ignoring any with invalid properties
-	std::map<player_id_t, std::vector<entity_id_t> > influenceEntities;
+	PS::map<player_id_t, PS::vector<entity_id_t> > influenceEntities;
 	for (const CComponentManager::InterfacePair& pair : influences)
 	{
 		entity_id_t ent = pair.first;
@@ -486,9 +485,9 @@ void CCmpTerritoryManager::CalculateTerritories()
 	// Store the overall best weight for comparison
 	Grid<u32> bestWeightGrid(tilesW, tilesH);
 	// store the root influences to mark territory as connected
-	std::vector<entity_id_t> rootInfluenceEntities;
+	PS::vector<entity_id_t> rootInfluenceEntities;
 
-	for (const std::pair<const player_id_t, std::vector<entity_id_t>>& pair : influenceEntities)
+	for (const std::pair<const player_id_t, PS::vector<entity_id_t>>& pair : influenceEntities)
 	{
 		// entityGrid stores the weight for a single entity, and is reset per entity
 		Grid<u32> entityGrid(tilesW, tilesH);
@@ -496,7 +495,7 @@ void CCmpTerritoryManager::CalculateTerritories()
 		Grid<u32> playerGrid(tilesW, tilesH);
 
 		u8 owner = static_cast<u8>(pair.first);
-		const std::vector<entity_id_t>& ents = pair.second;
+		const PS::vector<entity_id_t>& ents = pair.second;
 		// With 2^16 entities, we're safe against overflows as the weight is also limited to 2^16
 		ENSURE(ents.size() < 1 << 16);
 		// Compute the influence map of the current entity, then add it to the player grid
@@ -600,7 +599,7 @@ void CCmpTerritoryManager::CalculateTerritories()
 	}
 }
 
-std::vector<STerritoryBoundary> CCmpTerritoryManager::ComputeBoundaries()
+PS::vector<STerritoryBoundary> CCmpTerritoryManager::ComputeBoundaries()
 {
 	PROFILE("ComputeBoundaries");
 
@@ -636,7 +635,7 @@ void CCmpTerritoryManager::UpdateBoundaryLines()
 	if (!CRenderer::IsInitialised())
 		return;
 
-	std::vector<STerritoryBoundary> boundaries = ComputeBoundaries();
+	PS::vector<STerritoryBoundary> boundaries = ComputeBoundaries();
 
 	CTextureProperties texturePropsBase("art/textures/misc/territory_border.png");
 	texturePropsBase.SetAddressMode(
@@ -680,7 +679,7 @@ void CCmpTerritoryManager::UpdateBoundaryLines()
 		SimRender::SmoothPointsAverage(boundaries[i].points, m_BoundaryLines.back().overlay.m_Closed);
 		SimRender::InterpolatePointsRNS(boundaries[i].points, m_BoundaryLines.back().overlay.m_Closed, m_BorderSeparation);
 
-		std::vector<CVector2D>& points = m_BoundaryLines.back().overlay.m_Coords;
+		PS::vector<CVector2D>& points = m_BoundaryLines.back().overlay.m_Coords;
 		for (size_t j = 0; j < boundaries[i].points.size(); ++j)
 		{
 			points.push_back(boundaries[i].points[j]);
@@ -757,13 +756,13 @@ player_id_t CCmpTerritoryManager::GetOwner(entity_pos_t x, entity_pos_t z)
 	return m_Territories->get(i, j) & TERRITORY_PLAYER_MASK;
 }
 
-std::vector<u32> CCmpTerritoryManager::GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected)
+PS::vector<u32> CCmpTerritoryManager::GetNeighbours(entity_pos_t x, entity_pos_t z, bool filterConnected)
 {
 	CmpPtr<ICmpPlayerManager> cmpPlayerManager(GetSystemEntity());
 	if (!cmpPlayerManager)
-		return std::vector<u32>();
+		return PS::vector<u32>();
 
-	std::vector<u32> ret(cmpPlayerManager->GetNumPlayers(), 0);
+	PS::vector<u32> ret(cmpPlayerManager->GetNumPlayers(), 0);
 	CalculateTerritories();
 	if (!m_Territories)
 		return ret;

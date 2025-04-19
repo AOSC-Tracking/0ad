@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -29,8 +29,7 @@
 
 #include "lib/os_path.h"
 #include "lib/posix/posix_filesystem.h"	// mode_t
-
-#include <vector>
+#include "ps/containers/Vector.h"
 
 bool DirectoryExists(const OsPath& path);
 bool FileExists(const OsPath& pathname);
@@ -74,8 +73,8 @@ private:
 
 Status GetFileInfo(const OsPath& pathname, CFileInfo* fileInfo);
 
-typedef std::vector<CFileInfo> CFileInfos;
-typedef std::vector<OsPath> DirectoryNames;
+typedef PS::vector<CFileInfo> CFileInfos;
+typedef PS::vector<OsPath> DirectoryNames;
 
 Status GetDirectoryEntries(const OsPath& path, CFileInfos* files, DirectoryNames* subdirectoryNames);
 

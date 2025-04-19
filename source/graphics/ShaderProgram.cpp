@@ -44,7 +44,7 @@ void CShaderProgram::Reload()
 		m_BackendShaderProgram = std::move(backendShaderProgram);
 }
 
-std::vector<VfsPath> CShaderProgram::GetFileDependencies() const
+PS::vector<VfsPath> CShaderProgram::GetFileDependencies() const
 {
 	if (m_BackendShaderProgram)
 		return m_BackendShaderProgram->GetFileDependencies();

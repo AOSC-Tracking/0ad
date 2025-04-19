@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -22,14 +22,13 @@
 #include "lib/external_libraries/libsdl.h"
 #include "ps/CLogger.h"
 #include "ps/ConfigDB.h"
+#include "ps/containers/Set.h"
+#include "ps/containers/UnorderedMap.h"
+#include "ps/containers/Vector.h"
 #include "ps/Hotkey.h"
 #include "ps/KeyName.h"
 #include "scriptinterface/FunctionWrapper.h"
 #include "scriptinterface/ScriptConversions.h"
-
-#include <unordered_map>
-#include <vector>
-#include <set>
 
 /**
  * Convert an unordered map to a JS object, mapping keys to values.
@@ -38,7 +37,7 @@
  * TODO: this could be moved to ScriptConversions.cpp if the need arises.
  */
 template<typename T, typename U>
-static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<T, U>& val)
+static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValue ret, const PS::unordered_map<T, U>& val)
 {
 	JS::RootedObject obj(rq.cx, JS_NewPlainObject(rq.cx));
 	if (!obj)
@@ -56,13 +55,13 @@ static void ToJSVal_unordered_map(const ScriptRequest& rq, JS::MutableHandleValu
 }
 
 template<>
-void Script::ToJSVal<std::unordered_map<std::string, std::vector<std::vector<std::string>>>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::vector<std::vector<std::string>>>& val)
+void Script::ToJSVal<PS::unordered_map<std::string, PS::vector<PS::vector<std::string>>>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const PS::unordered_map<std::string, PS::vector<PS::vector<std::string>>>& val)
 {
 	ToJSVal_unordered_map(rq, ret, val);
 }
 
 template<>
-void Script::ToJSVal<std::unordered_map<std::string, std::string>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const std::unordered_map<std::string, std::string>& val)
+void Script::ToJSVal<PS::unordered_map<std::string, std::string>>(const ScriptRequest& rq, JS::MutableHandleValue ret, const PS::unordered_map<std::string, std::string>& val)
 {
 	ToJSVal_unordered_map(rq, ret, val);
 }
@@ -76,11 +75,11 @@ JS::Value GetHotkeyMap(const ScriptRequest& rq)
 {
 	JS::RootedValue hotkeyMap(rq.cx);
 
-	std::unordered_map<std::string, std::vector<std::vector<std::string>>> hotkeys;
+	PS::unordered_map<std::string, PS::vector<PS::vector<std::string>>> hotkeys;
 	for (const std::pair<const SDL_Scancode_, KeyMapping>& key : g_HotkeyMap)
 		for (const SHotkeyMapping& mapping : key.second)
 		{
-			std::vector<std::string> keymap;
+			PS::vector<std::string> keymap;
 			if (key.first != UNUSED_HOTKEY_CODE)
 				keymap.push_back(FindScancodeName(static_cast<SDL_Scancode>(key.first)));
 			for (const SKey& secondary_key : mapping.required)
@@ -101,7 +100,7 @@ JS::Value GetHotkeyMap(const ScriptRequest& rq)
 JS::Value GetScancodeKeyNames(const ScriptRequest& rq)
 {
 	JS::RootedValue obj(rq.cx);
-	std::unordered_map<std::string, std::string> map;
+	PS::unordered_map<std::string, std::string> map;
 
 	// Get the name of all scancodes.
 	// This is slightly wasteful but should be fine overall, they are dense.
@@ -120,7 +119,7 @@ void ReloadHotkeys()
 
 JS::Value GetConflicts(const ScriptRequest& rq, JS::HandleValue combination)
 {
-	std::vector<std::string> keys;
+	PS::vector<std::string> keys;
 	if (!Script::FromJSVal(rq, combination, keys))
 	{
 		LOGERROR("Invalid hotkey combination");
@@ -133,23 +132,23 @@ JS::Value GetConflicts(const ScriptRequest& rq, JS::HandleValue combination)
 	// Pick a random code as a starting point of the hotkeys (they are all equivalent).
 	SDL_Scancode_ startCode = FindScancode(keys.back());
 
-	std::unordered_map<SDL_Scancode_, KeyMapping>::const_iterator it = g_HotkeyMap.find(startCode);
+	PS::unordered_map<SDL_Scancode_, KeyMapping>::const_iterator it = g_HotkeyMap.find(startCode);
 	if (it == g_HotkeyMap.end())
 		return JS::NullValue();
 
 	// Create a sorted vector with the remaining keys.
 	keys.pop_back();
 
-	std::set<SKey> codes;
+	PS::set<SKey> codes;
 	for (const std::string& key : keys)
 		codes.insert(SKey{ FindScancode(key) });
 
-	std::vector<CStr> conflicts;
+	PS::vector<CStr> conflicts;
 	// This isn't very efficient, but we shouldn't iterate too many hotkeys
 	// since we at least have one matching key.
 	for (const SHotkeyMapping& keymap : it->second)
 	{
-		std::set<SKey> match(keymap.required.begin(), keymap.required.end());
+		PS::set<SKey> match(keymap.required.begin(), keymap.required.end());
 		if (codes == match)
 			conflicts.emplace_back(keymap.name);
 	}

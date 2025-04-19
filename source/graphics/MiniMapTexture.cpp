@@ -628,7 +628,7 @@ void CMiniMapTexture::UpdateAndUploadEntities(
 
 	m_EntitiesDrawn = 0;
 	MinimapUnitVertex v;
-	std::vector<MinimapUnitVertex> pingingVertices;
+	PS::vector<MinimapUnitVertex> pingingVertices;
 	pingingVertices.reserve(MAX_ENTITIES_DRAWN / 2);
 
 	CmpPtr<ICmpRangeManager> cmpRangeManager(m_Simulation, SYSTEM_ENTITY);

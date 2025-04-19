@@ -50,8 +50,8 @@ CObjectEntry::CObjectEntry(const std::shared_ptr<CObjectBase>& base, const CSimu
 
 CObjectEntry::~CObjectEntry() = default;
 
-bool CObjectEntry::BuildVariation(const std::vector<const std::set<CStr>*>& completeSelections,
-								  const std::vector<u8>& variationKey,
+bool CObjectEntry::BuildVariation(const PS::vector<const PS::set<CStr>*>& completeSelections,
+								  const PS::vector<u8>& variationKey,
 								  CObjectManager& objectManager)
 {
 	CObjectBase::Variation variation = m_Base->BuildVariation(variationKey);
@@ -114,7 +114,7 @@ bool CObjectEntry::BuildVariation(const std::vector<const std::set<CStr>*>& comp
 		return true;
 	}
 
-	std::vector<CObjectBase::Prop> props;
+	PS::vector<CObjectBase::Prop> props;
 
 	for (std::multimap<CStr, CObjectBase::Prop>::iterator it = variation.props.begin(); it != variation.props.end(); ++it)
 		props.push_back(it->second);
@@ -273,7 +273,7 @@ bool CObjectEntry::BuildVariation(const std::vector<const std::set<CStr>*>& comp
 
 CSkeletonAnim* CObjectEntry::GetRandomAnimation(const CStr& animationName, const CStr& ID) const
 {
-	std::vector<CSkeletonAnim*> anims = GetAnimations(animationName, ID);
+	PS::vector<CSkeletonAnim*> anims = GetAnimations(animationName, ID);
 
 	int totalFreq = 0;
 	for (CSkeletonAnim* anim : anims)
@@ -292,9 +292,9 @@ CSkeletonAnim* CObjectEntry::GetRandomAnimation(const CStr& animationName, const
 	return NULL;
 }
 
-std::vector<CSkeletonAnim*> CObjectEntry::GetAnimations(const CStr& animationName, const CStr& ID) const
+PS::vector<CSkeletonAnim*> CObjectEntry::GetAnimations(const CStr& animationName, const CStr& ID) const
 {
-	std::vector<CSkeletonAnim*> anims;
+	PS::vector<CSkeletonAnim*> anims;
 
 	SkeletonAnimMap::const_iterator lower = m_Animations.lower_bound(animationName);
 	SkeletonAnimMap::const_iterator upper = m_Animations.upper_bound(animationName);

@@ -84,9 +84,9 @@ public:
 	void test_Load()
 	{
 #define ITERATIONS 100000
-		std::vector<Future<int>> futures;
+		PS::vector<Future<int>> futures;
 		futures.resize(ITERATIONS);
-		std::vector<u32> values(ITERATIONS);
+		PS::vector<u32> values(ITERATIONS);
 
 		auto f1 = g_TaskManager.PushTask([&futures]() {
 			for (u32 i = 0; i < ITERATIONS; i+=3)

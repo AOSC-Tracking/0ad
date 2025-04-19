@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,14 +19,14 @@
 #define INCLUDED_TERRAINTEXTUREMANAGER
 
 #include "lib/file/vfs/vfs_path.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Vector.h"
 #include "ps/CStr.h"
 #include "ps/Singleton.h"
 #include "renderer/backend/IDeviceCommandContext.h"
 #include "renderer/backend/ITexture.h"
 
-#include <map>
 #include <memory>
-#include <vector>
 
 // access to sole CTerrainTextureManager object
 #define g_TexMan CTerrainTextureManager::GetSingleton()
@@ -46,7 +46,7 @@ class CTerrainGroup
 	// priorities
 	size_t m_Index;
 	// list of textures of this type (found from the texture directory)
-	std::vector<CTerrainTextureEntry*> m_Terrains;
+	PS::vector<CTerrainTextureEntry*> m_Terrains;
 
 public:
 	CTerrainGroup(CStr name, size_t index):
@@ -64,7 +64,7 @@ public:
 	CStr GetName() const
 	{ return m_Name; }
 
-	const std::vector<CTerrainTextureEntry*> &GetTerrains() const
+	const PS::vector<CTerrainTextureEntry*> &GetTerrains() const
 	{ return m_Terrains; }
 };
 
@@ -90,8 +90,8 @@ class CTerrainTextureManager : public Singleton<CTerrainTextureManager>
 	friend class CTerrainTextureEntry;
 
 public:
-	using TerrainGroupMap = std::map<CStr, CTerrainGroup*>;
-	using TerrainAlphaMap = std::map<VfsPath, TerrainAlpha>;
+	using TerrainGroupMap = PS::map<CStr, CTerrainGroup*>;
+	using TerrainAlphaMap = PS::map<VfsPath, TerrainAlpha>;
 
 	// constructor, destructor
 	CTerrainTextureManager(Renderer::Backend::IDevice* device);
@@ -128,7 +128,7 @@ private:
 
 	// All texture entries created by this class, for easy freeing now that
 	// textures may be in several STextureType's
-	std::vector<CTerrainTextureEntry*> m_TextureEntries;
+	PS::vector<CTerrainTextureEntry*> m_TextureEntries;
 
 	TerrainGroupMap m_TerrainGroups;
 
@@ -138,7 +138,7 @@ private:
 
 	// A way to separate file loading and uploading to GPU to not stall uploading.
 	// Once we get a properly threaded loading we might optimize that.
-	std::vector<CTerrainTextureManager::TerrainAlphaMap::iterator> m_AlphaMapsToUpload;
+	PS::vector<CTerrainTextureManager::TerrainAlphaMap::iterator> m_AlphaMapsToUpload;
 };
 
 #endif // INCLUDED_TERRAINTEXTUREMANAGER

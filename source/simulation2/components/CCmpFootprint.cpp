@@ -217,7 +217,7 @@ public:
 		}
 
 		// Store the position of the spawning point within each row that's closest to the spawning angle.
-		std::vector<int> offsetPoints(rows, 0);
+		PS::vector<int> offsetPoints(rows, 0);
 
 		CmpPtr<ICmpRallyPoint> cmpRallyPoint(GetEntityHandle());
 		if (cmpRallyPoint && cmpRallyPoint->HasPositions())

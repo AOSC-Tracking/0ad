@@ -67,7 +67,7 @@ public:
 		std::uniform_int_distribution<int> distributionValue(0);
 
 		RingBuf<int, N> buf;
-		std::deque<int> deq;
+		PS::deque<int> deq;
 		for(size_t rep = 0; rep < 1000; rep++)
 		{
 			const size_t rnd_op = distributionProbability(engine);

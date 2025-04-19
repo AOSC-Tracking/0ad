@@ -112,15 +112,15 @@ protected:
 	 * instantaneously rendering the rally point markers/lines when the user sets one in-game (instead of waiting until the
 	 * network-synchronization code sets it on the RallyPoint component, which might take up to half a second).
 	 */
-	std::vector<CFixedVector2D> m_RallyPoints;
+	PS::vector<CFixedVector2D> m_RallyPoints;
 	/**
 	 * Full path to the rally points as returned by the pathfinder, with some post-processing applied to reduce zig/zagging.
 	 */
-	std::vector<std::vector<CVector2D> > m_Path;
+	PS::vector<PS::vector<CVector2D> > m_Path;
 	/**
 	 * Visibility segments of the rally point paths; splits the path into SoD/non-SoD segments.
 	 */
-	std::vector<std::vector<SVisibilitySegment> > m_VisibilitySegments;
+	PS::vector<PS::vector<SVisibilitySegment> > m_VisibilitySegments;
 	/**
 	 * Should we render the rally points and the path lines? (set from JS when e.g. the unit is selected/deselected)
 	 */
@@ -132,7 +132,7 @@ protected:
 	/**
 	 * Entity IDs of the rally point markers.
 	 */
-	std::vector<entity_id_t> m_MarkerEntityIds;
+	PS::vector<entity_id_t> m_MarkerEntityIds;
 
 	size_t m_LastMarkerCount;
 	/**
@@ -166,13 +166,13 @@ protected:
 	 * Textured overlay lines to be used for rendering the marker line. There can be multiple because we may need to render
 	 * dashes for segments that are inside the SoD.
 	 */
-	std::vector<std::vector<SOverlayTexturedLine> > m_TexturedOverlayLines;
+	PS::vector<PS::vector<SOverlayTexturedLine> > m_TexturedOverlayLines;
 
 	/**
 	 * Draw little overlay circles to indicate where the exact path points are.
 	 */
 	bool m_EnableDebugNodeOverlay;
-	std::vector<std::vector<SOverlayLine> > m_DebugNodeOverlays;
+	PS::vector<PS::vector<SOverlayLine> > m_DebugNodeOverlays;
 
 private:
 	/**
@@ -245,7 +245,7 @@ private:
 	 * Returns a list of indices of waypoints in the current path (m_Path[index]) where the LOS visibility changes, ordered from
 	 * building/previous rally point to rally point. Used to construct the overlay line segments and track changes to the SoD.
 	 */
-	void GetVisibilitySegments(std::vector<SVisibilitySegment>& out, size_t index) const;
+	void GetVisibilitySegments(PS::vector<SVisibilitySegment>& out, size_t index) const;
 
 	/**
 	 * Simplifies the path by removing waypoints that lie between two points that are visible from one another. This is primarily
@@ -259,13 +259,13 @@ private:
 	 *                    at most 3 consecutive node links will be joined into a single link.
 	 * @p floating whether to consider nodes who are under the water level as floating on top of the water
 	 */
-	void ReduceSegmentsByVisibility(std::vector<CVector2D>& coords, unsigned maxSegmentLinks = 0, bool floating = true) const;
+	void ReduceSegmentsByVisibility(PS::vector<CVector2D>& coords, unsigned maxSegmentLinks = 0, bool floating = true) const;
 
 	/**
 	 * Helper function to GetVisibilitySegments, factored out for testing. Merges single-point segments with its neighbouring
 	 * segments. You should not have to call this method directly.
 	 */
-	static void MergeVisibilitySegments(std::vector<SVisibilitySegment>& segments);
+	static void MergeVisibilitySegments(PS::vector<SVisibilitySegment>& segments);
 
 	void RenderSubmit(SceneCollector& collector, const CFrustum& frustum, bool culling);
 };

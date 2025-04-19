@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -21,12 +21,11 @@
 #include "Pathfinding.h"
 
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
+#include "ps/containers/Set.h"
 #include "renderer/TerrainOverlay.h"
 #include "Render.h"
 #include "graphics/SColor.h"
-
-#include <map>
-#include <set>
 
 /**
  * Hierarchical pathfinder.
@@ -108,8 +107,8 @@ public:
 
 	// Non-pathfinding grids will never be recomputed on calling HierarchicalPathfinder::Update
 	void Recompute(Grid<NavcellData>* passabilityGrid,
-		const std::map<std::string, pass_class_t>& nonPathfindingPassClassMasks,
-		const std::map<std::string, pass_class_t>& pathfindingPassClassMasks);
+		const PS::map<std::string, pass_class_t>& nonPathfindingPassClassMasks,
+		const PS::map<std::string, pass_class_t>& pathfindingPassClassMasks);
 
 	void Update(Grid<NavcellData>* grid, const Grid<u8>& dirtinessGrid);
 
@@ -168,7 +167,7 @@ private:
 	struct Chunk
 	{
 		u8 m_ChunkI, m_ChunkJ; // chunk ID
-		std::vector<u16> m_RegionsID; // IDs of local regions, 0 (impassable) excluded
+		PS::vector<u16> m_RegionsID; // IDs of local regions, 0 (impassable) excluded
 		u16 m_Regions[CHUNK_SIZE][CHUNK_SIZE]; // local region ID per navcell
 
 		cassert(CHUNK_SIZE*CHUNK_SIZE/2 < 65536); // otherwise we could overflow m_RegionsID with a checkerboard pattern
@@ -196,19 +195,19 @@ private:
 		return m_Chunks.at(passClass).at(cj * m_ChunksW + ci);
 	}
 
-	typedef std::map<RegionID, std::set<RegionID> > EdgesMap;
+	typedef PS::map<RegionID, PS::set<RegionID> > EdgesMap;
 
 	void ComputeNeighbors(EdgesMap& edges, Chunk& a, Chunk& b, bool transpose, bool opposite) const;
 	void RecomputeAllEdges(pass_class_t passClass, EdgesMap& edges);
 	void UpdateEdges(u8 ci, u8 cj, pass_class_t passClass, EdgesMap& edges);
 
-	void UpdateGlobalRegions(const std::map<pass_class_t, std::vector<RegionID> >& needNewGlobalRegionMap);
+	void UpdateGlobalRegions(const PS::map<pass_class_t, PS::vector<RegionID> >& needNewGlobalRegionMap);
 
 	/**
 	 * Returns all reachable regions, optionally ordered in a specific manner.
 	 */
 	template<typename Ordering>
-	void FindReachableRegions(RegionID from, std::set<RegionID, Ordering>& reachable, pass_class_t passClass) const
+	void FindReachableRegions(RegionID from, PS::set<RegionID, Ordering>& reachable, pass_class_t passClass) const
 	{
 		// Flood-fill the region graph, starting at 'from',
 		// collecting all the regions that are reachable via edges
@@ -218,7 +217,7 @@ private:
 		if (edgeMap.find(from) == edgeMap.end())
 			return;
 
-		std::vector<RegionID> open;
+		PS::vector<RegionID> open;
 		open.reserve(64);
 		open.push_back(from);
 
@@ -249,7 +248,7 @@ private:
 		u16 gi, gj;
 	};
 
-	void FindNearestNavcellInRegions(const std::set<RegionID, SortByCenterToPoint>& regions,
+	void FindNearestNavcellInRegions(const PS::set<RegionID, SortByCenterToPoint>& regions,
 									 u16& iGoal, u16& jGoal, pass_class_t passClass) const;
 
 	struct InterestingRegion {
@@ -273,28 +272,28 @@ private:
 	};
 
 	// Returns the region along with the best cell for optimisation.
-	void FindGoalRegionsAndBestNavcells(u16 i0, u16 j0, u16 gi, u16 gj, const PathGoal& goal, std::set<InterestingRegion, SortByBestToPoint>& regions, pass_class_t passClass) const;
+	void FindGoalRegionsAndBestNavcells(u16 i0, u16 j0, u16 gi, u16 gj, const PathGoal& goal, PS::set<InterestingRegion, SortByBestToPoint>& regions, pass_class_t passClass) const;
 
 	void FillRegionOnGrid(const RegionID& region, pass_class_t passClass, u16 value, Grid<u16>& grid) const;
 
 	u16 m_W, m_H;
 	u8 m_ChunksW, m_ChunksH;
-	std::map<pass_class_t, std::vector<Chunk> > m_Chunks;
+	PS::map<pass_class_t, PS::vector<Chunk> > m_Chunks;
 
-	std::map<pass_class_t, EdgesMap> m_Edges;
+	PS::map<pass_class_t, EdgesMap> m_Edges;
 
-	std::map<pass_class_t, std::map<RegionID, GlobalRegionID> > m_GlobalRegions;
+	PS::map<pass_class_t, PS::map<RegionID, GlobalRegionID> > m_GlobalRegions;
 	GlobalRegionID m_NextGlobalRegionID;
 
 	// Passability classes for which grids will be updated when calling Update
-	std::map<std::string, pass_class_t> m_PassClassMasks;
+	PS::map<std::string, pass_class_t> m_PassClassMasks;
 
 	void AddDebugEdges(pass_class_t passClass);
 	HierarchicalOverlay* m_DebugOverlay;
 	const CSimContext* m_SimContext; // Used for drawing the debug lines
 
 public:
-	std::vector<SOverlayLine> m_DebugOverlayLines;
+	PS::vector<SOverlayLine> m_DebugOverlayLines;
 };
 
 class HierarchicalOverlay : public TerrainTextureOverlay

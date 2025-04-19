@@ -20,9 +20,9 @@
 
 #include "CStr.h"
 #include "lib/file/vfs/vfs.h"
+#include "ps/containers/Vector.h"
 
 #include <memory>
-#include <vector>
 
 class ScriptContext;
 
@@ -67,7 +67,7 @@ public:
 	/**
 	 * @return a list of all mods installed so far by this CModInstaller.
 	 */
-	const std::vector<CStr>& GetInstalledMods() const;
+	const PS::vector<CStr>& GetInstalledMods() const;
 
 	/**
 	 * @return whether the path has a mod-like extension.
@@ -82,7 +82,7 @@ private:
 	OsPath m_ModsDir;
 	OsPath m_TempDir;
 	VfsPath m_CacheDir;
-	std::vector<CStr> m_InstalledMods;
+	PS::vector<CStr> m_InstalledMods;
 };
 
 #endif // INCLUDED_MODINSTALLER

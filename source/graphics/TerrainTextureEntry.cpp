@@ -26,13 +26,12 @@
 #include "graphics/TextureManager.h"
 #include "lib/utf8.h"
 #include "ps/CLogger.h"
+#include "ps/containers/Map.h"
 #include "ps/CStrInternStatic.h"
 #include "ps/Filesystem.h"
 #include "ps/XML/Xeromyces.h"
 #include "renderer/Renderer.h"
 #include "renderer/SceneRenderer.h"
-
-#include <map>
 
 CTerrainTextureEntry::CTerrainTextureEntry(CTerrainPropertiesPtr properties, const VfsPath& path):
 	m_pProperties(properties),
@@ -70,7 +69,7 @@ CTerrainTextureEntry::CTerrainTextureEntry(CTerrainPropertiesPtr properties, con
 		return;
 	}
 
-	std::vector<std::pair<CStr, VfsPath> > samplers;
+	PS::vector<std::pair<CStr, VfsPath> > samplers;
 	VfsPath alphamap("standard");
 	m_Tag = utf8_from_wstring(path.Basename().string());
 

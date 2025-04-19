@@ -18,11 +18,11 @@
 #ifndef INCLUDED_RENDERER_BACKEND_VULKAN_RINGCOMMANDCONTEXT
 #define INCLUDED_RENDERER_BACKEND_VULKAN_RINGCOMMANDCONTEXT
 
+#include "ps/containers/Vector.h"
 #include "renderer/backend/vulkan/SubmitScheduler.h"
 
 #include <glad/vulkan.h>
 #include <memory>
-#include <vector>
 
 namespace Renderer
 {
@@ -127,7 +127,7 @@ private:
 		bool isBegan = false;
 		uint32_t stagingBufferFirst = 0, stagingBufferLast = 0;
 	};
-	std::vector<RingItem> m_Ring;
+	PS::vector<RingItem> m_Ring;
 	size_t m_RingIndex = 0;
 
 	void WaitUntilFree(RingItem& item);

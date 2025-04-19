@@ -18,11 +18,11 @@
 #include "precompiled.h"
 
 #include <algorithm>
-#include <queue>
 
 #include "ObjectBase.h"
 
 #include "ObjectManager.h"
+#include "ps/containers/Queue.h"
 #include "ps/XML/Xeromyces.h"
 #include "ps/Filesystem.h"
 #include "ps/CLogger.h"
@@ -126,7 +126,7 @@ bool CObjectBase::Load(const CXeromyces& XeroFile, const XMBElement& root)
 
 		if (child_name == el_group)
 		{
-			std::vector<Variant>& currentGroup = m_VariantGroups.emplace_back();
+			PS::vector<Variant>& currentGroup = m_VariantGroups.emplace_back();
 			currentGroup.reserve(child.GetChildNodes().size());
 			XERO_ITER_EL(child, variant)
 			{
@@ -345,7 +345,7 @@ bool CObjectBase::LoadVariant(const CXeromyces& XeroFile, const XMBElement& vari
 	return true;
 }
 
-std::vector<u8> CObjectBase::CalculateVariationKey(const std::vector<const std::set<CStr>*>& selections) const
+PS::vector<u8> CObjectBase::CalculateVariationKey(const PS::vector<const PS::set<CStr>*>& selections) const
 {
 	// (TODO: see CObjectManager::FindObjectVariation for an opportunity to
 	// call this function a bit less frequently)
@@ -358,11 +358,11 @@ std::vector<u8> CObjectBase::CalculateVariationKey(const std::vector<const std::
 	// Otherwise, try with the next (lower priority) selections set, and repeat.
 	// Otherwise, choose the first variant (arbitrarily).
 
-	std::vector<u8> choices;
+	PS::vector<u8> choices;
 
 	std::multimap<CStr, CStrW> chosenProps;
 
-	for (std::vector<std::vector<CObjectBase::Variant> >::const_iterator grp = m_VariantGroups.begin();
+	for (PS::vector<PS::vector<CObjectBase::Variant> >::const_iterator grp = m_VariantGroups.begin();
 		grp != m_VariantGroups.end();
 		++grp)
 	{
@@ -383,7 +383,7 @@ std::vector<u8> CObjectBase::CalculateVariationKey(const std::vector<const std::
 			// Determine the first variant that matches the provided strings,
 			// starting with the highest priority selections set:
 
-			for (const std::set<CStr>* selset : selections)
+			for (const PS::set<CStr>* selset : selections)
 			{
 				ENSURE(grp->size() < 256); // else they won't fit in 'choices'
 
@@ -425,7 +425,7 @@ std::vector<u8> CObjectBase::CalculateVariationKey(const std::vector<const std::
 	{
 		if (auto [success, prop] = m_ObjectManager.FindActorDef(it->second); success)
 		{
-			std::vector<u8> propChoices = prop.GetBase(m_QualityLevel)->CalculateVariationKey(selections);
+			PS::vector<u8> propChoices = prop.GetBase(m_QualityLevel)->CalculateVariationKey(selections);
 			choices.insert(choices.end(), propChoices.begin(), propChoices.end());
 		}
 	}
@@ -433,7 +433,7 @@ std::vector<u8> CObjectBase::CalculateVariationKey(const std::vector<const std::
 	return choices;
 }
 
-const CObjectBase::Variation CObjectBase::BuildVariation(const std::vector<u8>& variationKey) const
+const CObjectBase::Variation CObjectBase::BuildVariation(const PS::vector<u8>& variationKey) const
 {
 	Variation variation;
 
@@ -441,8 +441,8 @@ const CObjectBase::Variation CObjectBase::BuildVariation(const std::vector<u8>& 
 	// chosen variant from each group. (Except variationKey has some bits stuck
 	// on the end for props, but we don't care about those in here.)
 
-	std::vector<std::vector<CObjectBase::Variant> >::const_iterator grp = m_VariantGroups.begin();
-	std::vector<u8>::const_iterator match = variationKey.begin();
+	PS::vector<PS::vector<CObjectBase::Variant> >::const_iterator grp = m_VariantGroups.begin();
+	PS::vector<u8>::const_iterator match = variationKey.begin();
 	for ( ;
 		grp != m_VariantGroups.end() && match != variationKey.end();
 		++grp, ++match)
@@ -482,46 +482,46 @@ const CObjectBase::Variation CObjectBase::BuildVariation(const std::vector<u8>& 
 		// original should be erased, and replaced by the two new ones.
 		//
 		// So, erase all existing props which are overridden by this variant:
-		for (std::vector<CObjectBase::Prop>::const_iterator it = var.m_Props.begin(); it != var.m_Props.end(); ++it)
+		for (PS::vector<CObjectBase::Prop>::const_iterator it = var.m_Props.begin(); it != var.m_Props.end(); ++it)
 			variation.props.erase(it->m_PropPointName);
 		// and then insert the new ones:
-		for (std::vector<CObjectBase::Prop>::const_iterator it = var.m_Props.begin(); it != var.m_Props.end(); ++it)
+		for (PS::vector<CObjectBase::Prop>::const_iterator it = var.m_Props.begin(); it != var.m_Props.end(); ++it)
 			if (! it->m_ModelName.empty()) // if the name is empty then the overridden prop is just deleted
 				variation.props.insert(make_pair(it->m_PropPointName, *it));
 
 		// Same idea applies for animations.
 		// So, erase all existing animations which are overridden by this variant:
-		for (std::vector<CObjectBase::Anim>::const_iterator it = var.m_Anims.begin(); it != var.m_Anims.end(); ++it)
+		for (PS::vector<CObjectBase::Anim>::const_iterator it = var.m_Anims.begin(); it != var.m_Anims.end(); ++it)
 			variation.anims.erase(it->m_AnimName);
 		// and then insert the new ones:
-		for (std::vector<CObjectBase::Anim>::const_iterator it = var.m_Anims.begin(); it != var.m_Anims.end(); ++it)
+		for (PS::vector<CObjectBase::Anim>::const_iterator it = var.m_Anims.begin(); it != var.m_Anims.end(); ++it)
 			variation.anims.insert(make_pair(it->m_AnimName, *it));
 
 		// Same for samplers, though perhaps not strictly necessary:
-		for (std::vector<CObjectBase::Samp>::const_iterator it = var.m_Samplers.begin(); it != var.m_Samplers.end(); ++it)
+		for (PS::vector<CObjectBase::Samp>::const_iterator it = var.m_Samplers.begin(); it != var.m_Samplers.end(); ++it)
 			variation.samplers.erase(it->m_SamplerName.string());
-		for (std::vector<CObjectBase::Samp>::const_iterator it = var.m_Samplers.begin(); it != var.m_Samplers.end(); ++it)
+		for (PS::vector<CObjectBase::Samp>::const_iterator it = var.m_Samplers.begin(); it != var.m_Samplers.end(); ++it)
 			variation.samplers.insert(make_pair(it->m_SamplerName.string(), *it));
 	}
 
 	return variation;
 }
 
-std::set<CStr> CObjectBase::CalculateRandomRemainingSelections(uint32_t seed, const std::vector<std::set<CStr>>& initialSelections) const
+PS::set<CStr> CObjectBase::CalculateRandomRemainingSelections(uint32_t seed, const PS::vector<PS::set<CStr>>& initialSelections) const
 {
 	rng_t rng;
 	rng.seed(seed);
 
-	std::set<CStr> remainingSelections = CalculateRandomRemainingSelections(rng, initialSelections);
-	for (const std::set<CStr>& sel : initialSelections)
+	PS::set<CStr> remainingSelections = CalculateRandomRemainingSelections(rng, initialSelections);
+	for (const PS::set<CStr>& sel : initialSelections)
 		remainingSelections.insert(sel.begin(), sel.end());
 
 	return remainingSelections; // now actually a complete set of selections
 }
 
-std::set<CStr> CObjectBase::CalculateRandomRemainingSelections(rng_t& rng, const std::vector<std::set<CStr>>& initialSelections) const
+PS::set<CStr> CObjectBase::CalculateRandomRemainingSelections(rng_t& rng, const PS::vector<PS::set<CStr>>& initialSelections) const
 {
-	std::set<CStr> remainingSelections;
+	PS::set<CStr> remainingSelections;
 	std::multimap<CStr, CStrW> chosenProps;
 
 	// Calculate a complete list of selections, so there is at least one
@@ -536,7 +536,7 @@ std::set<CStr> CObjectBase::CalculateRandomRemainingSelections(rng_t& rng, const
 
 	CObjectManager::VariantDiversity diversity = m_ObjectManager.GetVariantDiversity();
 
-	for (std::vector<std::vector<Variant> >::const_iterator grp = m_VariantGroups.begin();
+	for (PS::vector<PS::vector<Variant> >::const_iterator grp = m_VariantGroups.begin();
 		grp != m_VariantGroups.end();
 		++grp)
 	{
@@ -641,11 +641,11 @@ std::set<CStr> CObjectBase::CalculateRandomRemainingSelections(rng_t& rng, const
 	{
 		if (auto [success, prop] = m_ObjectManager.FindActorDef(it->second); success)
 		{
-			std::vector<std::set<CStr> > propInitialSelections = initialSelections;
+			PS::vector<PS::set<CStr> > propInitialSelections = initialSelections;
 			if (!remainingSelections.empty())
 				propInitialSelections.push_back(remainingSelections);
 
-			std::set<CStr> propRemainingSelections = prop.GetBase(m_QualityLevel)->CalculateRandomRemainingSelections(rng, propInitialSelections);
+			PS::set<CStr> propRemainingSelections = prop.GetBase(m_QualityLevel)->CalculateRandomRemainingSelections(rng, propInitialSelections);
 			remainingSelections.insert(propRemainingSelections.begin(), propRemainingSelections.end());
 
 			// Add the prop's used files to our own (recursively) so we can hotload
@@ -657,16 +657,16 @@ std::set<CStr> CObjectBase::CalculateRandomRemainingSelections(rng_t& rng, const
 	return remainingSelections;
 }
 
-std::vector<std::vector<CStr> > CObjectBase::GetVariantGroups() const
+PS::vector<PS::vector<CStr> > CObjectBase::GetVariantGroups() const
 {
-	std::vector<std::vector<CStr> > groups;
+	PS::vector<PS::vector<CStr> > groups;
 
 	// Queue of objects (main actor plus props (recursively)) to be processed
-	std::queue<const CObjectBase*> objectsQueue;
+	PS::queue<const CObjectBase*> objectsQueue;
 	objectsQueue.push(this);
 
 	// Set of objects already processed, so we don't do them more than once
-	std::set<const CObjectBase*> objectsProcessed;
+	PS::set<const CObjectBase*> objectsProcessed;
 
 	while (!objectsQueue.empty())
 	{
@@ -682,7 +682,7 @@ std::vector<std::vector<CStr> > CObjectBase::GetVariantGroups() const
 		for (size_t i = 0; i < obj->m_VariantGroups.size(); ++i)
 		{
 			// Copy the group's variant names into a new vector
-			std::vector<CStr> group;
+			PS::vector<CStr> group;
 			group.reserve(obj->m_VariantGroups[i].size());
 			for (size_t j = 0; j < obj->m_VariantGroups[i].size(); ++j)
 				group.push_back(obj->m_VariantGroups[i][j].m_VariantName);
@@ -710,7 +710,7 @@ std::vector<std::vector<CStr> > CObjectBase::GetVariantGroups() const
 			// Add all props onto the queue to be considered
 			for (size_t j = 0; j < obj->m_VariantGroups[i].size(); ++j)
 			{
-				const std::vector<Prop>& props = obj->m_VariantGroups[i][j].m_Props;
+				const PS::vector<Prop>& props = obj->m_VariantGroups[i][j].m_Props;
 				for (size_t k = 0; k < props.size(); ++k)
 					if (!props[k].m_ModelName.empty())
 						if (auto [success, prop] = m_ObjectManager.FindActorDef(props[k].m_ModelName.c_str()); success)
@@ -722,13 +722,13 @@ std::vector<std::vector<CStr> > CObjectBase::GetVariantGroups() const
 	return groups;
 }
 
-void CObjectBase::GetQualitySplits(std::vector<u8>& splits) const
+void CObjectBase::GetQualitySplits(PS::vector<u8>& splits) const
 {
-	std::vector<u8>::iterator it = std::find_if(splits.begin(), splits.end(), [this](u8 qualityLevel) { return qualityLevel >= m_QualityLevel; });
+	PS::vector<u8>::iterator it = std::find_if(splits.begin(), splits.end(), [this](u8 qualityLevel) { return qualityLevel >= m_QualityLevel; });
 	if (it == splits.end() ||  *it != m_QualityLevel)
 		splits.emplace(it, m_QualityLevel);
 
-	for (const std::vector<Variant>& group : m_VariantGroups)
+	for (const PS::vector<Variant>& group : m_VariantGroups)
 		for (const Variant& variant : group)
 			for (const Prop& prop : variant.m_Props)
 			{
@@ -740,14 +740,14 @@ void CObjectBase::GetQualitySplits(std::vector<u8>& splits) const
 				if (!success)
 					continue;
 
-				std::vector<u8> newSplits = propActor.QualityLevels();
+				PS::vector<u8> newSplits = propActor.QualityLevels();
 				if (newSplits.size() <= 1)
 					continue;
 
 				// This is not entirely optimal since we might loop though redundant quality levels, but that shouldn't matter.
-				// Custom implementation because this is inplace, std::set_union needs a 3rd vector.
-				std::vector<u8>::iterator v1 = splits.begin();
-				std::vector<u8>::iterator v2 = newSplits.begin();
+				// Custom implementation because this is inplace, PS::set_union needs a 3rd vector.
+				PS::vector<u8>::iterator v1 = splits.begin();
+				PS::vector<u8>::iterator v2 = newSplits.begin();
 				while (v2 != newSplits.end())
 				{
 					if (v1 == splits.end() || *v1 > *v2)
@@ -781,17 +781,17 @@ CActorDef::CActorDef(CObjectManager& objectManager) : m_ObjectManager(objectMana
 {
 }
 
-std::set<CStr> CActorDef::PickSelectionsAtRandom(uint32_t seed) const
+PS::set<CStr> CActorDef::PickSelectionsAtRandom(uint32_t seed) const
 {
 	// Use the selections from the highest quality actor - this lets artists maintain compatibility (or not)
 	// when going to lower quality levels.
-	std::vector<std::set<CStr>> noSelections;
+	PS::vector<PS::set<CStr>> noSelections;
 	return GetBase(255)->CalculateRandomRemainingSelections(seed, noSelections);
 }
 
-std::vector<u8> CActorDef::QualityLevels() const
+PS::vector<u8> CActorDef::QualityLevels() const
 {
-	std::vector<u8> splits;
+	PS::vector<u8> splits;
 	splits.reserve(m_ObjectBases.size());
 	for (const std::shared_ptr<CObjectBase>& base : m_ObjectBases)
 		splits.emplace_back(base->m_QualityLevel);
@@ -973,7 +973,7 @@ bool CActorDef::Load(const VfsPath& pathname)
 	}
 
 	// For each quality level, check if we need to further split (because of props).
-	std::vector<u8> splits = QualityLevels();
+	PS::vector<u8> splits = QualityLevels();
 	for (const std::shared_ptr<CObjectBase>& base : m_ObjectBases)
 		base->GetQualitySplits(splits);
 	ENSURE(splits.size() >= 1);
@@ -983,8 +983,8 @@ bool CActorDef::Load(const VfsPath& pathname)
 		return false;
 	}
 
-	std::vector<std::shared_ptr<CObjectBase>>::iterator it = m_ObjectBases.begin();
-	std::vector<u8>::const_iterator qualityLevels = splits.begin();
+	PS::vector<std::shared_ptr<CObjectBase>>::iterator it = m_ObjectBases.begin();
+	PS::vector<u8>::const_iterator qualityLevels = splits.begin();
 	while (it != m_ObjectBases.end())
 		if ((*it)->m_QualityLevel > *qualityLevels)
 		{

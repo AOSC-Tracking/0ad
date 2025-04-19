@@ -31,6 +31,6 @@ class CStr8;
  * Runs a new pyrogenesis process with the -editor argument.
  * Necessary because SDL and WxWidgets conflict.
  */
-void startNewAtlasProcess(const std::vector<CStr8>& mods);
+void startNewAtlasProcess(const PS::vector<CStr8>& mods);
 
 #endif // OSX_ATLAS_H

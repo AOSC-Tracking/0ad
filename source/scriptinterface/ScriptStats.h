@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 #ifndef INCLUDED_SCRIPTSTATS
 #define INCLUDED_SCRIPTSTATS
 
+#include "ps/containers/Vector.h"
 #include "ps/ProfileViewer.h"
-
-#include <vector>
 
 class ScriptInterface;
 
@@ -36,13 +35,13 @@ public:
 	CStr GetName() override;
 	CStr GetTitle() override;
 	size_t GetNumberRows() override;
-	const std::vector<ProfileColumn>& GetColumns() override;
+	const PS::vector<ProfileColumn>& GetColumns() override;
 	CStr GetCellText(size_t row, size_t col) override;
 	AbstractProfileTable* GetChild(size_t row) override;
 
 private:
-	std::vector<std::pair<const ScriptInterface*, std::string> > m_ScriptInterfaces;
-	std::vector<ProfileColumn> m_ColumnDescriptions;
+	PS::vector<std::pair<const ScriptInterface*, std::string> > m_ScriptInterfaces;
+	PS::vector<ProfileColumn> m_ColumnDescriptions;
 };
 
 // To simplify the UI we want to use a single table for all script interfaces,

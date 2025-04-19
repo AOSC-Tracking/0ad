@@ -214,7 +214,7 @@ public:
 	virtual ~IParticleEffector() {}
 
 	/// Updates all particles.
-	virtual void Evaluate(std::vector<SParticle>& particles, float dt) = 0;
+	virtual void Evaluate(PS::vector<SParticle>& particles, float dt) = 0;
 
 	/// Returns maximum acceleration caused by this effector.
 	virtual CVector3D Max() = 0;
@@ -232,7 +232,7 @@ public:
 	{
 	}
 
-	virtual void Evaluate(std::vector<SParticle>& particles, float dt)
+	virtual void Evaluate(PS::vector<SParticle>& particles, float dt)
 	{
 		CVector3D dv = m_Accel * dt;
 

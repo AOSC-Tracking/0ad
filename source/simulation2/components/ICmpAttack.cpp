@@ -36,9 +36,9 @@ public:
 		return m_Script.Call<float, const std::string&>("GetRepeatTime", type);
 	}
 
-	std::vector<CStr> GetAttackTypes() const override
+	PS::vector<CStr> GetAttackTypes() const override
 	{
-		return m_Script.Call<std::vector<CStr>>("GetAttackTypes");
+		return m_Script.Call<PS::vector<CStr>>("GetAttackTypes");
 	}
 };
 

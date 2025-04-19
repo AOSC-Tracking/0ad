@@ -1,4 +1,4 @@
-/* Copyright (C) 2019 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 #ifndef INCLUDED_SGUISTYLE
 #define INCLUDED_SGUISTYLE
 
+#include "ps/containers/Map.h"
 #include "ps/CStr.h"
-
-#include <map>
 
 /**
  * Contains a list of values for new defaults to objects.
@@ -32,7 +31,7 @@ struct SGUIStyle
 	MOVABLE(SGUIStyle);
 	SGUIStyle() = default;
 
-	std::map<CStr, CStrW> m_SettingsDefaults;
+	PS::map<CStr, CStrW> m_SettingsDefaults;
 };
 
 #endif // INCLUDED_SGUISTYLE

@@ -55,20 +55,20 @@ bool CComponentManager::DumpDebugState(std::ostream& stream, bool includeDebugIn
 	serializer.TextLine("entities:");
 
 	// We want the output to be grouped by entity ID, so invert the CComponentManager data structures
-	std::map<entity_id_t, std::map<ComponentTypeId, IComponent*> > components;
-	//std::map<ComponentTypeId, std::string> names;
+	PS::map<entity_id_t, PS::map<ComponentTypeId, IComponent*> > components;
+	//PS::map<ComponentTypeId, std::string> names;
 
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator ctit = m_ComponentsByTypeId.begin();
+	PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator ctit = m_ComponentsByTypeId.begin();
 	for (; ctit != m_ComponentsByTypeId.end(); ++ctit)
 	{
-		std::map<entity_id_t, IComponent*>::const_iterator eit = ctit->second.begin();
+		PS::map<entity_id_t, IComponent*>::const_iterator eit = ctit->second.begin();
 		for (; eit != ctit->second.end(); ++eit)
 		{
 			components[eit->first][ctit->first] = eit->second;
 		}
 	}
 
-	std::map<entity_id_t, std::map<ComponentTypeId, IComponent*> >::const_iterator cit = components.begin();
+	PS::map<entity_id_t, PS::map<ComponentTypeId, IComponent*> >::const_iterator cit = components.begin();
 	for (; cit != components.end(); ++cit)
 	{
 		std::stringstream n;
@@ -78,7 +78,7 @@ bool CComponentManager::DumpDebugState(std::ostream& stream, bool includeDebugIn
 		if (ENTITY_IS_LOCAL(cit->first))
 			serializer.TextLine("  type: local");
 
-		std::map<ComponentTypeId, IComponent*>::const_iterator it = cit->second.begin();
+		PS::map<ComponentTypeId, IComponent*>::const_iterator it = cit->second.begin();
 		for (; it != cit->second.end(); ++it)
 		{
 			std::stringstream st;
@@ -109,7 +109,7 @@ bool CComponentManager::ComputeStateHash(std::string& outHash, bool quick) const
 	serializer.StringASCII("rng", SerializeRNG(m_RNG), 0, 32);
 	serializer.NumberU32_Unbounded("next entity id", m_NextEntityId);
 
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator cit = m_ComponentsByTypeId.begin();
+	PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator cit = m_ComponentsByTypeId.begin();
 	for (; cit != m_ComponentsByTypeId.end(); ++cit)
 	{
 		// In quick mode, only check unit positions
@@ -118,7 +118,7 @@ bool CComponentManager::ComputeStateHash(std::string& outHash, bool quick) const
 
 		// Only emit component types if they have a component that will be serialized
 		bool needsSerialization = false;
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
+		for (PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities
 			if (ENTITY_IS_LOCAL(eit->first))
@@ -133,7 +133,7 @@ bool CComponentManager::ComputeStateHash(std::string& outHash, bool quick) const
 
 		serializer.NumberI32_Unbounded("component type id", cit->first);
 
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
+		for (PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities
 			if (ENTITY_IS_LOCAL(eit->first))
@@ -189,18 +189,18 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 	serializer.StringASCII("rng", SerializeRNG(m_RNG), 0, 32);
 	serializer.NumberU32_Unbounded("next entity id", m_NextEntityId);
 
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator cit;
+	PS::map<ComponentTypeId, PS::map<entity_id_t, IComponent*> >::const_iterator cit;
 
 	uint32_t numSystemComponentTypes = 0;
 	uint32_t numComponentTypes = 0;
-	std::set<ComponentTypeId> serializedSystemComponentTypes;
-	std::set<ComponentTypeId> serializedComponentTypes;
+	PS::set<ComponentTypeId> serializedSystemComponentTypes;
+	PS::set<ComponentTypeId> serializedComponentTypes;
 
 	for (cit = m_ComponentsByTypeId.begin(); cit != m_ComponentsByTypeId.end(); ++cit)
 	{
 		// Only emit component types if they have a component that will be serialized
 		bool needsSerialization = false;
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
+		for (PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities, and handle SYSTEM_ENTITY separately
 			if (ENTITY_IS_LOCAL(eit->first) || eit->first == SYSTEM_ENTITY)
@@ -230,7 +230,7 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 		if (serializedSystemComponentTypes.find(cit->first) == serializedSystemComponentTypes.end())
 			continue;
 
-		std::map<ComponentTypeId, ComponentType>::const_iterator ctit = m_ComponentTypesById.find(cit->first);
+		PS::map<ComponentTypeId, ComponentType>::const_iterator ctit = m_ComponentTypesById.find(cit->first);
 		if (ctit == m_ComponentTypesById.end())
 		{
 			debug_warn(L"Invalid ctit"); // this should never happen
@@ -239,7 +239,7 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 
 		serializer.StringASCII("name", ctit->second.name, 0, 255);
 
-		std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.find(SYSTEM_ENTITY);
+		PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.find(SYSTEM_ENTITY);
 		if (eit == cit->second.end())
 		{
 			debug_warn(L"Invalid eit"); // this should never happen
@@ -255,7 +255,7 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 		if (serializedComponentTypes.find(cit->first) == serializedComponentTypes.end())
 			continue;
 
-		std::map<ComponentTypeId, ComponentType>::const_iterator ctit = m_ComponentTypesById.find(cit->first);
+		PS::map<ComponentTypeId, ComponentType>::const_iterator ctit = m_ComponentTypesById.find(cit->first);
 		if (ctit == m_ComponentTypesById.end())
 		{
 			debug_warn(L"Invalid ctit"); // this should never happen
@@ -266,7 +266,7 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 
 		// Count the components before serializing any of them
 		uint32_t numComponents = 0;
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
+		for (PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities or SYSTEM_ENTITY
 			if (ENTITY_IS_LOCAL(eit->first) || eit->first == SYSTEM_ENTITY)
@@ -279,7 +279,7 @@ bool CComponentManager::SerializeState(std::ostream& stream) const
 		serializer.NumberU32_Unbounded("num components", numComponents);
 
 		// Serialize the components now
-		for (std::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
+		for (PS::map<entity_id_t, IComponent*>::const_iterator eit = cit->second.begin(); eit != cit->second.end(); ++eit)
 		{
 			// Don't serialize local entities or SYSTEM_ENTITY
 			if (ENTITY_IS_LOCAL(eit->first) || eit->first == SYSTEM_ENTITY)

@@ -102,7 +102,7 @@ static const entity_pos_t EDGE_EXPAND_DELTA = entity_pos_t::FromInt(1)/16;
  * Check whether a ray from 'a' to 'b' crosses any of the edges.
  * (Edges are one-sided so it's only considered a cross if going from front to back.)
  */
-inline static bool CheckVisibility(const CFixedVector2D& a, const CFixedVector2D& b, const std::vector<Edge>& edges)
+inline static bool CheckVisibility(const CFixedVector2D& a, const CFixedVector2D& b, const PS::vector<Edge>& edges)
 {
 	CFixedVector2D abn = (b - a).Perpendicular();
 
@@ -146,7 +146,7 @@ inline static bool CheckVisibility(const CFixedVector2D& a, const CFixedVector2D
 // They assume the caller has already excluded edges for which 'a' is
 // on the wrong side.)
 
-inline static bool CheckVisibilityLeft(const CFixedVector2D& a, const CFixedVector2D& b, const std::vector<EdgeAA>& edges)
+inline static bool CheckVisibilityLeft(const CFixedVector2D& a, const CFixedVector2D& b, const PS::vector<EdgeAA>& edges)
 {
 	if (a.X >= b.X)
 		return true;
@@ -174,7 +174,7 @@ inline static bool CheckVisibilityLeft(const CFixedVector2D& a, const CFixedVect
 	return true;
 }
 
-inline static bool CheckVisibilityRight(const CFixedVector2D& a, const CFixedVector2D& b, const std::vector<EdgeAA>& edges)
+inline static bool CheckVisibilityRight(const CFixedVector2D& a, const CFixedVector2D& b, const PS::vector<EdgeAA>& edges)
 {
 	if (a.X <= b.X)
 		return true;
@@ -202,7 +202,7 @@ inline static bool CheckVisibilityRight(const CFixedVector2D& a, const CFixedVec
 	return true;
 }
 
-inline static bool CheckVisibilityBottom(const CFixedVector2D& a, const CFixedVector2D& b, const std::vector<EdgeAA>& edges)
+inline static bool CheckVisibilityBottom(const CFixedVector2D& a, const CFixedVector2D& b, const PS::vector<EdgeAA>& edges)
 {
 	if (a.Y >= b.Y)
 		return true;
@@ -230,7 +230,7 @@ inline static bool CheckVisibilityBottom(const CFixedVector2D& a, const CFixedVe
 	return true;
 }
 
-inline static bool CheckVisibilityTop(const CFixedVector2D& a, const CFixedVector2D& b, const std::vector<EdgeAA>& edges)
+inline static bool CheckVisibilityTop(const CFixedVector2D& a, const CFixedVector2D& b, const PS::vector<EdgeAA>& edges)
 {
 	if (a.Y <= b.Y)
 		return true;
@@ -265,7 +265,7 @@ typedef PriorityQueueHeap<u16, fixed, fixed> VertexPriorityQueue;
  * navcells (for impassable terrain).
  * Navcells i0 <= i <= i1, j0 <= j <= j1 will be considered.
  */
-static void AddTerrainEdges(std::vector<Edge>& edges, std::vector<Vertex>& vertexes,
+static void AddTerrainEdges(PS::vector<Edge>& edges, PS::vector<Vertex>& vertexes,
 	int i0, int j0, int i1, int j1,
 	pass_class_t passClass, const Grid<NavcellData>& grid)
 {
@@ -330,8 +330,8 @@ static void AddTerrainEdges(std::vector<Edge>& edges, std::vector<Vertex>& verte
 	}
 
 	// XXX rewrite this stuff
-	std::vector<u16> segmentsR;
-	std::vector<u16> segmentsL;
+	PS::vector<u16> segmentsR;
+	PS::vector<u16> segmentsL;
 	for (int j = j0; j < j1; ++j)
 	{
 		segmentsR.clear();
@@ -388,8 +388,8 @@ static void AddTerrainEdges(std::vector<Edge>& edges, std::vector<Vertex>& verte
 			}
 		}
 	}
-	std::vector<u16> segmentsU;
-	std::vector<u16> segmentsD;
+	PS::vector<u16> segmentsU;
+	PS::vector<u16> segmentsD;
 	for (int i = i0; i < i1; ++i)
 	{
 		segmentsU.clear();
@@ -449,11 +449,11 @@ static void AddTerrainEdges(std::vector<Edge>& edges, std::vector<Vertex>& verte
 }
 
 static void SplitAAEdges(const CFixedVector2D& a,
-		const std::vector<Edge>& edges,
-		const std::vector<Square>& squares,
-		std::vector<Edge>& edgesUnaligned,
-		std::vector<EdgeAA>& edgesLeft, std::vector<EdgeAA>& edgesRight,
-		std::vector<EdgeAA>& edgesBottom, std::vector<EdgeAA>& edgesTop)
+		const PS::vector<Edge>& edges,
+		const PS::vector<Square>& squares,
+		PS::vector<Edge>& edgesUnaligned,
+		PS::vector<EdgeAA>& edgesLeft, PS::vector<EdgeAA>& edgesRight,
+		PS::vector<EdgeAA>& edgesBottom, PS::vector<EdgeAA>& edgesTop)
 {
 
 	for (const Square& square : squares)
@@ -586,7 +586,7 @@ WaypointPath VertexPathfinder::ComputeShortPath(const ShortPathRequest& request,
 	const size_t GOAL_VERTEX_ID = 1;
 
 	// Find all the obstruction squares that might affect us
-	std::vector<ICmpObstructionManager::ObstructionSquare> squares;
+	PS::vector<ICmpObstructionManager::ObstructionSquare> squares;
 	size_t staticShapesNb = 0;
 	ControlGroupMovementObstructionFilter filter(request.avoidMovingUnits, request.group);
 	cmpObstructionManager->GetStaticObstructionsInRange(filter, rangeXMin - request.clearance, rangeZMin - request.clearance, rangeXMax + request.clearance, rangeZMax + request.clearance, squares);
@@ -926,7 +926,7 @@ void VertexPathfinderDebugOverlay::DebugRenderGoal(const CSimContext& simContext
 	}
 }
 
-void VertexPathfinderDebugOverlay::DebugRenderGraph(const CSimContext& simContext, const std::vector<Vertex>& vertexes, const std::vector<Edge>& edges, const std::vector<Square>& edgeSquares)
+void VertexPathfinderDebugOverlay::DebugRenderGraph(const CSimContext& simContext, const PS::vector<Vertex>& vertexes, const PS::vector<Edge>& edges, const PS::vector<Square>& edgeSquares)
 {
 	if (!m_DebugOverlay)
 		return;
@@ -964,7 +964,7 @@ void VertexPathfinderDebugOverlay::DebugRenderGraph(const CSimContext& simContex
 	{
 		m_DebugOverlayShortPathLines.emplace_back();
 		m_DebugOverlayShortPathLines.back().m_Color = CColor(0, 1, 1, 1);
-		std::vector<float> xz;
+		PS::vector<float> xz;
 		PUSH_POINT(edges[i].p0);
 		PUSH_POINT(edges[i].p1);
 
@@ -987,7 +987,7 @@ void VertexPathfinderDebugOverlay::DebugRenderGraph(const CSimContext& simContex
 	{
 		m_DebugOverlayShortPathLines.push_back(SOverlayLine());
 		m_DebugOverlayShortPathLines.back().m_Color = CColor(0, 1, 1, 1);
-		std::vector<float> xz;
+		PS::vector<float> xz;
 		Square s = edgeSquares[i];
 		xz.push_back(s.p0.X.ToFloat());
 		xz.push_back(s.p0.Y.ToFloat());
@@ -1016,7 +1016,7 @@ void VertexPathfinderDebugOverlay::DebugRenderEdges(const CSimContext& UNUSED(si
 	m_DebugOverlayShortPathLines.back().m_Color = visible ? CColor(0, 1, 0, 0.5) : CColor(1, 0, 0, 0.5);
 	m_DebugOverlayShortPathLines.push_back(SOverlayLine());
 	m_DebugOverlayShortPathLines.back().m_Color = visible ? CColor(0, 1, 0, 0.5) : CColor(1, 0, 0, 0.5);
-	std::vector<float> xz;
+	PS::vector<float> xz;
 	xz.push_back(curr.X.ToFloat());
 	xz.push_back(curr.Y.ToFloat());
 	xz.push_back(npos.X.ToFloat());

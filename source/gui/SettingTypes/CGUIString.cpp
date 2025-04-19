@@ -291,7 +291,7 @@ void CGUIString::SetValue(const CStrW& str)
 	int l = str.length();
 	int rawpos = 0;
 	CStrW tag;
-	std::vector<CStrW> tags;
+	PS::vector<CStrW> tags;
 	bool closing = false;
 	for (int p = 0; p < l; ++p)
 	{

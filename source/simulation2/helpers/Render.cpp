@@ -33,7 +33,7 @@
 #include "simulation2/components/ICmpWaterManager.h"
 #include "simulation2/helpers/Geometry.h"
 
-void SimRender::ConstructLineOnGround(const CSimContext& context, const std::vector<float>& xz,
+void SimRender::ConstructLineOnGround(const CSimContext& context, const PS::vector<float>& xz,
 		SOverlayLine& overlay, bool floating, float heightOffset)
 {
 	overlay.m_Coords.clear();
@@ -132,7 +132,7 @@ void SimRender::ConstructClosedArcOnGround(
 }
 
 // This method splits up a straight line into a number of line segments each having a length ~= TERRAIN_TILE_SIZE
-static void SplitLine(std::vector<std::pair<float, float> >& coords, float x1, float y1, float x2, float y2)
+static void SplitLine(PS::vector<std::pair<float, float> >& coords, float x1, float y1, float x2, float y2)
 {
 	float length = sqrtf(SQR(x1 - x2) + SQR(y1 - y2));
 	size_t pieces = ((int)length) / TERRAIN_TILE_SIZE;
@@ -168,7 +168,7 @@ void SimRender::ConstructSquareOnGround(const CSimContext& context, float x, flo
 	float c = cosf(a);
 	float s = sinf(a);
 
-	std::vector<std::pair<float, float> > coords;
+	PS::vector<std::pair<float, float> > coords;
 
 	// Add the first vertex, since SplitLine will be adding only the second end-point of the each line to
 	// the coordinates list. We don't have to worry about the other lines, since the end-point of one line
@@ -330,7 +330,7 @@ void SimRender::ConstructAxesMarker(const CMatrix3D& coordSystem, SOverlayLine& 
 	outZ.PushCoords(origin + CVector3D(coordSystem(0,2), coordSystem(1,2), coordSystem(2,2)));
 }
 
-void SimRender::SmoothPointsAverage(std::vector<CVector2D>& points, bool closed)
+void SimRender::SmoothPointsAverage(PS::vector<CVector2D>& points, bool closed)
 {
 	PROFILE("SmoothPointsAverage");
 
@@ -338,7 +338,7 @@ void SimRender::SmoothPointsAverage(std::vector<CVector2D>& points, bool closed)
 	if (n < 2)
 		return; // avoid out-of-bounds array accesses, and leave the points unchanged
 
-	std::vector<CVector2D> newPoints;
+	PS::vector<CVector2D> newPoints;
 	newPoints.resize(points.size());
 
 	// Handle the end points appropriately
@@ -372,12 +372,12 @@ static CVector2D EvaluateSpline(float t, CVector2D a0, CVector2D a1, CVector2D a
 	return p + CVector2D(dp.Y*-offset, dp.X*offset);
 }
 
-void SimRender::InterpolatePointsRNS(std::vector<CVector2D>& points, bool closed, float offset, int segmentSamples /* = 4 */)
+void SimRender::InterpolatePointsRNS(PS::vector<CVector2D>& points, bool closed, float offset, int segmentSamples /* = 4 */)
 {
 	PROFILE("InterpolatePointsRNS");
 	ENSURE(segmentSamples > 0);
 
-	std::vector<CVector2D> newPoints;
+	PS::vector<CVector2D> newPoints;
 
 	// (This does some redundant computations for adjacent vertices,
 	// but it's fairly fast (<1ms typically) so we don't worry about it yet)
@@ -463,7 +463,7 @@ void SimRender::InterpolatePointsRNS(std::vector<CVector2D>& points, bool closed
 	points.swap(newPoints);
 }
 
-void SimRender::ConstructDashedLine(const std::vector<CVector2D>& keyPoints, SDashedLine& dashedLineOut, const float dashLength, const float blankLength)
+void SimRender::ConstructDashedLine(const PS::vector<CVector2D>& keyPoints, SDashedLine& dashedLineOut, const float dashLength, const float blankLength)
 {
 	// sanity checks
 	if (dashLength <= 0)
@@ -552,7 +552,7 @@ void SimRender::ConstructDashedLine(const std::vector<CVector2D>& keyPoints, SDa
 
 // TODO: this serves a similar purpose to SplitLine above, but is more general. Also, SplitLine seems to be implemented more
 // efficiently, might be nice to take some cues from it
-void SimRender::SubdividePoints(std::vector<CVector2D>& points, float maxSegmentLength, bool closed)
+void SimRender::SubdividePoints(PS::vector<CVector2D>& points, float maxSegmentLength, bool closed)
 {
 	size_t numControlPoints = points.size();
 	if (numControlPoints < 2)
@@ -564,7 +564,7 @@ void SimRender::SubdividePoints(std::vector<CVector2D>& points, float maxSegment
 	if (!closed && numControlPoints > 2)
 		endIndex--;
 
-	std::vector<CVector2D> newPoints;
+	PS::vector<CVector2D> newPoints;
 
 	for (size_t i = 0; i < endIndex; i++)
 	{
@@ -603,7 +603,7 @@ void SimRender::ConstructTexturedLineBox(SOverlayTexturedLine& overlay, const CV
 	const float halfSizeX = sizeX / 2.f + overlay.m_Thickness / 2.f;
 	const float halfSizeZ = sizeZ / 2.f + overlay.m_Thickness / 2.f;
 
-	std::vector<CVector2D> points;
+	PS::vector<CVector2D> points;
 	points.push_back(CVector2D(origin + unitX * halfSizeX + unitZ * (-halfSizeZ)));
 	points.push_back(CVector2D(origin + unitX * (-halfSizeX) + unitZ * (-halfSizeZ)));
 	points.push_back(CVector2D(origin + unitX * (-halfSizeX) + unitZ * halfSizeZ));

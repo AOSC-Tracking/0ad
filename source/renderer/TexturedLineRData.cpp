@@ -102,8 +102,8 @@ void CTexturedLineRData::Update(const SOverlayTexturedLine& line)
 	}
 
 	float v = 0.f;
-	std::vector<SVertex> vertices;
-	std::vector<u16> indices;
+	PS::vector<SVertex> vertices;
+	PS::vector<u16> indices;
 
 	const size_t n = line.m_Coords.size(); // number of line points
 	bool closed = line.m_Closed;
@@ -275,8 +275,8 @@ void CTexturedLineRData::Update(const SOverlayTexturedLine& line)
 		// Create start and end caps. On either end, this is done by taking the centroid between the last and second-to-last pair of
 		// vertices that was generated along the path (i.e. the vertex1's and vertex2's from above), taking a directional vector
 		// between them, and drawing the line cap in the plane given by the two butt-end corner points plus said vector.
-		std::vector<u16> capIndices;
-		std::vector<SVertex> capVertices;
+		PS::vector<u16> capIndices;
+		PS::vector<SVertex> capVertices;
 
 		// create end cap
 		CreateLineCap(
@@ -352,8 +352,8 @@ void CTexturedLineRData::Update(const SOverlayTexturedLine& line)
 }
 
 void CTexturedLineRData::CreateLineCap(const SOverlayTexturedLine& line, const CVector3D& corner1, const CVector3D& corner2,
-	const CVector3D& lineDirectionNormal, SOverlayTexturedLine::LineCapType endCapType, std::vector<SVertex>& verticesOut,
-	std::vector<u16>& indicesOut)
+	const CVector3D& lineDirectionNormal, SOverlayTexturedLine::LineCapType endCapType, PS::vector<SVertex>& verticesOut,
+	PS::vector<u16>& indicesOut)
 {
 	if (endCapType == SOverlayTexturedLine::LINECAP_FLAT)
 		return; // no action needed, this is the default

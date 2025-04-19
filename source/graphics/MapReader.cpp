@@ -1018,8 +1018,8 @@ int CXMLReader::ReadEntities(XMBElement parent, double end_time)
 
 		CStrW TemplateName;
 		int PlayerID = 0;
-		std::vector<entity_id_t> Garrison;
-		std::vector<std::pair<std::string, entity_id_t>> Turrets;
+		PS::vector<entity_id_t> Garrison;
+		PS::vector<std::pair<std::string, entity_id_t>> Turrets;
 		CFixedVector3D Position;
 		CFixedVector3D Orientation;
 		long Seed = -1;
@@ -1418,7 +1418,7 @@ if (!Script::GetProperty(rq, val, #prop, out))\
 	GET_TERRAIN_PROPERTY(m_MapData, height, m_Heightmap)
 
 	// load textures
-	std::vector<std::string> textureNames;
+	PS::vector<std::string> textureNames;
 	GET_TERRAIN_PROPERTY(m_MapData, textureNames, textureNames)
 	num_terrain_tex = textureNames.size();
 
@@ -1440,8 +1440,8 @@ if (!Script::GetProperty(rq, val, #prop, out))\
 	GET_TERRAIN_PROPERTY(m_MapData, tileData, &tileData)
 
 	// parse tile data object into flat arrays
-	std::vector<u16> tileIndex;
-	std::vector<u16> tilePriority;
+	PS::vector<u16> tileIndex;
+	PS::vector<u16> tilePriority;
 	GET_TERRAIN_PROPERTY(tileData, index, tileIndex);
 	GET_TERRAIN_PROPERTY(tileData, priority, tilePriority);
 
@@ -1480,7 +1480,7 @@ int CMapReader::ParseEntities()
 	ScriptRequest rq(pSimulation2->GetScriptInterface());
 
 	// parse entities from map data
-	std::vector<Entity> entities;
+	PS::vector<Entity> entities;
 
 	if (!Script::GetProperty(rq, m_MapData, "entities", entities))
 		LOGWARNING("CMapReader::ParseEntities() failed to get 'entities' property");
