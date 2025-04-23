@@ -44,7 +44,7 @@ export const mainMenuItems = [
 				"tooltip": colorizeHotkey(translate("%(hotkey)s: View the structure tree of civilizations featured in 0 A.D."), "structree"),
 				"hotkey": "structree",
 				"onPress": () => {
-					pageLoop("page_structree.xml");
+					Engine.OpenChildPage("page_structree.xml");
 				}
 			},
 			{
@@ -52,7 +52,7 @@ export const mainMenuItems = [
 				"tooltip": colorizeHotkey(translate("%(hotkey)s: Learn about the civilizations featured in 0 A.D."), "civinfo"),
 				"hotkey": "civinfo",
 				"onPress": () => {
-					pageLoop("page_civinfo.xml");
+					Engine.OpenChildPage("page_civinfo.xml");
 				}
 			},
 			{
