@@ -308,6 +308,7 @@ public:
 		TS_ASSERT(g_GUI->TickObjects().value());
 	}
 
+<<<<<<< HEAD
 	void test_MultipleRootModules()
 	{
 		ScriptRequest rq{g_GUI->GetScriptInterface()};
@@ -324,5 +325,22 @@ public:
 
 		TS_ASSERT_THROWS(g_GUI->OpenChildPage(L"await/page.xml",
 			Script::WriteStructuredClone(rq, JS::NullHandleValue)), const std::bad_variant_access&);
+=======
+	void test_OpenRequest()
+	{
+		const ScriptRequest rq{g_GUI->GetScriptInterface()};
+		g_GUI->OpenChildPage(L"OpenRequest/Root/Page.xml",
+			Script::WriteStructuredClone(rq, JS::UndefinedHandleValue));
+		TS_ASSERT_EQUALS(g_GUI->GetPageCount(), 2);
+
+		g_GUI->TickObjects();
+
+		const ScriptRequest pageRq{g_GUI->GetActiveGUI()->GetScriptInterface()};
+		JS::RootedValue global{pageRq.cx, pageRq.globalValue()};
+		std::string result;
+		TS_ASSERT(ScriptFunction::Call(pageRq, global, "closePageCallback", result));
+
+		TS_ASSERT_STR_EQUALS(result, "Entry Continuation");
+>>>>>>> b8a051eb40 (Add Engine.openRequest)
 	}
 };
