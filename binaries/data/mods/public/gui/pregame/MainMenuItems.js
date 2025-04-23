@@ -13,23 +13,28 @@ export const mainMenuItems = [
 			{
 				"caption": translate("Tutorial"),
 				"tooltip": translate("Start the introductory tutorial."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("page_autostart.xml", {
-						"attribs": {
-							"mapType": "scenario",
-							"map": "maps/tutorials/introductory_tutorial",
-							"settings": {
-								"CheatsEnabled": true
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_autostart.xml",
+						"argument": {
+							"attribs": {
+								"mapType": "scenario",
+								"map": "maps/tutorials/introductory_tutorial",
+								"settings": {
+									"CheatsEnabled": true
+								},
 							},
-						},
-						"playerAssignments": {
-							"local": {
-								"player": 1,
-								"name": Engine.ConfigDB_GetValue("user", "playername.singleplayer") || Engine.GetSystemUsername()
-							}
-						},
-						"storeReplay": true
-					});
+							"playerAssignments": {
+								"local": {
+									"player": 1,
+									"name": Engine.ConfigDB_GetValue("user",
+										"playername.singleplayer") ||
+										Engine.GetSystemUsername()
+								}
+							},
+							"storeReplay": true
+						}
+					} });
 				}
 			},
 			{
@@ -74,10 +79,12 @@ export const mainMenuItems = [
 	{
 		"caption": translate("Continue Campaign"),
 		"tooltip": translate("Relive history through historical military campaigns."),
-		"onPress": () => {
+		"onPress": closePageCallback => {
 			try
 			{
-				Engine.SwitchGuiPage(CampaignRun.getCurrentRun().getMenuPath());
+				closePageCallback({ [Engine.openRequest]: {
+					"page": CampaignRun.getCurrentRun().getMenuPath()
+				} });
 			}
 			catch (err)
 			{
@@ -94,14 +101,16 @@ export const mainMenuItems = [
 			{
 				"caption": translate("Matches"),
 				"tooltip": translate("Start a new single-player game."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("page_gamesetup.xml");
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_gamesetup.xml"
+					} });
 				}
 			},
 			{
 				"caption": translate("Load Game"),
 				"tooltip": translate("Load a saved game."),
-				"onPress": async() => {
+				"onPress": async(closePageCallback) => {
 					const gameId = await Engine.OpenChildPage("page_loadgame.xml");
 
 					if (!gameId)
@@ -114,27 +123,32 @@ export const mainMenuItems = [
 						return;
 					}
 
-					Engine.SwitchGuiPage("page_loading.xml", {
-						"attribs": metadata.initAttributes,
-						"playerAssignments": {
-							"local": {
-								"name": metadata.initAttributes.settings.
-									PlayerData[metadata.playerID]?.Name ??
-									singleplayerName(),
-								"player": metadata.playerID
-							}
-						},
-						"savedGUIData": metadata.gui
-					});
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_loading.xml",
+						"argument": {
+							"attribs": metadata.initAttributes,
+							"playerAssignments": {
+								"local": {
+									"name": metadata.initAttributes.settings.
+										PlayerData[metadata.playerID]?.Name ??
+										singleplayerName(),
+									"player": metadata.playerID
+								}
+							},
+							"savedGUIData": metadata.gui
+						}
+					} });
 				}
 			},
 			{
 				"caption": translate("Continue Campaign"),
 				"tooltip": translate("Relive history through historical military campaigns."),
-				"onPress": () => {
+				"onPress": closePageCallback => {
 					try
 					{
-						Engine.SwitchGuiPage(CampaignRun.getCurrentRun().getMenuPath());
+						closePageCallback({ [Engine.openRequest]: {
+							"page": CampaignRun.getCurrentRun().getMenuPath()
+						} });
 					}
 					catch (err)
 					{
@@ -147,31 +161,38 @@ export const mainMenuItems = [
 			{
 				"caption": translate("New Campaign"),
 				"tooltip": translate("Relive history through historical military campaigns."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("campaigns/setup/page.xml");
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "campaigns/setup/page.xml"
+					} });
 				}
 			},
 			{
 				"caption": translate("Load Campaign"),
 				"tooltip": translate("Relive history through historical military campaigns."),
-				"onPress": () => {
+				"onPress": closePageCallback => {
 					// Switch instead of push, otherwise the 'continue'
 					// button might remain enabled.
 					// TODO: find a better solution.
-					Engine.SwitchGuiPage("campaigns/load_modal/page.xml");
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "campaigns/load_modal/page.xml"
+					} });
 				}
 			},
 			{
 				"caption": translate("Replays"),
 				"tooltip": translate("Playback previous games."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("page_replaymenu.xml", {
-						"replaySelectionData": {
-							"filters": {
-								"singleplayer": "Single-player"
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_replaymenu.xml",
+						"argument": {
+							"replaySelectionData": {
+								"filters": {
+									"singleplayer": "Single-player"
+								}
 							}
 						}
-					});
+					} });
 				}
 			}
 		]
@@ -219,14 +240,17 @@ export const mainMenuItems = [
 			{
 				"caption": translate("Replays"),
 				"tooltip": translate("Playback previous games."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("page_replaymenu.xml", {
-						"replaySelectionData": {
-							"filters": {
-								"singleplayer": "Multiplayer"
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_replaymenu.xml",
+						"argument": {
+							"replaySelectionData": {
+								"filters": {
+									"singleplayer": "Multiplayer"
+								}
 							}
 						}
-					});
+					} });
 				}
 			}
 		]
@@ -259,15 +283,19 @@ export const mainMenuItems = [
 			{
 				"caption": translate("Mod Selection"),
 				"tooltip": translate("Select and download mods for the game."),
-				"onPress": () => {
-					Engine.SwitchGuiPage("page_modmod.xml");
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_modmod.xml"
+					} });
 				}
 			},
 			{
 				"caption": translate("Welcome Screen"),
 				"tooltip": translate("Show the Welcome Screen again. Useful if you hid it by mistake."),
-				"onPress": () => {
-					Engine.OpenChildPage("page_splashscreen.xml");
+				"onPress": closePageCallback => {
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_splashscreen.xml"
+					} });
 				}
 			}
 		]
