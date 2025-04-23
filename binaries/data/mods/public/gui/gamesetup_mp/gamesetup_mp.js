@@ -46,7 +46,7 @@ async function init(attribs)
 		else if (startJoinFromLobby(attribs.name, attribs.hostJID, ""))
 			switchSetupPage("pageConnecting");
 		else if (cancelSetup())
-			return;
+			return undefined;
 		break;
 	}
 	case "host":
@@ -70,10 +70,13 @@ async function init(attribs)
 
 	while (true)
 	{
-		await new Promise(resolve => {
+		const result = await new Promise(resolve => {
 			Engine.GetGUIObjectByName("cancelButton").onPress = resolve;
 			Engine.GetGUIObjectByName("multiplayerPages").onTick = async() => {
-				if (await onTick(attribs.loadSavedGame))
+				const res = await onTick(attribs.loadSavedGame);
+				if (typeof res === "object")
+					resolve(res);
+				if (res)
 					resolve();
 			};
 			Engine.GetGUIObjectByName("continueButton").onPress = () => {
@@ -85,8 +88,8 @@ async function init(attribs)
 					resolve();
 			};
 		});
-		if (cancelSetup())
-			return;
+		if (result !== undefined || cancelSetup())
+			return result;
 	}
 }
 
@@ -266,14 +269,14 @@ function pollAndHandleNetworkClient(loadSavedGame)
 				break;
 
 			case "start":
-				Engine.SwitchGuiPage("page_loading.xml", {
-					"attribs": message.initAttributes,
-					"isRejoining": g_IsRejoining,
-					"playerAssignments": g_PlayerAssignments
-				});
-
-				// Process further pending netmessages in the session page
-				return false;
+				return {
+					"page": "page_loading.xml",
+					"argument": {
+						"attribs": message.initAttributes,
+						"isRejoining": g_IsRejoining,
+						"playerAssignments": g_PlayerAssignments
+					}
+				};
 
 			case "chat":
 				break;
@@ -357,12 +360,14 @@ async function handleAuthenticated(message, loadSavedGame)
 		return true;
 	}
 
-	Engine.SwitchGuiPage("page_gamesetup.xml", {
-		"savedGame": savegameID, // Undefined or the savegame ID
-		"serverName": g_ServerName,
-		"hasPassword": g_ServerHasPassword
-	});
-	return false; // don't process any more messages - leave them for the game GUI loop
+	return {
+		"page": "page_gamesetup.xml",
+		"argument": {
+			"savedGame": savegameID, // Undefined or the savegame ID
+			"serverName": g_ServerName,
+			"hasPassword": g_ServerHasPassword
+		}
+	};
 }
 
 function switchSetupPage(newPage)
