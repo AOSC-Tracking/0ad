@@ -131,22 +131,22 @@
 		/>
 
 		<!-- corners -->
-		<image texture = "global/modern/dialog-deco-top.png"
+		<image texture = "global/modern/dialog-deco-top-corner.png"
 			real_texture_placement = "0 0 64 32"
 			texture_size = "64 0 0 32"
 			size = "-14 -21 50 11"
 		/>
-		<image texture = "global/modern/dialog-deco-top.png"
+		<image texture = "global/modern/dialog-deco-top-corner.png"
 			real_texture_placement = "0 0 64 32"
 			texture_size = "0 0 64 32"
 			size = "100%-50 -21 100%+14 11"
 		/>
-		<image texture = "global/modern/dialog-deco-bottom.png"
+		<image texture = "global/modern/dialog-deco-bottom-corner.png"
 			real_texture_placement = "0 0 64 32"
 			texture_size = "64 0 0 32"
 			size = "-31 100%-22 33 100%+10"
 		/>
-		<image texture = "global/modern/dialog-deco-bottom.png"
+		<image texture = "global/modern/dialog-deco-bottom-corner.png"
 			real_texture_placement = "0 0 64 32"
 			texture_size = "0 0 64 32"
 			size = "100%-33 100%-22 100%+31 100%+10"

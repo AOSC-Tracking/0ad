@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="objectiveNotitfication" type="image" z="-10" size="50%-270 150 50%+270 380" sprite="ObjectiveNotitfication">
+    <object name="objectiveNotificationBackground" z="-20" type="image" size="0 0 100% 100%-1"/>
+    <object name="objectiveNotitficationHeader" type="text" size="19 10 100%-20 31" font="sans-bold-18" text_align="center" text_valign="center"/>
+    <object name="objectiveNotificationDetails" size="15 35 100%-15 100%-57" type="image">
+        <object name="objectiveNotitficationTitle" type="text" size="15 5 100%-10 35" font="sans-bold-24" textcolor="246 221 176" text_align="center" text_valign="center"/>
+        <!-- left and right sizes are set dynamically in the script -->
+        <object name="objectiveNotitficationTopSeparator" type="image" size="50% 40 50% 41" sprite="stretched:session/light-gray-separator.png"/>
+        <object name="objectiveNotitficationTextContainer" size="15 45 100%-10 100%-15">
+            <object name="objectiveNotitficationInfoText" type="text" text_align="center" text_valign="center" textcolor="white" font="sans-14"/>
+            <object name="objectiveNotitficationLabelText" type="text" text_valign="center" textcolor="white" font="sans-14"/>
+        </object>
+        <!-- left and right sizes are set dynamically in the script -->
+        <object name="objectiveNotificationBottomSeparator" type="image" size="50% 100%-11 50% 100%-10" sprite="stretched:session/light-gray-separator.png"/>
+    </object>
+    <object name="objectiveNotificationCloseHint" type="text" size="20 100%-46 100%-185 100%-16" text_valign="center" textcolor="white" font="sans-bold-stroke-12"/>
+    <object name="objectiveNotitficationCloseButton" type="button" style="ModernButtonRed" size="100%-170 100%-49 100%-21 100%-16"/>
+</object>

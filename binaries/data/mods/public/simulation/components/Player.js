@@ -1,3 +1,8 @@
+const OBJECTIVE_STATE_ACTIVE = 0;
+const OBJECTIVE_STATE_COMPLETED = 1;
+const OBJECTIVE_STATE_CANCELLED = 2;
+const OBJECTIVE_STATE_FAILED = 3;
+
 function Player() {}
 
 Player.prototype.Schema =
@@ -42,6 +47,13 @@ Player.prototype.Deserialize = function(state)
 {
 	for (const prop in state)
 		this[prop] = state[prop];
+
+	for (const [id, objective] of this.objectives.sort((a, b) => a.lastNotification.index - b.lastNotification.index).entries())
+		if (objective.isDirty)
+			this.PushObjectiveToGui(id, objective.lastNotification.message, objective.lastNotification.notificationData, objective.lastNotification.callbackData);
+		else if (objective.state === OBJECTIVE_STATE_ACTIVE)
+			// In this case, the player has already seen the notification and the callback been executed.
+			this.PushObjectiveToGui(id, objective.lastNotification.message, {}, {});
 };
 
 /**
@@ -77,6 +89,8 @@ Player.prototype.Init = function()
 		"buy": clone(this.template.BarterMultiplier.Buy),
 		"sell": clone(this.template.BarterMultiplier.Sell)
 	};
+	this.objectives = [];
+	this.nextObjectiveNotificationIndex = 0;
 
 	// Initial resources.
 	const resCodes = Resources.GetCodes();
@@ -411,6 +425,155 @@ Player.prototype.SetTradingGoods = function(tradingGoods)
 			"goods": resource,
 			"proba": tradingGoods[resource]
 		});
+};
+
+/**
+ * Set or modify an objective's state and message (including when the objective is first added) and notify the player about it.
+ * This method should not be called by trigger scripts. Use the wrappers below instead:
+ * @see Player.prototype.AddObjective
+ * @see Player.prototype.CompleteObjective
+ * @see Player.prototype.CancelObjective
+ * @see Player.prototype.FailedObjective
+ * @param {number} id - The ID of the target objective.
+ * @param {number} state - The objective's new state.
+ * @param {Object} message - Various descriptive strings displayed when announcing the objective to the player.
+ * @param {Object} [notificationData] - Information about when and how to display the notification as well as when to resolve the returned promise.
+ * @param {Object} [callbackData] - Information on which function to call back with which arguments once the objective is marked clean.
+ */
+Player.prototype.UpdateObjective = function(id, state, message, notificationData = {}, callbackData = {})
+{
+	this.objectives[id].state = state;
+	this.objectives[id].isDirty = true;
+
+	this.PushObjectiveToGui(id, message, notificationData, callbackData);
+};
+
+/**
+ * Create a new notification, store it as the last on of the given objective and push it to the GuiInterface component.
+ * @see Player.prototype.UpdateObjective for parameter details.
+ */
+Player.prototype.PushObjectiveToGui = function(id, message, notificationData, callbackData)
+{
+	if (!this.objectives[id].lastNotification)
+		this.objectives[id].lastNotification = {};
+
+	this.objectives[id].lastNotification.index = this.nextObjectiveNotificationIndex++;
+	this.objectives[id].lastNotification.data = notificationData;
+	// TODO: Should the old callback really be overwritten without ever being executed?
+	this.objectives[id].lastNotification.callbackData = callbackData;
+	if (!this.objectives[id].lastNotification.message)
+		this.objectives[id].lastNotification.message = {};
+	// Make sure not to delete the message properties from last time.
+	// For example, if adding the objective defined a reward, the reward should also be included on the completion notification (without having to specify it again when completing it).
+	Object.assign(this.objectives[id].lastNotification.message, message);
+
+	const isActive = this.objectives[id].state === OBJECTIVE_STATE_ACTIVE;
+	Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).PushNotification({
+		"type": "objective",
+		"players": [this.playerID],
+		"objectiveID": id,
+		"state": this.objectives[id].state,
+		"title": this.objectives[id].title,
+		"isMainObjective": !!this.objectives[id].isMainObjective,
+		"isNewObjective": isActive && !this.objectives[id].isInitialObjective,
+		// Don't use message directly since it doesn't contain the properties from last time.
+		"message": this.objectives[id].lastNotification.message,
+		...notificationData
+	});
+};
+
+/**
+ * Register a new objective.
+ * @param {number} id - A unique identifier among all objectives.
+ * @param {Object} objective - The objective's specifications.
+ * @param {boolean} [objective.isInitialObjective] - Whether the objective is set right at the start of the game.
+ * @param {boolean} [objective.isMainObjective] - Whether the objective is required (or at least recommended) to be completed in order to win the match.
+ * @param {string} objective.title - The identifying "name" of the objective.
+ * @param {Object} message - Various descriptive strings displayed when announcing the objective to the player.
+ * @param {string} [message.info] - General information.
+ * @param {string} message.task - An explanation of the task to be completed.
+ * @param {string} [message.reward] - What the player can gain by completing the objective.
+ * @param {Object} [notificationData] - Information about when and how to display the notification as well as when to "resolve" the notification, mark the objective and execute the callback.
+ * @param {string} [notificationData.closeButtonCaption] - A custom caption for the close button -- who would have guessed.
+ * @param {boolean} [notificationData.awaitNotificationClose] - Whether the callback promise should be executed when the notification is shown or when it's closed.
+ * @param {Object} [callbackData] - Information on which function to call back with which arguments.
+ * @param {string} [callback.method] - Name of the target method (has to be part of the trigger component).
+ * @param {Object} [callbackData.args] - The arguments passed to the given callback method.
+ */
+Player.prototype.AddObjective = function(id, objective, message, notificationData, callbackData)
+{
+	this.objectives[id] = { "isMainObjective": false, "isInitialObjective": false, ...objective };
+	this.UpdateObjective(id, OBJECTIVE_STATE_ACTIVE, message, notificationData, callbackData);
+};
+
+/**
+ * Mark an objective as completed.
+ * To ensure the player has seen/closed the notification before continuing, the caller can await the returned promise.
+ * @param {number} id - The ID of the target objective.
+ * @param {Object} message - Various descriptive strings displayed when notifying the player.
+ *                           message.reward and message.consequence are adopted from the message when the objective was first added.
+ * @param {string} message.info - Can contain anything really, whatever makes sense in the given context. Preferably, it should include a summary of the original task as a recap for the player.
+ * @param {Object} [notificationData] - Information about when and how to display the notification as well as when to "resolve" the notification, mark the objective and execute the callback.
+ * @param {string} [notificationData.closeButtonCaption] - A custom caption for the close button -- who would have guessed.
+ * @param {boolean} [notificationData.awaitNotificationClose] - Whether the callback promise should be executed when the notification is shown or when it's closed.
+ * @param {Object} [callbackData] - Information on which function to call back with which arguments.
+ * @param {string} [callback.method] - Name of the target method (has to be part of the trigger component).
+ * @param {Object} [callbackData.args] - The arguments passed to the given callback method.
+ */
+Player.prototype.CompleteObjective = function(id, message, notificationData)
+{
+	return this.UpdateObjective(id, OBJECTIVE_STATE_COMPLETED, message, notificationData);
+};
+
+/**
+ * Mark an objective as cancelled.
+ * To ensure the player has seen/closed the notification before continuing, the caller can await the returned promise.
+ * @param {number} id - The ID of the target objective.
+ * @param {Object} message - Various descriptive strings displayed when notifying the player.
+ *                           message.reward and message.consequence are adopted from the message when the objective was first added.
+ * @param {string} message.info - An explanation why the objective got cancelled.
+ * @param {Object} [notificationData] - Information about when and how to display the notification as well as when to "resolve" the notification, mark the objective and execute the callback.
+ * @param {string} [notificationData.closeButtonCaption] - A custom caption for the close button -- who would have guessed.
+ * @param {boolean} [notificationData.awaitNotificationClose] - Whether the callback promise should be executed when the notification is shown or when it's closed.
+ * @param {Object} [callbackData] - Information on which function to call back with which arguments.
+ * @param {string} [callback.method] - Name of the target method (has to be part of the trigger component).
+ * @param {Object} [callbackData.args] - The arguments passed to the given callback method.
+ */
+Player.prototype.CancelObjective = function(id, message, notificationData)
+{
+	return this.UpdateObjective(id, OBJECTIVE_STATE_CANCELLED, message, notificationData);
+};
+
+/**
+ * Mark an objective as failed.
+ * To ensure the player has seen/closed the notification before continuing, the caller can await the returned promise.
+ * @param {number} id - The ID of the target objective.
+ * @param {Object} message - Various descriptive strings displayed when notifying the player.
+ *                           message.reward and message.consequence are adopted from the message when the objective was first added.
+ * @param {string} message.info - An explanation why and what the player failed to accomplish.
+ * @param {Object} [notificationData] - Information about when and how to display the notification as well as when to "resolve" the notification, mark the objective and execute the callback.
+ * @param {string} [notificationData.closeButtonCaption] - A custom caption for the close button -- who would have guessed.
+ * @param {boolean} [notificationData.awaitNotificationClose] - Whether the callback promise should be executed when the notification is shown or when it's closed.
+ * @param {Object} [callbackData] - Information on which function to call back with which arguments.
+ * @param {string} [callback.method] - Name of the target method (has to be part of the trigger component).
+ * @param {Object} [callbackData.args] - The arguments passed to the given callback method.
+ */
+Player.prototype.FailObjective = function(id, message, notificationData)
+{
+	// TODO: Should failing main objectives always result in defeat?
+	return this.UpdateObjective(id, OBJECTIVE_STATE_FAILED, message, notificationData);
+};
+
+/**
+ * Unset an objective's dirty flag and execute its last notification's callback.
+ * Called by the GuiInterface component before resolving an objective notification promise.
+ * @param {number} id - The ID of the target objective.
+ */
+Player.prototype.MarkObjectiveClean = function(id)
+{
+	if (this.objectives[id].lastNotification.callbackData.method !== undefined)
+		Engine.QueryInterface(SYSTEM_ENTITY, IID_Trigger)[this.objectives[id].lastNotification.callbackData.method]((this.objectives[id].lastNotification.callbackData.args || {}));
+	this.objectives[id].isDirty = false;
 };
 
 /**

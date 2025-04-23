@@ -296,6 +296,50 @@
 	</sprite>
 
 	<!-- ================================  ================================ -->
+	<!-- Dialogs -->
+	<!-- ================================  ================================ -->
+
+	<sprite name="ObjectiveNotitfication">
+
+		<!-- top and bottom edge -->
+		<image texture="global/modern/border.png"
+			real_texture_placement="0 0 2048 8"
+			size="4 0%-4 100%-4 4"
+		/>
+		<image texture="global/modern/border.png"
+			real_texture_placement="0 0 2048 8"
+			size="4 100%-8 100%-4 100%"
+		/>
+
+		<!-- center deco -->
+		<image texture="global/modern/dialog-deco-bottom-center.png"
+			size="50%-64 100%-7 50%+64 100%+25"
+		/>
+		<image texture="global/modern/dialog-deco-top-center.png"
+			size="50%-128 -83 50%+128 45"
+		/>
+
+		<!-- corner deco -->
+		<image texture="global/modern/dialog-deco-top-corner.png"
+			real_texture_placement="0 0 64 32"
+			texture_size="64 0 0 32"
+			size="-14 -21 50 11"
+		/>
+		<image texture="global/modern/dialog-deco-top-corner.png"
+			size="100%-50 -21 100%+14 11"
+		/>
+		<image texture="global/modern/dialog-deco-bottom-corner.png"
+			real_texture_placement="0 0 64 32"
+			texture_size="64 0 0 32"
+			size="-31 100%-22 33 100%+10"
+		/>
+		<image texture="global/modern/dialog-deco-bottom-corner.png"
+			size="100%-33 100%-22 100%+31 100%+10"
+		/>
+
+	</sprite>
+
+	<!-- ================================  ================================ -->
 	<!-- Shading -->
 	<!-- ================================  ================================ -->
 

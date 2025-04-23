@@ -111,6 +111,7 @@
       <defeated_ally>interface/alarm/alarm_defeated_ally.xml</defeated_ally>
       <defeated_enemy>interface/alarm/alarm_defeated_enemy.xml</defeated_enemy>
       <no_idle_unit>interface/alarm/alarm_no_idle_unit.xml</no_idle_unit>
+      <objective>interface/alarm/alarm_objective.xml</objective>
     </SoundGroups>
   </Sound>
   <StatisticsTracker>

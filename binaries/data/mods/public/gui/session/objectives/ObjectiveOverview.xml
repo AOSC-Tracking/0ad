@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="objectiveOverview" size="10 100%-460 200 100%-214" z="20">
+    <object name="objectiveOverviewBackground" type="image" sprite="color:12 12 12 220"/>
+    <object name="objectiveOverviewHeader" type="button" sprite="ModernDarkBoxGoldBorder" sprite_over="ModernDarkBoxWhiteBorder" style="ModernLabelText" size="0 0 100% 32"/>
+    <object name="objectiveOverviewEntries" size="5 32 100%-5 100%">
+        <repeat count="5">
+            <object name="objectiveOverviewEntry[n]" type="button" font="sans-bold-12" text_valign="center" sprite_over="ModernDarkBoxWhiteBorder">
+                <object name="objectiveOverviewEntryState[n]" type="text" font="sans-13" text_valign="center" text_align="right" ghost="true"/>
+            </object>
+        </repeat>
+    </object>
+</object>

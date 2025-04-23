@@ -239,6 +239,17 @@ var g_NotificationsTypes =
 		if (player == Engine.GetPlayerID())
 			openDialog(notification.dialogName, notification.data, player);
 	},
+	"objective": function(notification, player)
+	{
+		delete notification.type;
+		delete notification.players;
+		// TODO: Also show the notifications to observers? (by comparing to g_ViewedPlayer here)
+		if (player === Engine.GetPlayerID())
+			g_ObjectiveNotification.handleNewNotification({
+				...notification,
+				"isReread": false
+			});
+	},
 	"playercommand": function(notification, player)
 	{
 		// For observers, focus the camera on units commanded by the selected player
@@ -581,6 +592,7 @@ function sendDialogAnswer(guiObject, dialogName)
  */
 function openDialog(dialogName, data, player)
 {
+	closeOpenDialogs();
 	const dialog = Engine.GetGUIObjectByName(dialogName + "-dialog");
 	if (!dialog)
 	{

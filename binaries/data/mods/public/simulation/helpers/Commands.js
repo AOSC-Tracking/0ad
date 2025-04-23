@@ -878,6 +878,10 @@ var g_Commands = {
 				cmpProductionQueue.DisableAutoQueue();
 		}
 	},
+	"objective-notification-resolved": function(player, cmd, data)
+	{
+		data.cmpPlayer.MarkObjectiveClean(cmd.objectiveID);
+	}
 
 };
 
