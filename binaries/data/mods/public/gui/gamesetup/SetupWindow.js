@@ -11,7 +11,7 @@ class SetupWindowPages
  */
 class SetupWindow
 {
-	constructor(initData, hotloadData)
+	constructor(initData, hotloadData, closePageCallback)
 	{
 		if (!g_Settings)
 			return;
@@ -38,7 +38,7 @@ class SetupWindow
 		const playerAssignmentsController =
 			new PlayerAssignmentsController(this, netMessages, isSavedGame);
 		const gameSettingsController = new GameSettingsController(this, netMessages,
-			playerAssignmentsController, mapCache, isSavedGame);
+			playerAssignmentsController, mapCache, closePageCallback, isSavedGame);
 		const readyController = new ReadyController(netMessages, gameSettingsController, playerAssignmentsController);
 		const lobbyGameRegistrationController = g_IsController && Engine.HasXmppClient() &&
 			new LobbyGameRegistrationController(initData, this, netMessages, mapCache, playerAssignmentsController);
@@ -56,8 +56,10 @@ class SetupWindow
 
 		// These are the pages within the setup window that may use the controls defined above
 		this.pages = {};
-		for (const name in SetupWindowPages)
-			this.pages[name] = new SetupWindowPages[name](this, isSavedGame);
+		new Promise(resolve => {
+			for (const name in SetupWindowPages)
+				this.pages[name] = new SetupWindowPages[name](this, isSavedGame, resolve);
+		}).then(this.closePage.bind(this)).then(closePageCallback);
 
 		netMessages.registerNetMessageHandler("netwarn", addNetworkWarning);
 		setTimeout(displayGamestateNotifications, 1000);
@@ -122,10 +124,21 @@ class SetupWindow
 		Engine.DisconnectNetworkGame();
 
 		if (this.backPage)
-			Engine.SwitchGuiPage(this.backPage.page, this.backPage?.data);
-		else if (Engine.HasXmppClient())
-			Engine.SwitchGuiPage("page_lobby.xml", { "dialog": false });
-		else
-			Engine.SwitchGuiPage("page_pregame.xml");
+		{
+			return { [Engine.openRequest]: {
+				"page": this.backPage.page,
+				"argument": this.backPage?.data
+			} };
+		}
+		if (Engine.HasXmppClient())
+		{
+			return { [Engine.openRequest]: {
+				"page": "page_lobby.xml",
+				"argument": { "dialog": false }
+			} };
+		}
+		return { [Engine.openRequest]: {
+			"page": "page_pregame.xml"
+		} };
 	}
 }

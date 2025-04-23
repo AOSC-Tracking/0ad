@@ -3,7 +3,7 @@
  */
 SetupWindowPages.GameSetupPage = class
 {
-	constructor(setupWindow, isSavedGame)
+	constructor(setupWindow, isSavedGame, cancelClicked)
 	{
 		Engine.ProfileStart("GameSetupPage");
 
@@ -18,7 +18,7 @@ SetupWindowPages.GameSetupPage = class
 				"civInfoButton": new CivInfoButton(),
 				"lobbyButton": new LobbyButton(),
 				"savedGameLabel": new SavedGameLabel(isSavedGame),
-				"cancelButton": new CancelButton(setupWindow, startGameButton, readyButton),
+				"cancelButton": new CancelButton(startGameButton, readyButton, cancelClicked),
 				"readyButton": readyButton,
 				"startGameButton": startGameButton
 			};

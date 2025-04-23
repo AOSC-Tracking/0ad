@@ -43,7 +43,9 @@ var g_SetupWindow;
 
 function init(initData, hotloadData)
 {
-	g_SetupWindow = new SetupWindow(initData, hotloadData);
+	return new Promise(closePageCallback => {
+		g_SetupWindow = new SetupWindow(initData, hotloadData, closePageCallback);
+	});
 }
 
 function getHotloadData()

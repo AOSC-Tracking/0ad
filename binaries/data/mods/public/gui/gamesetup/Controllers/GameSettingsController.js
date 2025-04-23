@@ -3,10 +3,12 @@
  */
 class GameSettingsController
 {
-	constructor(setupWindow, netMessages, playerAssignmentsController, mapCache, isSavedGame)
+	constructor(setupWindow, netMessages, playerAssignmentsController, mapCache, closePageCallback,
+		isSavedGame)
 	{
 		this.setupWindow = setupWindow;
 		this.mapCache = mapCache;
+		this.closePageCallback = closePageCallback;
 		this.persistentMatchSettings = new PersistentMatchSettings(g_IsNetworked);
 
 		this.guiData = new GameSettingsGuiData();
@@ -301,10 +303,13 @@ class GameSettingsController
 
 	switchToLoadingPage(attributes)
 	{
-		Engine.SwitchGuiPage("page_loading.xml", {
-			"attribs": attributes?.initAttributes || g_GameSettings.finalizedAttributes,
-			"playerAssignments": g_PlayerAssignments
-		});
+		this.closePageCallback({ [Engine.openRequest]: {
+			"page": "page_loading.xml",
+			"argument": {
+				"attribs": attributes?.initAttributes || g_GameSettings.finalizedAttributes,
+				"playerAssignments": g_PlayerAssignments
+			}
+		} });
 	}
 
 	onClose()
