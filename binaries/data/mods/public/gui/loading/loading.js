@@ -1,6 +1,6 @@
 var g_LoadingPage;
 
-function init(data)
+async function init(data)
 {
 	g_LoadingPage = {
 		"initData": data,
@@ -11,14 +11,38 @@ function init(data)
 	};
 
 	Engine.SetCursor("cursor-wait");
-}
 
-/**
- * This is a reserved function name that is executed by the engine when it is ready
- * to start the game (i.e. loading progress has reached 100%).
- */
-function reallyStartGame()
-{
-	Engine.SwitchGuiPage("page_session.xml", g_LoadingPage.initData);
+	// reallyStartGame and cancelOnLoadGameError are reserved names that are called by the engine.
+	// reallyStartGame is called when it is ready to start the game (i.e. loading progress has reached
+	// 100%).
+	// cancnelOnLoadGameError is called when there is an error.
+	const errorMessage = await new Promise(resolve => {
+		globalThis.reallyStartGame = resolve;
+		globalThis.cancelOnLoadGameError = resolve;
+	});
+
 	Engine.ResetCursor();
+
+	if (!errorMessage)
+	{
+		return { [Engine.openRequest]: {
+			"page": "page_session.xml",
+			"argument": data
+		} };
+	}
+
+	Engine.EndGame();
+
+	if (Engine.HasXmppClient())
+		Engine.StopXmppClient();
+
+	await Engine.OpenChildPage("page_msgbox.xml", {
+		"width": 500,
+		"height": 200,
+		"message": errorMessage,
+		"title": translate("Loading Aborted"),
+		"mode": 2
+	});
+
+	return { [Engine.openRequest]: { "page": "page_pregame.xml" } };
 }
