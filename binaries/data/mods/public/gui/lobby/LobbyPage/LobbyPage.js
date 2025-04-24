@@ -18,7 +18,7 @@ class LobbyPage
 			"buttons": {
 				"buddyButton": buddyButton,
 				"accountSettingsButton": accountSettingsButton,
-				"joinButton": new JoinButton(dialog, gameList),
+				"joinButton": new JoinButton(closePageCallback, dialog, gameList),
 				"hostButton": new HostButton(dialog, xmppMessages,
 					Engine.GetGUIObjectByName("hostButton"), false),
 				"hostSavedGameButton": new HostButton(dialog, xmppMessages,

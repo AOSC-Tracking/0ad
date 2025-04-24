@@ -53,9 +53,11 @@ class XmppMessages
 	{
 		this.handleMessages(Engine.LobbyGuiPollNewMessages);
 
+		warn("vor");
 		if (Engine.LobbyGuiPollHasPlayerListUpdate())
 			for (const handler of this.playerListUpdateHandlers)
 				handler();
+		warn("nach");
 	}
 
 	processHistoricMessages()
