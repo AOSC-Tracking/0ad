@@ -291,8 +291,13 @@ export const mainMenuItems = [
 			{
 				"caption": translate("Language"),
 				"tooltip": translate("Choose the language of the game."),
-				"onPress": () => {
-					Engine.OpenChildPage("page_locale.xml");
+				"onPress": async(closePageCallback) => {
+					if (!await Engine.OpenChildPage("page_locale.xml"))
+						return;
+
+					closePageCallback({ [Engine.openRequest]: {
+						"page": "page_pregame.xml"
+					} });
 				}
 			},
 			{
