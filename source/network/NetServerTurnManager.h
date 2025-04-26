@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -55,7 +55,13 @@ public:
 	 */
 	void UninitialiseClient(int client);
 
+	u32 GetTurnLength() const;
+
 	void SetTurnLength(u32 msecs);
+
+	u32 GetCommandDelay() const;
+
+	void SetCommandDelay(u32 turns);
 
 	/**
 	 * Returns the latest turn for which all clients are ready;
@@ -96,6 +102,9 @@ private:
 
 	// Current turn length
 	u32 m_TurnLength;
+
+	// Current command delay
+	u32 m_CommandDelay;
 
 	// Turn lengths for all previously executed turns
 	std::vector<u32> m_SavedTurnLengths;

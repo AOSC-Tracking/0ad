@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -71,7 +71,7 @@ inline constexpr u32 COMMAND_DELAY_SP = 1;
  *  - this command-delay could vary based on server-client pings
  *  - it ought be possible to send commands in a P2P fashion (with server verification), which would lower the ping.
  */
-inline constexpr u32 COMMAND_DELAY_MP = 4;
+inline constexpr u32 DEFAULT_COMMAND_DELAY_MP = 2;
 
 /**
  * Common turn system (used by clients and offline games).
@@ -132,7 +132,7 @@ public:
 	 * Called when all commands for a given turn have been received.
 	 * This allows Update to progress to that turn.
 	 */
-	void FinishedAllCommands(u32 turn, u32 turnLength);
+	void FinishedAllCommands(u32 turn, u32 turnLength, u32 commandDelay);
 
 	/**
 	 * Enables the recording of state snapshots every @p numTurns,
@@ -156,6 +156,10 @@ public:
 	 * (used to detect players/observers that fall behind the live game.
 	 */
 	u32 GetPendingTurns() const { return m_ReadyTurn - m_CurrentTurn; }
+
+	u32 GetCurrentCommandDelay() const { return m_CommandDelay; }
+
+	u32 GetCurrentTurnLength() const { return m_TurnLength; }
 
 protected:
 	/**

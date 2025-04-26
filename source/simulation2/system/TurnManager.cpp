@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -231,13 +231,14 @@ void CTurnManager::AddCommand(int client, int player, JS::HandleValue data, u32 
 	m_QueuedCommands[turn - (m_CurrentTurn+1)][client].emplace_back(player, rq.cx, data);
 }
 
-void CTurnManager::FinishedAllCommands(u32 turn, u32 turnLength)
+void CTurnManager::FinishedAllCommands(u32 turn, u32 turnLength, u32 commandDelay)
 {
 	NETTURN_LOG("FinishedAllCommands(%d, %d)\n", turn, turnLength);
 
 	ENSURE(turn == m_ReadyTurn + 1);
 	m_ReadyTurn = turn;
 	m_TurnLength = turnLength;
+	m_CommandDelay = commandDelay;
 }
 
 bool CTurnManager::TurnNeedsFullHash(u32 turn) const

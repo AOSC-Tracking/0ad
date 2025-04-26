@@ -73,13 +73,9 @@ constexpr int FAILED_PASSWORD_TRIES_BEFORE_BAN = 3;
  */
 static const int HOST_SERVICE_TIMEOUT = 50;
 
-/**
- * Once ping goes above turn length * command delay,
- * the game will start 'freezing' for other clients while we catch up.
- * Since commands are sent client -> server -> client, divide by 2.
- * (duplicated in NetServer.cpp to avoid having to fetch the constants in a header file)
- */
-constexpr u32 NETWORK_BAD_PING = DEFAULT_TURN_LENGTH * COMMAND_DELAY_MP / 2;
+const u8 MIN_COMMAND_DELAY = 2;
+const u8 MAX_COMMAND_DELAY = 8;
+
 
 CNetServer* g_NetServer = NULL;
 
@@ -432,6 +428,7 @@ bool CNetServerWorker::RunStep()
 	std::vector<std::string> newGameAttributes;
 	std::vector<std::pair<CStr, CStr>> newLobbyAuths;
 	std::vector<u32> newTurnLength;
+	std::vector<u32> newCommandDelay;
 
 	{
 		std::lock_guard<std::mutex> lock(m_WorkerMutex);
@@ -443,6 +440,7 @@ bool CNetServerWorker::RunStep()
 		newGameAttributes.swap(m_InitAttributesQueue);
 		newLobbyAuths.swap(m_LobbyAuthQueue);
 		newTurnLength.swap(m_TurnLengthQueue);
+		newCommandDelay.swap(m_CommandDelayQueue);
 	}
 
 	if (!newGameAttributes.empty())
@@ -459,6 +457,9 @@ bool CNetServerWorker::RunStep()
 
 	if (!newTurnLength.empty())
 		SetTurnLength(newTurnLength.back());
+
+	if (!newCommandDelay.empty())
+		SetCommandDelay(newCommandDelay.back());
 
 	while (!newLobbyAuths.empty())
 	{
@@ -583,10 +584,31 @@ void CNetServerWorker::CheckClientConnections()
 
 	m_LastConnectionCheck = now;
 
+
+	u32 turnLength;
+	u32 oldCommandDelay;
+
+	if (!m_ServerTurnManager)
+	{
+		turnLength = DEFAULT_TURN_LENGTH;
+		oldCommandDelay = DEFAULT_COMMAND_DELAY_MP;
+	}
+	else
+	{
+		turnLength = m_ServerTurnManager->GetTurnLength();
+		oldCommandDelay = m_ServerTurnManager->GetCommandDelay();
+	}
+
+	u32 worstRTT = 0;
 	for (size_t i = 0; i < m_Sessions.size(); ++i)
 	{
 		u32 lastReceived = m_Sessions[i]->GetLastReceivedTime();
 		u32 meanRTT = m_Sessions[i]->GetMeanRTT();
+
+		if (meanRTT > worstRTT)
+		{
+			worstRTT = meanRTT;
+		}
 
 		CNetMessage* message = nullptr;
 
@@ -599,7 +621,7 @@ void CNetServerWorker::CheckClientConnections()
 			message = msg;
 		}
 		// Report if the client has bad ping
-		else if (meanRTT > NETWORK_BAD_PING)
+		else if (meanRTT > turnLength * oldCommandDelay / 2)
 		{
 			CClientPerformanceMessage* msg = new CClientPerformanceMessage();
 			CClientPerformanceMessage::S_m_Clients client;
@@ -626,6 +648,26 @@ void CNetServerWorker::CheckClientConnections()
 
 		SAFE_DELETE(message);
 	}
+
+	// Check if current delay accomodates client with worst RTT
+	if (m_ServerTurnManager && worstRTT > turnLength * oldCommandDelay / 2)
+	{
+		u32 newCommandDelay = std::min(oldCommandDelay + 1, MAX_COMMAND_DELAY);
+		if (newCommandDelay != oldCommandDelay) {
+			m_ServerTurnManager->SetCommandDelay(newCommandDelay);
+		}
+	}
+	// This check provides hysteresis into command delay adjustment algorithm
+	// If decreasing command delay by 1 will force us to increase it next time,
+	// skip this adjustment
+	else if (m_ServerTurnManager && worstRTT < turnLength * (oldCommandDelay - 1) / 2)
+	{
+		u32 newCommandDelay = std::max(oldCommandDelay - 1, MIN_COMMAND_DELAY);
+		if (newCommandDelay != oldCommandDelay) {
+			m_ServerTurnManager->SetCommandDelay(newCommandDelay);
+		}
+	}
+
 }
 
 void CNetServerWorker::HandleMessageReceive(const CNetMessage* message, CNetServerSession* session)
@@ -884,6 +926,12 @@ void CNetServerWorker::SetTurnLength(u32 msecs)
 {
 	if (m_ServerTurnManager)
 		m_ServerTurnManager->SetTurnLength(msecs);
+}
+
+void CNetServerWorker::SetCommandDelay(u32 turns)
+{
+	if (m_ServerTurnManager)
+		m_ServerTurnManager->SetCommandDelay(turns);
 }
 
 void CNetServerWorker::ProcessLobbyAuth(const CStr& name, const CStr& token)
@@ -1371,7 +1419,6 @@ bool CNetServerWorker::OnSavedGameStart(CNetServerSession* session, CFsmEvent* e
 		[&server, initAttributes = std::move(message->m_InitAttributes)](std::string buffer)
 		{
 			server.m_SavedState = std::move(buffer);
-
 			server.StartSavedGame(initAttributes);
 		});
 	return true;
@@ -1780,6 +1827,12 @@ void CNetServer::SetTurnLength(u32 msecs)
 {
 	std::lock_guard<std::mutex> lock(m_Worker->m_WorkerMutex);
 	m_Worker->m_TurnLengthQueue.push_back(msecs);
+}
+
+void CNetServer::SetCommandDelay(u32 turns)
+{
+	std::lock_guard<std::mutex> lock(m_Worker->m_WorkerMutex);
+	m_Worker->m_CommandDelayQueue.push_back(turns);
 }
 
 void CNetServer::SendHolePunchingMessage(const CStr& ip, u16 port)

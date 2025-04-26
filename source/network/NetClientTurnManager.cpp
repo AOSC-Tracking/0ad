@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@
 extern CStrW g_UniqueLogPostfix;
 
 CNetClientTurnManager::CNetClientTurnManager(CSimulation2& simulation, CNetClient& client, int clientId, IReplayLogger& replay)
-	: CTurnManager(simulation, DEFAULT_TURN_LENGTH, COMMAND_DELAY_MP, clientId, replay), m_NetClient(client)
+	: CTurnManager(simulation, DEFAULT_TURN_LENGTH, DEFAULT_COMMAND_DELAY_MP, clientId, replay), m_NetClient(client)
 {
 }
 
@@ -46,9 +46,20 @@ void CNetClientTurnManager::PostCommand(JS::HandleValue data)
 {
 	NETCLIENTTURN_LOG("PostCommand()\n");
 
+	u32 targetTurn = m_CurrentTurn + m_CommandDelay;
+
+	// Ensure also we send all commands from a turn to the same target turn.
+	if (m_CurrentTurn == m_LastSentTurn)
+	{
+		targetTurn = m_LastSentTargetTurn;
+	}
+
 	// Transmit command to server
-	CSimulationMessage msg(m_Simulation2.GetScriptInterface(), m_ClientId, m_PlayerId, m_CurrentTurn + m_CommandDelay, data);
+	CSimulationMessage msg(m_Simulation2.GetScriptInterface(), m_ClientId, m_PlayerId, targetTurn, data);
 	m_NetClient.SendMessage(&msg);
+
+	m_LastSentTurn = m_CurrentTurn;
+	m_LastSentTargetTurn = targetTurn;
 
 	// Add to our local queue
 	//AddCommand(m_ClientId, m_PlayerId, data, m_CurrentTurn + m_CommandDelay);

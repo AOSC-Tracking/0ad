@@ -32,6 +32,7 @@
 #include <unordered_map>
 #include <vector>
 #include <thread>
+#include <algorithm>
 
 class CNetServerSession;
 class CNetServerTurnManager;
@@ -137,6 +138,8 @@ public:
 	 * TODO: we should replace this with some adapative lag-dependent computation.
 	 */
 	void SetTurnLength(u32 msecs);
+
+	void SetCommandDelay(u32 turns);
 
 	bool UseLobbyAuth() const;
 
@@ -284,6 +287,8 @@ private:
 	 * TODO: we should replace this with some adaptive lag-dependent computation.
 	 */
 	void SetTurnLength(u32 msecs);
+
+	void SetCommandDelay(u32 turns);
 
 	void ProcessLobbyAuth(const CStr& name, const CStr& token);
 
@@ -446,6 +451,7 @@ private:
 	std::vector<std::string> m_InitAttributesQueue;
 	std::vector<std::pair<CStr, CStr>> m_LobbyAuthQueue;
 	std::vector<u32> m_TurnLengthQueue;
+	std::vector<u32> m_CommandDelayQueue;
 };
 
 /// Global network server for the standard game

@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -36,7 +36,7 @@ void CLocalTurnManager::PostCommand(JS::HandleValue data)
 
 void CLocalTurnManager::NotifyFinishedOwnCommands(u32 turn)
 {
-	FinishedAllCommands(turn, m_TurnLength);
+	FinishedAllCommands(turn, m_TurnLength, m_CommandDelay);
 }
 
 void CLocalTurnManager::NotifyFinishedUpdate(u32 UNUSED(turn))

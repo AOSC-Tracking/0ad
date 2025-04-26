@@ -44,13 +44,17 @@
 #include "simulation2/Simulation2.h"
 #include "network/StunClient.h"
 
+/*
+ * duplicated in NetServer.cpp to avoid having to fetch the constants in a header file
+*/
+const u8 MAX_COMMAND_DELAY = 8;
+
 /**
- * Once ping goes above turn length * command delay,
+ * Once ping goes above turn length * max command delay,
  * the game will start 'freezing' for other clients while we catch up.
  * Since commands are sent client -> server -> client, divide by 2.
- * (duplicated in NetServer.cpp to avoid having to fetch the constants in a header file)
  */
-constexpr u32 NETWORK_BAD_PING = DEFAULT_TURN_LENGTH * COMMAND_DELAY_MP / 2;
+constexpr u32 NETWORK_BAD_PING = DEFAULT_TURN_LENGTH * MAX_COMMAND_DELAY / 2;
 
 CNetClient *g_NetClient = NULL;
 
@@ -357,7 +361,18 @@ void CNetClient::CheckServerConnection()
 
 	// Report if we have a bad ping to the server.
 	u32 meanRTT = m_Session->GetMeanRTT();
-	if (meanRTT > NETWORK_BAD_PING)
+
+	u32 badPing;
+	if (m_ClientTurnManager)
+	{
+		badPing = m_ClientTurnManager->GetCurrentCommandDelay() * m_ClientTurnManager->GetCurrentTurnLength() / 2;
+	}
+	else
+	{
+		badPing = NETWORK_BAD_PING;
+	}
+	
+	if (meanRTT > badPing)
 	{
 		PushGuiMessage(
 			"type", "netwarn",
@@ -843,7 +858,7 @@ bool CNetClient::OnSavedGameStart(CNetClient* client, CFsmEvent* event)
 		{
 			std::string state;
 			DecompressZLib(buffer, state, true);
-
+			
 			client->StartGame(&*initAttribs, state);
 		});
 	return true;
@@ -881,7 +896,7 @@ bool CNetClient::OnJoinSyncEndCommandBatch(CNetClient* client, CFsmEvent* event)
 
 	CEndCommandBatchMessage* endMessage = (CEndCommandBatchMessage*)event->GetParamRef();
 
-	client->m_ClientTurnManager->FinishedAllCommands(endMessage->m_Turn, endMessage->m_TurnLength);
+	client->m_ClientTurnManager->FinishedAllCommands(endMessage->m_Turn, endMessage->m_TurnLength, endMessage->m_CommandDelay);
 
 	// Execute all the received commands for the latest turn
 	client->m_ClientTurnManager->UpdateFastForward();
@@ -1028,7 +1043,7 @@ bool CNetClient::OnInGame(CNetClient* client, CFsmEvent* event)
 		else if (message->GetType() == NMT_END_COMMAND_BATCH)
 		{
 			CEndCommandBatchMessage* endMessage = static_cast<CEndCommandBatchMessage*> (message);
-			client->m_ClientTurnManager->FinishedAllCommands(endMessage->m_Turn, endMessage->m_TurnLength);
+			client->m_ClientTurnManager->FinishedAllCommands(endMessage->m_Turn, endMessage->m_TurnLength, endMessage->m_CommandDelay);
 		}
 	}
 

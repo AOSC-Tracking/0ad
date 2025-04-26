@@ -35,13 +35,14 @@
 #endif
 
 CNetServerTurnManager::CNetServerTurnManager(CNetServerWorker& server)
-	: m_NetServer(server), m_ReadyTurn(COMMAND_DELAY_MP - 1), m_TurnLength(DEFAULT_TURN_LENGTH)
+	: m_NetServer(server), m_ReadyTurn(DEFAULT_COMMAND_DELAY_MP - 1), m_CommandDelay(DEFAULT_COMMAND_DELAY_MP),
+	m_TurnLength(DEFAULT_TURN_LENGTH)
 {
 	// Turn 0 is not actually executed, store a dummy value.
 	m_SavedTurnLengths.push_back(0);
-	// Turns [1..COMMAND_DELAY - 1] are special: all clients run them without waiting on a server command batch.
+	// Turns [1..m_ReadyTurn] are special: all clients run them without waiting on a server command batch.
 	// Because of this, they are always run with the default MP turn length.
-	for (u32 i = 1; i < COMMAND_DELAY_MP; ++i)
+	for (u32 i = 1; i <= m_ReadyTurn; ++i)
 		m_SavedTurnLengths.push_back(m_TurnLength);
 }
 
@@ -53,18 +54,6 @@ void CNetServerTurnManager::NotifyFinishedClientCommands(CNetServerSession& sess
 
 	// Must be a client we've already heard of
 	ENSURE(m_ClientsData.find(client) != m_ClientsData.end());
-
-	// Clients must advance one turn at a time
-	if (turn != m_ClientsData[client].readyTurn + 1)
-	{
-		LOGERROR("NotifyFinishedClientCommands: Client %d (%s) is ready for turn %d, but expected %d",
-			client,
-			utf8_from_wstring(session.GetUserName()).c_str(),
-			turn,
-			m_ClientsData[client].readyTurn + 1);
-
-		session.Disconnect(NDR_INCORRECT_READY_TURN_COMMANDS);
-	}
 
 	m_ClientsData[client].readyTurn = turn;
 
@@ -96,6 +85,7 @@ void CNetServerTurnManager::CheckClientsReady()
 	// Tell all clients that the next turn is ready
 	CEndCommandBatchMessage msg;
 	msg.m_TurnLength = m_TurnLength;
+	msg.m_CommandDelay = m_CommandDelay;
 	msg.m_Turn = m_ReadyTurn;
 	m_NetServer.Multicast(&msg, { NSS_INGAME });
 
@@ -186,7 +176,7 @@ void CNetServerTurnManager::InitialiseClient(int client, u32 turn, bool observer
 
 	ENSURE(m_ClientsData.find(client) == m_ClientsData.end());
 	Client& data = m_ClientsData[client];
-	data.readyTurn = turn + COMMAND_DELAY_MP - 1;
+	data.readyTurn = turn + m_CommandDelay - 1;
 	data.simulatedTurn = turn;
 	data.isObserver = observer;
 }
@@ -219,6 +209,21 @@ void CNetServerTurnManager::UninitialiseClient(int client)
 void CNetServerTurnManager::SetTurnLength(u32 msecs)
 {
 	m_TurnLength = msecs;
+}
+
+u32 CNetServerTurnManager::GetTurnLength() const
+{
+	return m_TurnLength;
+}
+
+void CNetServerTurnManager::SetCommandDelay(u32 turns)
+{
+	m_CommandDelay = turns;
+}
+
+u32 CNetServerTurnManager::GetCommandDelay() const
+{
+	return m_CommandDelay;
 }
 
 u32 CNetServerTurnManager::GetSavedTurnLength(u32 turn)

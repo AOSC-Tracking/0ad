@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -246,6 +246,7 @@ END_NMT_CLASS()
 START_NMT_CLASS_(EndCommandBatch, NMT_END_COMMAND_BATCH)
 	NMT_FIELD_INT(m_Turn, u32, 4)
 	NMT_FIELD_INT(m_TurnLength, u32, 2)
+	NMT_FIELD_INT(m_CommandDelay, u32, 1)
 END_NMT_CLASS()
 
 START_NMT_CLASS_(SyncCheck, NMT_SYNC_CHECK)

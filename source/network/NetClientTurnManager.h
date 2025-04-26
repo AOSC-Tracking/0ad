@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -49,6 +49,10 @@ private:
 	void NotifyFinishedUpdate(u32 turn) override;
 
 	CNetClient& m_NetClient;
+
+	u32 m_LastSentTurn = 0;
+	u32 m_LastSentTargetTurn = 0;
+	
 };
 
 #endif // INCLUDED_NETCLIENTTURNMANAGER
