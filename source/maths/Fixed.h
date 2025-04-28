@@ -202,6 +202,14 @@ public:
 		return (value + fract_pow2/2) >> fract_bits;
 	}
 
+	constexpr int ToInt() const
+	{
+		if (value % fract_pow2 == 0)
+			return value >> fract_bits;
+		else
+			throw std::runtime_error("Value is not exactly an integer");
+	}
+
 	/// Returns the shortest string such that FromString will parse to the correct value.
 	CStr8 ToString() const;
 
@@ -269,7 +277,7 @@ public:
 	}
 
 	/// Divide by a CFixed. Must not have n.IsZero(). Might overflow.
-	CFixed operator/(CFixed n) const
+	constexpr CFixed operator/(CFixed n) const
 	{
 		i64 t = (i64)value << fract_bits;
 		i64 result = t / (i64)n.value;
@@ -279,7 +287,7 @@ public:
 	}
 
 	/// Multiply by an integer. Might overflow.
-	CFixed operator*(int n) const
+	constexpr CFixed operator*(int n) const
 	{
 		CheckMultiplicationOverflow(T, value, n, L"Overflow in CFixed::operator*(int n)", L"Underflow in CFixed::operator*(int n)")
 		return CFixed(value * n);
@@ -294,7 +302,7 @@ public:
 	}
 
 	/// Divide by an integer. Must not have n == 0. Cannot overflow unless n == -1.
-	CFixed operator/(int n) const
+	constexpr CFixed operator/(int n) const
 	{
 		CheckDivisionOverflow(T, value, n, L"Overflow in CFixed::operator/(int n)")
 		return CFixed(value / n);

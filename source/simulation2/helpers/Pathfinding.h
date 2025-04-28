@@ -140,15 +140,16 @@ namespace Pathfinding
 	 * We therefore split each the world into NxN "nav cells" (for some integer N,
 	 * preferably a power of two).
 	 */
-	inline constexpr fixed NAVCELL_SIZE = fixed::FromInt(1);
-	inline constexpr int NAVCELL_SIZE_INT = 1;
-	inline constexpr int NAVCELL_SIZE_LOG2 = 0;
+	inline constexpr fixed NAVCELL_SIZE = fixed::FromInt(1) / 2;
+
+	inline constexpr u16 TerrainToNavcell(u16 t) {
+		return (fixed::FromInt(t) / NAVCELL_SIZE).ToInt();
+	}
 
 	/**
 	 * The terrain grid is coarser, and it is often convenient to convert from one to the other.
 	 */
-	inline constexpr int NAVCELLS_PER_TERRAIN_TILE = TERRAIN_TILE_SIZE / NAVCELL_SIZE_INT;
-	static_assert(TERRAIN_TILE_SIZE % NAVCELL_SIZE_INT == 0, "Terrain tile size is not a multiple of navcell size");
+	inline constexpr int NAVCELLS_PER_TERRAIN_TILE = (fixed::FromInt(TERRAIN_TILE_SIZE) / NAVCELL_SIZE).ToInt();
 
 	/**
 	 * To make sure the long-range pathfinder is more strict than the short-range one,
@@ -162,9 +163,8 @@ namespace Pathfinding
 	 */
 	inline void NearestNavcell(entity_pos_t x, entity_pos_t z, u16& i, u16& j, u16 w, u16 h)
 	{
-		// Use NAVCELL_SIZE_INT to save the cost of dividing by a fixed
-		i = static_cast<u16>(Clamp((x / NAVCELL_SIZE_INT).ToInt_RoundToNegInfinity(), 0, w - 1));
-		j = static_cast<u16>(Clamp((z / NAVCELL_SIZE_INT).ToInt_RoundToNegInfinity(), 0, h - 1));
+		i = static_cast<u16>(Clamp((x / NAVCELL_SIZE).ToInt_RoundToNegInfinity(), 0, w - 1));
+		j = static_cast<u16>(Clamp((z / NAVCELL_SIZE).ToInt_RoundToNegInfinity(), 0, h - 1));
 	}
 
 	/**

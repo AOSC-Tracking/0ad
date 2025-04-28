@@ -220,8 +220,8 @@ bool HierarchicalPathfinder::Chunk::RegionNearestNavcellInGoal(u16 r, u16 i0, u1
 	dist2Best = std::numeric_limits<u32>::max();
 
 	// Calculate the navcell that contains the center of the goal.
-	int gi = (goal.x >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
-	int gj = (goal.z >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
+	int gi = (goal.x / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
+	int gj = (goal.z / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
 
 	switch(goal.type)
 	{
@@ -245,7 +245,7 @@ bool HierarchicalPathfinder::Chunk::RegionNearestNavcellInGoal(u16 r, u16 i0, u1
 	case PathGoal::SQUARE:
 	{
 		// restrict ourselves to a square surrounding the goal.
-		int radius = (std::max(goal.hw*3/2,goal.hh*3/2) >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToInfinity();
+		int radius = (std::max(goal.hw*3/2,goal.hh*3/2) / Pathfinding::NAVCELL_SIZE).ToInt_RoundToInfinity();
 		int imin = std::max(0, gi-m_ChunkI*CHUNK_SIZE-radius);
 		int imax = std::min((int)CHUNK_SIZE, gi-m_ChunkI*CHUNK_SIZE+radius+1);
 		int jmin = std::max(0, gj-m_ChunkJ*CHUNK_SIZE-radius);

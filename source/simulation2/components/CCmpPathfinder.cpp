@@ -486,7 +486,7 @@ void CCmpPathfinder::UpdateGrid()
 	if (!cmpTerrain)
 		return; // error
 
-	u16 gridSize = cmpTerrain->GetMapSize() / Pathfinding::NAVCELL_SIZE_INT;
+	u16 gridSize = Pathfinding::TerrainToNavcell(cmpTerrain->GetMapSize());
 	if (gridSize == 0)
 		return;
 
@@ -588,7 +588,7 @@ void CCmpPathfinder::TerrainUpdateHelper(bool expandPassability, int itile0, int
 	if (!cmpTerrain || !cmpObstructionManager)
 		return;
 
-	u16 gridSize = cmpTerrain->GetMapSize() / Pathfinding::NAVCELL_SIZE_INT;
+	u16 gridSize = Pathfinding::TerrainToNavcell(cmpTerrain->GetMapSize());
 	if (gridSize == 0)
 		return;
 

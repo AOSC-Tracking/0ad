@@ -99,8 +99,8 @@ bool PathGoal::NavcellContainsGoal(int i, int j) const
 	case POINT:
 	{
 		// Only accept a single navcell
-		int gi = (x >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
-		int gj = (z >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
+		int gi = (x / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
+		int gj = (z / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
 		return gi == i && gj == j;
 	}
 	case CIRCLE:
@@ -132,8 +132,8 @@ bool PathGoal::NavcellRectContainsGoal(int i0, int j0, int i1, int j1, int* gi, 
 	case POINT:
 	{
 		// Calculate the navcell that contains the point goal
-		int i = (x >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
-		int j = (z >> Pathfinding::NAVCELL_SIZE_LOG2).ToInt_RoundToNegInfinity();
+		int i = (x / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
+		int j = (z / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity();
 		// If that goal navcell is in the given range, return it
 		if (imin <= i && i <= imax && jmin <= j && j <= jmax)
 		{

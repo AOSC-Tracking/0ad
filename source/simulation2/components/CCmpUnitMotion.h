@@ -58,33 +58,33 @@ namespace
  * smaller ranges might miss some legitimate routes around large obstacles.)
  * NB: keep the max-range in sync with the vertex pathfinder "move the search space" heuristic.
  */
-constexpr entity_pos_t SHORT_PATH_MIN_SEARCH_RANGE = entity_pos_t::FromInt(12 * Pathfinding::NAVCELL_SIZE_INT);
-constexpr entity_pos_t SHORT_PATH_MAX_SEARCH_RANGE = entity_pos_t::FromInt(56 * Pathfinding::NAVCELL_SIZE_INT);
-constexpr entity_pos_t SHORT_PATH_SEARCH_RANGE_INCREMENT = entity_pos_t::FromInt(4 * Pathfinding::NAVCELL_SIZE_INT);
+constexpr entity_pos_t SHORT_PATH_MIN_SEARCH_RANGE = entity_pos_t::FromInt(12);
+constexpr entity_pos_t SHORT_PATH_MAX_SEARCH_RANGE = entity_pos_t::FromInt(56);
+constexpr entity_pos_t SHORT_PATH_SEARCH_RANGE_INCREMENT = entity_pos_t::FromInt(4);
 constexpr u8 SHORT_PATH_SEARCH_RANGE_INCREASE_DELAY = 1;
 
 /**
  * When using the short-pathfinder to rejoin a long-path waypoint, aim for a circle of this radius around the waypoint.
  */
-constexpr entity_pos_t SHORT_PATH_LONG_WAYPOINT_RANGE = entity_pos_t::FromInt(4 * Pathfinding::NAVCELL_SIZE_INT);
+constexpr entity_pos_t SHORT_PATH_LONG_WAYPOINT_RANGE = entity_pos_t::FromInt(4);
 
 /**
  * Minimum distance to goal for a long path request
  */
-constexpr entity_pos_t LONG_PATH_MIN_DIST = entity_pos_t::FromInt(16 * Pathfinding::NAVCELL_SIZE_INT);
+constexpr entity_pos_t LONG_PATH_MIN_DIST = entity_pos_t::FromInt(16);
 
 /**
  * If we are this close to our target entity/point, then think about heading
  * for it in a straight line instead of pathfinding.
  */
-constexpr entity_pos_t DIRECT_PATH_RANGE = entity_pos_t::FromInt(24 * Pathfinding::NAVCELL_SIZE_INT);
+constexpr entity_pos_t DIRECT_PATH_RANGE = entity_pos_t::FromInt(24);
 
 /**
  * To avoid recomputing paths too often, have some leeway for target range checks
  * based on our distance to the target. Increase that incertainty by one navcell
  * for every this many tiles of distance.
  */
-constexpr entity_pos_t TARGET_UNCERTAINTY_MULTIPLIER = entity_pos_t::FromInt(8 * Pathfinding::NAVCELL_SIZE_INT);
+constexpr entity_pos_t TARGET_UNCERTAINTY_MULTIPLIER = entity_pos_t::FromInt(8);
 
 /**
  * When following a known imperfect path (i.e. a path that won't take us in range of our goal

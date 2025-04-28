@@ -2008,7 +2008,8 @@ public:
 		// LOS data is stored per los vertex (in reality tiles too, but it's the center that matters).
 		// This scales from LOS coordinates to Territory coordinates.
 		auto scale = [](i32 coord, i32 max) -> i32 {
-			return std::min(max, (coord * LOS_TILE_SIZE + LOS_TILE_SIZE / 2) / (ICmpTerritoryManager::NAVCELLS_PER_TERRITORY_TILE * Pathfinding::NAVCELL_SIZE_INT));
+			constexpr int size = (Pathfinding::NAVCELL_SIZE * ICmpTerritoryManager::NAVCELLS_PER_TERRITORY_TILE).ToInt();
+			return std::min(max, (coord * LOS_TILE_SIZE + LOS_TILE_SIZE / 2) / size);
 		};
 
 		// For each territory-tile, if it is owned by a valid player then update the LOS

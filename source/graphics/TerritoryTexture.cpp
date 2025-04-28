@@ -82,7 +82,7 @@ void CTerritoryTexture::ConstructTexture(Renderer::Backend::IDeviceCommandContex
 		return;
 
 	// Convert size from terrain tiles to territory tiles
-	m_MapSize = cmpTerrain->GetMapSize() * Pathfinding::NAVCELL_SIZE_INT / ICmpTerritoryManager::NAVCELLS_PER_TERRITORY_TILE;
+	m_MapSize = Pathfinding::TerrainToNavcell(cmpTerrain->GetMapSize()) / ICmpTerritoryManager::NAVCELLS_PER_TERRITORY_TILE;
 
 	const uint32_t textureSize = round_up_to_pow2(static_cast<uint32_t>(m_MapSize));
 
