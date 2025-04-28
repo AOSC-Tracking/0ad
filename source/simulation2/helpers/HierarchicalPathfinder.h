@@ -161,9 +161,18 @@ public:
 
 	void RenderSubmit(SceneCollector& collector);
 
-private:
+	/**
+	 * Finds a path through regions from start to goal using A* algorithm.
+	 * @param start Starting region
+	 * @param goal Goal region
+	 * @param passClass Passability class to use
+	 * @return Vector of RegionIDs representing the path from start to goal, empty if no path found
+	 */
+	std::vector<RegionID> FindRegionPath(RegionID start, RegionID goal, pass_class_t passClass) const;
+
 	static const u8 CHUNK_SIZE = 96; // number of navcells per side
 									 // TODO: figure out best number. Probably 64 < n < 128
+private:
 
 	struct Chunk
 	{
@@ -295,7 +304,47 @@ private:
 
 public:
 	std::vector<SOverlayLine> m_DebugOverlayLines;
+
+private:
+	struct AStarNode {
+		RegionID id;
+		RegionID parent;
+		fixed g_cost;  // Cost from start to this node
+		fixed h_cost;  // Estimated cost from this node to goal
+		fixed f_cost() const { return g_cost + h_cost; }
+
+		bool operator<(const AStarNode& other) const {
+			if (f_cost() == other.f_cost())
+				return h_cost > other.h_cost; // Tie-break using h_cost
+			return f_cost() > other.f_cost();
+		}
+	};
+
+	/**
+	 * Heuristic function for A* pathfinding.
+	 */
+	fixed RegionHeuristic(const RegionID& from, const RegionID& to) const;
+
+	/**
+	 * Gets the center coordinates of a region.
+	 * @return pair of <x,z> coordinates
+	 */
+	std::pair<fixed, fixed> GetRegionCenter(const RegionID& region) const;
 };
+
+namespace std
+{
+    template <>
+    struct hash<HierarchicalPathfinder::RegionID>
+	{
+		size_t operator()(const HierarchicalPathfinder::RegionID& k) const noexcept
+		{
+			return static_cast<size_t>(k.ci) |
+				   (static_cast<size_t>(k.cj) << 8) |
+				   (static_cast<size_t>(k.r) << 16);
+		}
+	};
+}
 
 class HierarchicalOverlay : public TerrainTextureOverlay
 {

@@ -25,8 +25,10 @@
 #include "renderer/TerrainOverlay.h"
 #include "simulation2/helpers/Grid.h"
 #include "simulation2/helpers/PriorityQueue.h"
+#include "HierarchicalPathfinder.h"
 
 #include <map>
+#include <unordered_set>
 
 /**
  * Represents the 2D coordinates of a tile.
@@ -155,6 +157,10 @@ struct PathfinderState
 	u16 iBest, jBest; // closest tile
 
 	const JumpPointCache* jpc;
+
+	const HierarchicalPathfinder* hierPath;
+	std::vector<u8> regionPath; // Dense array marking regions in path with 0xff
+	u8 chunksH;
 };
 
 class LongOverlay;

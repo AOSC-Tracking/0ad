@@ -384,7 +384,9 @@ LongPathfinder::LongPathfinder() :
 {
 }
 
-#define PASSABLE(i, j) IS_PASSABLE(state.terrain->get(i, j), state.passClass)
+#define PASSABLE(i, j) (IS_PASSABLE(state.terrain->get(i, j), state.passClass) && \
+    state.regionPath[((int)(i) / (int)(HierarchicalPathfinder::CHUNK_SIZE)) + ((int)(j) / (int)(HierarchicalPathfinder::CHUNK_SIZE)) * state.chunksH] > 0)
+
 
 // Calculate heuristic cost from tile i,j to goal
 // (This ought to be an underestimate for correctness)
@@ -762,10 +764,25 @@ void LongPathfinder::ComputeJPSPath(const HierarchicalPathfinder& hierPath, enti
 		return;
 	}
 
+	// Get start and goal regions
+	HierarchicalPathfinder::RegionID startRegion = hierPath.Get(i0, j0, passClass);
 	Pathfinding::NearestNavcell(state.goal.x, state.goal.z, state.iGoal, state.jGoal, m_GridSize, m_GridSize);
+	HierarchicalPathfinder::RegionID goalRegion = hierPath.Get(state.iGoal, state.jGoal, passClass);
 
 	ENSURE((state.goal.x / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity() == state.iGoal);
 	ENSURE((state.goal.z / Pathfinding::NAVCELL_SIZE).ToInt_RoundToNegInfinity() == state.jGoal);
+
+	// Get the region path from hierarchical pathfinder
+	const auto& regionPath = hierPath.FindRegionPath(startRegion, goalRegion, passClass);
+	// If no valid region path exists, return empty path
+	if (regionPath.empty())
+		return;
+
+	state.chunksH = m_GridSize / HierarchicalPathfinder::CHUNK_SIZE;
+	state.regionPath.assign(state.chunksH * state.chunksH, 0);
+	for (const auto& region : regionPath)
+		state.regionPath[region.ci + region.cj * state.chunksH] = 0xff;
+	state.hierPath = &hierPath;
 
 	state.passClass = passClass;
 

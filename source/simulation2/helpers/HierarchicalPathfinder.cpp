@@ -850,3 +850,98 @@ Grid<u16> HierarchicalPathfinder::GetConnectivityGrid(pass_class_t passClass) co
 
 	return connectivityGrid;
 }
+
+std::pair<fixed, fixed> HierarchicalPathfinder::GetRegionCenter(const RegionID& region) const
+{
+	return std::make_pair(
+		Pathfinding::NAVCELL_SIZE * (CHUNK_SIZE * region.ci + CHUNK_SIZE / 2),
+		Pathfinding::NAVCELL_SIZE * (CHUNK_SIZE * region.cj + CHUNK_SIZE / 2)
+	);
+}
+
+fixed HierarchicalPathfinder::RegionHeuristic(const RegionID& from, const RegionID& to) const
+{
+	auto [x1, z1] = GetRegionCenter(from);
+	auto [x2, z2] = GetRegionCenter(to);
+
+	// Using Euclidean distance as heuristic
+	return ((x2 - x1).Square() + (z2 - z1).Square()).Sqrt();
+}
+
+std::vector<HierarchicalPathfinder::RegionID> HierarchicalPathfinder::FindRegionPath(RegionID start, RegionID goal, pass_class_t passClass) const
+{
+	PROFILE2("FindRegionPath");
+
+	// Early exit if start or goal regions are invalid or in different global regions
+	if (start.r == 0 || goal.r == 0 || GetGlobalRegion(start, passClass) != GetGlobalRegion(goal, passClass))
+		return std::vector<RegionID>();
+
+	// Priority queue for A* open set
+	std::priority_queue<AStarNode> openSet;
+
+	// Track visited nodes and their costs
+	std::unordered_map<RegionID, AStarNode> nodeMap;
+
+	// Initialize start node
+	AStarNode startNode{start, start, fixed::Zero(), RegionHeuristic(start, goal)};
+	openSet.push(startNode);
+	nodeMap.emplace(start, startNode);
+
+	while (!openSet.empty())
+	{
+		AStarNode current = openSet.top();
+		openSet.pop();
+
+		// Goal found - reconstruct path
+		if (current.id == goal)
+		{
+			std::vector<RegionID> path;
+			RegionID currentId = goal;
+
+			while (!(currentId == start))
+			{
+				path.push_back(currentId);
+				currentId = nodeMap.at(currentId).parent;
+			}
+			path.push_back(start);
+
+			// Don't reverse - caller will do it if needed
+			return path;
+		}
+
+		// Skip if we've found a better path to this node
+		if (nodeMap.count(current.id) && nodeMap.at(current.id).g_cost < current.g_cost)
+			continue;
+
+		// Process neighbors
+		const EdgesMap& edges = m_Edges.at(passClass);
+		auto edgeIt = edges.find(current.id);
+		if (edgeIt == edges.end())
+			continue;
+
+		for (const RegionID& neighbor : edgeIt->second)
+		{
+			// Calculate cost to reach neighbor through current node
+			auto [nx, nz] = GetRegionCenter(neighbor);
+			auto [cx, cz] = GetRegionCenter(current.id);
+			fixed edgeCost = ((nx - cx).Square() + (nz - cz).Square()).Sqrt();
+			fixed newCost = current.g_cost + edgeCost;
+
+			// If we haven't visited this neighbor or found a better path
+			if (nodeMap.count(neighbor) == 0 || newCost < nodeMap.at(neighbor).g_cost)
+			{
+				AStarNode neighborNode{
+					neighbor,
+					current.id,
+					newCost,
+					RegionHeuristic(neighbor, goal)
+				};
+				openSet.push(neighborNode);
+				nodeMap.emplace(neighbor, neighborNode);
+			}
+		}
+	}
+
+	// No path found
+	return std::vector<RegionID>();
+}
