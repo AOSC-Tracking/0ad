@@ -312,7 +312,8 @@ DiplomacyManager.prototype.lastManStandingCheck = function(gameState)
 	}
 
 	// do not turn against a player yet if we are not strong enough
-	if (gameState.getOwnUnits().length < 50)
+	// or if there is an emergency
+	if (gameState.getOwnUnits().length < 50 || gameState.ai.HQ.emergencyManager.hasEmergency)
 	{
 		this.betrayLapseTime += 60;
 		return;
