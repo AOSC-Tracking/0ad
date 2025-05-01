@@ -3,6 +3,11 @@ import { emergency as chatEmergency } from "simulation/ai/petra/chatHelper.js";
 /**
  * Checks for emergencies and acts accordingly
  */
+PETRA.EMERGENCY_NONE = 0;
+PETRA.EMERGENCY_LOW = 1;
+PETRA.EMERGENCY_HEAVY = 2;
+PETRA.EMERGENCY_FINAL = 3;
+
 export function EmergencyManager(Config)
 {
 	this.Config = Config;
@@ -10,7 +15,8 @@ export function EmergencyManager(Config)
 	this.referenceStructureCount = 0;
 	this.numRoots = 0;
 	this.hasEmergency = false;
-}
+	this.emergencyState = PETRA.EMERGENCY_NONE;
+};
 
 EmergencyManager.prototype.init = function(gameState)
 {
@@ -32,9 +38,9 @@ EmergencyManager.prototype.update = function(gameState)
 	const factors = this.Config.emergencyValues;
 	if (((pop / this.referencePopulation) < factors.population || pop == 0) &&
 		((nStructures / this.referenceStructureCount) < factors.structures || nStructures == 0))
-		this.setEmergency(gameState, true);
+		this.startEmergency(gameState);
 	else if ((nRoots / this.numRoots) <= factors.roots || (nRoots == 0 && this.numRoots != 0))
-		this.setEmergency(gameState, true);
+		this.startEmergency(gameState);
 
 	if (pop > this.referencePopulation || this.hasEmergency)
 		this.referencePopulation = pop;
@@ -49,7 +55,6 @@ EmergencyManager.prototype.emergencyUpdate = function(gameState)
 	const pop = gameState.getPopulation();
 	const nStructures = gameState.getOwnStructures().length;
 	const nRoots = this.rootCount(gameState);
-	const factors = this.Config.emergencyValues;
 
 	if ((pop > this.referencePopulation * 1.2 &&
 		nStructures > this.referenceStructureCount * 1.2) ||
@@ -59,6 +64,30 @@ EmergencyManager.prototype.emergencyUpdate = function(gameState)
 		this.referencePopulation = pop;
 		this.referenceStructureCount = nStructures;
 		this.numRoots = nRoots;
+		return;
+	}
+	if (nRoots > 1) {
+		this.emergencyState = PETRA.EMERGENCY_LOW;
+		return;
+	}
+	if (nRoots == 0) {
+		this.emergencyState = PETRA.EMERGENCY_FINAL;
+		return;
+	}
+
+	if (nRoots == 1) {
+		const onlyRoot = gameState.getOwnStructures().filter(ent => {
+			return ent?.get("TerritoryInfluence")?.Root === "true"
+		}).toEntityArray()[0];
+		// TODO: Also check if it's nearly captured
+		const healthLevel = onlyRoot.healthLevel();
+		if (healthLevel < 0.2) {
+			this.emergencyState = PETRA.EMERGENCY_FINAL;
+		} else if (healthLevel < 0.4) {
+			this.emergencyState = PETRA.EMERGENCY_HEAVY;
+		} else {
+			this.emergencyState = PETRA.EMERGENCY_LOW;
+		}
 	}
 };
 
@@ -70,6 +99,12 @@ EmergencyManager.prototype.rootCount = function(gameState)
 			roots++;
 	});
 	return roots;
+};
+
+EmergencyManager.prototype.startEmergency = function(gameState)
+{
+	this.emergencyState = PETRA.EMERGENCY_LOW;
+	this.setEmergency(gameState, true);
 };
 
 EmergencyManager.prototype.setEmergency = function(gameState, enable)
@@ -84,7 +119,8 @@ EmergencyManager.prototype.Serialize = function()
 		"referencePopulation": this.referencePopulation,
 		"referenceStructureCount": this.referenceStructureCount,
 		"numRoots": this.numRoots,
-		"hasEmergency": this.hasEmergency
+		"hasEmergency": this.hasEmergency,
+		"emergencyState": this.emergencyState,
 	};
 };
 
