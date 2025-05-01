@@ -392,7 +392,11 @@ DiplomacyManager.prototype.handleDiplomacyRequest = function(gameState, player, 
 	const moreEnemiesThanAllies = gameState.getEnemies().length > gameState.getMutualAllies().length;
 
 	// For any given diplomacy request be likely to permanently decline
-	if (!request && gameState.getPlayerCiv() !== gameState.getPlayerCiv(player) && randBool(0.6) ||
+	if (gameState.ai.HQ.emergencyManager.hasEmergency && (requestType == "ally" || requestType == "neutral")) {
+		response = "accept";
+		this.changePlayerDiplomacy(gameState, player, requestType);
+		this.receivedDiplomacyRequests.set(player, { "requestType": requestType, "status": "accepted" });
+	} else if (!request && gameState.getPlayerCiv() !== gameState.getPlayerCiv(player) && randBool(0.6) ||
 	    !moreEnemiesThanAllies || gameState.ai.HQ.attackManager.currentEnemyPlayer === player)
 	{
 		this.receivedDiplomacyRequests.set(player, { "requestType": requestType, "status": "declinedRequest" });
