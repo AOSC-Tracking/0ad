@@ -137,8 +137,7 @@ DiplomacyManager.prototype.checkEvents = function(gameState, events)
 			if (request.status === "waitingForTribute" && request.type in evt.amounts)
 			{
 				request.wanted -= evt.amounts[request.type];
-
-				if (request.wanted <= 0)
+				if (request.wanted <= 0 || gameState.ai.HQ.emergencyManager.hasEmergency)
 				{
 					if (this.Config.debug > 1)
 					{
