@@ -26,7 +26,9 @@ function hslToRgb(h, s, l, a)
 
 	if (s == 0)
 	{
-		r = g = b = l;
+		r = l;
+		g = l;
+		b = l;
 	}
 	else
 	{
@@ -148,15 +150,15 @@ function set_tooltip_handlers(canvas)
 {
 	function do_tooltip(event)
 	{
-		var tooltips = canvas._tooltips;
+		const tooltips = canvas._tooltips;
 		if (!tooltips)
 			return;
 
 		var relativeX = event.pageX - this.getBoundingClientRect().left - window.scrollX;
 		var relativeY = event.pageY - this.getBoundingClientRect().top - window.scrollY;
 
-		var text = undefined;
-		for (var i = 0; i < tooltips.length; ++i)
+		let text;
+		for (let i = 0; i < tooltips.length; ++i)
 		{
 			var t = tooltips[i];
 			if (t.x0-1 <= relativeX && relativeX <= t.x1+1 && t.y0 <= relativeY && relativeY <= t.y1)

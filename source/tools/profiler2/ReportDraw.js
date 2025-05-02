@@ -132,8 +132,8 @@ function display_frames(data, canvas, range)
 		var duration = frame.t1 - frame.t0;
 		var x0 = xpadding + dx*(frame.t0 - tmin);
 		var x1 = x0 + dx*duration;
-		var y1 = canvas.height;
-		var y0 = y1 * scale(duration*1000);
+		const y1 = canvas.height;
+		const y0 = y1 * scale(duration*1000);
 
 		ctx.beginPath();
 		ctx.rect(x0, y0, x1-x0, y1-y0);
@@ -142,12 +142,12 @@ function display_frames(data, canvas, range)
 		canvas._tooltips.push({
 			'x0': x0, 'x1': x1,
 			'y0': y0, 'y1': y1,
-			'text': function(frame, duration) { return function() {
+			'text': function(frameA, durationA) { return function() {
 				var t = '<b>Frame</b><br>';
-				t += 'Length: ' + time_label(duration) + '<br>';
-				if (frame.attrs)
+				t += 'Length: ' + time_label(durationA) + '<br>';
+				if (frameA.attrs)
 				{
-					frame.attrs.forEach(function(attr)
+					frameA.attrs.forEach(function(attr)
 					{
 						t += attr + '<br>';
 					});
@@ -220,11 +220,11 @@ function display_events(data, canvas)
 		canvas._tooltips.push({
 			'x0': x0, 'x1': x1,
 			'y0': y0, 'y1': y1,
-			'text': function(event) { return function() {
-				var t = '<b>' + event.id + '</b><br>';
-				if (event.attrs)
+			'text': function(eventA) { return function() {
+				var t = '<b>' + eventA.id + '</b><br>';
+				if (eventA.attrs)
 				{
-					event.attrs.forEach(function(attr) {
+					eventA.attrs.forEach(function(attr) {
 						t += attr + '<br>';
 					});
 				}
@@ -342,12 +342,12 @@ function display_hierarchy(main_data, data, canvas, range, zoom)
 		canvas._tooltips.push({
 			'x0': x0, 'x1': x1,
 			'y0': y0, 'y1': y1,
-			'text': function(interval) { return function() {
-				var t = '<b>' + interval.id + '</b><br>';
-				t += 'Length: ' + time_label(interval.duration) + '<br>';
-				if (interval.attrs)
+			'text': function(intervalA) { return function() {
+				var t = '<b>' + intervalA.id + '</b><br>';
+				t += 'Length: ' + time_label(intervalA.duration) + '<br>';
+				if (intervalA.attrs)
 				{
-					interval.attrs.forEach(function(attr) {
+					intervalA.attrs.forEach(function(attr) {
 						t += attr + '<br>';
 					});
 				}
@@ -399,7 +399,7 @@ outInterface.display_hierarchy = display_hierarchy;
 
 function set_frames_zoom_handlers(report, canvas0)
 {
-	function do_zoom(report, event)
+	function do_zoom(reportA, event)
 	{
 		var zdata = canvas0._zoomData;
 
@@ -414,7 +414,7 @@ function set_frames_zoom_handlers(report, canvas0)
 		var tmax = tavg + width/2;
 		var tmin = tavg - width/2;
 		var range = { 'tmin': tmin, 'tmax': tmax };
-		update_display(report, range);
+		update_display(reportA, range);
 	}
 
 	$(canvas0).unbind();

@@ -37,36 +37,36 @@ var Profiler2Report = function(callback, tryLive, file)
 	var g_raw_data;
 	var g_data;
 
-	function refresh(callback, tryLive, file)
+	function refresh(callbackA, tryLiveA, fileA)
 	{
-		if (tryLive)
-			refresh_live(callback, file);
+		if (tryLiveA)
+			refresh_live(callbackA, fileA);
 		else
-			refresh_jsonp(callback, file);
+			refresh_jsonp(callbackA, fileA);
 	}
 	outInterface.refresh = refresh;
 
-	function refresh_jsonp(callback, source)
+	function refresh_jsonp(callbackA, source)
 	{
 		if (!source)
 		{
-			callback(false);
+			callbackA(false);
 			return;
 		}
 		var reader = new FileReader();
 		reader.onload = function(e)
 		{
-			refresh_from_jsonp(callback, e.target.result);
+			refresh_from_jsonp(callbackA, e.target.result);
 		};
 		reader.onerror = function(e) {
 			alert("Failed to load report file");
-			callback(false);
+			callbackA(false);
 			return;
 		};
 		reader.readAsText(source);
 	}
 
-	function refresh_from_jsonp(callback, content)
+	function refresh_from_jsonp(callbackA, content)
 	{
 		var script = document.createElement('script');
 
@@ -81,14 +81,14 @@ var Profiler2Report = function(callback, tryLive, file)
 			});
 			g_raw_data = { 'threads': threads };
 			compute_data();
-			callback(true);
+			callbackA(true);
 		};
 
 		script.innerHTML = content;
 		document.body.appendChild(script);
 	}
 
-	function refresh_live(callback, file)
+	function refresh_live(callbackA, fileA)
 	{
 		$.ajax({
 			"url": `http://127.0.0.1:${$("#gameport").val()}/overview`,
@@ -101,18 +101,18 @@ var Profiler2Report = function(callback, tryLive, file)
 				var callback_data = { 'threads': threads, 'completed': 0 };
 
 				threads.forEach(function(thread) {
-					refresh_thread(callback, thread, callback_data);
+					refresh_thread(callbackA, thread, callback_data);
 				});
 			},
 			"error": function(jqXHR, textStatus, errorThrown)
 			{
 				console.log('Failed to connect to server ("'+textStatus+'")');
-				callback(false);
+				callbackA(false);
 			}
 		});
 	}
 
-	function refresh_thread(callback, thread, callback_data)
+	function refresh_thread(callbackA, thread, callback_data)
 	{
 		$.ajax({
 			"url": `http://127.0.0.1:${$("#gameport").val()}/query`,
@@ -126,7 +126,7 @@ var Profiler2Report = function(callback, tryLive, file)
 				{
 					g_raw_data = { 'threads': callback_data.threads };
 					compute_data();
-					callback(true);
+					callbackA(true);
 				}
 			},
 			"error": function(jqXHR, textStatus, errorThrown) {
@@ -180,7 +180,7 @@ var Profiler2Report = function(callback, tryLive, file)
 		var tmin, tmax;
 
 		var frames = [];
-		var last_frame_time_start = undefined;
+		var last_frame_time_start;
 
 		var stack = [];
 		for (var i = 0; i < data.length; ++i)
