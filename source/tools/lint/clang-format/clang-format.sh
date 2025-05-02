@@ -34,12 +34,12 @@ fi
 if [ -n "${diff}" ]; then
 	git diff --name-status --no-renames "${diff}" |
 		awk '!/^D/{if ($2 ~ /(\.cpp|\.h)$/) {print "./" $2}}' |
-		xargs clang-format --dry-run --style=file -i
+		xargs -n 1 clang-format --dry-run --Werror --ferror-limit=0 --style=file
 else
 	echo "WARNING: running clang-format linter without base commit, likely not what you want."
 	find . \( -name '*.cpp' -o -name '*.h' \) >clang-format-file-list.txt
 	awk '!/^\.\/(binaries|build|libraries|source\/third_party)\//' <cppcheck-file-list.txt >clang-format-file-list-filtered.txt
 	rm cppcheck-file-list.txt
-	xargs clang-format --dry-run --style=file -i <clang-format-file-list-filtered.txt
+	xargs -n 1 clang-format --dry-run --Werror --ferror-limit=0 --style=file <clang-format-file-list-filtered.txt
 	rm clang-format-file-list-filtered.txt
 fi
