@@ -59,3 +59,16 @@ jobs:
 
       - name: Check for issues with copyright
         run: ./source/tools/lint/copyright/copyright.sh --from ${{ env.BASE_SHA }} --to ${{ env.HEAD_SHA }}
+
+  clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get --assume-yes --no-install-recommends install clang-format
+
+      - name: Fetch the base branch, so we can use `git diff`
+        run: git fetch origin ${{ env.BASE_SHA }}
+
+      - name: Check for issues with clang-format
+        run: ./source/tools/lint/clang-format/clang-format.sh --from ${{ env.BASE_SHA }} --to ${{ env.HEAD_SHA }}
