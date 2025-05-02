@@ -700,7 +700,7 @@ static void RunGameOrAtlas(const PS::span<const char* const> argv)
 		{
 			if (isVisual)
 				Frame(rlInterface ? &*rlInterface : nullptr, fixedFrameFrequency);
-			else if(rlInterface)
+			else if (rlInterface)
 				rlInterface->TryApplyMessage();
 			else
 				NonVisualFrame();
