@@ -4,8 +4,8 @@
     <Population>3</Population>
     <BuildTime>36</BuildTime>
     <Resources>
-      <food>300</food>
-      <metal>200</metal>
+      <food>350</food>
+      <metal>250</metal>
     </Resources>
   </Cost>
   <Footprint replace="">
@@ -13,7 +13,7 @@
     <Height>9.0</Height>
   </Footprint>
   <Health>
-    <Max>1000</Max>
+    <Max>950</Max>
   </Health>
   <Identity>
     <GenericName>War Elephant</GenericName>
@@ -25,14 +25,14 @@
     <metal>20</metal>
   </Loot>
   <Position>
-    <TurnRate>4</TurnRate>
+    <TurnRate>3</TurnRate>
   </Position>
   <Resistance>
     <Entity>
       <Damage>
-        <Hack>5</Hack>
-        <Pierce>6</Pierce>
-        <Crush>20</Crush>
+        <Hack>4</Hack>
+        <Pierce>5</Pierce>
+        <Crush>15</Crush>
       </Damage>
     </Entity>
   </Resistance>
@@ -59,6 +59,6 @@
     <Weight op="mul">5.0</Weight>
   </UnitMotion>
   <Vision>
-    <Range>100</Range>
+    <Range>80</Range>
   </Vision>
 </Entity>
