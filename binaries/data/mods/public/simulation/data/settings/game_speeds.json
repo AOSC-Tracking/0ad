@@ -49,6 +49,16 @@
 			"Speed": 20.0,
 			"Title": "Fast Forward (20×)",
 			"FastForward": true
+		},
+		{
+			"Speed": 50.0,
+			"Title": "Fast Forward (50×)",
+			"FastForward": true
+		},
+		{
+			"Speed": 100.0,
+			"Title": "Fast Forward (100×)",
+			"FastForward": true
 		}
 	]
 }
