@@ -399,8 +399,8 @@ PETRA.DiplomacyManager.prototype.handleDiplomacyRequest = function(gameState, pl
 			requiredTribute = request;
 		}
 	}
-	else if (requestType === "ally" && gameState.getEntities(player).length < gameState.getOwnEntities().length && randBool(0.4) ||
-	         requestType === "neutral" && moreEnemiesThanAllies && randBool(0.8))
+	else if (requestType === "ally" && gameState.getEntities(player).length < gameState.getOwnEntities().length && randBool(0.3) ||
+	         requestType === "neutral" && moreEnemiesThanAllies && randBool(0.7))
 	{
 		response = "accept";
 		this.changePlayerDiplomacy(gameState, player, requestType);
