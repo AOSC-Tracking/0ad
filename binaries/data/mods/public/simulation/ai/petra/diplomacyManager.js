@@ -421,7 +421,11 @@ PETRA.DiplomacyManager.prototype.handleDiplomacyRequest = function(gameState, pl
 			const unitCount = gameState.getOwnUnits().length;
 			const unitBasedTribute = 100 * Math.round((50 + unitCount) / (requestType === "ally" ? 11 : 17));
 			const minimumTribute = requestType === "ally" ? 900 : 800;
-			requiredTribute.wanted = Math.max(minimumTribute, unitBasedTribute);
+
+			// Add random ±16% variability in multiples of 100, which avoids revealing too much information
+			const randomTribute = 100 * randIntInclusive(-requiredTribute.wanted / 625, requiredTribute.wanted / 625);
+
+			requiredTribute.wanted = Math.max(minimumTribute, unitBasedTribute) + randomTribute;
 
 			this.receivedDiplomacyRequests.set(player, {
 				"status": "waitingForTribute",
