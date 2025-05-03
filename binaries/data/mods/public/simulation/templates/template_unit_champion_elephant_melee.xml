@@ -5,20 +5,20 @@
     <Melee>
       <AttackName>Trunk</AttackName>
       <Damage>
-        <Hack>30</Hack>
-        <Crush>45</Crush>
+        <Hack>20</Hack>
+        <Crush>35</Crush>
       </Damage>
       <Splash>
         <Shape>Circular</Shape>
         <Range>2</Range>
         <FriendlyFire>false</FriendlyFire>
         <Damage>
-          <Hack>30</Hack>
+          <Hack>20</Hack>
         </Damage>
       </Splash>
       <MaxRange>5</MaxRange>
-      <PrepareTime>750</PrepareTime>
-      <RepeatTime>1500</RepeatTime>
+      <PrepareTime>850</PrepareTime>
+      <RepeatTime>1600</RepeatTime>
       <PreferredClasses datatype="tokens">!Ship</PreferredClasses>
     </Melee>
   </Attack>
