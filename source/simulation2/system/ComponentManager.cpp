@@ -326,8 +326,8 @@ void CComponentManager::Script_RegisterComponentType_Common(int iid, const std::
 	{
 		// For every script component with this cid, we need to switch its
 		// prototype from the old constructor's prototype property to the new one's
-		const std::map<entity_id_t, IComponent*>& comps = m_ComponentsByTypeId[cid];
-		std::map<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
+		const OrderedMapType<entity_id_t, IComponent*>& comps = m_ComponentsByTypeId[cid];
+		OrderedMapType<entity_id_t, IComponent*>::const_iterator eit = comps.begin();
 		for (; eit != comps.end(); ++eit)
 		{
 			JS::RootedValue instance(rq.cx, eit->second->GetJSInstance());
@@ -501,10 +501,10 @@ void CComponentManager::ResetState()
 	m_TraceCache.clear();
 
 	// Delete all IComponents in reverse order of creation.
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::reverse_iterator iit = m_ComponentsByTypeId.rbegin();
+	std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> >::reverse_iterator iit = m_ComponentsByTypeId.rbegin();
 	for (; iit != m_ComponentsByTypeId.rend(); ++iit)
 	{
-		std::map<entity_id_t, IComponent*>::iterator eit = iit->second.begin();
+		MapType<entity_id_t, IComponent*>::iterator eit = iit->second.begin();
 		for (; eit != iit->second.end(); ++eit)
 		{
 			eit->second->Deinit();
@@ -512,14 +512,14 @@ void CComponentManager::ResetState()
 		}
 	}
 
-	std::vector<std::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
+	std::vector<MapType<entity_id_t, IComponent*>>::iterator ifcit = m_ComponentsByInterface.begin();
 	for (; ifcit != m_ComponentsByInterface.end(); ++ifcit)
 		ifcit->clear();
 
 	m_ComponentsByTypeId.clear();
 
 	// Delete all SEntityComponentCaches
-	std::unordered_map<entity_id_t, SEntityComponentCache*>::iterator ccit = m_ComponentCaches.begin();
+	MapType<entity_id_t, SEntityComponentCache*>::iterator ccit = m_ComponentCaches.begin();
 	for (; ccit != m_ComponentCaches.end(); ++ccit)
 		free(ccit->second);
 	m_ComponentCaches.clear();
@@ -761,14 +761,14 @@ IComponent* CComponentManager::ConstructComponent(CEntityHandle ent, ComponentTy
 
 	ENSURE((size_t)ct.iid < m_ComponentsByInterface.size());
 
-	std::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface[ct.iid];
+	MapType<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface[ct.iid];
 	if (emap1.find(ent.GetId()) != emap1.end())
 	{
 		LOGERROR("Multiple components for interface %d", ct.iid);
 		return NULL;
 	}
 
-	std::map<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
+	OrderedMapType<entity_id_t, IComponent*>& emap2 = m_ComponentsByTypeId[cid];
 
 	// If this is a scripted component, construct the appropriate JS object first
 	JS::RootedValue obj(rq.cx);
@@ -811,7 +811,7 @@ void CComponentManager::AddMockComponent(CEntityHandle ent, InterfaceId iid, ICo
 	// Just add it into the by-interface map, not the by-component-type map,
 	// so it won't be considered for messages or deletion etc
 
-	std::unordered_map<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface.at(iid);
+	MapType<entity_id_t, IComponent*>& emap1 = m_ComponentsByInterface.at(iid);
 	if (emap1.find(ent.GetId()) != emap1.end())
 		debug_warn(L"Multiple components for interface");
 	emap1.insert(std::make_pair(ent.GetId(), &component));
@@ -852,7 +852,7 @@ CEntityHandle CComponentManager::AllocateEntityHandle(entity_id_t ent)
 
 CEntityHandle CComponentManager::LookupEntityHandle(entity_id_t ent, bool allowCreate)
 {
-	std::unordered_map<entity_id_t, SEntityComponentCache*>::iterator it;
+	MapType<entity_id_t, SEntityComponentCache*>::iterator it;
 	it = m_ComponentCaches.find(ent);
 	if (it == m_ComponentCaches.end())
 	{
@@ -957,10 +957,10 @@ void CComponentManager::FlushDestroyedComponents()
 			FlattenDynamicSubscriptions();
 
 			// Destroy the components, and remove from m_ComponentsByTypeId:
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::iterator iit = m_ComponentsByTypeId.begin();
+			std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> >::iterator iit = m_ComponentsByTypeId.begin();
 			for (; iit != m_ComponentsByTypeId.end(); ++iit)
 			{
-				std::map<entity_id_t, IComponent*>::iterator eit = iit->second.find(ent);
+				OrderedMapType<entity_id_t, IComponent*>::iterator eit = iit->second.find(ent);
 				if (eit != iit->second.end())
 				{
 					eit->second->Deinit();
@@ -979,7 +979,7 @@ void CComponentManager::FlushDestroyedComponents()
 				m_TraceCache.erase(hit);
 
 			// Remove from m_ComponentsByInterface
-			std::vector<std::unordered_map<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
+			std::vector<MapType<entity_id_t, IComponent*> >::iterator ifcit = m_ComponentsByInterface.begin();
 			for (; ifcit != m_ComponentsByInterface.end(); ++ifcit)
 			{
 				ifcit->erase(ent);
@@ -996,7 +996,7 @@ IComponent* CComponentManager::QueryInterface(entity_id_t ent, InterfaceId iid) 
 		return NULL;
 	}
 
-	std::unordered_map<entity_id_t, IComponent*>::const_iterator eit = m_ComponentsByInterface[iid].find(ent);
+	MapType<entity_id_t, IComponent*>::const_iterator eit = m_ComponentsByInterface[iid].find(ent);
 	if (eit == m_ComponentsByInterface[iid].end())
 	{
 		// This entity doesn't implement this interface
@@ -1018,7 +1018,7 @@ CComponentManager::InterfaceList CComponentManager::GetEntitiesWithInterface(Int
 
 	ret.reserve(m_ComponentsByInterface[iid].size());
 
-	std::unordered_map<entity_id_t, IComponent*>::const_iterator it = m_ComponentsByInterface[iid].begin();
+	MapType<entity_id_t, IComponent*>::const_iterator it = m_ComponentsByInterface[iid].begin();
 	for (; it != m_ComponentsByInterface[iid].end(); ++it)
 		ret.push_back(*it);
 
@@ -1050,12 +1050,12 @@ void CComponentManager::PostMessage(entity_id_t ent, const CMessage& msg)
 		for (; ctit != it->second.end(); ++ctit)
 		{
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.find(ent);
+			OrderedMapType<entity_id_t, IComponent*>::const_iterator eit = emap->second.find(ent);
 			if (eit != emap->second.end())
 				eit->second->HandleMessage(msg, false);
 		}
@@ -1075,12 +1075,12 @@ void CComponentManager::BroadcastMessage(const CMessage& msg)
 		for (; ctit != it->second.end(); ++ctit)
 		{
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
+			OrderedMapType<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
 				eit->second->HandleMessage(msg, false);
 		}
@@ -1112,12 +1112,12 @@ void CComponentManager::SendGlobalMessage(entity_id_t ent, const CMessage& msg)
 			}
 
 			// Find the component instances of this type (if any)
-			std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
+			std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> >::const_iterator emap = m_ComponentsByTypeId.find(*ctit);
 			if (emap == m_ComponentsByTypeId.end())
 				continue;
 
 			// Send the message to all of them
-			std::map<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
+			OrderedMapType<entity_id_t, IComponent*>::const_iterator eit = emap->second.begin();
 			for (; eit != emap->second.end(); ++eit)
 				eit->second->HandleMessage(msg, true);
 		}

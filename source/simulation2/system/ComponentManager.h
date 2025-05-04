@@ -26,6 +26,7 @@
 #include "simulation2/system/IComponent.h"
 
 #include <boost/random/linear_congruential.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <map>
 #include <set>
 #include <unordered_map>
@@ -45,6 +46,13 @@ public:
 	typedef int InterfaceId;
 	typedef int ComponentTypeId;
 	typedef int MessageTypeId;
+
+	// boost::unordered_flat_map is much faster than std::unordered_map and std::map
+	// while remaining deterministic and portable across platforms.
+	template <typename K, typename V>
+	using MapType = boost::unordered_flat_map<K, V>;
+	template <typename K, typename V>
+	using OrderedMapType = MapType<K, V>;
 
 private:
 	using AllocFunc = IComponent::AllocFunc;
@@ -253,7 +261,7 @@ public:
 
 	using InterfacePair = std::pair<entity_id_t, IComponent*>;
 	using InterfaceList = std::vector<InterfacePair>;
-	using InterfaceListUnordered = std::unordered_map<entity_id_t, IComponent*>;
+	using InterfaceListUnordered = MapType<entity_id_t, IComponent*>;
 
 	InterfaceList GetEntitiesWithInterface(InterfaceId iid) const;
 	const InterfaceListUnordered& GetEntitiesWithInterfaceUnordered(InterfaceId iid) const;
@@ -332,8 +340,8 @@ private:
 	// TODO: some of these should be vectors
 	std::map<ComponentTypeId, ComponentType> m_ComponentTypesById;
 	std::vector<CComponentManager::ComponentTypeId> m_ScriptedSystemComponents;
-	std::vector<std::unordered_map<entity_id_t, IComponent*> > m_ComponentsByInterface; // indexed by InterfaceId
-	std::map<ComponentTypeId, std::map<entity_id_t, IComponent*> > m_ComponentsByTypeId;
+	std::vector<MapType<entity_id_t, IComponent*> > m_ComponentsByInterface; // indexed by InterfaceId
+	std::map<ComponentTypeId, OrderedMapType<entity_id_t, IComponent*> > m_ComponentsByTypeId;
 	std::map<MessageTypeId, std::vector<ComponentTypeId> > m_LocalMessageSubscriptions;
 	std::map<MessageTypeId, std::vector<ComponentTypeId> > m_GlobalMessageSubscriptions;
 	std::map<std::string, ComponentTypeId> m_ComponentTypeIdsByName;
@@ -344,8 +352,8 @@ private:
 	std::map<MessageTypeId, CDynamicSubscription> m_DynamicMessageSubscriptionsNonsync;
 	std::map<IComponent*, std::set<MessageTypeId> > m_DynamicMessageSubscriptionsNonsyncByComponent;
 
-	std::unordered_map<entity_id_t, SEntityComponentCache*> m_ComponentCaches;
-	std::unordered_map<entity_id_t, std::vector<JS::Heap<JS::Value>*>> m_TraceCache;
+	MapType<entity_id_t, SEntityComponentCache*> m_ComponentCaches;
+	MapType<entity_id_t, std::vector<JS::Heap<JS::Value>*>> m_TraceCache;
 
 	// TODO: maintaining both ComponentsBy* is nasty; can we get rid of one,
 	// while keeping QueryInterface and PostMessage sufficiently efficient?

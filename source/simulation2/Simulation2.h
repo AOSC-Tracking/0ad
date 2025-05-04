@@ -23,6 +23,7 @@
 #include "simulation2/system/CmpPtr.h"
 #include "simulation2/system/Components.h"
 
+#include <boost/unordered/unordered_flat_map.hpp>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -209,7 +210,7 @@ public:
 		std::vector<std::pair<entity_id_t, IComponent*> >;
 
 	using InterfaceListUnordered =
-		std::unordered_map<entity_id_t, IComponent*>;
+		boost::unordered_flat_map<entity_id_t, IComponent*>;
 
 	/**
 	 * Returns a list of components implementing the given interface, and their
