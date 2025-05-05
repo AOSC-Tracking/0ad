@@ -2,11 +2,7 @@ GameSettingControls.SeaLevelRiseTime = class SeaLevelRiseTime extends GameSettin
 {
 	constructor(...args)
 	{
-		super(...args);
-
-		g_GameSettings.seaLevelRise.watch(() => this.render(), ["value"]);
-		g_GameSettings.map.watch(() => this.render(), ["type"]);
-		this.render();
+		super({ "seaLevelRise": ["value"], "map": ["type"] }, ...args);
 	}
 
 	render()

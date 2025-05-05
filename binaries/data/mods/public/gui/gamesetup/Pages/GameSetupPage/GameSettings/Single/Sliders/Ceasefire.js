@@ -2,11 +2,7 @@ GameSettingControls.Ceasefire = class Ceasefire extends GameSettingControlSlider
 {
 	constructor(...args)
 	{
-		super(...args);
-
-		g_GameSettings.ceasefire.watch(() => this.render(), ["value"]);
-		g_GameSettings.map.watch(() => this.render(), ["type"]);
-		this.render();
+		super({ "ceasefire": ["value"], "map": ["type"] }, ...args);
 	}
 
 	render()

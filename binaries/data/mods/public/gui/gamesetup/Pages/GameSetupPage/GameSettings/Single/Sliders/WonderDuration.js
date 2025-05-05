@@ -2,11 +2,7 @@ GameSettingControls.WonderDuration = class WonderDuration extends GameSettingCon
 {
 	constructor(...args)
 	{
-		super(...args);
-
-		g_GameSettings.wonder.watch(() => this.render(), ["duration", "available"]);
-		g_GameSettings.map.watch(() => this.render(), ["type"]);
-		this.render();
+		super({ "wonder": ["duration", "available"], "map": ["type"] }, ...args);
 	}
 
 	render()

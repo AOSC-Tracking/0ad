@@ -2,11 +2,7 @@ GameSettingControls.RelicCount = class RelicCount extends GameSettingControlSlid
 {
 	constructor(...args)
 	{
-		super(...args);
-
-		g_GameSettings.relicCount.watch(() => this.render(), ["value", "available"]);
-		g_GameSettings.map.watch(() => this.render(), ["type"]);
-		this.render();
+		super({ "relicCount": ["value", "available"], "map": ["type"] }, ...args);
 	}
 
 	render()

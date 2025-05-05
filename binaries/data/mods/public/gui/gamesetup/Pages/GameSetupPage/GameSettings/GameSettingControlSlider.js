@@ -3,7 +3,7 @@
  */
 class GameSettingControlSlider extends GameSettingControl
 {
-	constructor(...args)
+	constructor(triggers, ...args)
 	{
 		super(...args);
 
@@ -19,6 +19,11 @@ class GameSettingControlSlider extends GameSettingControl
 
 		if (this.MaxValue !== undefined)
 			this.slider.max_value = this.MaxValue;
+
+		for (const [setting, values] of Object.entries(triggers))
+			g_GameSettings[setting].watch(this.render.bind(this), values);
+
+		this.render();
 	}
 
 	setControl(gameSettingControlManager)
