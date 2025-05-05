@@ -56,6 +56,7 @@
 	<include directory="gui/session/dialogs/"/>
 	<include directory="gui/session/diplomacy/"/>
 	<include directory="gui/session/objectives/"/>
+	<include directory="gui/session/stats_overlay/"/>
 	<include file="gui/session/GameSpeedControl.xml"/>
 	<include file="gui/session/PanelEntities.xml"/>
 	<include file="gui/session/ResearchProgress.xml"/>

@@ -1,0 +1,13 @@
+<object name="statsOverlay" type="text"
+    size="100%-100 100%-228-100 100% 100%-50"
+    style="ModernText"
+	sprite="color:0 0 0 200"
+    textcolor="255 255 255 255"
+    font="sans-bold-16"
+    z="120"
+    buffer_zone="4"
+    hidden="false"
+    text_align="right"
+    ghost="true">
+    <script file="gui/session/stats_overlay/statsOverlay.js"/>
+</object>

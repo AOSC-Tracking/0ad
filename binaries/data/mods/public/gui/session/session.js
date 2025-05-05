@@ -129,6 +129,11 @@ var g_TemplateData = {};
 var g_TechnologyData = {};
 
 var g_ResourceData = new Resources();
+/**
+ * Show players stats overlay
+ */
+var g_StatsOverlay;
+var g_LastStatsUpdate = 0;
 
 /**
  * These handlers are called each time a new turn was simulated.
@@ -178,6 +183,7 @@ var g_WorkerTypes = ["FemaleCitizen", "Trader", "FishingBoat", "Citizen"];
  * Unit classes to be checked for the military-only-selection modifier and for the idle-warrior-hotkey.
  */
 var g_MilitaryTypes = ["Melee", "Ranged"];
+
 
 function GetSimState()
 {
@@ -648,6 +654,23 @@ function onTick()
 	let isPlayingCinemaPath = GetSimState().cinemaPlaying && !g_Disconnected;
 	if (isPlayingCinemaPath)
 		updateCinemaOverlay();
+	//statsOverlay init and refresh
+	if (!g_StatsOverlay)
+		{
+			const overlayObj = Engine.GetGUIObjectByName("statsOverlay");
+			if (overlayObj)
+			{
+				g_StatsOverlay = new StatsOverlay();
+			}
+		}
+
+		// If it's already initialized, update every 3 seconds
+		// No need to call this every single frame
+		if (g_StatsOverlay && now - g_LastStatsUpdate >= 3000)
+		{
+			g_StatsOverlay.update();
+			g_LastStatsUpdate = now;
+		}
 }
 
 function onSimulationUpdate()
