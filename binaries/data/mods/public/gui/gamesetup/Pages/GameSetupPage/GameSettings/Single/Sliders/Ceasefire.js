@@ -19,13 +19,9 @@ GameSettingControls.Ceasefire = class Ceasefire extends GameSettingControlSlider
 				this.NoCeasefireCaption :
 				sprintf(this.CeasefireCaption(value), { "minutes": value }));
 	}
-
-	onValueChange(value)
-	{
-		g_GameSettings.ceasefire.setValue(value);
-		this.gameSettingsController.setNetworkInitAttributes();
-	}
 };
+
+GameSettingControls.Ceasefire.prototype.AttributeName = "ceasefire";
 
 GameSettingControls.Ceasefire.prototype.TitleCaption =
 	translate("Ceasefire");

@@ -23,13 +23,9 @@ GameSettingControls.RelicDuration = class RelicDuration extends GameSettingContr
 				sprintf(this.CaptionVictoryTime(value), { "min": value }));
 		}
 	}
-
-	onValueChange(value)
-	{
-		g_GameSettings.relicDuration.setValue(value);
-		this.gameSettingsController.setNetworkInitAttributes();
-	}
 };
+
+GameSettingControls.RelicDuration.prototype.AttributeName = "relicDuration";
 
 GameSettingControls.RelicDuration.prototype.TitleCaption =
 	translate("Relic Duration");

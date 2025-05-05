@@ -25,13 +25,9 @@ GameSettingControls.WonderDuration = class WonderDuration extends GameSettingCon
 					sprintf(this.CaptionVictoryTime(value), { "min": value }));
 		}
 	}
-
-	onValueChange(value)
-	{
-		g_GameSettings.wonder.setValue(value);
-		this.gameSettingsController.setNetworkInitAttributes();
-	}
 };
+
+GameSettingControls.WonderDuration.prototype.AttributeName = "wonder";
 
 GameSettingControls.WonderDuration.prototype.TitleCaption =
 	translate("Wonder Duration");

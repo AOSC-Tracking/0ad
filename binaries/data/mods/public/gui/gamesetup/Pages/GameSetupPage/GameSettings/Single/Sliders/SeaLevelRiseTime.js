@@ -23,13 +23,9 @@ GameSettingControls.SeaLevelRiseTime = class SeaLevelRiseTime extends GameSettin
 		this.setSelectedValue(
 			value, sprintf(this.SeaLevelRiseTimeCaption(value), { "minutes": value }));
 	}
-
-	onValueChange(value)
-	{
-		g_GameSettings.seaLevelRise.setValue(value);
-		this.gameSettingsController.setNetworkInitAttributes();
-	}
 };
+
+GameSettingControls.SeaLevelRiseTime.prototype.AttributeName = "seaLevelRise";
 
 GameSettingControls.SeaLevelRiseTime.prototype.TitleCaption =
 	translate("Sea Level Rise Time");

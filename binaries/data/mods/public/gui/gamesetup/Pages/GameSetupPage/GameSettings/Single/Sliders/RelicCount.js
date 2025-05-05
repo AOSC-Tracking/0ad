@@ -23,13 +23,9 @@ GameSettingControls.RelicCount = class RelicCount extends GameSettingControlSlid
 				sprintf(this.CaptionRelicCount(value), { "number": value }));
 		}
 	}
-
-	onValueChange(value)
-	{
-		g_GameSettings.relicCount.setValue(value);
-		this.gameSettingsController.setNetworkInitAttributes();
-	}
 };
+
+GameSettingControls.RelicCount.prototype.AttributeName = "relicCount";
 
 GameSettingControls.RelicCount.prototype.TitleCaption =
 	translate("Relic Count");

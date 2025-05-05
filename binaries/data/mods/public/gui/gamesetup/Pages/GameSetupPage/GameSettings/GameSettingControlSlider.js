@@ -10,7 +10,7 @@ class GameSettingControlSlider extends GameSettingControl
 		this.isInGuiUpdate = false;
 		this.isPressing = false;
 
-		this.slider.onValueChange = this.onValueChangeSuper.bind(this);
+		this.slider.onValueChange = this.onValueChange.bind(this);
 		this.slider.onPress = this.onPress.bind(this);
 		this.slider.onRelease = this.onRelease.bind(this);
 
@@ -58,13 +58,16 @@ class GameSettingControlSlider extends GameSettingControl
 		this.valueLabel.caption = caption;
 	}
 
-	onValueChangeSuper()
+	onValueChange()
 	{
-		if (!this.isInGuiUpdate && !this.timer)
-			this.timer = setTimeout(() => {
-				this.onValueChange(this.slider.value);
-				delete this.timer;
-			}, this.Timeout);
+		if (this.isInGuiUpdate || this.timer)
+			return;
+
+		this.timer = setTimeout(() => {
+			g_GameSettings[this.AttributeName].setValue(this.slider.value);
+			this.gameSettingsController.setNetworkInitAttributes();
+			delete this.timer;
+		}, this.Timeout);
 	}
 
 	onPress()
