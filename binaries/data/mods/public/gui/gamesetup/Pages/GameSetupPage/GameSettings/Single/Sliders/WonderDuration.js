@@ -4,7 +4,6 @@ GameSettingControls.WonderDuration = class WonderDuration extends GameSettingCon
 	{
 		super(...args);
 
-		this.sprintfValue = {};
 		this.available = false;
 
 		g_GameSettings.wonder.watch(() => this.render(), ["duration", "available"]);
@@ -19,11 +18,11 @@ GameSettingControls.WonderDuration = class WonderDuration extends GameSettingCon
 
 		if (g_GameSettings.wonder.available)
 		{
-			let value = g_GameSettings.wonder.duration;
-			this.sprintfValue.min = value;
+			const value = g_GameSettings.wonder.duration;
 			this.setSelectedValue(
 				g_GameSettings.wonder.duration,
-				value == 0 ? this.InstantVictory : sprintf(this.CaptionVictoryTime(value), this.sprintfValue));
+				value == 0 ? this.InstantVictory :
+					sprintf(this.CaptionVictoryTime(value), { "min": value }));
 		}
 	}
 

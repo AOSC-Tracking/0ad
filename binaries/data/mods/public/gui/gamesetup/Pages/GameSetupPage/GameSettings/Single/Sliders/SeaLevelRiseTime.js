@@ -5,7 +5,6 @@ GameSettingControls.SeaLevelRiseTime = class SeaLevelRiseTime extends GameSettin
 		super(...args);
 
 		this.values = undefined;
-		this.sprintfValue = {};
 
 		g_GameSettings.seaLevelRise.watch(() => this.render(), ["value"]);
 		g_GameSettings.map.watch(() => this.render(), ["type"]);
@@ -20,11 +19,9 @@ GameSettingControls.SeaLevelRiseTime = class SeaLevelRiseTime extends GameSettin
 		if (hidden)
 			return;
 
-		let value = g_GameSettings.seaLevelRise.value;
-		this.sprintfValue.minutes = value;
-
+		const value = g_GameSettings.seaLevelRise.value;
 		this.setSelectedValue(
-			value, sprintf(this.SeaLevelRiseTimeCaption(value), this.sprintfValue));
+			value, sprintf(this.SeaLevelRiseTimeCaption(value), { "minutes": value }));
 	}
 
 	onValueChange(value)

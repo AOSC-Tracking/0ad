@@ -4,8 +4,6 @@ GameSettingControls.Ceasefire = class Ceasefire extends GameSettingControlSlider
 	{
 		super(...args);
 
-		this.sprintfValue = {};
-
 		g_GameSettings.ceasefire.watch(() => this.render(), ["value"]);
 		g_GameSettings.map.watch(() => this.render(), ["type"]);
 		this.render();
@@ -15,13 +13,11 @@ GameSettingControls.Ceasefire = class Ceasefire extends GameSettingControlSlider
 	{
 		this.setEnabled(g_GameSettings.map.type != "scenario");
 
-		let value = Math.round(g_GameSettings.ceasefire.value);
-		this.sprintfValue.minutes = value;
-
+		const value = Math.round(g_GameSettings.ceasefire.value);
 		this.setSelectedValue(g_GameSettings.ceasefire.value,
 			value == 0 ?
 				this.NoCeasefireCaption :
-				sprintf(this.CeasefireCaption(value), this.sprintfValue));
+				sprintf(this.CeasefireCaption(value), { "minutes": value }));
 	}
 
 	onValueChange(value)

@@ -4,7 +4,6 @@ GameSettingControls.RelicCount = class RelicCount extends GameSettingControlSlid
 	{
 		super(...args);
 
-		this.sprintfValue = {};
 		this.available = false;
 
 		g_GameSettings.relic.watch(() => this.render(), ["count", "available"]);
@@ -19,11 +18,11 @@ GameSettingControls.RelicCount = class RelicCount extends GameSettingControlSlid
 
 		if (g_GameSettings.relic.available)
 		{
-			let value = g_GameSettings.relic.count;
-			this.sprintfValue.number = value;
+			const value = g_GameSettings.relic.count;
 			this.setSelectedValue(
 				g_GameSettings.relic.count,
-				value == 0 ? this.InstantVictory : sprintf(this.CaptionRelicCount(value), this.sprintfValue));
+				value == 0 ? this.InstantVictory :
+					sprintf(this.CaptionRelicCount(value), { "number": value }));
 		}
 	}
 

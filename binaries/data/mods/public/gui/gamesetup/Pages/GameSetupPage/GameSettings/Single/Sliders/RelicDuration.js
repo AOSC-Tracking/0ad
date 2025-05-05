@@ -4,7 +4,6 @@ GameSettingControls.RelicDuration = class RelicDuration extends GameSettingContr
 	{
 		super(...args);
 
-		this.sprintfValue = {};
 		this.available = false;
 
 		g_GameSettings.relic.watch(() => this.render(), ["duration", "available"]);
@@ -19,11 +18,11 @@ GameSettingControls.RelicDuration = class RelicDuration extends GameSettingContr
 
 		if (g_GameSettings.relic.available)
 		{
-			let value = g_GameSettings.relic.duration;
-			this.sprintfValue.min = value;
+			const value = g_GameSettings.relic.duration;
 			this.setSelectedValue(
 				g_GameSettings.relic.duration,
-				value == 0 ? this.InstantVictory : sprintf(this.CaptionVictoryTime(value), this.sprintfValue));
+				value == 0 ? this.InstantVictory :
+					sprintf(this.CaptionVictoryTime(value), { "min": value }));
 		}
 	}
 
