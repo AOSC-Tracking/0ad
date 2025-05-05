@@ -6,29 +6,27 @@ GameSettingControls.RelicCount = class RelicCount extends GameSettingControlSlid
 
 		this.available = false;
 
-		g_GameSettings.relic.watch(() => this.render(), ["count", "available"]);
+		g_GameSettings.relicCount.watch(() => this.render(), ["value", "available"]);
 		g_GameSettings.map.watch(() => this.render(), ["type"]);
 		this.render();
 	}
 
 	render()
 	{
-		this.setHidden(!g_GameSettings.relic.available);
+		this.setHidden(!g_GameSettings.relicCount.available);
 		this.setEnabled(g_GameSettings.map.type != "scenario");
 
-		if (g_GameSettings.relic.available)
+		if (g_GameSettings.relicCount.available)
 		{
-			const value = g_GameSettings.relic.count;
-			this.setSelectedValue(
-				g_GameSettings.relic.count,
-				value == 0 ? this.InstantVictory :
-					sprintf(this.CaptionRelicCount(value), { "number": value }));
+			const value = g_GameSettings.relicCount.value;
+			this.setSelectedValue(value, value == 0 ? this.InstantVictory :
+				sprintf(this.CaptionRelicCount(value), { "number": value }));
 		}
 	}
 
 	onValueChange(value)
 	{
-		g_GameSettings.relic.setCount(value);
+		g_GameSettings.relicCount.setValue(value);
 		this.gameSettingsController.setNetworkInitAttributes();
 	}
 };

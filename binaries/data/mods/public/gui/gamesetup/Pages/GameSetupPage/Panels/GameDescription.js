@@ -29,7 +29,8 @@ class GameDescription
 		g_GameSettings.playerPlacement.watch(update, ["value"]);
 		g_GameSettings.rating.watch(update, ["enabled"]);
 		g_GameSettings.regicideGarrison.watch(update, ["enabled"]);
-		g_GameSettings.relic.watch(update, ["count", "duration"]);
+		g_GameSettings.relicCount.watch(update, ["value"]);
+		g_GameSettings.relicDuration.watch(update, ["value"]);
 		g_GameSettings.startingResources.watch(update, ["perPlayer", "resources"]);
 		g_GameSettings.triggerDifficulty.watch(update, ["value"]);
 		g_GameSettings.victoryConditions.watch(update, ["active"]);

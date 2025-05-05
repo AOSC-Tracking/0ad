@@ -6,29 +6,27 @@ GameSettingControls.RelicDuration = class RelicDuration extends GameSettingContr
 
 		this.available = false;
 
-		g_GameSettings.relic.watch(() => this.render(), ["duration", "available"]);
+		g_GameSettings.relicDuration.watch(() => this.render(), ["value", "available"]);
 		g_GameSettings.map.watch(() => this.render(), ["type"]);
 		this.render();
 	}
 
 	render()
 	{
-		this.setHidden(!g_GameSettings.relic.available);
+		this.setHidden(!g_GameSettings.relicDuration.available);
 		this.setEnabled(g_GameSettings.map.type != "scenario");
 
-		if (g_GameSettings.relic.available)
+		if (g_GameSettings.relicDuration.available)
 		{
-			const value = g_GameSettings.relic.duration;
-			this.setSelectedValue(
-				g_GameSettings.relic.duration,
-				value == 0 ? this.InstantVictory :
-					sprintf(this.CaptionVictoryTime(value), { "min": value }));
+			const value = g_GameSettings.relicDuration.value;
+			this.setSelectedValue(value, value == 0 ? this.InstantVictory :
+				sprintf(this.CaptionVictoryTime(value), { "min": value }));
 		}
 	}
 
 	onValueChange(value)
 	{
-		g_GameSettings.relic.setDuration(value);
+		g_GameSettings.relicDuration.setValue(value);
 		this.gameSettingsController.setNetworkInitAttributes();
 	}
 };
