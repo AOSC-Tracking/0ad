@@ -17,17 +17,17 @@ GameSettings.prototype.Attributes.Wonder = class Wonder extends GameSetting
 	fromInitAttributes(attribs)
 	{
 		if (this.getLegacySetting(attribs, "WonderDuration") !== undefined)
-			this.setDuration(+this.getLegacySetting(attribs, "WonderDuration"));
+			this.setValue(+this.getLegacySetting(attribs, "WonderDuration"));
 	}
 
 	onMapChange()
 	{
 		if (this.settings.map.type != "scenario")
 			return;
-		this.setDuration(+this.getMapSetting("WonderDuration") || 0);
+		this.setValue(+this.getMapSetting("WonderDuration") || 0);
 	}
 
-	setDuration(duration)
+	setValue(duration)
 	{
 		this.available = this.settings.victoryConditions.active.has("wonder");
 		this.duration = Math.round(duration);
@@ -35,6 +35,6 @@ GameSettings.prototype.Attributes.Wonder = class Wonder extends GameSetting
 
 	maybeUpdate()
 	{
-		this.setDuration(this.duration);
+		this.setValue(this.duration);
 	}
 };
