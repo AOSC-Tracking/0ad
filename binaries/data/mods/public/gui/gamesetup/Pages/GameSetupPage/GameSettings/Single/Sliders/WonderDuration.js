@@ -1,42 +1,23 @@
-GameSettingControls.WonderDuration = class WonderDuration extends GameSettingControlSlider
-{
-	constructor(...args)
-	{
-		super({ "wonder": ["duration", "available"], "map": ["type"] }, ...args);
-	}
-
-	render()
-	{
-		this.setHidden(!g_GameSettings.wonder.available);
-		this.setEnabled(g_GameSettings.map.type != "scenario");
-
-		if (g_GameSettings.wonder.available)
+GameSettingControls.WonderDuration = GameSettingControlSlider.bind(undefined, {
+	"triggers": { "wonder": ["duration", "available"], "map": ["type"] },
+	"render": function()
 		{
-			const value = g_GameSettings.wonder.duration;
-			this.setSelectedValue(
-				g_GameSettings.wonder.duration,
-				value == 0 ? this.InstantVictory :
-					sprintf(this.CaptionVictoryTime(value), { "min": value }));
-		}
-	}
-};
+			this.setHidden(!g_GameSettings.wonder.available);
+			this.setEnabled(g_GameSettings.map.type != "scenario");
 
-GameSettingControls.WonderDuration.prototype.AttributeName = "wonder";
-
-GameSettingControls.WonderDuration.prototype.TitleCaption =
-	translate("Wonder Duration");
-
-GameSettingControls.WonderDuration.prototype.Tooltip =
-	translate("Minutes until the player has achieved Wonder Victory");
-
-GameSettingControls.WonderDuration.prototype.CaptionVictoryTime =
-	min => translatePluralWithContext("victory duration", "%(min)s minute", "%(min)s minutes", min);
-
-GameSettingControls.WonderDuration.prototype.InstantVictory =
-	translateWithContext("victory duration", "Immediate Victory.");
-
-GameSettingControls.WonderDuration.prototype.MinValue = 0;
-
-GameSettingControls.WonderDuration.prototype.MaxValue = 60;
-
-GameSettingControls.WonderDuration.prototype.DefaultValue = 20;
+			if (g_GameSettings.wonder.available)
+			{
+				const value = g_GameSettings.wonder.duration;
+				this.setSelectedValue(
+					g_GameSettings.wonder.duration,
+					value == 0 ? translateWithContext("victory duration", "Immediate Victory.") :
+						sprintf(translatePluralWithContext("victory duration", "%(min)s minute",
+							"%(min)s minutes", value), { "min": value }));
+			}
+		},
+	"attributeName": "wonder",
+	"titleCaption": translate("Wonder Duration"),
+	"tooltip": translate("Minutes until the player has achieved Wonder Victory."),
+	"minValue": 0,
+	"maxValue": 60
+});

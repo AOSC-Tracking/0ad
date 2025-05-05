@@ -3,27 +3,29 @@
  */
 class GameSettingControlSlider extends GameSettingControl
 {
-	constructor(triggers, ...args)
+	constructor(type, ...args)
 	{
 		super(...args);
 
 		this.isInGuiUpdate = false;
 		this.isPressing = false;
+		this.TitleCaption = type.titleCaption;
+		this.Tooltip = type.Tooltip;
 
-		this.slider.onValueChange = this.onValueChange.bind(this);
+		this.slider.onValueChange = this.onValueChange.bind(this, type.attributeName);
 		this.slider.onPress = this.onPress.bind(this);
 		this.slider.onRelease = this.onRelease.bind(this);
 
-		if (this.MinValue !== undefined)
-			this.slider.min_value = this.MinValue;
+		if (type.minValue !== undefined)
+			this.slider.min_value = type.minValue;
 
-		if (this.MaxValue !== undefined)
-			this.slider.max_value = this.MaxValue;
+		if (type.maxValue !== undefined)
+			this.slider.max_value = type.maxValue;
 
-		for (const [setting, values] of Object.entries(triggers))
-			g_GameSettings[setting].watch(this.render.bind(this), values);
+		for (const [setting, values] of Object.entries(type.triggers))
+			g_GameSettings[setting].watch(type.render.bind(this), values);
 
-		this.render();
+		type.render.call(this);
 	}
 
 	setControl(gameSettingControlManager)
@@ -63,13 +65,13 @@ class GameSettingControlSlider extends GameSettingControl
 		this.valueLabel.caption = caption;
 	}
 
-	onValueChange()
+	onValueChange(attributeName)
 	{
 		if (this.isInGuiUpdate || this.timer)
 			return;
 
 		this.timer = setTimeout(() => {
-			g_GameSettings[this.AttributeName].setValue(this.slider.value);
+			g_GameSettings[attributeName].setValue(this.slider.value);
 			this.gameSettingsController.setNetworkInitAttributes();
 			delete this.timer;
 		}, this.Timeout);

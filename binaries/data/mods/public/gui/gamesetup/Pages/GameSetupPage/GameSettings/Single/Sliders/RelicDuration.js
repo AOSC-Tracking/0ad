@@ -1,41 +1,22 @@
-GameSettingControls.RelicDuration = class RelicDuration extends GameSettingControlSlider
-{
-	constructor(...args)
-	{
-		super({ "relicDuration": ["value", "available"], "map": ["type"] }, ...args);
-	}
-
-	render()
-	{
-		this.setHidden(!g_GameSettings.relicDuration.available);
-		this.setEnabled(g_GameSettings.map.type != "scenario");
-
-		if (g_GameSettings.relicDuration.available)
+GameSettingControls.RelicDuration = GameSettingControlSlider.bind(undefined, {
+	"triggers": { "relicDuration": ["value", "available"], "map": ["type"] },
+	"render": function()
 		{
-			const value = g_GameSettings.relicDuration.value;
-			this.setSelectedValue(value, value == 0 ? this.InstantVictory :
-				sprintf(this.CaptionVictoryTime(value), { "min": value }));
-		}
-	}
-};
+			this.setHidden(!g_GameSettings.relicDuration.available);
+			this.setEnabled(g_GameSettings.map.type != "scenario");
 
-GameSettingControls.RelicDuration.prototype.AttributeName = "relicDuration";
-
-GameSettingControls.RelicDuration.prototype.TitleCaption =
-	translate("Relic Duration");
-
-GameSettingControls.RelicDuration.prototype.Tooltip =
-	translate("Minutes until the player has achieved Relic Victory.");
-
-GameSettingControls.RelicDuration.prototype.NameCaptureTheRelic =
-	"capture_the_relic";
-
-GameSettingControls.RelicDuration.prototype.CaptionVictoryTime =
-	min => translatePluralWithContext("victory duration", "%(min)s minute", "%(min)s minutes", min);
-
-GameSettingControls.RelicDuration.prototype.InstantVictory =
-	translateWithContext("victory duration", "Immediate Victory.");
-
-GameSettingControls.RelicDuration.prototype.MinValue = 0;
-
-GameSettingControls.RelicDuration.prototype.MaxValue = 60;
+			if (g_GameSettings.relicDuration.available)
+			{
+				const value = g_GameSettings.relicDuration.value;
+				this.setSelectedValue(value, value == 0 ?
+					translateWithContext("victory duration", "Immediate Victory.") :
+					sprintf(translatePluralWithContext("victory duration", "%(min)s minute",
+						"%(min)s minutes", value), { "min": value }));
+			}
+		},
+	"attributeName": "relicDuration",
+	"titleCaption": translate("Relic Duration"),
+	"tooltip": translate("Minutes until the player has achieved Relic Victory."),
+	"minValue": 0,
+	"maxValue": 60
+});
