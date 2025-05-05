@@ -4,8 +4,6 @@ GameSettingControls.RelicDuration = class RelicDuration extends GameSettingContr
 	{
 		super(...args);
 
-		this.available = false;
-
 		g_GameSettings.relicDuration.watch(() => this.render(), ["value", "available"]);
 		g_GameSettings.map.watch(() => this.render(), ["type"]);
 		this.render();
