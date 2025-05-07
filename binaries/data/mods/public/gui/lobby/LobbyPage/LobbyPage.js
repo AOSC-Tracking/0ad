@@ -13,7 +13,7 @@ class LobbyPage
 		accountSettingsButton.onPress = AccountSettingsPage.openPage.bind(null, xmppMessages);
 		const gameList = new GameList(xmppMessages, buddyButton, mapCache);
 		const playerList = new PlayerList(xmppMessages, buddyButton, gameList);
-
+		new LobbyMenu();
 		this.lobbyPage = {
 			"buttons": {
 				"buddyButton": buddyButton,

@@ -553,11 +553,13 @@ function initGUILabels()
 function initGUIButtons()
 {
 	let replayButton = Engine.GetGUIObjectByName("replayButton");
-	replayButton.hidden = g_GameData.gui.isInGame || !g_GameData.gui.replayDirectory;
+	replayButton.hidden = g_GameData.gui.isInGame || !g_GameData.gui.replayDirectory || g_GameData.gui.dialog;
+
+
 
 	let lobbyButton = Engine.GetGUIObjectByName("lobbyButton");
 	lobbyButton.tooltip = colorizeHotkey(translate("%(hotkey)s: Toggle the multiplayer lobby in a dialog window."), "lobby");
-	lobbyButton.hidden = g_GameData.gui.isInGame || !Engine.HasXmppClient();
+	lobbyButton.hidden = g_GameData.gui.isInGame || !Engine.HasXmppClient() || g_GameData.gui.dialog;
 
 	// Right-align lobby button
 	let lobbyButtonSize = lobbyButton.size;

@@ -10,5 +10,32 @@
 		<translatableAttribute id="caption">Host Saved Game</translatableAttribute>
 	</object>
 
-	<object name="leaveButton" size="0 100%-25 100% 100%" type="button" style="ModernButtonRed"/>
+
+	<object name="leaveButton" size="0 100%-25 100%-27 100%" type="button" style="ModernButtonRed">
+		<translatableAttribute id="caption">Main Menu</translatableAttribute>
+	</object>
+
+	<object name="moreButton" size="100%-25 100%-25 100% 100%" type="button" style="ModernButtonRed">
+		<translatableAttribute id="caption">+</translatableAttribute>
+	</object>
+
+	<object name="lobbyMenuPanel"
+		style="StonePanelThinBorder"
+		type="image"
+		z="70"
+		size="100%-25 100%-25 100% 100%-25"
+		hidden="true"
+	>
+	<repeat count="4">
+		<object
+			type="button"
+			size="4 4 100%-4 32"
+			style="StoneButtonFancy"
+			tooltip_style="sessionToolTip"
+			hidden="true"
+		/>
+	</repeat>
+	</object>
+	<object name="optionsButton" size="0 0 0 0" hidden="true"/>
+	<object name="lastGameSummaryButton" size="0 0 0 0" hidden="true"/>
 </object>
