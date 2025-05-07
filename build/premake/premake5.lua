@@ -244,7 +244,7 @@ function project_set_build_flags()
 		defines { "CONFIG2_MINIUPNPC=0" }
 	end
 
-	if os.istarget("windows") or os.istarget("macos") then
+	if os.istarget("windows") or os.istarget("macosx") then
 		defines { "CONFIG2_VIDEO_WAYLAND=0" }
 		defines { "CONFIG2_VIDEO_X11=0" }
 	else
