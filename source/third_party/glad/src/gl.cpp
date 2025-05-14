@@ -56,6 +56,7 @@ int GLAD_GL_ARB_texture_compression_bptc = 0;
 int GLAD_GL_ARB_texture_float = 0;
 int GLAD_GL_ARB_texture_multisample = 0;
 int GLAD_GL_ARB_texture_rectangle = 0;
+int GLAD_GL_ARB_texture_swizzle = 0;
 int GLAD_GL_ARB_timer_query = 0;
 int GLAD_GL_ARB_uniform_buffer_object = 0;
 int GLAD_GL_ARB_vertex_buffer_object = 0;
@@ -75,6 +76,7 @@ int GLAD_GL_EXT_texture_compression_s3tc = 0;
 int GLAD_GL_EXT_texture_filter_anisotropic = 0;
 int GLAD_GL_EXT_texture_lod_bias = 0;
 int GLAD_GL_EXT_texture_sRGB = 0;
+int GLAD_GL_EXT_texture_swizzle = 0;
 int GLAD_GL_KHR_debug = 0;
 
 
@@ -2090,6 +2092,7 @@ static int glad_gl_find_extensions_gl(void) {
     GLAD_GL_ARB_texture_float = glad_gl_has_extension(exts, exts_i, "GL_ARB_texture_float");
     GLAD_GL_ARB_texture_multisample = glad_gl_has_extension(exts, exts_i, "GL_ARB_texture_multisample");
     GLAD_GL_ARB_texture_rectangle = glad_gl_has_extension(exts, exts_i, "GL_ARB_texture_rectangle");
+    GLAD_GL_ARB_texture_swizzle = glad_gl_has_extension(exts, exts_i, "GL_ARB_texture_swizzle");
     GLAD_GL_ARB_timer_query = glad_gl_has_extension(exts, exts_i, "GL_ARB_timer_query");
     GLAD_GL_ARB_uniform_buffer_object = glad_gl_has_extension(exts, exts_i, "GL_ARB_uniform_buffer_object");
     GLAD_GL_ARB_vertex_buffer_object = glad_gl_has_extension(exts, exts_i, "GL_ARB_vertex_buffer_object");
@@ -2109,6 +2112,7 @@ static int glad_gl_find_extensions_gl(void) {
     GLAD_GL_EXT_texture_filter_anisotropic = glad_gl_has_extension(exts, exts_i, "GL_EXT_texture_filter_anisotropic");
     GLAD_GL_EXT_texture_lod_bias = glad_gl_has_extension(exts, exts_i, "GL_EXT_texture_lod_bias");
     GLAD_GL_EXT_texture_sRGB = glad_gl_has_extension(exts, exts_i, "GL_EXT_texture_sRGB");
+    GLAD_GL_EXT_texture_swizzle = glad_gl_has_extension(exts, exts_i, "GL_EXT_texture_swizzle");
     GLAD_GL_KHR_debug = glad_gl_has_extension(exts, exts_i, "GL_KHR_debug");
 
     glad_gl_free_extensions(exts_i);
