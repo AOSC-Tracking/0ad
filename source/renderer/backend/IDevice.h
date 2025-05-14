@@ -63,6 +63,7 @@ public:
 		bool storage;
 		bool timestamps;
 		double timestampMultiplier;
+		bool textureSwizzle;
 	};
 
 	virtual ~IDevice() {}

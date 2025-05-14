@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -68,6 +68,7 @@ struct Desc
 	BorderColor borderColor;
 	bool compareEnabled;
 	CompareOp compareOp;
+	bool textureSwizzleEnabled;
 };
 
 Desc MakeDefaultSampler(Filter filter, AddressMode addressMode);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -202,6 +202,13 @@ std::unique_ptr<CTexture> CTexture::Create(
 		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_R;
 		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_R;
 		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_ONE;
+	}
+	else if (format == Format::R8_UNORM && defaultSamplerDesc.textureSwizzleEnabled)
+	{
+		imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_ZERO;
+		imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_ZERO;
+		imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_ZERO;
+		imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_R;
 	}
 	else
 	{

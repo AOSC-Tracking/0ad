@@ -193,6 +193,15 @@ std::unique_ptr<CTexture> CTexture::Create(
 			break;
 #if !CONFIG2_GLES
 		case Format::R8_UNORM:
+			if (defaultSamplerDesc.textureSwizzleEnabled)
+			{
+				ENSURE(texture->m_Device->GetCapabilities().textureSwizzle);
+				glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
+				glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+				glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
+				glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
+			}
+
 			internalFormat = GL_RED;
 			pixelFormat = GL_RED;
 			pixelType = GL_UNSIGNED_BYTE;
