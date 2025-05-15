@@ -10,4 +10,9 @@
 	<object type="text" style="ModernLabelText">
 		<translatableAttribute id="caption">Loading map data. Please wait…</translatableAttribute>
 	</object>
+
+	<object name="returnButton" type="button" style="ModernButtonRed" size="50%-128 0%+115 50%+128 143" hotkey="cancel">
+		<translatableAttribute id="caption">Cancel</translatableAttribute>
+	</object>
+
 </object>
