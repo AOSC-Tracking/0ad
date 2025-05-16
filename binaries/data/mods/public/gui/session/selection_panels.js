@@ -1247,6 +1247,145 @@ g_SelectionPanels.Upgrade = {
 	}
 };
 
+//Garrison EXP indicator by Atrik
+g_SelectionPanels.Garrison = {
+	"getMaxNumberOfItems": function () {
+		return 12;
+	},
+	"rowLength": 4,
+	"conflictsWith": ["Barter"],
+	"getItems": function (unitEntStates) {
+		if (unitEntStates.every(state => !state.garrisonHolder))
+			return [];
+
+		const groups = new EntityGroups();
+
+		for (const state of unitEntStates)
+			if (state.garrisonHolder)
+				groups.add(state.garrisonHolder.entities);
+
+		return groups.getEntsGrouped();
+	},
+	"setupButton": function (data) {
+		const entities = data.item.ents.map(id => GetEntityState(id));
+		const template = GetTemplateData(entities[0].template);
+		if (!template)
+			return false;
+
+		data.button.onPress = function () {
+			unloadTemplate(template.selectionGroupName || entities[0].template, entities[0].player);
+		};
+
+		data.countDisplay.caption = entities.length || "";
+
+		const canUngarrison = controlsPlayer(data.player) || controlsPlayer(entities[0].player);
+		data.button.enabled = canUngarrison;
+
+		let tooltipParts = [
+			canUngarrison ?
+			`${sprintf(translate("Unload %(name)s"), { "name": getEntityNames(template) })}\n${translate("Single-click to unload 1. Shift-click to unload all of this type.")}` :
+			getEntityNames(template),
+			sprintf(translate("Player: %(playername)s"), {
+				"playername": g_Players[entities[0].player].name
+			})
+		];
+
+		let totalExp = 0;
+		let totalExpReq = 0;
+		const rankCounts = {};
+		let hasPromotionData = false;
+
+		entities.forEach(entState => {
+			if (entState.promotion) {
+				hasPromotionData = true;
+				totalExp += entState.promotion.curr || 0;
+				totalExpReq += entState.promotion.req || 0;
+			}
+
+			if (entState.identity && entState.identity.rank) {
+				const rank = entState.identity.rank;
+				rankCounts[rank] = (rankCounts[rank] || 0) + 1;
+			}
+		});
+
+		// Add rank information if available
+		if (Object.keys(rankCounts).length > 0) {
+			const rankLines = [];
+
+			// If all units have the same rank
+			if (Object.keys(rankCounts).length === 1) {
+				const rank = Object.keys(rankCounts)[0];
+				rankLines.push(sprintf(translate("%(rank)s %(current)s"), {
+					"rank": `[font="sans-bold-13"]${translate("\nRank:")}[/font]`,
+									   "current": rank
+				}));
+			} else {
+				// Multiple different ranks - list them all
+				rankLines.push(`[font="sans-bold-13"]${translate("\nRanks:")}[/font]`);
+				for (const [rank, count] of Object.entries(rankCounts)) {
+					rankLines.push(sprintf(translate("• %(rank)s: %(count)s"), {
+						"rank": rank,
+						"count": count
+					}));
+				}
+			}
+
+			tooltipParts.push(rankLines.join("\n"));
+		}
+
+		// Add experience information if available
+		if (hasPromotionData) {
+			// Filter entities that actually have promotion data
+			const expEntities = entities.filter(ent => ent.promotion);
+			const expCount = expEntities.length;
+
+			// Recalculate totals only for entities with promotion data
+			let validTotalExp = 0;
+			let validTotalExpReq = 0;
+
+			expEntities.forEach(entState => {
+				validTotalExp += entState.promotion.curr || 0;
+				validTotalExpReq += entState.promotion.req || 0;
+			});
+
+			const avgExp = validTotalExp / expCount;
+			const avgExpReq = validTotalExpReq / expCount;
+
+			let expInfo = `[font="sans-bold-13"]${translate("\nExperience:")}[/font]`;
+
+			if (expCount < entities.length) {
+				expInfo += ` ${translate("(for %(count)s of %(total)s units)").replace("%(count)s", expCount).replace("%(total)s", entities.length)}`;
+			}
+
+			expInfo += avgExp < avgExpReq ?
+			sprintf(translate("\n%(current)s / %(required)s (average)"), {
+				"current": Math.floor(avgExp),
+					"required": Math.ceil(avgExpReq)
+			}) :
+			sprintf(translate("\n%(current)s (average)"), {
+				"current": Math.floor(avgExp)
+			});
+
+			tooltipParts.push(expInfo);
+		}
+
+		// Combine all tooltip parts
+		data.button.tooltip = tooltipParts.join("\n");
+
+		data.guiSelection.sprite = `color:${g_DiplomacyColors.getPlayerColor(entities[0].player, 160)}`;
+		data.button.sprite_disabled = data.button.sprite;
+
+		data.icon.sprite =
+		`${canUngarrison || g_IsObserver ? "" : "grayscale:"
+		}stretched:session/portraits/${template.icon}`;
+
+		setPanelObjectPosition(data.button, data.i, data.rowLength);
+
+		return true;
+	}
+};
+
+
 function initSelectionPanels()
 {
 
