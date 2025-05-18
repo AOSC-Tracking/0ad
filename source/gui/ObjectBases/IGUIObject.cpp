@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -224,6 +224,12 @@ void IGUIObject::ResetStates()
 	UpdateMouseOver(nullptr);
 }
 
+void IGUIObject::CleanSize()
+{
+	if (m_Size->MarkClean())
+		SettingChanged("size", true);
+}
+
 void IGUIObject::UpdateCachedSize()
 {
 	// If absolute="false" and the object has got a parent,
@@ -256,6 +262,7 @@ void IGUIObject::UpdateCachedSize()
 
 CRect IGUIObject::GetComputedSize()
 {
+	CleanSize();
 	UpdateCachedSize();
 	return m_CachedActualSize;
 }

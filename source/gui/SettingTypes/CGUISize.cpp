@@ -1,4 +1,4 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -26,12 +26,12 @@
 #include "scriptinterface/ScriptInterface.h"
 
 CGUISize::CGUISize()
-	: pixel(), percent()
+	: pixel(), percent(), m_IsDirty(false), m_JSInstance(nullptr)
 {
 }
 
 CGUISize::CGUISize(const CRect& pixel, const CRect& percent)
-	: pixel(pixel), percent(percent)
+	: pixel(pixel), percent(percent), m_IsDirty(false), m_JSInstance(nullptr)
 {
 }
 
@@ -145,24 +145,19 @@ bool CGUISize::FromString(const CStr& Value)
 
 void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) const
 {
+	if (m_JSInstance == nullptr)
+		CreateJSInstance(rq);
+
+	ret.setObject(*m_JSInstance->get());
+}
+
+void CGUISize::CreateJSInstance(const ScriptRequest& rq) const
+{
 	const ScriptInterface& scriptInterface = rq.GetScriptInterface();
-	ret.setObjectOrNull(scriptInterface.CreateCustomObject("GUISize"));
-
-	if (!ret.isObject())
-	{
-		ScriptException::Raise(rq, "CGUISize value is not an Object");
-		return;
-	}
-
-	JS::RootedObject obj(rq.cx, &ret.toObject());
-	if (!JS_InstanceOf(rq.cx, obj, &JSI_GUISize::JSI_class, nullptr))
-	{
-		ScriptException::Raise(rq, "CGUISize value is not a CGUISize class instance");
-		return;
-	}
+	JS::RootedObject obj(rq.cx, scriptInterface.CreateCustomObject("GUISize"));
 
 #define P(x, y, z)\
-	if (!Script::SetProperty(rq, ret, #z, x.y)) \
+	if (!JS_SetProperty(rq.cx, obj, #z, JS::RootedValue(rq.cx, JS::DoubleValue(x.y)))) \
 	{ \
 		ScriptException::Raise(rq, "Could not SetProperty '%s'", #z); \
 		return; \
@@ -176,6 +171,9 @@ void CGUISize::ToJSVal(const ScriptRequest& rq, JS::MutableHandleValue ret) cons
 	P(percent, right, rright);
 	P(percent, bottom, rbottom);
 #undef P
+
+	JS::SetReservedSlot(obj, JSI_GUISize::OWNER_SLOT, JS::PrivateValue(reinterpret_cast<void*>(const_cast<CGUISize*>(this))));
+	m_JSInstance = std::make_unique<JS::PersistentRootedObject>(rq.cx, obj.get());
 }
 
 bool CGUISize::FromJSVal(const ScriptRequest& rq, JS::HandleValue v)
@@ -227,5 +225,41 @@ bool CGUISize::FromJSVal(const ScriptRequest& rq, JS::HandleValue v)
 	P(percent, bottom, rbottom);
 #undef P
 
+	// Make sure to only create a copy of the given object and just not set ourselves as the owner of it directly.
+	// It itself could belong to another GUI object.
+	CreateJSInstance(rq);
 	return true;
+}
+
+bool CGUISize::ModifyPropertyDirty(const CStr& propName, const float value) const
+{
+#define P(x, y, z) \
+	if (#z == propName) \
+	{ \
+		x.y = value; \
+		m_IsDirty = true; \
+		return true; \
+	} \
+
+	P(pixel, left, left);
+	P(pixel, top, top);
+	P(pixel, right, right);
+	P(pixel, bottom, bottom);
+	P(percent, left, rleft);
+	P(percent, top, rtop);
+	P(percent, right, rright);
+	P(percent, bottom, rbottom);
+#undef P
+
+	return false;
+}
+
+bool CGUISize::MarkClean() const
+{
+	if (m_IsDirty)
+	{
+		m_IsDirty = false;
+		return true;
+	}
+	return false;
 }

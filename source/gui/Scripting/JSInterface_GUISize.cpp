@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 #include "scriptinterface/Object.h"
 
 JSClass JSI_GUISize::JSI_class = {
-	"GUISize", 0, &JSI_GUISize::JSI_classops
+	"GUISize", JSCLASS_HAS_RESERVED_SLOTS(SLOT_COUNT) , &JSI_GUISize::JSI_classops
 };
 
 JSClassOps JSI_GUISize::JSI_classops = {
@@ -34,6 +34,43 @@ JSClassOps JSI_GUISize::JSI_classops = {
 	nullptr, JSI_GUISize::construct, nullptr
 };
 
+#define GETTER(propName, propSlot) \
++[](JSContext* cx, uint argc, JS::Value* vp) -> bool { \
+	if (!JSI_GUISize::getProperty(cx, argc, propSlot, vp)) \
+	{ \
+		LOGERROR("Failed to get property '%s' of GUISize instance.", propName); \
+		return false; \
+	} \
+	return true; \
+}
+#define SETTER(propName, propSlot) \
++[](JSContext* cx, uint argc, JS::Value* vp) -> bool { \
+	if (!JSI_GUISize::setProperty(cx, argc, propSlot, propName, vp)) \
+	{ \
+		LOGERROR("Failed to set property '%s' on GUISize instance.", propName); \
+		return false; \
+	} \
+	return true; \
+}
+#define PROPERTY(propName, propSlot) JS_PSGS(propName, GETTER(propName, propSlot), SETTER(propName, propSlot), JSPROP_ENUMERATE)
+
+JSPropertySpec JSI_GUISize::JSI_props[] = {
+	PROPERTY("left", PROPERTY_SLOT_LEFT),
+	PROPERTY("top", PROPERTY_SLOT_TOP),
+	PROPERTY("right", PROPERTY_SLOT_RIGHT),
+	PROPERTY("bottom", PROPERTY_SLOT_BOTTOM),
+	PROPERTY("rleft", PROPERTY_SLOT_RLEFT),
+	PROPERTY("rtop", PROPERTY_SLOT_RTOP),
+	PROPERTY("rright", PROPERTY_SLOT_RRIGHT),
+	PROPERTY("rbottom", PROPERTY_SLOT_RBOTTOM),
+	JS_PS_END
+};
+
+#undef PROPERTY
+#undef GETTER
+#undef SETTER
+
+
 JSFunctionSpec JSI_GUISize::JSI_methods[] =
 {
 	JS_FN("toString", JSI_GUISize::toString, 0, 0),
@@ -42,7 +79,7 @@ JSFunctionSpec JSI_GUISize::JSI_methods[] =
 
 void JSI_GUISize::RegisterScriptClass(ScriptInterface& scriptInterface)
 {
-	scriptInterface.DefineCustomObjectType(&JSI_GUISize::JSI_class, JSI_GUISize::construct, 0, nullptr, JSI_GUISize::JSI_methods, nullptr, nullptr);
+	scriptInterface.DefineCustomObjectType(&JSI_GUISize::JSI_class, JSI_GUISize::construct, 0, JSI_GUISize::JSI_props, JSI_GUISize::JSI_methods, nullptr, nullptr);
 }
 
 bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
@@ -90,6 +127,47 @@ bool JSI_GUISize::construct(JSContext* cx, uint argc, JS::Value* vp)
 	}
 
 	args.rval().setObject(*obj);
+	return true;
+}
+
+bool JSI_GUISize::setProperty(JSContext* cx, uint argc, ReservedSlot propSlot, CStr propName, JS::Value* vp)
+{
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	args.rval().setUndefined();
+	if (args.length() != 1)
+		return false;
+
+	JS::RootedObject obj(cx, &args.thisv().toObject());
+
+	ScriptRequest rq(cx);
+	double val;
+	if (!Script::FromJSVal(rq, args[0], val))
+		return false;
+
+	JS::SetReservedSlot(obj, propSlot, JS::RootedValue(cx, JS::NumberValue(val)));
+
+	// Instances can be created via the constructor directly and exist independently from GUI objects.
+	// In that case we're already done.
+	// Otherwise, we have to forward the change to the size setting it is assigned to.
+	CGUISize* owner = JS::GetMaybePtrFromReservedSlot<CGUISize>(obj, OWNER_SLOT);
+	if (owner == nullptr)
+		return true;
+
+	return owner->ModifyPropertyDirty(propName, val);
+}
+
+bool JSI_GUISize::getProperty(JSContext* cx, uint argc, ReservedSlot propSlot, JS::Value* vp)
+{
+	if (propSlot == OWNER_SLOT || propSlot == SLOT_COUNT)
+		return false;
+
+	JS::CallArgs args = JS::CallArgsFromVp(argc, vp);
+	JS::RootedObject obj(cx, &args.thisv().toObject());;
+	JS::RootedValue val(cx, JS::GetReservedSlot(obj, propSlot));
+	if (!val.isNumber())
+		return false;
+
+	args.rval().set(val);
 	return true;
 }
 

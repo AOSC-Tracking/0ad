@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -182,6 +182,11 @@ public:
 	 * Same as SendEvent, but passes mouse coordinates and button state as an argument.
 	 */
 	InReaction SendMouseEvent(EGUIMessageType type, const CStr& eventName);
+
+	/*
+	 * Start the update recursion if the size is marked dirty. Called every tick.
+	 */
+	void CleanSize();
 
 	/**
 	 * All sizes are relative to resolution, and the calculation
