@@ -861,18 +861,13 @@ void CDeviceCommandContext::SetGraphicsPipelineStateImpl(
 
 void CDeviceCommandContext::BlitFramebuffer(
 	IFramebuffer* srcFramebuffer, IFramebuffer* dstFramebuffer,
-	const Rect& sourceRegion, const Rect& destinationRegion,
-	const Sampler::Filter filter)
+	[[maybe_unused]] const Rect& sourceRegion, [[maybe_unused]] const Rect& destinationRegion,
+	[[maybe_unused]] const Sampler::Filter filter)
 {
 	ENSURE(!m_InsideFramebufferPass);
-	CFramebuffer* destinationFramebuffer = dstFramebuffer->As<CFramebuffer>();
-	CFramebuffer* sourceFramebuffer = srcFramebuffer->As<CFramebuffer>();
+	[[maybe_unused]] CFramebuffer* destinationFramebuffer = dstFramebuffer->As<CFramebuffer>();
+	[[maybe_unused]] CFramebuffer* sourceFramebuffer = srcFramebuffer->As<CFramebuffer>();
 #if CONFIG2_GLES
-	UNUSED2(destinationFramebuffer);
-	UNUSED2(sourceFramebuffer);
-	UNUSED2(destinationRegion);
-	UNUSED2(sourceRegion);
-	UNUSED2(filter);
 	debug_warn("CDeviceCommandContext::BlitFramebuffer is not implemented for GLES");
 #else
 	// Source framebuffer should not be backbuffer.
@@ -1185,7 +1180,7 @@ void CDeviceCommandContext::DrawIndexed(
 }
 
 void CDeviceCommandContext::DrawInstanced(
-	const uint32_t firstVertex, const uint32_t vertexCount,
+	[[maybe_unused]] const uint32_t firstVertex, const uint32_t vertexCount,
 	const uint32_t firstInstance, const uint32_t instanceCount)
 {
 	ENSURE(m_Device->GetCapabilities().instancing);
@@ -1197,7 +1192,6 @@ void CDeviceCommandContext::DrawInstanced(
 	m_ShaderProgram->AssertPointersBound();
 #if CONFIG2_GLES
 	ENSURE(!m_Device->GetCapabilities().instancing);
-	UNUSED2(firstVertex);
 #else
 	glDrawArraysInstancedARB(GL_TRIANGLES, firstVertex, vertexCount, instanceCount);
 #endif
@@ -1206,7 +1200,7 @@ void CDeviceCommandContext::DrawInstanced(
 
 void CDeviceCommandContext::DrawIndexedInstanced(
 	const uint32_t firstIndex, const uint32_t indexCount,
-	const uint32_t firstInstance, const uint32_t instanceCount,
+	const uint32_t firstInstance, [[maybe_unused]] const uint32_t instanceCount,
 	const int32_t vertexOffset)
 {
 	ENSURE(m_Device->GetCapabilities().instancing);
@@ -1226,7 +1220,6 @@ void CDeviceCommandContext::DrawIndexedInstanced(
 	// in Mesa 7.10 swrast with index VBOs).
 #if CONFIG2_GLES
 	ENSURE(!m_Device->GetCapabilities().instancing);
-	UNUSED2(instanceCount);
 #else
 	glDrawElementsInstancedARB(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT,
 		static_cast<const void*>((static_cast<const uint8_t*>(m_IndexBufferData) + sizeof(uint16_t) * firstIndex)),
@@ -1237,7 +1230,7 @@ void CDeviceCommandContext::DrawIndexedInstanced(
 
 void CDeviceCommandContext::DrawIndexedInRange(
 	const uint32_t firstIndex, const uint32_t indexCount,
-	const uint32_t start, const uint32_t end)
+	[[maybe_unused]] const uint32_t start, [[maybe_unused]] const uint32_t end)
 {
 	ENSURE(m_ShaderProgram);
 	ENSURE(m_InsidePass);
@@ -1250,8 +1243,6 @@ void CDeviceCommandContext::DrawIndexedInRange(
 	// Draw with DrawRangeElements where available, since it might be more
 	// efficient for slow hardware.
 #if CONFIG2_GLES
-	UNUSED2(start);
-	UNUSED2(end);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, indices);
 #else
 	glDrawRangeElementsEXT(GL_TRIANGLES, start, end, indexCount, GL_UNSIGNED_SHORT, indices);
@@ -1273,9 +1264,9 @@ void CDeviceCommandContext::EndComputePass()
 }
 
 void CDeviceCommandContext::Dispatch(
-	const uint32_t groupCountX,
-	const uint32_t groupCountY,
-	const uint32_t groupCountZ)
+	[[maybe_unused]] const uint32_t groupCountX,
+	[[maybe_unused]] const uint32_t groupCountY,
+	[[maybe_unused]] const uint32_t groupCountZ)
 {
 #if !CONFIG2_GLES
 	ENSURE(m_InsideComputePass);
@@ -1287,16 +1278,12 @@ void CDeviceCommandContext::Dispatch(
 		glMemoryBarrier(
 			GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT | GL_TEXTURE_UPDATE_BARRIER_BIT | GL_FRAMEBUFFER_BARRIER_BIT );
 	}
-#else
-	UNUSED2(groupCountX);
-	UNUSED2(groupCountY);
-	UNUSED2(groupCountZ);
 #endif
 }
 
 void CDeviceCommandContext::InsertMemoryBarrier(
-	const uint32_t /*srcStageMask*/, const uint32_t dstStageMask,
-	const uint32_t srcAccessMask, const uint32_t dstAccessMask)
+	const uint32_t /*srcStageMask*/, [[maybe_unused]] const uint32_t dstStageMask,
+	[[maybe_unused]] const uint32_t srcAccessMask, [[maybe_unused]] const uint32_t dstAccessMask)
 {
 #if !CONFIG2_GLES
 	ENSURE(!m_InsideFramebufferPass);
@@ -1320,10 +1307,6 @@ void CDeviceCommandContext::InsertMemoryBarrier(
 	}
 	if (barriers)
 		glMemoryBarrier(barriers);
-#else
-	UNUSED2(dstStageMask);
-	UNUSED2(srcAccessMask);
-	UNUSED2(dstAccessMask);
 #endif
 }
 
@@ -1369,7 +1352,8 @@ void CDeviceCommandContext::SetTexture(const int32_t bindingSlot, ITexture* text
 	BindTexture(unit, textureUnit.target, texture->As<CTexture>()->GetHandle());
 }
 
-void CDeviceCommandContext::SetStorageTexture(const int32_t bindingSlot, ITexture* texture)
+void CDeviceCommandContext::SetStorageTexture([[maybe_unused]] const int32_t bindingSlot,
+	[[maybe_unused]] ITexture* texture)
 {
 #if !CONFIG2_GLES
 	ENSURE(m_ShaderProgram);
@@ -1383,13 +1367,11 @@ void CDeviceCommandContext::SetStorageTexture(const int32_t bindingSlot, ITextur
 	ENSURE(textureUnit.type == GL_IMAGE_2D);
 	ENSURE(texture->GetFormat() == Format::R8G8B8A8_UNORM);
 	glBindImageTexture(textureUnit.unit, texture->As<CTexture>()->GetHandle(), 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
-#else
-	UNUSED2(bindingSlot);
-	UNUSED2(texture);
 #endif
 }
 
-void CDeviceCommandContext::SetStorageBuffer(const int32_t bindingSlot, IBuffer* buffer)
+void CDeviceCommandContext::SetStorageBuffer([[maybe_unused]] const int32_t bindingSlot,
+	[[maybe_unused]] IBuffer* buffer)
 {
 #if !CONFIG2_GLES
 	if (bindingSlot < 0)
@@ -1398,9 +1380,6 @@ void CDeviceCommandContext::SetStorageBuffer(const int32_t bindingSlot, IBuffer*
 	ENSURE(buffer);
 	ENSURE(buffer->GetUsage() & Renderer::Backend::IBuffer::Usage::STORAGE);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, m_ShaderProgram->GetStorageBuffer(bindingSlot), buffer->As<CBuffer>()->GetHandle());
-#else
-	UNUSED2(bindingSlot);
-	UNUSED2(buffer);
 #endif
 }
 
