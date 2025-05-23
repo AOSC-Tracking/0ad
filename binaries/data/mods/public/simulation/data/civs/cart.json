@@ -26,6 +26,11 @@
 			"Description": "Merchant Ships +25% trade gain."
 		},
 		{
+			"Name": "Agile Cavalry",
+			"History": "The Numidian light cavalry were known for their adaptability, agility and speed. Played an important role in reconaissance, disrupting enemy supply lines and complimenting the slower-moving elephants in the Punic wars, they are the perfect units to rush your opponents with. ",
+			"Description": "Skirmisher cavalry +10% walk speed"
+		},
+		{
 			"Name": "Desirable Products",
 			"History": "",
 			"Description": "Docks and Markets +10% international trade bonus."
