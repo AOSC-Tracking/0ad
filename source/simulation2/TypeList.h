@@ -112,6 +112,9 @@ COMPONENT(GuiInterfaceScripted)
 INTERFACE(Identity)
 COMPONENT(IdentityScripted)
 
+INTERFACE(MapEditorInterface)
+COMPONENT(MapEditorInterfaceScripted)
+
 INTERFACE(Minimap)
 COMPONENT(Minimap)
 
