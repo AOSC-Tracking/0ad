@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<sprites>
+	<sprite name="BackgroundTranslucent">
+		<image backcolor="0 0 0 85"
+			size="0 0 100% 100%"
+		/>
+	</sprite>
+</sprites>

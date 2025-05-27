@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="mainPanel" size="24 40 100%-24 100%-60">
+	<script directory="gui/editorsetup/Pages/MainPages/" />
+	<object size="0 0 100%-416 100%">
+		<include file="gui/editorsetup/Pages/MainPages/editorsettingspanel.xml"/>
+	</object>
+
+	<object size="100%-402 0 100% 100%">
+
+		<object size="0 0 100% 336">
+			<include file="gui/editorsetup/Pages/MainPages/mappreview.xml"/>
+		</object>
+
+		<object size="0 350 100% 100%">
+			<include file="gui/editorsetup/Pages/MainPages/editordescription.xml"/>
+		</object>
+
+	</object>
+
+</object>

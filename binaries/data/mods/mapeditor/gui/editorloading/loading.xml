@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+
+	<script directory="gui/common/"/>
+	<script directory="gui/editorloading/"/>
+
+	<object name="setupWindow" type="image" style="ModernWindow">
+
+		<object size="50%-256 4 50%+256 36">
+			<include file="gui/editorloading/progressbar.xml"/>
+		</object>
+
+		<object size="50%-256 36 50%+256 50%-196">
+			<include file="gui/editorloading/titledisplay.xml"/>
+		</object>
+	</object>
+
+</objects>

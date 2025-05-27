@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<styles>
+	<style name="LargeTitleText"
+		font="sans-bold-24"
+		textcolor="white"
+		text_align="center"
+		text_valign="center"
+	/>
+</styles>

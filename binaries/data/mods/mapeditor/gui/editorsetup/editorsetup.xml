@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+	<script directory="gui/common/"/>
+	<script directory="gui/editorcommon/EditorSettings/" />
+	<script directory="editorsettings/"/>
+	<script directory="editorsettings/CommonAttributes/"/>
+	<script directory="editorsettings/EditorSetupAttributes/"/>
+	<script directory="gui/editorsetup/"/>
+	<script directory="gui/editorsetup/Controllers/"/>
+
+	<object type="image" style="ModernWindow" name="setupWindow">
+		<object name="setupWindowTitle" style="ModernLabelText" type="text" size="50%-128 4 50%+128 36" />
+
+		<include directory="gui/editorsetup/Pages/" />
+	</object>
+</objects>

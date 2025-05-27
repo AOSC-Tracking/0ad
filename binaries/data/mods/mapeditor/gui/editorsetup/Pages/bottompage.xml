@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="bottomPanel" size="0 0 100% 100%-24">
+	<script directory="gui/editorsetup/Pages/BottomPages/" />
+	<object name="bottomLeftPanel">
+
+		<object size="20 100%-32 100%-312 100%">
+			<include file="gui/editorsetup/Pages/BottomPages/tooltip.xml"/>
+		</object>
+
+		<object size="0 100%-28 100%-320 100%">
+
+		</object>
+
+	</object>
+
+	<object name="bottomRightPanel" size="100%-314 100%-28 100% 100%">
+
+		<object size="0 0 140 100%">
+			<include file="gui/editorsetup/Pages/BottomPages/cancelbutton.xml"/>
+		</object>
+
+		<object	size="150 0 290 100%">
+			<include file="gui/editorsetup/Pages/BottomPages/starteditorbutton.xml"/>
+		</object>
+
+	</object>
+
+</object>

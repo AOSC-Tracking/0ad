@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="leftToolbarButtonsPanel"
+	type="image"
+	size="5 0 50%-145 0"
+>
+	<repeat count="5">
+		<object
+			type="button"
+			size="4 4 32 32"
+			style="iconButton"
+			tooltip_style="editorToolTip"
+			hidden="true"
+			name="leftToolbarButton[n]"
+		>
+			<object name="leftToolbarButtonIcon[n]" type="image" ghost="true" size="3 3 100%-4 100%-4"/>
+		</object>
+	</repeat>
+
+	<script directory="gui/editor/Pages/General/LeftToolbars/"/>
+	<script directory="gui/editor/Pages/General/LeftToolbars/LeftToolbarButtons/"/>
+</object>

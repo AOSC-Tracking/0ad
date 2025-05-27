@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<objects>
+
+	<script directory="gui/common/"/>
+	<script directory="gui/editorcommon/EditorSettings/" />
+	<script directory="editorsettings/"/>
+	<script directory="editorsettings/CommonAttributes/"/>
+	<script directory="editorsettings/EditorAttributes/"/>
+
+	<script directory="gui/editor/"/>
+	<script directory="gui/editor/Controllers/"/>
+	<script directory="gui/editor/Commands/"/>
+
+	<object name="setupWindow">
+
+		<object name="topPanel" type="image" sprite="topPanel" size="-3 0 100%+3 36">
+			<include directory="gui/editor/Pages/TopPanel/" />
+		</object>
+
+		<object name="leftPanel" size="0 36 200 100%-200">
+			<include directory="gui/editor/Pages/LeftPanel/" />
+		</object>
+
+		<object name="bottomPanel" size="200 100%-200 100% 100%">
+			<include directory="gui/editor/Pages/BottomPanel/" />
+		</object>
+
+		<include directory="gui/editor/Pages/General/" />
+
+		<!-- Selection bandbox -->
+		<object name="bandbox" type="image" sprite="bandbox" ghost="true" hidden="true" z="200"/>
+	</object>
+</objects>
