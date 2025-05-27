@@ -34,3 +34,9 @@ indent_size = 4
 # https://wiki.jenkins.io/display/JENKINS/Code+Style+Guidelines
 # Additionally, our linter npm-groovy-lint does not support tabs.
 indent_style = space
+
+[*.js]
+indent_style = tab
+indent_size = 4
+# editorconfig-tools is unable to ignore longs strings or urls
+max_line_length = off
