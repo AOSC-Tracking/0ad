@@ -28,7 +28,5 @@
     <Preview>true</Preview>
   </Visibility>
   <!-- Previews should not cast shadows -->
-  <VisualActor merge="">
-    <DisableShadows/>
-  </VisualActor>
+  <VisualActor merge="" />
 </Entity>
