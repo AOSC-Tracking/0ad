@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -31,7 +31,6 @@
 #include "i18n/L10n.h"
 #include "lib/bits.h"
 #include "lib/input.h"
-#include "lib/sysdep/sysdep.h"
 #include "lib/timer.h"
 #include "lib/utf8.h"
 #include "maths/Size2D.h"
@@ -40,17 +39,19 @@
 #include "ps/GameSetup/Config.h"
 #include "ps/Globals.h"
 #include "ps/Hotkey.h"
-#include "ps/Profile.h"
-#include "ps/Pyrogenesis.h"
 #include "ps/VideoMode.h"
 #include "ps/XML/Xeromyces.h"
 #include "scriptinterface/ScriptContext.h"
 #include "scriptinterface/ScriptInterface.h"
+#include "scriptinterface/ScriptRequest.h"
 
 #include <string>
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <memory>
+#include <utility>
+#include <map>
 
 const double SELECT_DBLCLICK_RATE = 0.5;
 const u32 MAX_OBJECT_DEPTH = 100; // Max number of nesting for GUI includes. Used to detect recursive inclusion
@@ -277,10 +278,18 @@ InReaction CGUI::HandleEvent(const SDL_Event_* ev)
 	return ret;
 }
 
-void CGUI::TickObjects()
+void CGUI::TickObjects(const float realTimeSinceLastFrame)
 {
 	m_BaseObject->RecurseObject(&IGUIObject::IsHiddenOrGhostOrOutOfBoundaries, &IGUIObject::Tick);
-	SendEventToAll(EventNameTick);
+
+	// Send tick event to all objects
+	ScriptRequest rq{this->m_ScriptInterface};
+	JS::RootedValueVector paramData{rq.cx};
+	JS::RootedValue valRealTime{rq.cx};
+	valRealTime.setDouble(realTimeSinceLastFrame);
+	ignore_result(paramData.append(valRealTime));
+	SendEventToAll(EventNameTick, paramData);
+
 	m_Tooltip.Update(FindObjectUnderMouse(), m_MousePos, *this);
 }
 

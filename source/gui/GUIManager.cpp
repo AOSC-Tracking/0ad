@@ -394,7 +394,7 @@ void CGUIManager::SendEventToAll(const CStr& eventName, JS::HandleValueArray par
 		p.gui->SendEventToAll(eventName, paramData);
 }
 
-std::optional<bool> CGUIManager::TickObjects()
+std::optional<bool> CGUIManager::TickObjects(const float realTimeSinceLastFrame)
 {
 	PROFILE3("gui tick");
 
@@ -405,7 +405,7 @@ std::optional<bool> CGUIManager::TickObjects()
 	const auto pageStack = GetCopyOfFrozenStack();
 
 	for (const SGUIPage& p : pageStack)
-		p.gui->TickObjects();
+		p.gui->TickObjects(realTimeSinceLastFrame);
 
 	m_ScriptContext.RunJobs();
 

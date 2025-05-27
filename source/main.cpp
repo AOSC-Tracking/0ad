@@ -426,7 +426,7 @@ static void Frame(RL::Interface* rlInterface, const int fixedFrameFrequency)
 	if (g_NetClient)
 		g_NetClient->Poll();
 
-	std::optional<bool> completionCommand{g_GUI->TickObjects()};
+	std::optional<bool> completionCommand{g_GUI->TickObjects(realTimeSinceLastFrame)};
 	if (completionCommand.has_value())
 		g_Shutdown = completionCommand.value() ? ShutdownType::RestartAsAtlas : ShutdownType::Quit;
 

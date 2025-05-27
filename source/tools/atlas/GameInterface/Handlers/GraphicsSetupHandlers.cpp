@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -264,7 +264,7 @@ QUERYHANDLER(RenderLoop)
 		in_dispatch_event(&ev);
 
 	if (g_GUI)
-		g_GUI->TickObjects();
+		g_GUI->TickObjects(g_AtlasGameLoop->realFrameLength);
 
 	g_AtlasGameLoop->view->Update(g_AtlasGameLoop->realFrameLength);
 

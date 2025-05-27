@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ public:
 	 * Performs processing that should happen every frame
 	 * (including sending the "Tick" event to scripts)
 	 */
-	void TickObjects();
+	void TickObjects(const float realTimeSinceLastFrame);
 
 	/**
 	 * Sends a specified script event to every object
