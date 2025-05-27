@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -75,6 +75,7 @@ public:
 	// Returns icons for corresponding entities on the minimap texture.
 	const std::vector<Icon>& GetIcons() { return m_Icons; }
 
+	void MakeDirty();
 private:
 	void CreateTextures(
 		Renderer::Backend::IDeviceCommandContext* deviceCommandContext,

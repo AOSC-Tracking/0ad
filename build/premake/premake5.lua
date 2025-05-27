@@ -852,7 +852,8 @@ function setup_all_libs ()
 
 	source_dirs = {
 		"tools/atlas/GameInterface",
-		"tools/atlas/GameInterface/Handlers"
+		"tools/atlas/GameInterface/Handlers",
+		"tools/atlas/MapEditorInterface"
 	}
 	extern_libs = {
 		"boost",

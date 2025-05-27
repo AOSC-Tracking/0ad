@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,6 +19,8 @@
 #define INCLUDED_ICMPTEMPLATEMANAGER
 
 #include "simulation2/system/Interface.h"
+
+#include "ps/TemplateLoader.h"
 
 #include <vector>
 
@@ -102,6 +104,8 @@ public:
 	 * Intended for use by the map editor. This is likely to be quite slow.
 	 */
 	virtual std::vector<std::string> FindAllTemplates(bool includeActors) const = 0;
+
+	virtual std::vector<std::string> FindAllTemplatesType(ETemplatesType templatesType) const = 0;
 
 	/**
 	 * Returns some data of the civs from the templates.
