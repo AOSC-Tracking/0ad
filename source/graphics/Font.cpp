@@ -230,14 +230,21 @@ Renderer::Backend::Sampler::Desc CFont::ChooseTextureFormatAndSampler()
 	if (m_StrokeWidth > 0)
 		return defaultSamplerDesc;
 
-	// TODO: Add Support for R8_UNORM.
+	m_TextureFormatStride = 1;
+	m_HasRGB = false;
+
 	// for R8 we will use texture swizzling to convert to RGBA.
 	// and sampler will be changed
+	Renderer::Backend::IDevice* backendDevice = g_Renderer.GetDeviceCommandContext()->GetDevice();
+	if (backendDevice->GetCapabilities().textureSwizzle && backendDevice->IsTextureFormatSupported(Renderer::Backend::Format::R8_UNORM))
+	{
+		defaultSamplerDesc.textureSwizzleEnabled = true;
+		m_TextureFormat = Renderer::Backend::Format::R8_UNORM;
+		return defaultSamplerDesc;
+	}
 
 	// Legacy Format
 	m_TextureFormat = Renderer::Backend::Format::A8_UNORM;
-	m_TextureFormatStride = 1;
-	m_HasRGB = false;
 
 	return defaultSamplerDesc;
 }
