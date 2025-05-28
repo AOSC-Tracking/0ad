@@ -14,8 +14,6 @@ class GameSettingsPanel
 
 		this.settingsPanel = Engine.GetGUIObjectByName("settingsPanel");
 
-		this.enabled = Engine.ConfigDB_GetValue("user", this.ConfigNameSlide) == "true";
-		this.slideSpeed = this.enabled ? this.SlideSpeed : Infinity;
 		this.lastTickTime = undefined;
 
 		gameSettingTabs.registerTabSelectHandler(this.updateSize.bind(this));
@@ -58,7 +56,7 @@ class GameSettingsPanel
 		if (previousTime === undefined)
 			return;
 
-		const distance = this.slideSpeed * (tickLength || 1);
+		const distance = this.SlideSpeed * (tickLength || 1);
 		const rightBorder = this.settingTabButtonsFrame.size.left;
 		let offset = 0;
 		if (g_TabCategorySelected === undefined)
@@ -158,9 +156,6 @@ class GameSettingsPanel
 		}
 	}
 }
-
-GameSettingsPanel.prototype.ConfigNameSlide =
-	"gui.gamesetup.settingsslide";
 
 /**
  * Maximum width of a column in the settings panel.

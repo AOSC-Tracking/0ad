@@ -463,12 +463,6 @@
 			},
 			{
 				"type": "boolean",
-				"label": "Enable settings panel slide",
-				"tooltip": "Slide the settings panel when opening, closing or resizing.",
-				"config": "gui.gamesetup.settingsslide"
-			},
-			{
-				"type": "boolean",
 				"label": "Persist match settings",
 				"tooltip": "Save and restore match settings for quick reuse when hosting another game.",
 				"config": "persistmatchsettings"
