@@ -192,7 +192,7 @@ bool CFont::AddFontFromPath(const OsPath& fontPath)
 		m_Height = FPosF26Dot6ToFloat(face->size->metrics.height);
 
 		// Get the line spacing of the font.
-		m_LineSpacing = FPosF26Dot6ToFloat(face->size->metrics.ascender - face->size->metrics.descender);
+		m_LineSpacing = m_Height;
 	}
 
 	// Add the fallback font to the list.
