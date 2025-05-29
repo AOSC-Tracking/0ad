@@ -28,7 +28,9 @@ class CounterResource
 		this.panel.tooltip =
 			setStringTags(resourceNameFirstWord(this.resCode), CounterManager.ResourceTitleTags) +
 			description +
-			getAllyStatTooltip(this.getTooltipData.bind(this)) + "\n" + coloredText(this.CurrentGatherersTooltip, gatherers ? this.DefaultResourceGatherersColor : this.DefaultResourceGatherersColorZero);
+			getAllyStatTooltip(this.getTooltipData.bind(this)) +
+			"\n" +
+			sprintf(translate(this.CurrentGatherersTooltip), { "gatherers": gatherers });
 	}
 
 	getTooltipData(playerState, playername)
@@ -54,4 +56,4 @@ CounterResource.prototype.DefaultResourceGatherersColor = "gold";
 /**
  * Storing the translated and formatted gatherer string in the prototype.
  */
-CounterResource.prototype.CurrentGatherersTooltip = setStringTags(translate("Gatherers: current count"), {"font": "sans-bold-16"});
+CounterResource.prototype.CurrentGatherersTooltip = markForTranslation("Current gatherers: %(gatherers)s");

@@ -29,7 +29,17 @@ class CounterPopulation
 
 		this.panel.tooltip =
 			setStringTags(translate(this.PopulationTooltip), CounterManager.ResourceTitleTags) +
-			getAllyStatTooltip(this.getTooltipData.bind(this)) + "\n" + coloredText(this.CurrentGatherersTooltip, total ? this.DefaultTotalGatherersColor : this.DefaultTotalGatherersColorZero);
+			"\n" +
+			translate("Build houses and civic centers to increase the limit.") +
+			getAllyStatTooltip(this.getTooltipData.bind(this)) +
+			"\n" +
+			sprintf(translate(this.CurrentPopulationTooltip), playerState) +
+			"\n" +
+			sprintf(translate(this.LimitPopulationTooltip), playerState) +
+			"\n" +
+			sprintf(translate(this.MaxPopulationTooltip), playerState) +
+			"\n" +
+			sprintf(translate(this.TotalGatherersTooltip), { "total": total });
 	}
 
 	getTooltipData(playerState, playername)
@@ -65,9 +75,24 @@ CounterPopulation.prototype.PopulationTooltip = markForTranslation("Population: 
 CounterPopulation.prototype.AllyPopulationTooltip = markForTranslation("%(popCount)s/%(popLimit)s (%(popMax)s)");
 
 /**
- * Storing the translated and formatted gatherer string in the prototype.
+ * Store the translated and formatted string for total gatherers in the prototype.
  */
-CounterPopulation.prototype.CurrentGatherersTooltip = setStringTags(translate("Gatherers: total count"), {"font": "sans-bold-16"});
+CounterPopulation.prototype.TotalGatherersTooltip = markForTranslation("Total gatherers: %(total)s");
+
+/**
+ * Store the translated and formatted string for max population in the prototype.
+ */
+CounterPopulation.prototype.MaxPopulationTooltip = markForTranslation("Max population: %(popMax)s");
+
+/**
+ * Store the translated and formatted string for current population in the prototype.
+ */
+CounterPopulation.prototype.CurrentPopulationTooltip = markForTranslation("Current population: %(popCount)s");
+
+/**
+ * Store the translated and formatted string for population cap in the prototype.
+ */
+CounterPopulation.prototype.LimitPopulationTooltip = markForTranslation("Population limit: %(popLimit)s");
 
 /**
  * Color to highlight the total number of gatherers at zero.
