@@ -38,19 +38,16 @@ class ChatOverlay
 			if (chatMessage && chatMessage.text)
 			{
 				// First scale line width to maximum size.
-				const lineSize = this.chatLines[i].size;
-				const height = lineSize.bottom - lineSize.top;
-				lineSize.top = i * height;
-				lineSize.bottom = lineSize.top + height;
-				lineSize.rright = 100;
-				this.chatLines[i].size = lineSize;
+				const height = this.chatLines[i].size.bottom - this.chatLines[i].size.top;
+				this.chatLines[i].size.top = i * height;
+				this.chatLines[i].size.bottom = this.chatLines[i].size.top + height;
+				this.chatLines[i].size.rright = 100;
 
 				this.chatLines[i].caption = chatMessage.text;
 
 				// Now read the actual text width and scale the line width accordingly.
-				lineSize.rright = 0;
-				lineSize.right = lineSize.left + this.chatLines[i].getTextSize().width;
-				this.chatLines[i].size = lineSize;
+				this.chatLines[i].size.rright = 0;
+				this.chatLines[i].size.right = this.chatLines[i].size.left + this.chatLines[i].getTextSize().width;
 
 				if (chatMessage.callback)
 					this.chatLines[i].onPress = chatMessage.callback;

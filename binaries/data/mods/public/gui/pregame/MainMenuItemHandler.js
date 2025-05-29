@@ -108,18 +108,9 @@ class MainMenuItemHandler
 
 		this.submenu.hidden = false;
 
-		{
-			const size = this.MainMenuPanelRightBorderTop.size;
-			size.bottom = this.submenu.size.top + this.Margin;
-			size.rbottom = 0;
-			this.MainMenuPanelRightBorderTop.size = size;
-		}
-
-		{
-			const size = this.MainMenuPanelRightBorderBottom.size;
-			size.top = this.submenu.size.bottom;
-			this.MainMenuPanelRightBorderBottom.size = size;
-		}
+		this.MainMenuPanelRightBorderTop.size.bottom = this.submenu.size.top + this.Margin;
+		this.MainMenuPanelRightBorderTop.size.rbottom = 0;
+		this.MainMenuPanelRightBorderBottom.size.top = this.submenu.size.bottom;
 
 		// Start animation
 		this.lastTickTime = Date.now();
@@ -131,11 +122,9 @@ class MainMenuItemHandler
 		this.submenu.hidden = true;
 		this.submenu.size = this.mainMenu.size;
 
-		const size = this.MainMenuPanelRightBorderTop.size;
-		size.top = 0;
-		size.bottom = 0;
-		size.rbottom = 100;
-		this.MainMenuPanelRightBorderTop.size = size;
+		this.MainMenuPanelRightBorderTop.size.top = 0;
+		this.MainMenuPanelRightBorderTop.size.bottom = 0;
+		this.MainMenuPanelRightBorderTop.size.rbottom = 100;
 	}
 
 	onTick()
@@ -155,10 +144,8 @@ class MainMenuItemHandler
 			return;
 		}
 
-		const size = this.submenu.size;
-		size.left += offset;
-		size.right += offset;
-		this.submenu.size = size;
+		this.submenu.size.left += offset;
+		this.submenu.size.right += offset;
 	}
 }
 

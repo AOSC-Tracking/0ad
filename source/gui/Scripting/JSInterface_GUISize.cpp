@@ -70,7 +70,6 @@ JSPropertySpec JSI_GUISize::JSI_props[] = {
 #undef GETTER
 #undef SETTER
 
-
 JSFunctionSpec JSI_GUISize::JSI_methods[] =
 {
 	JS_FN("toString", JSI_GUISize::toString, 0, 0),

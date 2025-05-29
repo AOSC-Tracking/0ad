@@ -92,10 +92,8 @@ class GameSettingsPanel
 		if (!offset)
 			return;
 
-		const size = this.settingsPanelFrame.size;
-		size.left += offset;
-		size.right += offset;
-		this.settingsPanelFrame.size = size;
+		this.settingsPanelFrame.size.left += offset;
+		this.settingsPanelFrame.size.right += offset;
 
 		this.triggerResizeHandlers();
 	}
@@ -151,11 +149,7 @@ class GameSettingsPanel
 			++settingsThisColumn;
 		}
 
-		{
-			const size = this.settingsPanelFrame.size;
-			size.right = size.left + (column + 1) * columnWidth;
-			this.settingsPanelFrame.size = size;
-		}
+		this.settingsPanelFrame.size.right = this.settingsPanelFrame.size.left + (column + 1) * columnWidth;
 	}
 }
 

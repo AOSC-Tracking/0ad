@@ -158,20 +158,15 @@ class TipDisplay
 
 	scaleGuiElementsToFit()
 	{
-		const titleSize = this.tipTitle.size;
 		const titleTextSize = this.tipTitle.getTextSize();
-
-		titleSize.bottom = titleSize.top + titleTextSize.height;
-		this.tipTitle.size = titleSize;
+		this.tipTitle.size.bottom = this.tipTitle.size.top + titleTextSize.height;
 
 		this.tipTitleDecoration.size = new GUISize(
 			-(titleTextSize.width / 2 + 12), this.tipTitle.size.bottom - 4, titleTextSize.width / 2 + 12, this.tipTitle.size.bottom + 12,
 			50, 0, 50, 0
 		);
 
-		const textSize = this.tipText.size;
-		textSize.top = this.tipTitleDecoration.size.bottom + 16;
-		this.tipText.size = textSize;
+		this.tipText.size.top = this.tipTitleDecoration.size.bottom + 16;
 	}
 
 }

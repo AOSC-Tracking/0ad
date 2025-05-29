@@ -52,8 +52,6 @@ class ObjectivesDialog
 		this.objectivesPlayerstate.hidden = isActive;
 		this.objectivesPlayerstate.caption = g_PlayerStateMessages[playerState] || "";
 
-		const size = this.gameDescription.size;
-		size.top = (isActive ? this.objectivesTitle : this.objectivesPlayerstate).size.bottom;
-		this.gameDescription.size = size;
+		this.gameDescription.size.top = (isActive ? this.objectivesTitle : this.objectivesPlayerstate).size.bottom;
 	}
 }

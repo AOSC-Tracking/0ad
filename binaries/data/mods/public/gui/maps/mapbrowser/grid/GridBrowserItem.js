@@ -27,12 +27,10 @@ class GridBrowserItem
 		const gridBrowser = this.gridBrowser;
 		const x = this.itemIndex % gridBrowser.columnCount;
 		const y = Math.floor(this.itemIndex / gridBrowser.columnCount);
-		const size = this.imageObject.size;
-		size.left = gridBrowser.itemWidth * x;
-		size.right = gridBrowser.itemWidth * (x + 1);
-		size.top = gridBrowser.itemHeight * y;
-		size.bottom = gridBrowser.itemHeight * (y + 1);
-		this.imageObject.size = size;
+		this.imageObject.size = new GUISize(
+			gridBrowser.itemWidth * x, gridBrowser.itemHeight * y,
+			gridBrowser.itemWidth * (x + 1), gridBrowser.itemHeight * (y + 1)
+		);
 		this.updateVisibility();
 	}
 

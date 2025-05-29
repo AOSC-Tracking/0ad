@@ -24,18 +24,16 @@ var g_unitPanelButtons = {
  */
 function setPanelObjectPosition(object, index, rowLength, vMargin = 1, hMargin = 1)
 {
-	var size = object.size;
 	// horizontal position
-	var oWidth = size.right - size.left;
-	var hIndex = index % rowLength;
-	size.left = hIndex * (oWidth + vMargin);
-	size.right = size.left + oWidth;
+	const oWidth = object.size.right - object.size.left;
+	const hIndex = index % rowLength;
+	object.size.left = hIndex * (oWidth + vMargin);
+	object.size.right = object.size.left + oWidth;
 	// vertical position
-	var oHeight = size.bottom - size.top;
-	var vIndex = Math.floor(index / rowLength);
-	size.top = vIndex * (oHeight + hMargin);
-	size.bottom = size.top + oHeight;
-	object.size = size;
+	const oHeight = object.size.bottom - object.size.top;
+	const vIndex = Math.floor(index / rowLength);
+	object.size.top = vIndex * (oHeight + hMargin);
+	object.size.bottom = object.size.top + oHeight;
 }
 
 /**
