@@ -28,7 +28,7 @@ class CounterResource
 		this.panel.tooltip =
 			setStringTags(resourceNameFirstWord(this.resCode), CounterManager.ResourceTitleTags) +
 			description +
-			getAllyStatTooltip(this.getTooltipData.bind(this));
+			getAllyStatTooltip(this.getTooltipData.bind(this)) + "\n" + coloredText(this.CurrentGatherersTooltip, gatherers ? this.DefaultResourceGatherersColor : this.DefaultResourceGatherersColorZero);
 	}
 
 	getTooltipData(playerState, playername)
@@ -50,3 +50,8 @@ CounterResource.prototype.DefaultResourceGatherersColorZero = "200 200 200";
  * Color to highlight the resource gatherers.
  */
 CounterResource.prototype.DefaultResourceGatherersColor = "gold";
+
+/**
+ * Storing the translated and formatted gatherer string in the prototype.
+ */
+CounterResource.prototype.CurrentGatherersTooltip = setStringTags(translate("Gatherers: current count"), {"font": "sans-bold-16"});
