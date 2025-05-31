@@ -1,8 +1,4 @@
-// Hack to get eslint run via pre-commit to find the braces plugin in the pre-commit cache,
-// should be 'import braceRules from "eslint-plugin-brace-rules";'
-import { createRequire } from 'node:module';
-const require = createRequire(import.meta.url);
-const braceRules = require("eslint-plugin-brace-rules");
+import braceRules from "eslint-plugin-brace-rules";
 
 
 const configIgnores = {

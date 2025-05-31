@@ -61,6 +61,19 @@ jobs:
       - name: Check for issues with copyright
         run: ./source/tools/lint/copyright/copyright.sh --from ${{ env.BASE_SHA }} --to ${{ env.HEAD_SHA }}
 
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check for issues with Javascript
+        run: ./source/tools/lint/eslint/eslint.sh
+
   jenkinsfiles:
     runs-on: ubuntu-latest
     steps:
