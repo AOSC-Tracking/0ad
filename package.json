@@ -1,5 +1,6 @@
 {
 	"type": "module",
+	"license": "GPL-2.0-or-later",
 	"devDependencies": {
 		"eslint": "^9.27.0",
 		"eslint-plugin-brace-rules": "^0.1.6"
