@@ -30,7 +30,7 @@ class CounterPopulation
 		this.panel.tooltip =
 			setStringTags(translate(this.PopulationTooltip), CounterManager.ResourceTitleTags) +
 			"\n" +
-			translate("Build houses and civic centers to increase the limit.") +
+			translate("Build Houses and Civic Centers to increase the limit.") +
 			getAllyStatTooltip(this.getTooltipData.bind(this)) +
 			"\n" +
 			sprintf(translate(this.CurrentPopulationTooltip), playerState) +
