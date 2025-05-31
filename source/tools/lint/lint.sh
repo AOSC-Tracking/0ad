@@ -41,7 +41,13 @@ if [ -n "${commitish}" ]; then
 	# shellcheck disable=SC2086
 	copyright/copyright.sh --from ${commitish} || has_errors=true
 else
-	"Skipping copyright linter as no base commit was defined"
+	echo "Skipping copyright linter as no base commit was defined"
+fi
+
+if [ -e ../../../node_modules ]; then
+	./eslint/eslint.sh || has_errors=true
+else
+	echo "Skipping eslint as no node_modules found."
 fi
 
 if [ ${has_errors} = true ]; then

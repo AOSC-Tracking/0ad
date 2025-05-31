@@ -7,12 +7,12 @@ while [ "$#" -gt 0 ]; do
 	case "$1" in
 		--from)
 			# NOTE: Could be supported via eslint-plugin-diff
-			from_commitish=$2
+			# from_commitish=$2
 			printf "Option --to ignored: \n\n"
 			shift
 			;;
 		--to)
-			to_commitish=$2
+			# to_commitish=$2
 			printf "Option --to ignored: \n\n"
 			shift
 			;;
@@ -35,4 +35,3 @@ if [ "${package_manager}" = yarn ]; then
 else
 	npm run-script lint -- --max-warnings=0
 fi
-
