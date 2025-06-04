@@ -37,6 +37,21 @@ Trigger.prototype.CheckCaptureTheRelicVictory = function(data)
 	{
 		warn("Relic entity " + data.entity + " has been destroyed.");
 		this.relics.splice(this.relics.indexOf(data.entity), 1);
+
+		const potentialRespawnPoints = TriggerHelper.GetLandSpawnPoints();
+		const respawnPoint = pickRandom(potentialRespawnPoints);
+		const cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
+		const catafalqueTemplates = shuffleArray(cmpTemplateManager.FindAllTemplates(false).filter(
+			name => GetIdentityClasses(cmpTemplateManager.GetTemplate(name).Identity || {}).indexOf("Relic") != -1));
+		const relicTemplateToSpawn = pickRandom(catafalqueTemplates);
+		const newRelicEntities = TriggerHelper.SpawnUnits(respawnPoint, relicTemplateToSpawn, 1, 0);
+		const newRelicId = newRelicEntities[0];
+		this.relics.push(newRelicId);
+		const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
+		const numSpawnedRelics = cmpEndGameManager.GetGameSettings().relicCount;
+		this.playerRelicsCount = new Array(TriggerHelper.GetNumberOfPlayers()).fill(0, 1);
+		this.playerRelicsCount[0] = numSpawnedRelics;
+
 	}
 	else
 		++this.playerRelicsCount[data.to];
