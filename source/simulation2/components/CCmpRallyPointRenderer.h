@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
 * This file is part of 0 A.D.
 *
 * 0 A.D. is free software: you can redistribute it and/or modify
@@ -75,8 +75,8 @@ public:
 	void Init(const CParamNode& paramNode) override;
 	void Deinit() override;
 
-	void Serialize(ISerializer& UNUSED(serialize)) override;
-	void Deserialize(const CParamNode& paramNode, IDeserializer& UNUSED(deserialize)) override;
+	void Serialize(ISerializer&) override;
+	void Deserialize(const CParamNode& paramNode, IDeserializer&) override;
 
 	void HandleMessage(const CMessage& msg, bool UNUSED(global)) override;
 

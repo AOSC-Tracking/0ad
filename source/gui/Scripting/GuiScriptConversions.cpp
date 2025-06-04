@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -131,7 +131,8 @@ template<> void Script::ToJSVal<SDL_Event_>(const ScriptRequest& rq, JS::Mutable
 	ret.setObject(*obj);
 }
 
-template<> void Script::ToJSVal<IGUIObject*>(const ScriptRequest& UNUSED(rq), JS::MutableHandleValue ret, IGUIObject* const& val)
+template<> void Script::ToJSVal<IGUIObject*>(const ScriptRequest&, JS::MutableHandleValue ret,
+	IGUIObject* const& val)
 {
 	if (val == nullptr)
 		ret.setNull();

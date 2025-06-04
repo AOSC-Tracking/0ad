@@ -1,4 +1,4 @@
-/* Copyright (C) 2022 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -140,12 +140,12 @@ void CCmpRallyPointRenderer::Deinit()
 {
 }
 
-void CCmpRallyPointRenderer::Serialize(ISerializer& UNUSED(serialize))
+void CCmpRallyPointRenderer::Serialize(ISerializer&)
 {
 	// Do NOT serialize anything; this is a rendering-only component, it does not and should not affect simulation state
 }
 
-void CCmpRallyPointRenderer::Deserialize(const CParamNode& paramNode, IDeserializer& UNUSED(deserialize))
+void CCmpRallyPointRenderer::Deserialize(const CParamNode& paramNode, IDeserializer&)
 {
 	Init(paramNode);
 	// The dependent components have not been deserialized, so the color is loaded on first SetDisplayed

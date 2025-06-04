@@ -1,4 +1,4 @@
-/* Copyright (C) 2023 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ public:
 		vfs::ForEachFile(g_VFS, L"simulation/ai/", Callback, (uintptr_t)this, L"*.json", vfs::DIR_RECURSIVE);
 	}
 
-	static Status Callback(const VfsPath& pathname, const CFileInfo& UNUSED(fileInfo), const uintptr_t cbData)
+	static Status Callback(const VfsPath& pathname, const CFileInfo&, const uintptr_t cbData)
 	{
 		GetAIsHelper* self = (GetAIsHelper*)cbData;
 		ScriptRequest rq(self->m_ScriptInterface);
