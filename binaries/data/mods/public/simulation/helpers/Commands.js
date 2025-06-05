@@ -214,6 +214,8 @@ var g_Commands = {
 			warn("Invalid command: resource is not owned by gaia or player "+player+": "+uneval(cmd));
 
 		GetFormationUnitAIs(data.entities, player, cmd, data.formation).forEach(cmpUnitAI => {
+			if (cmd.dropResources)
+				cmpUnitAI.DropAtNearestDropSite(false, false);
 			cmpUnitAI.Gather(cmd.target, cmd.queued, cmd.pushFront);
 		});
 	},

@@ -486,9 +486,10 @@ var g_UnitActions =
 				"type": "gather",
 				"entities": selection,
 				"target": action.target,
-				"queued": queued,
-				"pushFront": pushFront,
-				"formation": g_AutoFormation.getNull()
+				"queued": action.dropResources ? true : queued,
+				"pushFront": action.dropResources ? false : pushFront,
+				"formation": g_AutoFormation.getNull(),
+				"dropResources": action.dropResources
 			});
 
 			Engine.GuiInterfaceCall("PlaySound", {
@@ -512,9 +513,14 @@ var g_UnitActions =
 			if (!resource)
 				return false;
 
+			const dropResources = entState.resourceCarrying &&
+				entState.resourceCarrying.length > 0 &&
+				entState.resourceCarrying[0].type != targetState.resourceSupply.type.generic;
+
 			return {
 				"possible": true,
-				"cursor": "action-gather-" + resource
+				"cursor": "action-gather-" + resource,
+				"dropResources": dropResources,
 			};
 		},
 		"actionCheck": function(target, selection)
@@ -524,7 +530,8 @@ var g_UnitActions =
 				"type": "gather",
 				"cursor": actionInfo.cursor,
 				"target": target,
-				"firstAbleEntity": actionInfo.entity
+				"firstAbleEntity": actionInfo.entity,
+				"dropResources": actionInfo.dropResources
 			};
 		},
 		"specificness": 1,
