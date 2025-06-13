@@ -41,25 +41,19 @@ Trigger.prototype.CheckCaptureTheRelicVictory = function(data)
 	{
 		warn("Relic entity " + data.entity + " has been destroyed.");
 		this.relics.splice(this.relics.indexOf(data.entity), 1); // Remove from list of active relics
-                
-        const potentialRespawnPoints = TriggerHelper.GetLandSpawnPoints();
-        const respawnPoint = pickRandom(potentialRespawnPoints);
-        
-        // Use the already initialized this.catafalqueTemplates
-        const relicTemplateToSpawn = pickRandom(this.catafalqueTemplates);
-         
-        const newRelicEntities = TriggerHelper.SpawnUnits(respawnPoint,relicTemplateToSpawn,1,0);
-        const newRelicId = newRelicEntities[0];
-
-        this.relics.push(newRelicId); // Add the newly spawned relic to the list
-
-        // Increment the neutral player's (Player 0) relic count as a new relic has spawned for Gaia
-        this.playerRelicsCount[0]++;
+		const potentialRespawnPoints = TriggerHelper.GetLandSpawnPoints();
+		const respawnPoint = pickRandom(potentialRespawnPoints);
+		const relicTemplateToSpawn = pickRandom(this.catafalqueTemplates);
+		const newRelicEntities = TriggerHelper.SpawnUnits(respawnPoint, relicTemplateToSpawn, 1, 0);
+		const newRelicId = newRelicEntities[0];
+		this.relics.push(newRelicId); // Add the newly spawned relic to the list
+		// Increment the neutral player's (Player 0) relic count as a new relic has spawned for Gaia
+		this.playerRelicsCount[0]++;
 	}
 	else // Relic captured by a player
 	{
 		++this.playerRelicsCount[data.to];
-    }
+		}
 
 	this.DeleteCaptureTheRelicVictoryMessages();
 	this.CheckCaptureTheRelicCountdown();
