@@ -1,7 +1,7 @@
 Trigger.prototype.InitCaptureTheRelic = function()
 {
 	const cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-	const catafalqueTemplates = shuffleArray(cmpTemplateManager.FindAllTemplates(false).filter(
+	this.catafalqueTemplates = shuffleArray(cmpTemplateManager.FindAllTemplates(false).filter(
 		name => GetIdentityClasses(cmpTemplateManager.GetTemplate(name).Identity || {}).indexOf("Relic") != -1));
 
 	const potentialSpawnPoints = TriggerHelper.GetLandSpawnPoints();
@@ -12,13 +12,17 @@ Trigger.prototype.InitCaptureTheRelic = function()
 	}
 
 	const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
-	const numSpawnedRelics = cmpEndGameManager.GetGameSettings().relicCount;
-	this.playerRelicsCount = new Array(TriggerHelper.GetNumberOfPlayers()).fill(0, 1);
-	this.playerRelicsCount[0] = numSpawnedRelics;
+	this.numSpawnedRelics = cmpEndGameManager.GetGameSettings().relicCount;
 
-	for (let i = 0; i < numSpawnedRelics; ++i)
+	// Initialize playerRelicsCount array with zeros for all players
+	this.playerRelicsCount = new Array(TriggerHelper.GetNumberOfPlayers()).fill(0);
+	// Set the neutral player (Player 0) relic count to the initial number of spawned relics
+	this.playerRelicsCount[0] = this.numSpawnedRelics;
+
+	for (let i = 0; i < this.numSpawnedRelics; ++i)
 	{
-		this.relics[i] = TriggerHelper.SpawnUnits(pickRandom(potentialSpawnPoints), catafalqueTemplates[i], 1, 0)[0];
+		// Use this.catafalqueTemplates to pick a template for spawning
+		this.relics[i] = TriggerHelper.SpawnUnits(pickRandom(potentialSpawnPoints), this.catafalqueTemplates[i], 1, 0)[0];
 
 		const cmpPositionRelic = Engine.QueryInterface(this.relics[i], IID_Position);
 		cmpPositionRelic.SetYRotation(randomAngle());
@@ -33,28 +37,29 @@ Trigger.prototype.CheckCaptureTheRelicVictory = function(data)
 
 	--this.playerRelicsCount[data.from];
 
-	if (data.to == -1)
+	if (data.to == -1) // Relic destroyed
 	{
 		warn("Relic entity " + data.entity + " has been destroyed.");
-		this.relics.splice(this.relics.indexOf(data.entity), 1);
+		this.relics.splice(this.relics.indexOf(data.entity), 1); // Remove from list of active relics
+                
+        const potentialRespawnPoints = TriggerHelper.GetLandSpawnPoints();
+        const respawnPoint = pickRandom(potentialRespawnPoints);
+        
+        // Use the already initialized this.catafalqueTemplates
+        const relicTemplateToSpawn = pickRandom(this.catafalqueTemplates);
+         
+        const newRelicEntities = TriggerHelper.SpawnUnits(respawnPoint,relicTemplateToSpawn,1,0);
+        const newRelicId = newRelicEntities[0];
 
-		const potentialRespawnPoints = TriggerHelper.GetLandSpawnPoints();
-		const respawnPoint = pickRandom(potentialRespawnPoints);
-		const cmpTemplateManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager);
-		const catafalqueTemplates = shuffleArray(cmpTemplateManager.FindAllTemplates(false).filter(
-			name => GetIdentityClasses(cmpTemplateManager.GetTemplate(name).Identity || {}).indexOf("Relic") != -1));
-		const relicTemplateToSpawn = pickRandom(catafalqueTemplates);
-		const newRelicEntities = TriggerHelper.SpawnUnits(respawnPoint, relicTemplateToSpawn, 1, 0);
-		const newRelicId = newRelicEntities[0];
-		this.relics.push(newRelicId);
-		const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
-		const numSpawnedRelics = cmpEndGameManager.GetGameSettings().relicCount;
-		this.playerRelicsCount = new Array(TriggerHelper.GetNumberOfPlayers()).fill(0, 1);
-		this.playerRelicsCount[0] = numSpawnedRelics;
+        this.relics.push(newRelicId); // Add the newly spawned relic to the list
 
+        // Increment the neutral player's (Player 0) relic count as a new relic has spawned for Gaia
+        this.playerRelicsCount[0]++;
 	}
-	else
+	else // Relic captured by a player
+	{
 		++this.playerRelicsCount[data.to];
+    }
 
 	this.DeleteCaptureTheRelicVictoryMessages();
 	this.CheckCaptureTheRelicCountdown();
@@ -67,7 +72,7 @@ Trigger.prototype.CheckCaptureTheRelicVictory = function(data)
  */
 Trigger.prototype.CheckCaptureTheRelicCountdown = function()
 {
-	if (this.playerRelicsCount[0])
+	if (this.playerRelicsCount[0]) // If neutral relics still exist
 	{
 		this.DeleteCaptureTheRelicVictoryMessages();
 		return;
@@ -75,7 +80,7 @@ Trigger.prototype.CheckCaptureTheRelicCountdown = function()
 
 	const activePlayers = Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetActivePlayers();
 	const relicOwners = activePlayers.filter(playerID => this.playerRelicsCount[playerID]);
-	if (!relicOwners.length)
+	if (!relicOwners.length) // No player owns any relics
 	{
 		this.DeleteCaptureTheRelicVictoryMessages();
 		return;
@@ -127,27 +132,28 @@ Trigger.prototype.StartCaptureTheRelicCountdown = function(winningPlayers)
 		cmpGuiInterface.DeleteTimeNotification(this.othersRelicsVictoryMessage);
 	}
 
-	if (!this.relics.length)
+	if (!this.relics.length) // Should not happen if playerRelicsCount[0] is 0 and relicOwners.length is > 0
 		return;
 
-	const others = [-1];
+	const others = [-1]; // Initialize with -1 for Gaia/neutral player
 	for (let playerID = 1; playerID < TriggerHelper.GetNumberOfPlayers(); ++playerID)
 	{
 		const cmpPlayer = QueryPlayerIDInterface(playerID);
-		if (cmpPlayer.GetState() == "won")
+		if (cmpPlayer.GetState() == "won") // If a player has already won, don't start countdown
 			return;
 
-		if (winningPlayers.indexOf(playerID) == -1)
+		if (winningPlayers.indexOf(playerID) == -1) // If player is not part of the winning group
 			others.push(playerID);
 	}
 
+	// This assumes that if relicOwners.length is > 0, then this.relics[0] exists and has an owner.
+	// You might want to add a check here if this.relics[0] could theoretically be undefined.
 	const cmpPlayer = QueryOwnerInterface(this.relics[0], IID_Player);
 	if (!cmpPlayer)
 	{
-		warn("Relic entity " + this.relics[0] + " has no owner.");
-		this.relics.splice(0, 1);
-
-		this.CheckCaptureTheRelicCountdown();
+		warn("Relic entity " + this.relics[0] + " has no owner (this should not happen at this stage).");
+		this.relics.splice(0, 1); // Remove problematic relic if no owner
+		this.CheckCaptureTheRelicCountdown(); // Re-evaluate
 		return;
 	}
 	const cmpEndGameManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_EndGameManager);
@@ -201,7 +207,6 @@ Trigger.prototype.CaptureTheRelicVictorySetWinner = function(winningPlayers)
 	cmpTrigger.ownRelicsVictoryMessage = undefined;
 	cmpTrigger.othersRelicsVictoryMessage = undefined;
 	cmpTrigger.relicsVictoryCountdownPlayers = [];
-
 	cmpTrigger.DoAfterDelay(0, "InitCaptureTheRelic", {});
 	cmpTrigger.RegisterTrigger("OnDiplomacyChanged", "CheckCaptureTheRelicCountdown", { "enabled": true });
 	cmpTrigger.RegisterTrigger("OnOwnershipChanged", "CheckCaptureTheRelicVictory", { "enabled": true });
