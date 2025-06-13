@@ -53,7 +53,7 @@ Trigger.prototype.CheckCaptureTheRelicVictory = function(data)
 	else // Relic captured by a player
 	{
 		++this.playerRelicsCount[data.to];
-		}
+	}
 
 	this.DeleteCaptureTheRelicVictoryMessages();
 	this.CheckCaptureTheRelicCountdown();
