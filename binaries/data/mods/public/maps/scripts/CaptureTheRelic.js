@@ -21,9 +21,7 @@ Trigger.prototype.InitCaptureTheRelic = function()
 
 	for (let i = 0; i < this.numSpawnedRelics; ++i)
 	{
-		// Use this.catafalqueTemplates to pick a template for spawning
 		this.relics[i] = TriggerHelper.SpawnUnits(pickRandom(potentialSpawnPoints), this.catafalqueTemplates[i], 1, 0)[0];
-
 		const cmpPositionRelic = Engine.QueryInterface(this.relics[i], IID_Position);
 		cmpPositionRelic.SetYRotation(randomAngle());
 	}
