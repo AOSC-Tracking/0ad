@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -82,8 +82,6 @@ struct DirWatch
 // for atexit
 static void inotify_deinit()
 {
-	close(inotifyfd);
-
 #ifdef __BIONIC__
 	#warning TODO: pthread_cancel not supported on Bionic
 #else
@@ -96,6 +94,8 @@ static void inotify_deinit()
 
 	// Wait for the thread to finish
 	pthread_join(g_event_loop_thread, NULL);
+
+	close(inotifyfd);
 }
 
 static void inotify_event_loop_process_events()
