@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
  * emulate a subset of POSIX on Win32.
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wposix/wposix.h"
 
 #include "lib/sysdep/os/win/wposix/wposix_internal.h"

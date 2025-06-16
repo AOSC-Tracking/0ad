@@ -24,8 +24,6 @@
  * portable debugging helper functions specific to the STL.
  */
 
-#include "precompiled.h"
-
 #include "debug_stl.h"
 
 #include "lib/code_annotation.h"

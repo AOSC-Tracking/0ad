@@ -24,8 +24,6 @@
  * helper functions for path strings.
  */
 
-#include "precompiled.h"
-
 #include "path.h"
 
 #include "lib/code_annotation.h"

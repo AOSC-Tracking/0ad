@@ -20,8 +20,6 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-#include "precompiled.h"
-
 #include "tinygettext/unix_file_system.hpp"
 
 #include <boost/filesystem.hpp>

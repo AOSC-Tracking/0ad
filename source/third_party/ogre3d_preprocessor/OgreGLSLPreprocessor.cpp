@@ -32,8 +32,6 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "precompiled.h"
-
 #include "lib/debug.h"
 #include "OgreGLSLPreprocessor.h"
 

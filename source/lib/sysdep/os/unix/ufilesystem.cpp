@@ -24,8 +24,6 @@
  * Unix implementation of wchar_t versions of POSIX filesystem functions
  */
 
-#include "precompiled.h"
-
 #include "lib/sysdep/filesystem.h"
 
 #include "lib/code_annotation.h"

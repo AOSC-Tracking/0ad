@@ -24,8 +24,6 @@
  * support routines for texture codecs
  */
 
-#include "precompiled.h"
-
 #include "tex_codec.h"
 
 #include "lib/allocators/dynarray.h"

@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "lib/sysdep/dir_watch.h"
 #include "lib/file/file_system.h"
 #include "osx_sys_version.h"

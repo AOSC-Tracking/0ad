@@ -24,7 +24,6 @@
  * Win32 stack trace and symbol engine.
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wdbg_sym.h"
 
 #include <cstdlib>

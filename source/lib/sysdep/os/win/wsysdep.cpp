@@ -24,7 +24,6 @@
  * Windows backend of the sysdep interface
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/sysdep.h"
 
 #include "lib/alignment.h"

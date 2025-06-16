@@ -24,8 +24,6 @@
  * helper functions for directory access
  */
 
-#include "precompiled.h"
-
 #include "vfs_util.h"
 
 #include "lib/code_annotation.h"

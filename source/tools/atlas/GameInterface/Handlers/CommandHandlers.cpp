@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "lib/debug.h"
 #include "tools/atlas/GameInterface/CommandProc.h"
 #include "tools/atlas/GameInterface/Handlers/MessageHandler.h"

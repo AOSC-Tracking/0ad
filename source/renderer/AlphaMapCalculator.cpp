@@ -19,8 +19,6 @@
  * Determine which alpha blend map fits a given shape.
  */
 
-#include "precompiled.h"
-
 #include "AlphaMapCalculator.h"
 
 #include "renderer/BlendShapes.h"

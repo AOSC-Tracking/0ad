@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "gui/CGUI.h"
 #include "gui/ObjectTypes/CButton.h"
 #include "gui/ObjectTypes/CChart.h"

@@ -4,8 +4,6 @@
 //  * For quietness with our default warning flags, some warnings are
 //    explicitly disabled.
 
-#include "precompiled.h"
-
 #ifdef _MSC_VER
 # pragma warning(disable:4456) // hides previous local declaration
 # pragma warning(disable:4189) // local variable is initialized but not referenced

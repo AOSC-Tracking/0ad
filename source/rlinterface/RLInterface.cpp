@@ -15,10 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Pull in the headers from the default precompiled header,
-// even if rlinterface doesn't use precompiled headers.
-#include "lib/precompiled.h"
-
 #include "rlinterface/RLInterface.h"
 
 #include "gui/GUIManager.h"

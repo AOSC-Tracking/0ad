@@ -20,8 +20,6 @@
  * info.
  */
 
-#include "precompiled.h"
-
 #include "Matrix3D.h"
 
 #include "maths/Quaternion.h"

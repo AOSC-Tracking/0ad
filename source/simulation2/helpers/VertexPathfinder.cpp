@@ -30,8 +30,6 @@
  * with a limited range and not exceedingly frequently.
  */
 
-#include "precompiled.h"
-
 #include "VertexPathfinder.h"
 
 #include "graphics/Color.h"

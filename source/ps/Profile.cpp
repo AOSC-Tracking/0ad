@@ -19,8 +19,6 @@
  * GPG3-style hierarchical profiler
  */
 
-#include "precompiled.h"
-
 #include "Profile.h"
 
 #include "lib/secure_crt.h"

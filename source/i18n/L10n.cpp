@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "i18n/L10n.h"
 
 #include "gui/GUIManager.h"

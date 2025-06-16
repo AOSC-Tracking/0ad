@@ -24,8 +24,6 @@
  * CPU and memory detection.
  */
 
-#include "precompiled.h"
-
 #include "cpu.h"
 
 #include "lib/code_annotation.h"

@@ -24,8 +24,6 @@
  * SDL input redirector; dispatches to multiple handlers.
  */
 
-#include "precompiled.h"
-
 #include "input.h"
 
 #include "lib/debug.h"

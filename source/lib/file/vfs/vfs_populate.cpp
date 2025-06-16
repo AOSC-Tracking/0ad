@@ -24,8 +24,6 @@
  * populate VFS directories with files
  */
 
-#include "precompiled.h"
-
 #include "vfs_populate.h"
 
 #include "lib/code_annotation.h"

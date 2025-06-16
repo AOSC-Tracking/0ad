@@ -24,8 +24,6 @@
  * 'tree' of VFS directories and files
  */
 
-#include "precompiled.h"
-
 #include "vfs_tree.h"
 
 #include "lib/code_annotation.h"

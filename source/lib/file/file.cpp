@@ -24,8 +24,6 @@
  * simple POSIX file wrapper.
  */
 
-#include "precompiled.h"
-
 #include "file.h"
 
 #include "lib/code_annotation.h"

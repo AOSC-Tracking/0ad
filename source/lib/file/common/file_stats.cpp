@@ -24,8 +24,6 @@
  * gathers statistics from all file modules.
  */
 
-#include "precompiled.h"
-
 #include "file_stats.h"
 
 #if FILE_STATS_ENABLED

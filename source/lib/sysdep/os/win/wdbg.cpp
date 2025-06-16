@@ -1,4 +1,4 @@
-/* Copyright (C) 2010 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
  * Win32 debug support code.
  */
 
-#include "precompiled.h"
 #include "lib/debug.h"
 
 #include "lib/bits.h"

@@ -18,8 +18,6 @@
 // FIFO queue of load 'functors' with time limit; enables displaying
 // load progress without resorting to threads (complicated).
 
-#include "precompiled.h"
-
 #include "Loader.h"
 
 #include "lib/code_annotation.h"

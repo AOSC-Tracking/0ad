@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "tools/atlas/AtlasUI/General/Observable.h"
 #include "tools/atlas/AtlasUI/ScenarioEditor/ScenarioEditor.h"
 #include "tools/atlas/AtlasUI/ScenarioEditor/Tools/Common/MiscState.h"

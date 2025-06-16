@@ -15,8 +15,6 @@
 * along with 0 A.D. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "precompiled.h"
-
 #include "tools/atlas/AtlasObject/AtlasObject.h"
 #include "tools/atlas/AtlasUI/ActorEditor/TexListEditor.h"
 #include "tools/atlas/AtlasUI/CustomControls/DraggableListCtrl/DraggableListCtrl.h"

@@ -24,8 +24,6 @@
  * helpers for module initialization/shutdown.
  */
 
-#include "precompiled.h"
-
 #include "module_init.h"
 
 #include "lib/debug.h"

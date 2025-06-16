@@ -24,8 +24,6 @@
  * TGA codec.
  */
 
-#include "precompiled.h"
-
 #include "tex_codec.h"
 
 #include "lib/bits.h"

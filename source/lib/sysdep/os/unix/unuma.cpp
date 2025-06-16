@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "lib/sysdep/numa.h"
 
 #include "lib/bits.h"

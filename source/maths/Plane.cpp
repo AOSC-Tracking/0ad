@@ -22,8 +22,6 @@
 // Note that the format used for the plane equation is
 // Ax + By + Cz + D = 0, where <A,B,C> is the normal vector.
 
-#include "precompiled.h"
-
 #include "Plane.h"
 
 #include "maths/MathUtil.h"

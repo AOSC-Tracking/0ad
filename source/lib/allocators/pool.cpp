@@ -24,8 +24,6 @@
  * pool allocator
  */
 
-#include "precompiled.h"
-
 #include "pool.h"
 
 #include "lib/alignment.h"

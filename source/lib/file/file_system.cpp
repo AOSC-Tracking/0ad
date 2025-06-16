@@ -24,8 +24,6 @@
  * higher-level interface on top of sysdep/filesystem.h
  */
 
-#include "precompiled.h"
-
 #include "lib/debug.h"
 #include "lib/file/file_system.h"
 #include "lib/posix/posix_filesystem.h"

@@ -24,8 +24,6 @@
  * PNG codec using libpng.
  */
 
-#include "precompiled.h"
-
 #include "tex_codec.h"
 
 #include "lib/alignment.h"

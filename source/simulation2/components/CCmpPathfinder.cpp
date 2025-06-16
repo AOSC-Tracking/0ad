@@ -20,8 +20,6 @@
  * Common code and setup code for CCmpPathfinder.
  */
 
-#include "precompiled.h"
-
 #include "CCmpPathfinder_Common.h"
 
 #include "graphics/Terrain.h"

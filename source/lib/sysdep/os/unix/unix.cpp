@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "lib/code_annotation.h"
 #include "lib/debug.h"
 #include "lib/os_path.h"

@@ -1,8 +1,6 @@
-/* Copyright (C) 2021 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * ...the usual copyright header...
  */
-
-#include "precompiled.h"
 
 #include "ICmpExample.h"
 

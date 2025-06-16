@@ -24,8 +24,6 @@
  * IO event recording
  */
 
-#include "precompiled.h"
-
 #include "trace.h"
 
 #include "lib/allocators/dynarray.h"

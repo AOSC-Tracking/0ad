@@ -19,8 +19,6 @@
 // Name:        wxVirtualDirTreeCtrl.cpp
 /////////////////////////////////////////////////////////////////////////////
 
-#include "precompiled.h"
-
 #include "virtualdirtreectrl.h"
 
 #include <wx/bitmap.h>

@@ -1,4 +1,4 @@
-/* Copyright (C) 2014 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
  * Windows implementation of sysdep/cpu
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wcpu.h"
 #include "lib/sysdep/os_cpu.h"
 

@@ -24,8 +24,6 @@
  * pseudorandom number generator
  */
 
-#include "precompiled.h"
-
 #include "rand.h"
 
 #include "lib/debug.h"

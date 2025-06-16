@@ -24,8 +24,6 @@
  * DDS (DirectDraw Surface) codec.
  */
 
-#include "precompiled.h"
-
 #include "tex_codec.h"
 
 #include "lib/alignment.h"

@@ -24,8 +24,6 @@
  * interface for reading from and creating archives.
  */
 
-#include "precompiled.h"
-
 #include "archive.h"
 
 #include "lib/code_annotation.h"

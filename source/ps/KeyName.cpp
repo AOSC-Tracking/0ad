@@ -17,8 +17,6 @@
 
 // Ooh, a file of keynames. Fun.
 
-#include "precompiled.h"
-
 #include "KeyName.h"
 
 #include "ps/CStr.h"

@@ -24,8 +24,6 @@
  * archive backend for Zip files.
  */
 
-#include "precompiled.h"
-
 #include "archive_zip.h"
 
 #include "lib/alignment.h"

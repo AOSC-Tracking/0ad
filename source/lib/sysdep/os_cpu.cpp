@@ -24,8 +24,6 @@
  * OS-specific support functions relating to CPU and memory
  */
 
-#include "precompiled.h"
-
 #include "lib/sysdep/os_cpu.h"
 
 #include "lib/alignment.h"

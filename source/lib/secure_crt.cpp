@@ -24,8 +24,6 @@
  * partial implementation of VC8's secure CRT functions
  */
 
-#include "precompiled.h"
-
 #include "secure_crt.h"
 
 #include "lib/code_generation.h"

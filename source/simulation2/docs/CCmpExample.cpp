@@ -2,8 +2,6 @@
  * ...the usual copyright header...
  */
 
-#include "precompiled.h"
-
 #include "simulation2/system/Component.h"
 #include "ICmpExample.h"
 

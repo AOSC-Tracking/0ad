@@ -24,8 +24,6 @@
  * various utility functions.
  */
 
-#include "precompiled.h"
-
 #include "lib.h"
 
 #include "lib/status.h"

@@ -24,8 +24,6 @@
  * CPU-specific routines common to 32 and 64-bit x86
  */
 
-#include "precompiled.h"
-
 #include "x86_x64.h"
 
 #include "lib/bits.h"

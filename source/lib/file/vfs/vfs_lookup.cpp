@@ -24,8 +24,6 @@
  * look up directories/files by traversing path components.
  */
 
-#include "precompiled.h"
-
 #include "vfs_lookup.h"
 
 #include "lib/debug.h"

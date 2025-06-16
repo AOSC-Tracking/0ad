@@ -19,8 +19,6 @@
  * Definition of a single terrain tile
  */
 
-#include "precompiled.h"
-
 #include "MiniPatch.h"
 
 ///////////////////////////////////////////////////////////////////////////////

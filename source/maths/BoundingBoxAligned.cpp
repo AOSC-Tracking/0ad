@@ -19,8 +19,6 @@
  * Axis-aligned bounding box
  */
 
-#include "precompiled.h"
-
 #include "BoundingBoxAligned.h"
 
 #include "lib/debug.h"

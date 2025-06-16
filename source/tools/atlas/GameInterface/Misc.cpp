@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 // TODO: organise things better, rather than sticking them in Misc
 
 #include "graphics/Camera.h"

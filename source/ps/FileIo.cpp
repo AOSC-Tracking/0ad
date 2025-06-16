@@ -19,8 +19,6 @@
  * endian-safe binary file IO helpers.
  */
 
-#include "precompiled.h"
-
 #include "FileIo.h"
 
 #include "lib/byte_order.h"

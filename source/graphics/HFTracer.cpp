@@ -19,8 +19,6 @@
  * Determine intersection of rays with a heightfield.
  */
 
-#include "precompiled.h"
-
 #include "HFTracer.h"
 
 #include "graphics/Patch.h"

@@ -17,14 +17,6 @@
 
 #define CXXTEST_MOCK_TEST_SOURCE_FILE
 
-// Pull in the common config headers from precompiled.h,
-// but disable the actual precompiling (since we've only got
-// one source file)
-#ifdef USING_PCH
-# undef USING_PCH
-#endif
-#include "lib/precompiled.h"
-
 #include "lib/sysdep/os.h"
 
 // Cause calls to be redirected to the real function by default

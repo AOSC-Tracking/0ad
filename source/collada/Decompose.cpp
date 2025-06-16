@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #ifdef _MSC_VER
 # pragma warning(disable: 4244 4305 4127 4701)
 #endif

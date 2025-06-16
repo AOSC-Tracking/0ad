@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -24,7 +24,6 @@
  * Structured Exception Handling support
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wseh.h"
 
 #include "lib/byte_order.h"		// FOURCC

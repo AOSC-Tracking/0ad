@@ -24,8 +24,6 @@
  * platform-independent high resolution timer
  */
 
-#include "precompiled.h"
-
 #include "timer.h"
 
 #include "lib/module_init.h"

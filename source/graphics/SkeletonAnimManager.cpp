@@ -19,8 +19,6 @@
  * Owner of all skeleton animations
  */
 
-#include "precompiled.h"
-
 #include "SkeletonAnimManager.h"
 
 #include "graphics/ColladaManager.h"

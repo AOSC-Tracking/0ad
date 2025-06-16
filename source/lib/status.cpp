@@ -26,8 +26,6 @@
  * simplifies propagating errors / checking if functions failed.
  */
 
-#include "precompiled.h"
-
 #include "status.h"
 
 #include "lib/secure_crt.h"

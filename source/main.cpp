@@ -26,11 +26,6 @@ that of Atlas depending on commandline parameters.
 
 */
 
-// not for any PCH effort, but instead for the (common) definitions
-// included there.
-#define MINIMAL_PCH 2
-#include "lib/precompiled.h"
-
 #include "dapinterface/DapInterface.h"
 #include "graphics/GameView.h"
 #include "graphics/TextureManager.h"

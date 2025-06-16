@@ -27,8 +27,6 @@ linux/ldbg.cpp for the linux-specific stuff (Using BFD and backtrace() for
 symbol lookups and backtraces)
 */
 
-#include "precompiled.h"
-
 #include "lib/debug.h"
 
 #include "lib/posix/posix_types.h"

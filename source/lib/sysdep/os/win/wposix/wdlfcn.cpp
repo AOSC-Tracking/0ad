@@ -20,7 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wposix/wdlfcn.h"
 
 #include "lib/sysdep/os/win/wposix/wposix_internal.h"

@@ -24,8 +24,6 @@
  * dynamic (expandable) array
  */
 
-#include "precompiled.h"
-
 #include "dynarray.h"
 
 #include "lib/alignment.h"

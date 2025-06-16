@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "Hotkey.h"
 
 #include "lib/external_libraries/libsdl.h"

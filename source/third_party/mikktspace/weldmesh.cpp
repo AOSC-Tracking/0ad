@@ -3,8 +3,6 @@
 // Motivation for changes:
 //  * Fix build on *BSD (including malloc.h produces an error)
 
-#include "precompiled.h"
-
 #ifdef _MSC_VER
 # pragma warning(disable:4456) // hides previous local declaration
 #endif

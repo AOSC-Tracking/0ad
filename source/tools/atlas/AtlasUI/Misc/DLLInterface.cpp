@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "DLLInterface.h"
 
 #include "tools/atlas/AtlasUI/ActorEditor/ActorEditor.h"

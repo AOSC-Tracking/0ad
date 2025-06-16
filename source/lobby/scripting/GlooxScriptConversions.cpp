@@ -15,8 +15,6 @@
  * along with 0 A.D.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "precompiled.h"
-
 #include "lib/config2.h"
 #if CONFIG2_LOBBY
 #include "lib/external_libraries/gloox.h"

@@ -21,8 +21,6 @@ view pyramid. But we allow more planes per frustum which may be used for
 portal rendering, where a portal may have 3 or more edges.
 */
 
-#include "precompiled.h"
-
 #include "Frustum.h"
 
 #include "lib/debug.h"

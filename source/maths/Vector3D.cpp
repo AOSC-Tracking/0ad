@@ -1,4 +1,4 @@
-/* Copyright (C) 2020 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -19,8 +19,6 @@
  * Provides an interface for a vector in R3 and allows vector and
  * scalar operations on it
  */
-
-#include "precompiled.h"
 
 #include "Vector3D.h"
 

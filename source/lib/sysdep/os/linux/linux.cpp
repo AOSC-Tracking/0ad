@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "lib/os_path.h"
 #include "lib/posix/posix_types.h"
 #include "lib/sysdep/os/unix/unix_executable_pathname.h"

@@ -24,8 +24,6 @@
  * provide access to System Management BIOS information
  */
 
-#include "precompiled.h"
-
 #include "smbios.h"
 
 #include "lib/alignment.h"

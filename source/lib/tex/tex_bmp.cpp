@@ -24,8 +24,6 @@
  * Windows BMP codec
  */
 
-#include "precompiled.h"
-
 #include "tex_codec.h"
 
 #include "lib/byte_order.h"

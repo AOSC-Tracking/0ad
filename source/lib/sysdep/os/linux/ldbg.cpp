@@ -28,8 +28,6 @@
 // and it's easy enough to get people to run in gdb if we want a proper backtrace.
 // So we now go with the simple approach of not using BFD.
 
-#include "precompiled.h"
-
 #include "lib/debug.h"
 
 #include "lib/code_annotation.h"

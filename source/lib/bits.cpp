@@ -24,8 +24,6 @@
  * bit-twiddling.
  */
 
-#include "precompiled.h"
-
 #include "bits.h"
 
 #include "lib/types.h"

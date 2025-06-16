@@ -522,8 +522,6 @@ end
 -- rel_source_dirs: A table of subdirectories. All source files in these directories are added.
 -- rel_include_dirs: A table of subdirectories to be included.
 -- extra_params: table including zero or more of the following:
--- * no_pch: If specified, no precompiled headers are used for this project.
--- * pch_dir: If specified, this directory will be used for precompiled headers instead of the default
 --   <source_root>/pch/<projectname>/.
 -- * extra_files: table of filenames (relative to source_root) to add to project
 -- * extra_links: table of library names to add to link step
@@ -534,41 +532,27 @@ function project_add_contents(source_root, rel_source_dirs, rel_include_dirs, ex
 		files { prefix.."*.cpp", prefix.."*.h", prefix.."*.inl", prefix.."*.js", prefix.."*.asm", prefix.."*.mm" }
 	end
 
-	-- Put the project-specific PCH directory at the start of the
-	-- include path, so '#include "precompiled.h"' will look in
-	-- there first
-	local pch_dir
-	if not extra_params["pch_dir"] then
-		pch_dir = source_root .. "pch/" .. project().name .. "/"
-	else
-		pch_dir = extra_params["pch_dir"]
-	end
-	includedirs { pch_dir }
-
 	-- Precompiled Headers
 	-- rationale: we need one PCH per static lib, since one global header would
-	-- increase dependencies. To that end, we can either include them as
-	-- "projectdir/precompiled.h", or add "source/PCH/projectdir" to the
-	-- include path and put the PCH there. The latter is better because
-	-- many projects contain several dirs and it's unclear where there the
-	-- PCH should be stored. This way is also a bit easier to use in that
-	-- source files always include "precompiled.h".
+	-- increase dependencies. To that end add "source/PCH/projectdir" to the
+	-- and put the PCH there.
 	-- Notes:
 	-- * Visual Assist manages to use the project include path and can
 	--   correctly open these files from the IDE.
-	-- * precompiled.cpp (needed to "Create" the PCH) also goes in
+	-- * precompiled.cpp (needed to "Create" the PCH with VS) also goes in
 	--   the abovementioned dir.
-	if (not _OPTIONS["without-pch"] and not extra_params["no_pch"]) then
-		filter "action:vs*"
-			pchheader("precompiled.h")
-		filter "action:xcode*"
-			pchheader("../"..pch_dir.."precompiled.h")
-		filter { "action:not vs*", "action:not xcode*" }
-			pchheader(pch_dir.."precompiled.h")
-		filter {}
-		pchsource(pch_dir.."precompiled.cpp")
+	local pchh = "pch/" .. project().name .. "/precompiled.h"
+	local pchs = "pch/" .. project().name .. "/precompiled.cpp"
+	if not _OPTIONS["without-pch"] and os.isfile(rootdir .. "/source/" .. pchh) then
+		forceincludes { rootdir .. "/source/" .. pchh }
+		pchheader( rootdir .. "/source/" .. pchh )
+		files { rootdir .. "/source/" .. pchh }
 		defines { "CONFIG_ENABLE_PCH=1" }
-		files { pch_dir.."precompiled.h", pch_dir.."precompiled.cpp" }
+
+		filter "action:vs*"
+			pchsource(rootdir .. "/source/" .. pchs)
+			files { rootdir .. "/source/" .. pchs }
+		filter {}
 	else
 		defines { "CONFIG_ENABLE_PCH=0" }
 		flags { "NoPCH" }
@@ -731,7 +715,7 @@ function setup_all_libs ()
 		"fmt",
 		"spidermonkey",
 	}
-	setup_static_lib_project("rlinterface", source_dirs, extern_libs, { no_pch = 1 })
+	setup_static_lib_project("rlinterface", source_dirs, extern_libs, {})
 
 	if not _OPTIONS["without-dap-interface"] then
 		source_dirs = {
@@ -743,7 +727,7 @@ function setup_all_libs ()
 			"spidermonkey",
 			"sockets"
 		}
-		setup_static_lib_project("dapinterface", source_dirs, extern_libs, { no_pch = 1 })
+		setup_static_lib_project("dapinterface", source_dirs, extern_libs, {})
 	end
 
 	source_dirs = {
@@ -754,7 +738,7 @@ function setup_all_libs ()
 		"boost",
 		"fmt",
 	}
-	setup_third_party_static_lib_project("tinygettext", source_dirs, extern_libs, { } )
+	setup_third_party_static_lib_project("tinygettext", source_dirs, extern_libs, {} )
 
 	-- it's an external library and we don't want to modify its source to fix warnings, so we just disable them to avoid noise in the compile output
 	filter "action:vs*"
@@ -1047,7 +1031,7 @@ function setup_all_libs ()
 	if not os.istarget("windows") and not _OPTIONS["android"] and not os.istarget("macosx") then
 		table.insert(extern_libs, "x11")
 	end
-	setup_static_lib_project("gladwrapper", {}, extern_libs, { no_pch = 1 })
+	setup_static_lib_project("gladwrapper", {}, extern_libs, {})
 	-- select files to build for the current platform
 	glad_path = third_party_source_dir.."glad/"
 	files { glad_path.."src/vulkan.cpp" }
@@ -1074,7 +1058,7 @@ function setup_all_libs ()
 	}
 	extern_libs = {
 	}
-	setup_static_lib_project("mongoose", source_dirs, extern_libs, { no_pch = 1 })
+	setup_static_lib_project("mongoose", source_dirs, extern_libs, {})
 
 
 	-- CxxTest mock function support
@@ -1086,10 +1070,10 @@ function setup_all_libs ()
 	-- 'real' implementations, to be linked against the main executable
 	-- (files are added manually and not with setup_static_lib_project
 	-- because not all files in the directory are included)
-	setup_static_lib_project("mocks_real", {}, extern_libs, { no_default_link = 1, no_pch = 1 })
+	setup_static_lib_project("mocks_real", {}, extern_libs, { no_default_link = 1 })
 	files { "mocks/*.h", source_root.."mocks/*_real.cpp" }
 	-- 'test' implementations, to be linked against the test executable
-	setup_static_lib_project("mocks_test", {}, extern_libs, { no_default_link = 1, no_pch = 1 })
+	setup_static_lib_project("mocks_test", {}, extern_libs, { no_default_link = 1 })
 	files { source_root.."mocks/*.h", source_root.."mocks/*_test.cpp" }
 end
 
@@ -1158,10 +1142,7 @@ function setup_main_exe ()
 
 	links { "mocks_real" }
 
-	local extra_params = {
-		extra_files = { "main.cpp" },
-		no_pch = 1
-	}
+	local extra_params = { extra_files = { "main.cpp" } }
 	project_add_contents(source_root, {}, {}, extra_params)
 	project_add_extern_libs(used_extern_libs, target_type)
 
@@ -1259,12 +1240,6 @@ function setup_atlas_project(project_name, target_type, rel_source_dirs, rel_inc
 
 	local source_root = rootdir.."/source/tools/atlas/" .. project_name .. "/"
 	project_create(project_name, target_type)
-
-	-- if not specified, the default for atlas pch files is in the project root.
-	if not extra_params["pch_dir"] then
-		extra_params["pch_dir"] = source_root
-	end
-
 	project_add_contents(source_root, rel_source_dirs, rel_include_dirs, extra_params)
 	project_add_extern_libs(extern_libs, target_type)
 
@@ -1316,8 +1291,8 @@ function setup_atlas_projects()
 		"spidermonkey",
 		"cxxtest",
 	},{	-- extra_params
-		no_pch = 1
 	})
+	includedirs( rootdir .. "/source" )
 
 	atlas_src = {
 		"ActorEditor",
@@ -1371,8 +1346,6 @@ function setup_atlas_projects()
 	},
 	atlas_extern_libs,
 	{	-- extra_params
-		pch_dir = rootdir.."/source/tools/atlas/AtlasUI/Misc/",
-		no_pch = false,
 		extra_links = atlas_extra_links,
 		extra_files = { "Misc/atlas.rc" }
 	})
@@ -1429,7 +1402,6 @@ function setup_collada_project(project_name, target_type, rel_source_dirs, rel_i
 
 	project_create(project_name, target_type)
 	local source_root = source_root.."collada/"
-	extra_params["pch_dir"] = source_root
 	project_add_contents(source_root, rel_source_dirs, rel_include_dirs, extra_params)
 	project_add_extern_libs(extern_libs, target_type)
 

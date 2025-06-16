@@ -19,8 +19,6 @@
  * A patch of terrain holding NxN MiniPatch tiles
  */
 
-#include "precompiled.h"
-
 #include "Patch.h"
 
 #include "graphics/RenderableObject.h"

@@ -24,7 +24,6 @@
  * emulate pthreads on Windows.
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wposix/wpthread.h"
 
 #include <new>

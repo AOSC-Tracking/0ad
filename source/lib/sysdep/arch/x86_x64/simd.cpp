@@ -20,8 +20,6 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "precompiled.h"
-
 #include "lib/sysdep/arch/x86_x64/simd.h"
 
 #if COMPILER_HAS_SSE

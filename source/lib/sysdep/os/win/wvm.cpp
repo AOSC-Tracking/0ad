@@ -25,7 +25,6 @@
  * large pages, autocommit, and specifying protection flags during allocation.
  */
 
-#include "precompiled.h"
 #include "lib/sysdep/vm.h"
 
 #include "lib/alignment.h"	// CACHE_ALIGNED

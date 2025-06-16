@@ -23,8 +23,6 @@
 // note: the BFD stuff *could* be used on other platforms, if we saw the
 // need for it.
 
-#include "precompiled.h"
-
 #include "lib/sysdep/sysdep.h"
 #include "lib/debug.h"
 

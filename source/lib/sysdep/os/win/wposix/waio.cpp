@@ -29,7 +29,6 @@
 // file is opened with FILE_FLAG_OVERLAPPED. (it looks like they are
 // using threaded blocking IO)
 
-#include "precompiled.h"
 #include "lib/sysdep/os/win/wposix/waio.h"
 
 #include "lib/bits.h"	// round_up
