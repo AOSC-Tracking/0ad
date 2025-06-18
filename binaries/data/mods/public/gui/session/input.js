@@ -91,6 +91,57 @@ const doublePressTime = 500;
 var doublePressTimer = 0;
 var prevHotkey = 0;
 
+// Definitions for buildings placement hotkeys
+const selectionData = Engine.ReadJSONFile("gui/hotkeys/spec/selection.json").mapped_hotkeys;
+const structuresData = Engine.ReadJSONFile("gui/hotkeys/spec/structures.json").mapped_hotkeys;
+var g_BuildingSelectIndex = {};
+const g_BuildingHotkeys = {};
+const g_SelectBuildingHotkeys = {};
+const g_SelectUnitHotkeys = {};
+
+for (const category in structuresData)
+{
+	for (const hotkey in structuresData[category])
+	{
+		if (hotkey.startsWith("structures.place."))
+		{
+			const buildingId = hotkey.replace("structures.place.", "");
+			g_BuildingHotkeys[hotkey] = `structures/{civ}/${buildingId}`;
+		}
+	}
+}
+for (const category in structuresData)
+{
+	for (const hotkey in structuresData[category])
+	{
+		if (hotkey.startsWith("selection.structures."))
+		{
+			const buildingId = hotkey.replace("selection.structures.", "");
+			const className = toPascalCase(buildingId);
+			g_SelectBuildingHotkeys[hotkey] = className;
+		}
+	}
+}
+
+for (const category in selectionData)
+{
+	for (const hotkey in selectionData[category])
+	{
+		if (hotkey.startsWith("selection.unit."))
+		{
+			const unitId = hotkey.replace("selection.unit.", "");
+			const className = toPascalCase(unitId);
+			g_SelectUnitHotkeys[hotkey] = className;
+		}
+	}
+}
+function toPascalCase(str) {
+	return str
+		.split('_')
+		.map(s => s.charAt(0).toUpperCase() + s.slice(1))
+		.join('');
+}
+
 function getMaxDragDelta()
 {
 	return Engine.ConfigDB_GetValue("user", "gui.session.dragdelta");
@@ -825,6 +876,69 @@ function handleInputAfterGui(ev)
 		g_ShowGuarded = (ev.type == "hotkeypress");
 		updateAdditionalHighlight();
 	}
+	// Unit class selection hotkeys
+	if (ev.type == "hotkeydown" && ev.hotkey in g_SelectUnitHotkeys)
+	{
+		let targetClass = g_SelectUnitHotkeys[ev.hotkey];
+		let playerEntities = Engine.GuiInterfaceCall("GetPlayerEntities", {
+			"player": g_ViewedPlayer
+		});
+
+		if (!playerEntities || !playerEntities.length)
+			return true;
+
+		let ents = playerEntities.filter(ent => {
+			let entState = GetEntityState(ent);
+			return entState && entState.identity && entState.identity.classes.includes(targetClass);
+		});
+
+		if (!ents.length)
+			return true;
+
+		g_Selection.reset();
+		g_Selection.addList(ents);
+		return true;
+	}
+
+	// Building placements hotkeys
+	if (ev.type == "hotkeydown" && ev.hotkey in g_BuildingHotkeys)
+	{
+		let templateName = g_BuildingHotkeys[ev.hotkey];
+		placeBuildingByTemplateName(templateName);
+		return true;
+	}
+
+	// Building selection hotkeys
+	if (ev.type == "hotkeydown" && ev.hotkey in g_SelectBuildingHotkeys)
+	{
+		let targetClass = g_SelectBuildingHotkeys[ev.hotkey];
+		let playerEntities = Engine.GuiInterfaceCall("GetPlayerEntities", {
+			"player": g_ViewedPlayer
+		});
+
+		if (!playerEntities || !playerEntities.length)
+			return true;
+
+		let ents = playerEntities.filter(ent => {
+			let entState = GetEntityState(ent);
+			return entState && entState.identity && entState.identity.classes.includes(targetClass);
+		});
+
+		if (!ents.length)
+			return true;
+
+		if (!(targetClass in g_BuildingSelectIndex))
+			g_BuildingSelectIndex[targetClass] = 0;
+
+		let index = g_BuildingSelectIndex[targetClass];
+		let entity = ents[index % ents.length];
+
+		g_Selection.reset();
+		g_Selection.addList([entity]);
+		g_BuildingSelectIndex[targetClass] = (index + 1) % ents.length;
+
+		return true;
+	}
 
 	if (inputState != INPUT_NORMAL && inputState != INPUT_SELECTING)
 		clickedEntity = INVALID_ENTITY;
@@ -1175,6 +1289,51 @@ function handleInputAfterGui(ev)
 		return false;
 	default:
 		return false;
+	}
+}
+
+//Check if the structure is a buildable entity of players's civ
+function placeBuildingByTemplateName(templateName)
+{
+	let playerState = GetSimState().players[g_ViewedPlayer];
+	if (!playerState)
+		return;
+	templateName = templateName.replace("{civ}", playerState.civ);
+
+	let buildableEntities = getAllBuildableEntitiesFromSelection();
+	if (!buildableEntities.includes(templateName))
+		return;
+
+	let templateData = GetTemplateData(templateName);
+	if (!templateData)
+		return;
+
+	//Check if cost and tech requirements are met before startBuildingPlacement()
+	let requirementsMet = true;
+	if (templateData.requirements)
+	{
+		requirementsMet = Engine.GuiInterfaceCall("AreRequirementsMet", {
+			"requirements": templateData.requirements,
+			"player": g_ViewedPlayer
+		});
+	}
+	if (requirementsMet && templateData.cost)
+	{
+		requirementsMet = !Engine.GuiInterfaceCall("GetNeededResources", {
+			"cost": templateData.cost,
+			"player": g_ViewedPlayer
+		});
+	}
+
+	if (!requirementsMet)
+		return;
+
+	startBuildingPlacement(templateName, playerState);
+
+	if (placementSupport)
+	{
+		placementSupport.position = Engine.GetTerrainAtScreenPoint(mouseX, mouseY);
+		updateBuildingPlacementPreview();
 	}
 }
 

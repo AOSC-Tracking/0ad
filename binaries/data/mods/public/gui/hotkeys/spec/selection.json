@@ -31,6 +31,38 @@
 				"name": "Select only wounded units",
 				"desc": "Select only wounded units."
 			},
+			"selection.unit.infantry": {
+				"name": "Select Infantry",
+				"desc": "Select all infantry units."
+			},
+			"selection.unit.cavalry": {
+				"name": "Select Cavalry",
+				"desc": "Select all cavalry units."
+			},
+			"selection.unit.mercenary": {
+				"name": "Select Mercenary",
+				"desc": "Select all mercenary units."
+			},
+			"selection.unit.champion": {
+				"name": "Select Champion",
+				"desc": "Select all champion units."
+			},
+			"selection.unit.healer": {
+				"name": "Select Healer",
+				"desc": "Select all Healer units."
+			},
+			"selection.unit.siege": {
+				"name": "Select Siege",
+				"desc": "Select all your Siege."
+			},
+			"selection.unit.hero": {
+				"name": "Select Hero",
+				"desc": "Select your Hero."
+			},
+			"selection.unit.dog": {
+				"name": "Select Dog",
+				"desc": "Select all your doggies."
+			},
 			"selection.remove": {
 				"name": "Remove units from selection",
 				"desc": "Remove units from selection."
