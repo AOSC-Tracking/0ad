@@ -20,7 +20,7 @@
   <Identity>
     <Civ>kush</Civ>
     <GenericName>Blemmye Camp</GenericName>
-    <SpecificName>ꜥfꜣy</SpecificName>
+    <SpecificName>Ꜥfꜣy Brhm</SpecificName>
     <Tooltip>Train Blemmye Mercenaries.</Tooltip>
     <Classes datatype="tokens">CivSpecific</Classes>
     <Icon>structures/mercenary_camp.png</Icon>
