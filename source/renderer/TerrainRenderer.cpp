@@ -508,14 +508,14 @@ bool TerrainRenderer::RenderFancyWater(
 		fancyWaterShader->GetBindingSlot(str_normalMap2),
 		nextNormalTexture->GetBackendTexture());
 
-	if (waterManager.m_WaterFancyEffects)
+	if (waterManager.m_WaterFancyEffects && !waterManager.m_FancyTexture->IsPendingQueueSubmit())
 	{
 		deviceCommandContext->SetTexture(
 			fancyWaterShader->GetBindingSlot(str_waterEffectsTex),
 			waterManager.m_FancyTexture.get());
 	}
 
-	if (waterManager.m_WaterRefraction && waterManager.m_WaterRealDepth)
+	if (waterManager.m_WaterRefraction && waterManager.m_WaterRealDepth && !waterManager.m_RefrFboDepthTexture->IsPendingQueueSubmit())
 	{
 		deviceCommandContext->SetTexture(
 			fancyWaterShader->GetBindingSlot(str_depthTex),
@@ -528,13 +528,13 @@ bool TerrainRenderer::RenderFancyWater(
 			waterManager.m_RefractionViewInvMatrix.AsFloatArray());
 	}
 
-	if (waterManager.m_WaterRefraction)
+	if (waterManager.m_WaterRefraction && !waterManager.m_RefractionTexture->IsPendingQueueSubmit())
 	{
 		deviceCommandContext->SetTexture(
 			fancyWaterShader->GetBindingSlot(str_refractionMap),
 			waterManager.m_RefractionTexture.get());
 	}
-	if (waterManager.m_WaterReflection)
+	if (waterManager.m_WaterReflection && !waterManager.m_ReflectionTexture->IsPendingQueueSubmit())
 	{
 		deviceCommandContext->SetTexture(
 			fancyWaterShader->GetBindingSlot(str_reflectionMap),

@@ -934,6 +934,9 @@ CTexture::~CTexture() = default;
 void CTexture::UploadBackendTextureIfNeeded(
 	Renderer::Backend::IDeviceCommandContext* deviceCommandContext)
 {
+	if (m_BackendTexture && m_BackendTexture->IsPendingQueueSubmit())
+		return;
+
 	if (IsUploaded())
 		return;
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2024 Wildfire Games.
+/* Copyright (C) 2025 Wildfire Games.
  * This file is part of 0 A.D.
  *
  * 0 A.D. is free software: you can redistribute it and/or modify
@@ -250,7 +250,7 @@ void WaterManager::RecreateOrLoadTexturesIfNeeded()
 			Renderer::Backend::Format::R8G8B8A8_UNORM, m_RefTextureSize, m_RefTextureSize,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::LINEAR,
-				Renderer::Backend::Sampler::AddressMode::MIRRORED_REPEAT));
+				Renderer::Backend::Sampler::AddressMode::MIRRORED_REPEAT), 1, 1, true);
 
 		m_ReflFboDepthTexture = m_Device->CreateTexture2D("WaterReflectionDepthTexture",
 			Renderer::Backend::ITexture::Usage::SAMPLED |
@@ -258,7 +258,7 @@ void WaterManager::RecreateOrLoadTexturesIfNeeded()
 			depthFormat, m_RefTextureSize, m_RefTextureSize,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::NEAREST,
-				Renderer::Backend::Sampler::AddressMode::REPEAT));
+				Renderer::Backend::Sampler::AddressMode::REPEAT), 1, 1, true);
 
 		Renderer::Backend::SColorAttachment colorAttachment{};
 		colorAttachment.texture = m_ReflectionTexture.get();
@@ -292,7 +292,7 @@ void WaterManager::RecreateOrLoadTexturesIfNeeded()
 			Renderer::Backend::Format::R8G8B8A8_UNORM, m_RefTextureSize, m_RefTextureSize,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::LINEAR,
-				Renderer::Backend::Sampler::AddressMode::MIRRORED_REPEAT));
+				Renderer::Backend::Sampler::AddressMode::MIRRORED_REPEAT), 1, 1, true);
 
 		m_RefrFboDepthTexture = m_Device->CreateTexture2D("WaterRefractionDepthTexture",
 			Renderer::Backend::ITexture::Usage::SAMPLED |
@@ -300,7 +300,7 @@ void WaterManager::RecreateOrLoadTexturesIfNeeded()
 			depthFormat, m_RefTextureSize, m_RefTextureSize,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::NEAREST,
-				Renderer::Backend::Sampler::AddressMode::REPEAT));
+				Renderer::Backend::Sampler::AddressMode::REPEAT), 1, 1, true);
 
 		Renderer::Backend::SColorAttachment colorAttachment{};
 		colorAttachment.texture = m_RefractionTexture.get();
@@ -346,14 +346,14 @@ void WaterManager::RecreateOrLoadTexturesIfNeeded()
 			Renderer::Backend::Format::R8G8B8A8_UNORM, newWidth, newHeight,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::LINEAR,
-				Renderer::Backend::Sampler::AddressMode::REPEAT));
+				Renderer::Backend::Sampler::AddressMode::REPEAT), 1, 1, true);
 
 		m_FancyTextureDepth = m_Device->CreateTexture2D("WaterFancyDepthTexture",
 			Renderer::Backend::ITexture::Usage::DEPTH_STENCIL_ATTACHMENT,
 			depthFormat, newWidth, newHeight,
 			Renderer::Backend::Sampler::MakeDefaultSampler(
 				Renderer::Backend::Sampler::Filter::LINEAR,
-				Renderer::Backend::Sampler::AddressMode::REPEAT));
+				Renderer::Backend::Sampler::AddressMode::REPEAT), 1, 1, true);
 
 		Renderer::Backend::SColorAttachment colorAttachment{};
 		colorAttachment.texture = m_FancyTexture.get();
