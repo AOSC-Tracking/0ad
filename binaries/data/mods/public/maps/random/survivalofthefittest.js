@@ -101,8 +101,8 @@ export function* generateMap(mapSettings)
 
 		// Passage between player and neighbor
 		createArea(
-			new PathPlacer(mapCenter, passage[i], scaleByMapSize(14, 24), 0.4, scaleByMapSize(3, 9),
-				0.2, 0.05),
+			new PathPlacer(mapCenter, passage[i], scaleByMapSize(6, 24), scaleByMapSize(1, 0.4),
+				scaleByMapSize(3, 9), scaleByMapSize(0.02, 0.2), scaleByMapSize(-1, 0.05)),
 			[
 				new TerrainPainter(tMainTerrain),
 				new SmoothElevationPainter(ELEVATION_SET, heightLand, 4)
