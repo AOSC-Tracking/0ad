@@ -80,8 +80,6 @@ export function* generateMap(mapSettings)
 
 	const { playerIDs, playerPosition, playerAngle, startAngle } =
 		playerPlacementCircle(fractionToTiles(0.3));
-	const halfway = distributePointsOnCircle(numPlayers, startAngle, fractionToTiles(0.375), mapCenter)[0]
-		.map(v => v.round());
 	const attacker = distributePointsOnCircle(numPlayers, startAngle, fractionToTiles(0.45), mapCenter)[0]
 		.map(v => v.round());
 	const passage = distributePointsOnCircle(numPlayers, startAngle + Math.PI / numPlayers,
@@ -124,8 +122,11 @@ export function* generateMap(mapSettings)
 		// Preventing mountains in the area between player and attackers at
 		// player
 		addCivicCenterAreaToClass(playerPosition[i], clPlayer);
-		clPlayer.add(attacker[i]);
-		clPlayer.add(halfway[i]);
+		createArea(new PathPlacer(attacker[i], playerPosition[i], 3, 0.5, 0, 0.2, 0),
+			[
+				new TerrainPainter(g_Terrains.roadWild),
+				new TileClassPainter(clPlayer)
+			]);
 	}
 	yield 20;
 
