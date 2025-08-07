@@ -23,7 +23,6 @@
 #include "graphics/GameView.h"
 #include "graphics/LOSTexture.h"
 #include "graphics/UnitManager.h"
-#include "gui/CGUI.h"
 #include "gui/GUIManager.h"
 #include "lib/code_generation.h"
 #include "lib/debug.h"
@@ -358,7 +357,7 @@ PSRETURN CGame::ReallyStartGame()
 	// Call the reallyStartGame GUI function, but only if it exists
 	if (g_GUI && g_GUI->GetPageCount())
 	{
-		std::shared_ptr<ScriptInterface> scriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
+		std::shared_ptr<ScriptInterface> scriptInterface = g_GUI->GetActiveGUIScriptInterface();
 		ScriptRequest rq(scriptInterface);
 
 		JS::RootedValue global(rq.cx, rq.globalValue());

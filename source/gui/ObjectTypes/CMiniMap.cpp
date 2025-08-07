@@ -257,7 +257,7 @@ CVector2D CMiniMap::WorldSpaceToMiniMapSpace(const CVector3D& worldPosition) con
 
 bool CMiniMap::FireWorldClickEvent(int button, int /*clicks*/)
 {
-	ScriptRequest rq(g_GUI->GetActiveGUI()->GetScriptInterface());
+	ScriptRequest rq(g_GUI->GetActiveGUIScriptInterface());
 
 	float x, z;
 	GetMouseWorldCoordinates(x, z);

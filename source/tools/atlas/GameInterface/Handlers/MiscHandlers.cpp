@@ -18,7 +18,6 @@
 #include "precompiled.h"
 
 #include "MessageHandler.h"
-#include "gui/CGUI.h"
 #include "gui/GUIManager.h"
 #include "lib/external_libraries/libsdl.h"
 #include "lib/input.h"
@@ -100,7 +99,7 @@ MESSAGEHANDLER(SimPlay)
 
 MESSAGEHANDLER(JavaScript)
 {
-	g_GUI->GetActiveGUI()->GetScriptInterface()->LoadGlobalScript(L"Atlas", *msg->command);
+	g_GUI->GetActiveGUIScriptInterface()->LoadGlobalScript(L"Atlas", *msg->command);
 }
 
 MESSAGEHANDLER(GuiSwitchPage)

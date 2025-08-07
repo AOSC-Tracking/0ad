@@ -283,6 +283,7 @@ public:
 
 	std::shared_ptr<ScriptInterface> GetScriptInterface() { return m_ScriptInterface; };
 
+	void ParseXML(const VfsPath& path, std::unordered_set<VfsPath>& inputs);
 private:
 	/**
 	 * The CGUI takes ownership of the child object and links the parent with the child.

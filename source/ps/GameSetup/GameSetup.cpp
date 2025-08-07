@@ -902,7 +902,7 @@ bool AutostartVisualReplay(const std::string& replayFile)
 
 void CancelLoad(const CStrW& message)
 {
-	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
+	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUIScriptInterface();
 	ScriptRequest rq(pScriptInterface);
 
 	JS::RootedValue global(rq.cx, rq.globalValue());

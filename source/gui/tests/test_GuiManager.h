@@ -19,7 +19,6 @@
 
 #include "gui/GUIManager.h"
 
-#include "gui/CGUI.h"
 #include "lib/external_libraries/libsdl.h"
 #include "lib/file/file_system.h"
 #include "lib/file/vfs/vfs.h"
@@ -97,7 +96,7 @@ public:
 		Script::StructuredClone data = Script::WriteStructuredClone(rq, JS::NullHandleValue);
 		g_GUI->OpenChildPage(L"event/page_event.xml", data);
 
-		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
+		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUIScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
 		JS::RootedValue global(prq.cx, prq.globalValue());
 
@@ -173,7 +172,7 @@ public:
 		while (in_poll_event(&ev))
 			in_dispatch_event(&ev);
 
-		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUI()->GetScriptInterface());
+		const ScriptInterface& pageScriptInterface = *(g_GUI->GetActiveGUIScriptInterface());
 		ScriptRequest prq(pageScriptInterface);
 		JS::RootedValue global(prq.cx, prq.globalValue());
 
@@ -226,7 +225,7 @@ public:
 
 	static void CloseTopmostPage()
 	{
-		ScriptRequest rq{g_GUI->GetActiveGUI()->GetScriptInterface()};
+		ScriptRequest rq{g_GUI->GetActiveGUIScriptInterface()};
 		JS::RootedValue global{rq.cx, rq.globalValue()};
 		TS_ASSERT(ScriptFunction::CallVoid(rq, global, "closePageCallback"));
 		// Check whether promises are settled in the page stack and flush the stack.

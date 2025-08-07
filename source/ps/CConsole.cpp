@@ -23,7 +23,6 @@
 #include "graphics/Color.h"
 #include "graphics/FontMetrics.h"
 #include "graphics/TextRenderer.h"
-#include "gui/CGUI.h"
 #include "gui/GUIManager.h"
 #include "lib/code_generation.h"
 #include "lib/debug.h"
@@ -611,7 +610,7 @@ void CConsole::ProcessBuffer(const wchar_t* szLine)
 	}
 
 	// Process it as JavaScript
-	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUI()->GetScriptInterface();
+	std::shared_ptr<ScriptInterface> pScriptInterface = g_GUI->GetActiveGUIScriptInterface();
 	ScriptRequest rq(*pScriptInterface);
 
 	JS::RootedValue rval(rq.cx);

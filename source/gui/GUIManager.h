@@ -21,19 +21,18 @@
 #include "lib/code_annotation.h"
 #include "lib/file/vfs/vfs_path.h"
 #include "lib/input.h"
-#include "lib/path.h"
 #include "lib/status.h"
 #include "ps/CStr.h"
 #include "ps/TemplateLoader.h"
 #include "scriptinterface/StructuredClone.h"
 
-#include <cstddef>
 #include <deque>
 #include <js/TypeDecls.h>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
 class CCanvas2D;
 class CGUI;
@@ -61,12 +60,15 @@ public:
 	CGUIManager(ScriptContext& scriptContext, ScriptInterface& scriptInterface);
 	~CGUIManager();
 
+	using CGUIVariant = std::variant<std::shared_ptr<CGUI>>;
+
 	ScriptInterface& GetScriptInterface()
 	{
 		return m_ScriptInterface;
 	}
 	ScriptContext& GetContext() { return m_ScriptContext; }
-	std::shared_ptr<CGUI> GetActiveGUI() { return top(); }
+	CGUIVariant GetActiveGUI() { return top(); }
+	std::shared_ptr<ScriptInterface> GetActiveGUIScriptInterface();
 
 	/**
 	 * Returns the number of currently open GUI pages.
@@ -76,7 +78,7 @@ public:
 	/**
 	 * Load a new GUI page and make it active. All current pages will be destroyed.
 	 */
-	void SwitchPage(const CStrW& name, const ScriptInterface* srcScriptInterface, JS::HandleValue initData);
+	void SwitchPage(const CStrW& name, const ScriptInterface* srcScriptInterface, JS::HandleValue initData, const int guiVersion = 1);
 
 	/**
 	 * Load a new GUI page and make it active. All current pages will be retained,
@@ -84,7 +86,7 @@ public:
 	 * user inputs.
 	 * The returned promise will be fulfilled once the pushed page is closed.
 	 */
-	JS::Value OpenChildPage(const CStrW& pageName, Script::StructuredClone initData);
+	JS::Value OpenChildPage(const CStrW& pageName, Script::StructuredClone initData, const int guiVersion = 1);
 
 	/**
 	 * Called when a file has been modified, to hotload changes.
@@ -148,7 +150,7 @@ private:
 		/**
 		 * Initializes the data that will be used to create the CGUI page one or multiple times (hotloading).
 		 */
-		SGUIPage(const CStrW& pageName, const Script::StructuredClone initData);
+		SGUIPage(const CStrW& pageName, const Script::StructuredClone initData, const int guiVersion = 1);
 
 		/**
 		 * Create the CGUI with it's own ScriptInterface. Deletes the previous CGUI if it existed.
@@ -181,9 +183,10 @@ private:
 		void Refocus(const CloseResult& result);
 
 		std::wstring m_Name;
+		int m_GUIVersion;
 		std::unordered_set<VfsPath> inputs; // for hotloading
 		Script::StructuredClone initData; // data to be passed to the init() function
-		std::shared_ptr<CGUI> gui; // the actual GUI page
+		CGUIVariant gui; // the actual GUI page
 
 		/**
 		 * When this promise is settled this page wants to be closed. It
@@ -198,7 +201,7 @@ private:
 		std::shared_ptr<JS::PersistentRootedObject> receivingPromise;
 	};
 
-	std::shared_ptr<CGUI> top() const;
+	CGUIVariant top() const;
 
 	ScriptContext& m_ScriptContext;
 	ScriptInterface& m_ScriptInterface;

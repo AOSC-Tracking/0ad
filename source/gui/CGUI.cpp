@@ -46,12 +46,14 @@
 #include "ps/Filesystem.h"
 #include "ps/GameSetup/Config.h"
 #include "ps/Hotkey.h"
+#include "ps/Profiler2.h"
 #include "ps/VideoMode.h"
 #include "ps/XMB/XMBData.h"
 #include "ps/XML/Xeromyces.h"
 #include "renderer/backend/Sampler.h"
 #include "scriptinterface/FunctionWrapper.h"
 #include "scriptinterface/Object.h"
+#include "scriptinterface/ScriptContext.h"
 #include "scriptinterface/ScriptExceptions.h"
 #include "scriptinterface/ScriptInterface.h"
 #include "scriptinterface/ScriptRequest.h"
@@ -1370,3 +1372,62 @@ CGUI::ModuleArtifact::ModuleArtifact(const ScriptRequest& rq, VfsPath filename):
 	result{rq, std::move(filename)},
 	moduleNamespace{rq.cx}
 {}
+
+void CGUI::ParseXML(const VfsPath& path, std::unordered_set<VfsPath>& inputs)
+{
+	CXeromyces xero;
+	if (xero.Load(g_VFS, path, "gui_page") != PSRETURN_OK)
+		// Fail silently (Xeromyces reported the error)
+		return;
+
+
+	int elmt_page = xero.GetElementID("page");
+	int elmt_include = xero.GetElementID("include");
+
+	XMBElement root = xero.GetRoot();
+
+	if (root.GetNodeName() != elmt_page)
+	{
+		LOGERROR("GUI page '%s' must have root element <page>", path.Basename().string8());
+		return;
+	}
+
+	VfsPath rootModule;
+	XERO_ITER_EL(root, node)
+	{
+		if (node.GetNodeName() != elmt_include)
+		{
+			LOGERROR("GUI page '%s' must only have <include> elements inside <page>", path.Basename().string8());
+			continue;
+		}
+
+		CStr8 name = node.GetText();
+		CStrW nameW = node.GetText().FromUTF8();
+
+		PROFILE2("load gui xml");
+		PROFILE2_ATTR("name: %s", name.c_str());
+
+		if (name.back() == '/')
+		{
+			VfsPath currentDirectory = VfsPath("gui") / nameW;
+			VfsPaths directories;
+			vfs::GetPathnames(g_VFS, currentDirectory, L"*.xml", directories);
+			for (const VfsPath& directory : directories)
+				LoadXmlFile(directory, inputs);
+		}
+		else
+		{
+			VfsPath directory = VfsPath("gui") / nameW;
+			LoadXmlFile(directory, inputs);
+		}
+	}
+
+	LoadedXmlFiles();
+
+	m_ScriptInterface->GetContext().RunJobs();
+	if (m_LoadModuleResult.has_value())
+	{
+		m_LoadModuleResult->moduleNamespace = m_LoadModuleResult->iterator->Get();
+		++m_LoadModuleResult->iterator;
+	}
+}
