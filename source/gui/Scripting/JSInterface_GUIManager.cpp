@@ -39,14 +39,14 @@ namespace JSI_GUIManager
 // Note that the initData argument may only contain clonable data.
 // Functions aren't supported for example!
 // It returns a promise.
-JS::Value OpenChildPage(const ScriptRequest& rq, const std::wstring& name, JS::HandleValue initData)
+JS::Value OpenChildPage(const ScriptRequest& rq, const std::wstring& name, JS::HandleValue initData, const int guiVersion)
 {
-	return g_GUI->OpenChildPage(name, Script::WriteStructuredClone(rq, initData));
+	return g_GUI->OpenChildPage(name, Script::WriteStructuredClone(rq, initData), guiVersion > 0 ? guiVersion : 1);
 }
 
-void SwitchGuiPage(const ScriptInterface& scriptInterface, const std::wstring& name, JS::HandleValue initData)
+void SwitchGuiPage(const ScriptInterface& scriptInterface, const std::wstring& name, JS::HandleValue initData, const int guiVersion)
 {
-	g_GUI->SwitchPage(name, &scriptInterface, initData);
+	g_GUI->SwitchPage(name, &scriptInterface, initData, guiVersion > 0 ? guiVersion : 1);
 }
 
 void SetCursor(const std::wstring& name)
