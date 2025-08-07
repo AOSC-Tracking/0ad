@@ -21,9 +21,12 @@
 
 #include "gui/CGUI.h"
 #include "gui/CGUISprite.h"
+#include "gui/ObjectBases/IGUILayoutBehavior.h"
 #include "gui/ObjectBases/IGUIObject.h"
 #include "gui/SettingTypes/CGUIColor.h"
 #include "gui/SettingTypes/CGUIList.h"
+#include "gui/SettingTypes/CGUILayoutPadding.h"
+#include "gui/SettingTypes/CGUILayoutSizing.h"
 #include "gui/SettingTypes/CGUISeries.h"
 #include "gui/SettingTypes/CGUIString.h"
 #include "lib/types.h"
@@ -134,5 +137,10 @@ TYPE(EVAlign)
 TYPE(CGUIList)
 TYPE(CGUISeries)
 TYPE(EScrollOrientation)
+
+// TODO: Remove from here
+TYPE(IGUILayoutBehavior::LayoutDirection)
+TYPE(CGUILayoutSizing)
+TYPE(CGUILayoutPadding)
 
 #undef TYPE

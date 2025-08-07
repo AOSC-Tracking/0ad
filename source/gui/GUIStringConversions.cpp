@@ -19,7 +19,10 @@
 
 #include "gui/CGUI.h"
 #include "gui/CGUISprite.h"
+#include "gui/ObjectBases/IGUILayoutBehavior.h"
 #include "gui/SettingTypes/CGUIColor.h"
+#include "gui/SettingTypes/CGUILayoutSizing.h"
+#include "gui/SettingTypes/CGUILayoutPadding.h"
 #include "gui/SettingTypes/CGUISize.h"
 #include "gui/SettingTypes/CGUIString.h"
 #include "gui/SettingTypes/EAlign.h"
@@ -271,4 +274,22 @@ bool CGUI::ParseString<EScrollOrientation>(const CGUI*, const CStrW& Value, EScr
 		return false;
 
 	return true;
+}
+
+template <>
+bool CGUI::ParseString<IGUILayoutBehavior::LayoutDirection>(const CGUI*, const CStrW& Value, IGUILayoutBehavior::LayoutDirection& Output)
+{
+	if (Value == L"leftToRight")
+		Output = IGUILayoutBehavior::LayoutDirection::LEFT_TO_RIGHT;
+	else if (Value == L"topToBottom")
+		Output = IGUILayoutBehavior::LayoutDirection::TOP_TO_BOTTOM;
+	else
+		return false;
+	return true;
+}
+
+template <>
+bool CGUI::ParseString<CGUILayoutSizing>(const CGUI*, const CStrW& Value, CGUILayoutSizing& Output)
+{
+	return Output.FromString(Value.ToUTF8());
 }

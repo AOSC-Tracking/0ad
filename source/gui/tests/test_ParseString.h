@@ -18,6 +18,8 @@
 #include "lib/self_test.h"
 
 #include "gui/CGUI.h"
+#include "gui/SettingTypes/CGUILayoutSizing.h"
+#include "gui/SettingTypes/CGUILayoutPadding.h"
 #include "gui/SettingTypes/CGUISize.h"
 #include "maths/Rect.h"
 #include "maths/Size2D.h"
@@ -104,5 +106,120 @@ public:
 		TS_ASSERT(!CGUI::ParseString<CVector2D>(nullptr, CStrW(L"0"), test));
 		TS_ASSERT(!CGUI::ParseString<CVector2D>(nullptr, CStrW(L"0 10 20"), test));
 		TS_ASSERT(!CGUI::ParseString<CVector2D>(nullptr, CStrW(L"0,0 10,0"), test));
+	}
+
+	void test_layout_sizing()
+	{
+		TestLogger nolog;
+		CGUILayoutSizing test;
+
+		TS_TRACE("Testing Fit no clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fit"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::FIT, 0, 0, 0), test);
+
+		TS_TRACE("Testing Fit with clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fit(0,128)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::FIT, 0, 0, 128), test);
+
+		TS_TRACE("Testing Fit with clamp and min");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fit(32)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::FIT, 0, 32, 0), test);
+
+		TS_TRACE("Testing Percentage no clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"80%"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::PERCENT, 80, 0, 0), test);
+
+		TS_TRACE("Testing Percentage with clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"80%(10,300)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::PERCENT, 80, 10, 300), test);
+
+		TS_TRACE("Testing Percentage with clamp and min");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"80%(300)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::PERCENT, 80, 300, 0), test);
+
+		TS_TRACE("Testing grow no clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"grow"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::GROW, 0, 0, 0), test);
+
+		TS_TRACE("Testing grow with clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"grow(10,300)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::GROW, 0, 10, 300), test);
+
+		TS_TRACE("Testing grow with clamp and min");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"grow(32)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::GROW, 0, 32, 0), test);
+
+		TS_TRACE("Testing shrink no clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"shrink"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::SHRINK, 0, 0, 0), test);
+
+		TS_TRACE("Testing shrink with clamp");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"shrink(10,300)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::SHRINK, 0, 10, 300), test);
+
+		TS_TRACE("Testing shrink with clamp and min");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"shrink(32)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::SHRINK, 0, 32, 0), test);
+
+		TS_TRACE("Testing fixed");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"100"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::FIXED, 0, 100, 100), test);
+
+		TS_TRACE("Testing clamp fit");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"clamp(20,fit,200)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::FIT, 0, 20, 200), test);
+
+		TS_TRACE("Testing clamp percentage");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"clamp(20,50%,200)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::PERCENT, 50, 20, 200), test);
+
+		TS_TRACE("Testing clamp grow");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"clamp(20,grow,200)"), test));
+		TS_ASSERT_EQUALS(CGUILayoutSizing(LayoutSizingType::GROW, 0, 20, 200), test);
+
+		TS_TRACE("Testing invalid input");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fit,,(asd)"), test));
+
+		TS_TRACE("Testing incomplete values");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fit(10,20"), test));
+
+		TS_TRACE("Testing fixed invalid input");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"fixed(10)"), test));
+
+		TS_TRACE("Testing invalid clamp input");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutSizing>(nullptr, CStrW(L"clamp(10,20,30,40)"), test));
+	}
+
+	void test_layout_padding()
+	{
+		TestLogger nolog;
+		CGUILayoutPadding test;
+
+		TS_TRACE("Testing Padding with all values");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"10 20 30 40"), test));
+		TS_ASSERT_EQUALS(CGUILayoutPadding(10, 20, 30, 40), test);
+
+		TS_TRACE("Testing padding with horizontal and vertical");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"5 10"), test));
+		TS_ASSERT_EQUALS(CGUILayoutPadding(5, 10, 5, 10), test);
+
+		TS_TRACE("Testing paddin with one value");
+		TS_ASSERT(CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"6"), test));
+		TS_ASSERT_EQUALS(CGUILayoutPadding(6), test);
+
+		TS_TRACE("Testing padding with no values");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L""), test));
+
+		TS_TRACE("Testing padding with negative value");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"-10 -5 1 2"), test));
+
+		TS_TRACE("Testing padding with invalid values");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"10 20 30"), test));
+
+		TS_TRACE("Testing padding with too many values");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"10 20 30 40 50"), test));
+
+		TS_TRACE("Testing padding with garbage data");
+		TS_ASSERT(!CGUI::ParseString<CGUILayoutPadding>(nullptr, CStrW(L"Hello world!"), test));
 	}
 };

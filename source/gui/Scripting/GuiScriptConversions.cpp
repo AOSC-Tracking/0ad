@@ -20,6 +20,7 @@
 #include "scriptinterface/ScriptConversions.h"
 
 #include "gui/CGUISprite.h"
+#include "gui/ObjectBases/IGUILayoutBehavior.h"
 #include "gui/ObjectBases/IGUIObject.h"
 #include "gui/Scripting/JSInterface_GUIProxy.h"
 #include "gui/SettingTypes/CGUIColor.h"
@@ -28,6 +29,8 @@
 #include "gui/SettingTypes/CGUIString.h"
 #include "gui/SettingTypes/EAlign.h"
 #include "gui/SettingTypes/EScrollOrientation.h"
+#include "gui/SettingTypes/CGUILayoutPadding.h"
+#include "gui/SettingTypes/CGUILayoutSizing.h"
 #include "lib/code_generation.h"
 #include "lib/external_libraries/libsdl.h"
 #include "maths/Rect.h"
@@ -362,6 +365,42 @@ template <> bool Script::FromJSVal<EScrollOrientation>(const ScriptRequest& rq, 
 	return true;
 }
 
+template<> bool Script::FromJSVal<IGUILayoutBehavior::LayoutDirection>(const ScriptRequest& rq, JS::HandleValue v, IGUILayoutBehavior::LayoutDirection& out)
+{
+	std::string word;
+	if (!FromJSVal(rq, v, word))
+		return false;
+	if (word == "leftToRight")
+		out = IGUILayoutBehavior::LayoutDirection::LEFT_TO_RIGHT;
+	else if (word == "topToBottom")
+		out = IGUILayoutBehavior::LayoutDirection::TOP_TO_BOTTOM;
+	else
+	{
+		LOGERROR("Invalid layout direction (should be 'leftToRight' or 'topToBottom')");
+		return false;
+	}
+	return true;
+}
+
+template<> void Script::ToJSVal<IGUILayoutBehavior::LayoutDirection>(const ScriptRequest& rq, JS::MutableHandleValue ret, const IGUILayoutBehavior::LayoutDirection& val)
+{
+	std::string word;
+	switch (val)
+	{
+	case IGUILayoutBehavior::LayoutDirection::LEFT_TO_RIGHT:
+		word = "leftToRight";
+		break;
+	case IGUILayoutBehavior::LayoutDirection::TOP_TO_BOTTOM:
+		word = "topToBottom";
+		break;
+	default:
+		word = "error";
+		ScriptException::Raise(rq, "Invalid layout direction");
+		break;
+	}
+	ToJSVal(rq, ret, word);
+}
+
 template<> void Script::ToJSVal<CGUISpriteInstance>(const ScriptRequest& rq, JS::MutableHandleValue ret, const CGUISpriteInstance& val)
 {
 	ToJSVal(rq, ret, val.GetName());
@@ -431,6 +470,25 @@ template<> bool Script::FromJSVal<CVector2D>(const ScriptRequest& rq, JS::Handle
 	}
 
 	return true;
+}
+
+template<> void Script::ToJSVal<CGUILayoutSizing>(const ScriptRequest& rq, JS::MutableHandleValue ret, const CGUILayoutSizing& val)
+{
+	ToJSVal(rq, ret, val.ToString());
+}
+
+template<> bool Script::FromJSVal<CGUILayoutSizing>(const ScriptRequest& rq, JS::HandleValue v, CGUILayoutSizing& out)
+{
+	if (!v.isString())
+	{
+		LOGERROR("CGUILayoutSizing value must be an string!");
+		return false;
+	}
+
+	std::string value;
+	if (!FromJSVal(rq, v, value))
+		return false;
+	return out.FromString(value);;
 }
 
 #undef SET
