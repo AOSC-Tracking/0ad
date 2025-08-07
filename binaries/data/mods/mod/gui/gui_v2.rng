@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<grammar
+    xmlns="http://relaxng.org/ns/structure/1.0"
+    ns=""
+    datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+    xmlns:a="http://www.example.com/annotation"
+    xmlns:m="http://www.example.com/module">
+
+    <start>
+        <element name="page">
+            <ref name="PageChildren" />
+        </element>
+    </start>
+
+    <define name="PageChildren">
+        <group>
+            <zeroOrMore>
+                <ref name="Script" />
+            </zeroOrMore>
+            <zeroOrMore>
+                <ref name="Stylesheet" />
+            </zeroOrMore>
+            <ref name="Body" />
+        </group>
+    </define>
+
+    <define name="Script">
+        <element name="script">
+            <choice>
+                <group>
+                    <attribute name="directory">
+                        <data type="string">
+                            <param name="pattern">[^/].*/</param>
+                        </data>
+                    </attribute>
+                    <empty />
+                </group>
+                <group>
+                    <attribute name="module">
+                        <data type="string">
+                            <param name="pattern">[^/].*\.js</param>
+                        </data>
+                    </attribute>
+                    <empty />
+                </group>
+            </choice>
+        </element>
+    </define>
+
+    <define name="Stylesheet">
+        <element name="stylesheet">
+            <choice>
+                <attribute name="src">
+                    <data type="string" >
+                        <param name="pattern">[^/].*\.xml</param>
+                    </data>
+                </attribute>
+                <zeroOrMore>
+                    <choice>
+                        <ref name="Style" />
+                        <ref name="Animation" />
+                    </choice>
+                </zeroOrMore>
+            </choice>
+        </element>
+    </define>
+
+    <define name="Style">
+        <element name="style">
+            <attribute name="name">
+                <data type="NCName" />
+            </attribute>
+            <zeroOrMore>
+                <choice>
+                    <ref name="State" />
+                    <ref name="Property" />
+                    <ref name="Transition" />
+                </choice>
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="State">
+        <element name="state">
+            <attribute name="name">
+                <choice>
+                    <value>default</value>
+                    <value>hover</value>
+                    <value>active</value>
+                    <value>disabled</value>
+                    <value>focus</value>
+                </choice>
+            </attribute>
+            <zeroOrMore>
+                <ref name="Property" />
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="Property">
+        <element name="property">
+            <attribute name="name">
+                <data type="NCName" />
+            </attribute>
+            <attribute name="value">
+                <data type="string" />
+            </attribute>
+        </element>
+    </define>
+
+    <define name="Transition">
+        <element name="transition">
+            <attribute name="properties">
+                <data type="string" />
+            </attribute>
+            <attribute name="duration">
+                <data type="string" />
+            </attribute>
+            <optional>
+                <attribute name="easing">
+                    <data type="string" />
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="delay">
+                    <data type="string" />
+                </attribute>
+            </optional>
+        </element>
+    </define>
+
+    <define name="Animation">
+        <element name="animation">
+            <attribute name="name">
+                <data type="NCName" />
+            </attribute>
+            <choice>
+                <ref name="Keyframes" />
+                <ref name="SimpleAnimation" />
+            </choice>
+        </element>
+    </define>
+
+    <define name="Keyframes">
+        <element name="keyframes">
+            <oneOrMore>
+                <ref name="Frame" />
+            </oneOrMore>
+        </element>
+    </define>
+
+    <define name="Frame">
+        <element name="frame">
+            <attribute name="at">
+                <data type="string" />
+            </attribute>
+            <zeroOrMore>
+                <ref name="Property" />
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="SimpleAnimation">
+        <element name="simple">
+            <attribute name="property">
+                <data type="NCName" />
+            </attribute>
+            <attribute name="from">
+                <data type="string" />
+            </attribute>
+            <attribute name="to">
+                <data type="string" />
+            </attribute>
+            <attribute name="duration">
+                <data type="string" />
+            </attribute>
+            <optional>
+                <attribute name="easing">
+                    <data type="string" />
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="iterationCount">
+                    <data type="string" />
+                </attribute>
+            </optional>
+        </element>
+    </define>
+
+    <define name="Body">
+        <a:documentation>Body will use Layout direction="TopToBottom", width="grow", height="grow" to fit windowed size</a:documentation>
+        <a:documentation>Body will have z-index by default base of 10, that allow to have a elements in begind other in position absolute or relative</a:documentation>
+        <element name="body">
+            <ref name="CommonAttrs" />
+            <zeroOrMore>
+                <ref name="Element" />
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="Element">
+        <choice>
+            <ref name="Container" />
+            <ref name="Text" />
+            <ref name="Image" />
+            <ref name="Button" />
+            <ref name="Include" />
+        </choice>
+    </define>
+
+    <define name="CommonAttrs">
+        <a:documentation>Common attributes for GUI elements</a:documentation>
+        <optional>
+            <attribute name="id">
+                <data type="ID" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="z-index">
+                <a:documentation>Z-index for layering elements useful for position absolute or relative</a:documentation>
+                <data type="integer" />
+            </attribute>
+        </optional>
+        <optional>
+            <ref name="positionAttr" />
+        </optional>
+        <optional>
+            <attribute name="style">
+                <data type="NCName" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="visibility">
+                <a:documentation>Visibility of the element, can be hidden, visible or ghost</a:documentation>
+                <a:documentation>Ghost means the element is visible but dont receive events</a:documentation>
+                <choice>
+                    <value>hidden</value>
+                    <value>visible</value>
+                    <value>ghost</value>
+                </choice>
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="width">
+                <ref name="Dimension" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="height">
+                <ref name="Dimension" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="min-width">
+                <data type="integer" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="max-width">
+                <data type="integer" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="min-height">
+                <data type="integer" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="max-height">
+                <data type="integer" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="align">
+                <choice>
+                    <value>left</value>
+                    <value>center</value>
+                    <value>right</value>
+                </choice>
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="valign">
+                <choice>
+                    <value>top</value>
+                    <value>middle</value>
+                    <value>bottom</value>
+                </choice>
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="padding">
+                <ref name="FourInts" />
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="margin">
+                <ref name="FourInts" />
+            </attribute>
+        </optional>
+
+        <optional>
+            <a:documentation>Background can be a sprite, color, or image</a:documentation>
+            <attribute name="background">
+                <choice>
+                    <ref name="color" />
+                </choice>
+            </attribute>
+        </optional>
+        <optional>
+            <attribute name="animation">
+                <list>
+                    <a:documentation>List of animation names to apply</a:documentation>
+                    <oneOrMore>
+                        <data type="NCName" />
+                    </oneOrMore>
+                </list>
+            </attribute>
+        </optional>
+    </define>
+
+    <define name="positionAttr">
+        <a:documentation>Attributes for positioning elements</a:documentation>
+        <choice>
+            <group>
+                <attribute name="position">
+                    <choice>
+                        <value>absolute</value>
+                        <value>relative</value>
+                    </choice>
+                </attribute>
+                <choice>
+                    <group>
+                        <optional>
+                            <attribute name="x">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                        <optional>
+                            <attribute name="y">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                    </group>
+                    <group>
+                        <optional>
+                            <attribute name="left">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                        <optional>
+                            <attribute name="right">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                        <optional>
+                            <attribute name="top">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                        <optional>
+                            <attribute name="bottom">
+                                <data type="integer" />
+                            </attribute>
+                        </optional>
+                    </group>
+                </choice>
+            </group>
+            <group>
+                <attribute name="position">
+                    <value>static</value>
+                </attribute>
+            </group>
+            <empty />
+        </choice>
+    </define>
+
+    <define name="color">
+        <a:documentation>Color can be a hex code or a string</a:documentation>
+        <choice>
+            <data type="string">
+                <a:documentation>Hex color code, e.g. #RRGGBB or #RRGGBBAA</a:documentation>
+                <param name="pattern">#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?</param>
+            </data>
+            <data type="string">
+                <a:documentation>String color name, e.g. "red", "blue"</a:documentation>
+                <param name="pattern">[a-zA-Z]+</param>
+            </data>
+        </choice>
+    </define>
+
+    <define name="Dimension">
+        <choice>
+            <data type="integer" />
+            <value>grow</value>
+            <data type="string" />
+        </choice>
+    </define>
+
+    <define name="FourInts">
+        <choice>
+            <!-- 1 integer -->
+            <data type="string">
+                <param name="pattern">\d+</param>
+            </data>
+            <!-- 2 integers -->
+            <data type="string">
+                <param name="pattern">\d+\s+\d+</param>
+            </data>
+            <!-- 4 integers -->
+            <data type="string">
+                <param name="pattern">\d+\s+\d+\s+\d+\s+\d+</param>
+            </data>
+        </choice>
+    </define>
+
+    <define name="Container">
+        <element name="container">
+            <ref name="CommonAttrs" />
+            <optional>
+                <attribute name="direction">
+                    <choice>
+                        <value>topToBottom</value>
+                        <value>leftToRight</value>
+                    </choice>
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="gap">
+                    <data type="integer" />
+                </attribute>
+            </optional>
+            <zeroOrMore>
+                <ref name="Element" />
+            </zeroOrMore>
+        </element>
+    </define>
+
+    <define name="Text">
+        <element name="text">
+            <ref name="CommonAttrs" />
+            <optional>
+                <attribute name="font">
+                    <data type="string" />
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="color">
+                    <data type="string" />
+                </attribute>
+            </optional>
+            <optional>
+                <attribute name="value">
+                    <data type="string" />
+                </attribute>
+            </optional>
+            <empty/>
+        </element>
+    </define>
+
+    <define name="Image">
+        <element name="image">
+            <ref name="CommonAttrs" />
+        </element>
+    </define>
+
+    <define name="Button">
+        <element name="button">
+            <ref name="CommonAttrs" />
+            <optional>
+                <ref name="Text" />
+            </optional>
+        </element>
+    </define>
+
+    <define name="Include">
+        <element name="include">
+            <attribute name="src">
+                <data type="string" >
+                    <param name="pattern">[^/].*\.xml</param>
+                </data>
+            </attribute>
+        </element>
+    </define>
+</grammar>

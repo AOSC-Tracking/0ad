@@ -682,6 +682,7 @@ class CheckRefs:
     def add_gui_xml(self):
         self.logger.info("Loading GUI XML...")
         gui_page_regex = re.compile(r".*[\\\/]page(_[^.\/\\]+)?\.xml$")
+        gui_v2_page_regex = re.compile(r".*[\\\/]gui2(_[^.\/\\]+)?\.xml$")
         for fp, ffp in self.find_files("gui", "xml"):
             self.files.append(fp)
             # GUI page definitions are assumed to be named page_[something].xml and alone in that.
@@ -701,6 +702,9 @@ class CheckRefs:
                         )
                     else:
                         self.deps.append((fp, Path(f"gui/{include.text}")))
+            elif gui_v2_page_regex.match(str(fp)):
+                # GUI v2 page definitions are assumed to be named gui2_[something].xml
+                self.roots.append(fp)
             else:
                 xml = ET.parse(ffp)
                 root_xml = xml.getroot()

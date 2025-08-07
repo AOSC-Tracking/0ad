@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-model href="gui_v2.rng"?>
+
+<page>
+    <!-- events will be handle only in js no attribute in xml -->
+    <script directory="gui/common/"/>
+	<script directory="gui/common/campaigns/"/>
+	<script module="gui/pregame/mainmenu.js"/>
+    <stylesheet src="gui/pregame/stylesheets/mainmenu.xml"/>
+    <stylesheet>
+        <style name="StoneButtonFancy">
+            <state name="default">
+                <property name="background" value="sprites/button_default.png"/>
+                <property name="color" value="#fff"/>
+            </state>
+            <state name="hover">
+                <property name="background" value="sprites/button_hover.png"/>
+            </state>
+            <state name="active">
+                <property name="background" value="sprites/button_down.png"/>
+            </state>
+            <state name="disabled">
+                <property name="opacity" value="0.5"/>
+            </state>
+            <transition properties="background,color,opacity" duration="150ms" easing="ease-out"/>
+        </style>
+
+        <!-- Simple from/to animation -->
+        <animation name="fadeInMenu">
+            <simple property="opacity" from="0" to="1" duration="300ms" easing="ease-in"/>
+        </animation>
+
+        <!-- Keyframe animation -->
+        <animation name="pulse">
+            <keyframes>
+                <frame at="0%"><property name="scale" value="1"/></frame>
+                <frame at="50%"><property name="scale" value="1.1"/></frame>
+                <frame at="100%"><property name="scale" value="1"/></frame>
+            </keyframes>
+        </animation>
+    </stylesheet>
+
+    <!-- width="grow", height="grow" to fit windowed size -->
+    <body id="mainPage" background="#000000">
+        <!-- position values: -->
+        <!-- static (default), use the parent flow container configuration-->
+        <!-- absolute, attribute [x,y] use body as a parent -->
+        <!-- relative, attribute [x,y] use parent as a reference -->
+        <text id="dataCounter" position="absolute" value="FPS: 10" color="white" font="mono-10" background="#000000ff" align="right" valign="top" padding="0 40 5 0" width="95" z-index="200"/>
+        <!-- when position absolute you can set offset="X Y" attribute -->
+        <!-- offset also will be affected by align, valign to define how to expand the width, height -->
+        <container id="backgrounds" position="absolute" width="100%" height="100%" z-index="1">
+            <!-- <image> -->
+            <image id="background_1" position="absolute" width="100%" height="100%" background="sprite/color"/>
+            <image id="background_2" position="absolute" width="100%" height="100%" background="sprite/color"/>
+            <image id="background_3" position="absolute" width="100%" height="100%" background="sprite/color"/>
+            <image id="background_4" position="absolute" width="100%" height="100%" background="sprite/color"/>
+            <image id="background_5" position="absolute" width="100%" height="100%" background="sprite/color"/>
+            <image id="background_6" position="absolute" width="100%" height="100%" background="sprite/color"/>
+        </container>
+        <container padding="60 0 0 0" direction="leftToRight" width="grow" height="grow">
+            <!-- visibility: hidden, visible -->
+            <text id="pgToolTip" style="TranslucentPanel" visibility="hidden" position="absolute" padding="0 25 0 0" width="313" height="125"/>
+
+            <container id="submenu" style="SubmenuPanel" width="240" visibility="hidden" position="absolute" x="0" y="0" direction="topToBottom" z-index="20">
+                <button style="StoneButtonFancy"/>
+                <button style="StoneButtonFancy"/>
+                <button style="StoneButtonFancy"/>
+            </container>
+            <container id="mainMenu" style="MainMenuPanel" width="240" height="grow" direction="topToBottom" z-index="50" padding="8">
+                <container id="mainMenuButtons" width="grow" min-height="53" z-index="60" direction="topToBottom" gap="4">
+                    <button id="mainMenuButton_1" height="53" width="grow" style="StoneButtonFancy">
+                        <text id="mainMenuButton_1_text" value="Main Menu" font="sans-14" color="white"/>
+                    </button>
+                    <button id="mainMenuButton_2" height="53" width="grow" style="StoneButtonFancy">
+                        <text id="mainMenuButton_2_text" value="Options" font="sans-14" color="white"/>
+                    </button>
+                    <button id="mainMenuButton_3" height="53" width="grow" style="StoneButtonFancy">
+                        <text id="mainMenuButton_3_text" value="Exit" font="sans-14" color="white"/>
+                    </button>
+                </container>
+                <container height="grow" width="grow"/>
+                <container style="TranslucentPanelThinBorder" width="grow" direction="topToBottom" padding="20 20 20 20" gap="10">
+                    <text id="productDescription" font="sans-14" color="white" width="grow"/>
+                    <include src="community_buttons.xml"/>
+                </container>
+                <image id="organizationLogo" width="32" height="32" align="center"/>
+                <text id="organizationName" style="MediumTitleText" align="center"/>
+                <text id="productBuild" style="MediumTitleText"/>
+            </container>
+            <container width="grow" />
+            <container id="userReport" style="userReportPanel" valign="bottom" width="156" direction="topToBottom" padding="2" gap="4">
+                <text id="userReportText" style="userReportText" width="grow"/>
+
+                <container direction="leftToRight" width="grow" gap="4">
+                    <button id="userReportEnableButton" style="StoneButton" animation="fadeInMenu pulse" width="grow" height="32"/>
+                    <button id="userReportTermsButton" style="StoneButton" width="grow" height="32"/>
+                </container>
+            </container>
+        </container>
+    </body>
+</page>

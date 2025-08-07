@@ -114,10 +114,17 @@ class RelaxNGValidator:
             if match(r".*[\\\/]page(_[^.\/\\]+)?\.xml$", str(file[0]))
         ]
         self.validate_files("gui page", pages, "gui/gui_page.rng")
+        gui2_files = [
+            file
+            for file in self.find_files(self.vfs_root, self.mods, "gui/", "xml")
+            if match(r".*[\\\/]gui2(_[^.\/\\]+)?\.xml$", str(file[0]))
+        ]
+        self.validate_files("gui2 xml", gui2_files, "gui/gui_v2.rng")
         xmls = [
             file
             for file in self.find_files(self.vfs_root, self.mods, "gui/", "xml")
             if not match(r".*[\\\/]page(_[^.\/\\]+)?\.xml$", str(file[0]))
+            and not match(r".*[\\\/]gui2(_[^.\/\\]+)?\.xml$", str(file[0]))
         ]
         self.validate_files("gui xml", xmls, "gui/gui.rng")
 
