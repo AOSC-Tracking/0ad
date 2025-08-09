@@ -10,7 +10,8 @@ class NewCampaignModal
 		this.template = campaignTemplate;
 
 		Engine.GetGUIObjectByName('cancelButton').onPress = closePageCallback;
-		Engine.GetGUIObjectByName('startButton').onPress = () => this.createAndStartCampaign();
+		Engine.GetGUIObjectByName('startButton').onPress =
+			this.createAndStartCampaign.bind(this, closePageCallback);
 		Engine.GetGUIObjectByName('runDescription').caption = translateWithContext("Campaign Template", this.template.Name);
 		Engine.GetGUIObjectByName('runDescription').onTextEdit = () => {
 			Engine.GetGUIObjectByName('startButton').enabled = Engine.GetGUIObjectByName('runDescription').caption.length > 0;
@@ -18,7 +19,7 @@ class NewCampaignModal
 		Engine.GetGUIObjectByName('runDescription').focus();
 	}
 
-	createAndStartCampaign()
+	createAndStartCampaign(closePageCallback)
 	{
 		const filename = this.template.identifier + "_" + Date.now() + "_" + Math.floor(Math.random()*100000);
 		const run = new CampaignRun(filename)
@@ -27,8 +28,11 @@ class NewCampaignModal
 			.save()
 			.setCurrent();
 
-		Engine.SwitchGuiPage(run.getMenuPath(), {
-			"filename": run.filename
+		closePageCallback({
+			"page": run.getMenuPath(),
+			"argument": {
+				"filename": run.filename
+			}
 		});
 	}
 }
