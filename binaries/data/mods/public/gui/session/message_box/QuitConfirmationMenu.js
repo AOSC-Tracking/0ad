@@ -6,7 +6,7 @@ ReturnQuestion.prototype.Caption = translate("Do you want to resign or will you 
 ReturnQuestion.prototype.Buttons = [
 	{
 		"caption": translate("I will return"),
-		"onPress": () => { endGame(false); }
+		"onPress": () => endGame(false)
 	},
 	{
 		"caption": translate("I resign"),
@@ -73,8 +73,9 @@ QuitConfirmationMenu.prototype.MultiplayerClient.prototype.Buttons =
 	},
 	{
 		"caption": translate("Yes"),
-		"onPress": () => {
-			(new ReturnQuestion()).display();
+		"onPress": closePageCallback => {
+			(new ReturnQuestion()).display(closePageCallback);
 		}
 	}
 ];
+

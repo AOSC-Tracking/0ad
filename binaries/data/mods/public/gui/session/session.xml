@@ -30,10 +30,6 @@
 		restoreSavedGameData(arguments[0]);
 	</action>
 
-	<action on="SimulationUpdate">
-		onSimulationUpdate();
-	</action>
-
 	<!-- Hotkeys won't work properly unless outside menu -->
 	<include directory="gui/session/hotkeys/"/>
 
