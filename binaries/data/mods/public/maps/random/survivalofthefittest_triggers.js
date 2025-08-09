@@ -104,6 +104,8 @@ var treasures = [
  */
 var attackerUnitTemplates = {};
 
+var teamsArray;
+
 Trigger.prototype.InitSurvival = function()
 {
 	this.InitStartingUnits();
@@ -155,6 +157,22 @@ Trigger.prototype.InitStartingUnits = function()
 
 Trigger.prototype.InitializeEnemyWaves = function()
 {
+	{
+		const numPlayers = InitAttributes.settings.PlayerData.length - 1;
+		const playerIDs = Array.from(Array(numPlayers), (_, index) => index + 1);
+
+		// Group players by team
+		teamsArray = InitAttributes.settings.PlayerPlacement === "circle" ? playerIDs.map(p => [p]) :
+			playerIDs.reduce((acc, id) => {
+				const team = InitAttributes.settings.PlayerData[id].Team;
+				if (team === -1)
+					acc[1].push([id]);
+				else
+					(acc[0][team] ??= []).push(id);
+				return acc;
+			}, [[], []]).flat();
+	}
+
 	const time = firstWaveTime() * 60 * 1000;
 	Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).AddTimeNotification({
 		"message": markForTranslation("The first wave will start in %(time)s!"),
@@ -212,13 +230,23 @@ Trigger.prototype.StartAnEnemyWave = function()
 		if (!cmpPlayer)
 			continue;
 
-		const playerID = cmpPlayer.GetPlayerID();
-		const civicCentre = this.playerCivicCenter[playerID];
-		if (!civicCentre)
-			continue;
+		const spawnPoint = TriggerHelper.GetEntityPosition2D(point);
+		const mapSize = InitAttributes.settings.Size;
+		const groupID = cmpPlayer.GetPlayerID();
+		const targetPos = teamsArray[groupID]
+			.map(playerID => this.playerCivicCenter[playerID])
+			.filter(civicCentre => civicCentre)
+			.map(TriggerHelper.GetEntityPosition2D)
+			.filter(targetPosition => targetPosition)
+			.reduce((acc, targetPosition) => {
+				if (acc === undefined)
+					return targetPosition;
+				if (spawnPoint.distanceTo(acc) > spawnPoint.distanceTo(targetPosition))
+					return targetPosition;
 
-		// Check if the cc is garrisoned in another building
-		const targetPos = TriggerHelper.GetEntityPosition2D(civicCentre);
+				return acc;
+			}, undefined);
+
 		if (!targetPos)
 			continue;
 
@@ -227,12 +255,13 @@ Trigger.prototype.StartAnEnemyWave = function()
 			const isHero = attackerUnitTemplates[civ].heroes.indexOf(templateName) != -1;
 
 			// Don't spawn gaia hero if the previous one is still alive
-			if (this.gaiaHeroes[playerID] && isHero)
+			if (this.gaiaHeroes[groupID] && isHero)
 			{
-				const cmpHealth = Engine.QueryInterface(this.gaiaHeroes[playerID], IID_Health);
+				const cmpHealth = Engine.QueryInterface(this.gaiaHeroes[groupID], IID_Health);
 				if (cmpHealth && cmpHealth.GetHitpoints() != 0)
 				{
-					this.debugLog("Not spawning hero for player " + playerID + " as the previous one is still alive");
+					this.debugLog("Not spawning hero for player " + groupID +
+						" as the previous one is still alive");
 					continue;
 				}
 			}
@@ -253,7 +282,7 @@ Trigger.prototype.StartAnEnemyWave = function()
 			});
 
 			if (isHero)
-				this.gaiaHeroes[playerID] = entities[0];
+				this.gaiaHeroes[groupID] = entities[0];
 		}
 		spawned = true;
 	}

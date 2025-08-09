@@ -68,6 +68,35 @@ export function* generateMap(mapSettings)
 	const clLand = g_Map.createTileClass();
 	const clCivilians = g_Map.createTileClass();
 
+	const startingPlacement = playerPlacementByPattern(mapSettings.PlayerPlacement,
+		fractionToTiles(0.3), fractionToTiles(0.04) + 6, 0);
+
+	const attackAngle = startingPlacement.teamAngle ?? startingPlacement.playerAngle;
+	const attacker = distributePointsOnCircle(attackAngle.length, attackAngle[0], fractionToTiles(0.45),
+		mapCenter)[0] .map(v => v.round());
+	const passage = distributePointsOnCircle(attackAngle.length, attackAngle[0] +
+		Math.PI / attackAngle.length, fractionToTiles(0.5), mapCenter)[0];
+
+	yield 10;
+
+	g_Map.log("Creating player bases");
+	for (let i = 0; i < numPlayers; ++i)
+	{
+		placeStartingEntities(startingPlacement.playerPosition[i], startingPlacement.playerIDs[i],
+			getStartingEntities(startingPlacement.playerIDs[i]).filter(ent =>
+				ent.Template.indexOf("civil_centre") != -1 ||
+				ent.Template.indexOf("infantry") != -1));
+
+		placePlayerBaseDecoratives({
+			"playerPosition": startingPlacement.playerPosition[i],
+			"template": aGrassShort,
+			"BaseResourceClass": clBaseResource
+		});
+
+		// Prevent mountains in the area of the staring locations.
+		addCivicCenterAreaToClass(startingPlacement.playerPosition[i], clPlayer);
+	}
+
 	g_Map.log("Creating central area");
 	createArea(
 		new ClumpPlacer(diskArea(fractionToTiles(0.15)), 0.7, 0.1, Infinity, mapCenter),
@@ -75,30 +104,23 @@ export function* generateMap(mapSettings)
 			new TerrainPainter(tMainTerrain),
 			new SmoothElevationPainter(ELEVATION_SET, heightLand, 3),
 			new TileClassPainter(clLand)
-		]);
-	yield 10;
+		],
+		new AvoidTileClassConstraint(clPlayer, 6));
 
-	const { playerIDs, playerPosition, playerAngle, startAngle } =
-		playerPlacementCircle(fractionToTiles(0.3));
-	const attacker = distributePointsOnCircle(numPlayers, startAngle, fractionToTiles(0.45), mapCenter)[0]
-		.map(v => v.round());
-	const passage = distributePointsOnCircle(numPlayers, startAngle + Math.PI / numPlayers,
-		fractionToTiles(0.5), mapCenter)[0];
-
-	g_Map.log("Creating player bases, passages, treasure seeker woman and attacker points");
+	g_Map.log("Creating treasure seeker woman");
 	for (let i = 0; i < numPlayers; ++i)
 	{
-		placeStartingEntities(playerPosition[i], playerIDs[i],
-			getStartingEntities(playerIDs[i]).filter(ent =>
-				ent.Template.indexOf("civil_centre") != -1 ||
-				ent.Template.indexOf("infantry") != -1));
+		// Treasure seeker civilian
+		const civilianLocation = findLocationInDirectionBasedOnHeight(
+			startingPlacement.playerPosition[i], mapCenter, -3, 3.5, 3).round();
+		clCivilians.add(civilianLocation);
+		g_Map.placeEntityPassable(oTreasureSeeker, startingPlacement.playerIDs[i], civilianLocation,
+			civilianLocation.angleTo(mapCenter) - Math.PI / 2);
+	}
 
-		placePlayerBaseDecoratives({
-			"playerPosition": playerPosition[i],
-			"template": aGrassShort,
-			"BaseResourceClass": clBaseResource
-		});
-
+	g_Map.log("Creating passages and attacker points");
+	for (let i = 0; i < attacker.length; ++i)
+	{
 		// Passage between player and neighbor
 		createArea(
 			new PathPlacer(mapCenter, passage[i], scaleByMapSize(6, 24), scaleByMapSize(1, 0.4),
@@ -106,28 +128,25 @@ export function* generateMap(mapSettings)
 			[
 				new TerrainPainter(tMainTerrain),
 				new SmoothElevationPainter(ELEVATION_SET, heightLand, 4)
-			]);
-
-		// Treasure seeker civilian
-		const civilianLocation = findLocationInDirectionBasedOnHeight(playerPosition[i], mapCenter, -3,
-			3.5, 3).round();
-		clCivilians.add(civilianLocation);
-		g_Map.placeEntityPassable(oTreasureSeeker, playerIDs[i], civilianLocation,
-			playerAngle[i] + Math.PI);
+			],
+			new AvoidTileClassConstraint(clPlayer, 0));
 
 		// Attacker spawn point
 		g_Map.placeEntityAnywhere(aWaypointFlag, 0, attacker[i], Math.PI / 2);
-		g_Map.placeEntityPassable(triggerPointAttacker, playerIDs[i], attacker[i], Math.PI / 2);
+		g_Map.placeEntityPassable(triggerPointAttacker, i, attacker[i], Math.PI / 2);
 
 		// Preventing mountains in the area between player and attackers at
 		// player
-		addCivicCenterAreaToClass(playerPosition[i], clPlayer);
-		createArea(new PathPlacer(attacker[i], playerPosition[i], 3, 0.5, 0, 0.2, 0),
+		createArea(
+			new PathPlacer(attacker[i],
+				startingPlacement.teamPosition?.[i] ?? startingPlacement.playerPosition[i], 3, 0.5,
+				0, 0.2, 0),
 			[
 				new TerrainPainter(g_Terrains.roadWild),
 				new TileClassPainter(clPlayer)
 			]);
 	}
+
 	yield 20;
 
 	paintTerrainBasedOnHeight(heightLand + 0.12, heightHill - 1, Elevation_IncludeMin_ExcludeMax, tCliff);

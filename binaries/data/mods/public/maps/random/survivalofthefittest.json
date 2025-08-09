@@ -10,6 +10,10 @@
 		"TriggerScripts": [
 			"scripts/TriggerHelper.js",
 			"random/survivalofthefittest_triggers.js"
+		],
+		"PlayerPlacements": [
+			"circle",
+			"stronghold"
 		]
 	}
 }
