@@ -28,6 +28,7 @@
 #define INCLUDED_CODE_ANNOTATION
 
 #include "lib/code_generation.h"
+#include "lib/config.h"
 #include "lib/sysdep/arch.h"	// ARCH_AMD64
 #include "lib/sysdep/compiler.h"
 

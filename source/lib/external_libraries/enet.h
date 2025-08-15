@@ -27,6 +27,8 @@
 #ifndef INCLUDED_ENET
 #define INCLUDED_ENET
 
+#include "lib/sysdep/os.h"
+
 #if OS_WIN
 
 // enet/win32.h wants to include winsock2.h which causes conflicts.

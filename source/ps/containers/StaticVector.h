@@ -18,6 +18,8 @@
 #ifndef INCLUDED_PS_STATICVECTOR
 #define INCLUDED_PS_STATICVECTOR
 
+#include "lib/debug.h"
+
 #include <algorithm>
 #include <array>
 #include <cstdint>

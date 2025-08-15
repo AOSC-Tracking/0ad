@@ -23,6 +23,8 @@
 #ifndef INCLUDED_POSIX_MMAN
 #define INCLUDED_POSIX_MMAN
 
+#include "lib/sysdep/os.h"
+
 #if OS_WIN
 # include "lib/sysdep/os/win/wposix/wmman.h"
 #else

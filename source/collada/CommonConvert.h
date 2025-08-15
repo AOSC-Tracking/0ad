@@ -18,6 +18,9 @@
 #ifndef INCLUDED_COMMONCONVERT
 #define INCLUDED_COMMONCONVERT
 
+#include "DLL.h"
+
+#include <FCollada.h>
 #include <FCDocument/FCDExtra.h>
 #include <FCDocument/FCDocument.h>
 #include <FMath/FMMatrix44.h>

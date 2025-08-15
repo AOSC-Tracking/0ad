@@ -27,6 +27,8 @@
 #ifndef INCLUDED_CURL
 #define INCLUDED_CURL
 
+#include "lib/sysdep/os.h"
+
 #if OS_WIN
 
 // curl.h wants to include winsock2.h which causes conflicts.

@@ -19,8 +19,12 @@
 
 #include "DLL.h"
 
+#include <FCollada.h>
+
 #include <FMath/FMMatrix44.h>
 #include <FMath/FMVector3.h>
+
+extern void Log(int severity, const char* fmt, ...);
 
 void DumpMatrix(const FMMatrix44& m)
 {

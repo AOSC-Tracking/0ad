@@ -20,6 +20,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "lib/sysdep/arch.h"
+
 #if ARCH_AMD64
 
 #include "lib/sysdep/arch/amd64/amd64.h"

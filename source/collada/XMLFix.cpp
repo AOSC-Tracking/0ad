@@ -24,6 +24,8 @@
 #include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 
+extern void Log(int severity, const char* fmt, ...);
+
 /*
 
 Things that are fixed here:

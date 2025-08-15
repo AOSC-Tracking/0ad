@@ -20,7 +20,6 @@
 
 #include "graphics/Color.h"
 #include "renderer/backend/IBuffer.h"
-#include "renderer/backend/IDevice.h"
 #include "renderer/backend/ITexture.h"
 
 #include <cstdint>

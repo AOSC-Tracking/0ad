@@ -27,6 +27,7 @@
 #ifndef INCLUDED_BYTE_ORDER
 #define INCLUDED_BYTE_ORDER
 
+#include "lib/sysdep/arch.h"
 #include "lib/sysdep/compiler.h"
 #include "lib/types.h"
 

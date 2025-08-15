@@ -28,12 +28,14 @@
 
 #include "lib/code_generation.h"
 #include "lib/debug.h"
+#include "lib/sysdep/os.h"
 
 #include <algorithm>
 #include <cerrno>
 #include <cinttypes>
 #include <cstdarg>
 #include <cstdio>
+#include <cwchar>
 
 #if OS_ANDROID
 # include <boost/algorithm/string/replace.hpp>

@@ -17,6 +17,7 @@
 
 #include "SectionLayout.h"
 
+#include "lib/posix/posix_types.h"
 #include "tools/atlas/AtlasUI/CustomControls/SnapSplitterWindow/SnapSplitterWindow.h"
 #include "tools/atlas/AtlasUI/General/Datafile.h"
 #include "tools/atlas/AtlasUI/ScenarioEditor/Sections/Cinema/Cinema.h"

@@ -46,6 +46,8 @@
 #include <limits>
 #include <vector>
 
+extern void Log(int severity, const char* fmt, ...);
+
 class PSAConvert
 {
 public:

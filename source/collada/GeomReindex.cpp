@@ -17,6 +17,9 @@
 
 #include "GeomReindex.h"
 
+#include <FCollada.h>
+#include <FCDocument/FCDocument.h>
+
 #include <FCDocument/FCDGeometryMesh.h>
 #include <FCDocument/FCDGeometryPolygons.h>
 #include <FCDocument/FCDGeometryPolygonsInput.h>

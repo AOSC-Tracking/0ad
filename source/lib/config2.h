@@ -27,6 +27,8 @@
 #ifndef INCLUDED_CONFIG2
 #define INCLUDED_CONFIG2
 
+#include "lib/sysdep/os.h"
+
 // rationale: a centralized header makes it much easier to see what all
 // can be changed. it is assumed that only a few modules will need
 // configuration choices, so rebuilding them all is acceptable.

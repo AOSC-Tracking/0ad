@@ -38,6 +38,8 @@
 #include <libxml/xmlmemory.h>
 #include <utility>
 
+extern void Log(int severity, const char* fmt, ...);
+
 void require_(int line, bool value, const char* type, const char* message)
 {
 	if (value) return;

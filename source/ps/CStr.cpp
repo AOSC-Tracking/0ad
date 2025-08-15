@@ -18,6 +18,7 @@
 #ifndef CStr_CPP_FIRST
 #define CStr_CPP_FIRST
 
+#include "lib/debug.h"
 #include "lib/fnv_hash.h"
 #include "lib/utf8.h"
 #include "lib/byte_order.h"

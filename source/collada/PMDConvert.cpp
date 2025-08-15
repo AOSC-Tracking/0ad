@@ -47,6 +47,8 @@
 #include <utility>
 #include <vector>
 
+extern void Log(int severity, const char* fmt, ...);
+
 const size_t maxInfluences = 4;
 struct VertexBlend
 {

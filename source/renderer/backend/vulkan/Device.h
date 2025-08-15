@@ -114,7 +114,7 @@ public:
 		const char* name, const IBuffer::Type type, const uint32_t size, const uint32_t usage);
 
 	std::unique_ptr<IShaderProgram> CreateShaderProgram(
-		const CStr& name, const CShaderDefines& defines) override;
+		const CStr& name, const CShaderDefines& defines);
 
 	bool AcquireNextBackbuffer() override;
 
