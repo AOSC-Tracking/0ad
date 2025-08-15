@@ -199,6 +199,9 @@ function GetMultipleEntityStates(ents)
 
 function GetEntityState(entId)
 {
+	if (entId == INVALID_ENTITY)
+		return null;
+
 	if (!g_EntityStates[entId])
 	{
 		const entityState = Engine.GuiInterfaceCall("GetEntityState", entId);
