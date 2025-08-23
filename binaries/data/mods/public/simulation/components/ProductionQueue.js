@@ -343,8 +343,6 @@ ProductionQueue.prototype.AddItem = function(templateName, type, count, metadata
 	else
 		this.queue.push(item);
 
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
-
 	if (!this.timer)
 		this.StartTimer();
 	return true;
@@ -360,8 +358,6 @@ ProductionQueue.prototype.RemoveItem = function(id)
 		return;
 
 	this.queue.splice(itemIndex, 1)[0].Stop();
-
-	Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
 
 	if (!this.queue.length)
 		this.StopTimer();
@@ -422,13 +418,9 @@ ProductionQueue.prototype.ProgressTimeout = function(data, lateness)
 		}
 		time -= item.Progress(time);
 		if (!item.IsFinished())
-		{
-			Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
 			return;
-		}
 
 		this.queue.shift();
-		Engine.PostMessage(this.entity, MT_ProductionQueueChanged, null);
 
 		// If autoqueuing, push a new unit on the queue immediately,
 		// but don't start right away. This 'wastes' some time, making

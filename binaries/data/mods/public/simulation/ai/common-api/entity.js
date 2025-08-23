@@ -622,12 +622,10 @@ export const Entity = Class({
 	 * Returns the current training queue state, of the form
 	 * [ { "id": 0, "template": "...", "count": 1, "progress": 0.5, "metadata": ... }, ... ]
 	 */
-	"trainingQueue": function() {
-		return this._entity.trainingQueue;
-	},
+	"trainingQueue": function() { return this.queryInterface(Sim.IID_ProductionQueue)?.GetQueue(); },
 
 	"trainingQueueTime": function() {
-		const queue = this._entity.trainingQueue;
+		const queue = this.trainingQueue();
 		if (!queue)
 			return undefined;
 		let time = 0;
@@ -991,7 +989,7 @@ export const Entity = Class({
 	},
 
 	"stopAllProduction": function(percentToStopAt) {
-		const queue = this._entity.trainingQueue;
+		const queue = this.trainingQueue();
 		if (!queue)
 			return true;	// no queue, so technically we stopped all production.
 		for (const item of queue)

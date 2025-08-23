@@ -204,9 +204,10 @@ Headquarters.prototype.checkEvents = function(gameState, events)
 		if (!ent || !ent.isOwn(PlayerID))
 			continue;
 
-		if (!ent._entity.trainingQueue || !ent._entity.trainingQueue.length)
+		const queue = ent.trainingQueue();
+		if (!queue?.length)
 			continue;
-		const metadata = ent._entity.trainingQueue[0].metadata;
+		const metadata = queue[0].metadata;
 		if (metadata && metadata.garrisonType)
 			ent.setRallyPoint(ent, "garrison");  // trained units will autogarrison
 		else
@@ -1837,7 +1838,7 @@ Headquarters.prototype.trainEmergencyUnits = function(gameState, positions)
 				continue;
 			if (!base.anchor.trainableEntities(civ))	// base still in construction
 				continue;
-			const queue = base.anchor._entity.trainingQueue;
+			const queue = base.anchor.trainingQueue();
 			if (queue)
 			{
 				let time = 0;
@@ -1860,9 +1861,9 @@ Headquarters.prototype.trainEmergencyUnits = function(gameState, positions)
 	// We will choose randomly ranged and melee units, except when garrisonHolder is full
 	// in which case we prefer melee units
 	let numGarrisoned = this.garrisonManager.numberOfGarrisonedSlots(nearestAnchor);
-	if (nearestAnchor._entity.trainingQueue)
+	if (nearestAnchor.trainingQueue())
 	{
-		for (const item of nearestAnchor._entity.trainingQueue)
+		for (const item of nearestAnchor.trainingQueue())
 		{
 			if (item.metadata && item.metadata.garrisonType)
 				numGarrisoned += item.count;
