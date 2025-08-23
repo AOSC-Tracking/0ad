@@ -120,13 +120,6 @@ AIProxy.prototype.OnCapturePointsChanged = function(msg)
 	this.changes.capturePoints = msg.capturePoints;
 };
 
-AIProxy.prototype.OnUnitIdleChanged = function(msg)
-{
-	if (!this.NotifyChange())
-		return;
-	this.changes.idle = msg.idle;
-};
-
 AIProxy.prototype.OnUnitStanceChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -249,8 +242,6 @@ AIProxy.prototype.GetFullRepresentation = function()
 	const cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
 	if (cmpUnitAI)
 	{
-		// Updated by OnUnitIdleChanged
-		ret.idle = cmpUnitAI.IsIdle();
 		// Updated by OnUnitStanceChanged
 		ret.stance = cmpUnitAI.GetStanceName();
 		// Updated by OnUnitAIStateChanged

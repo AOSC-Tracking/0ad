@@ -601,7 +601,7 @@ export const Entity = Class({
 	"position": function() { return this._entity.position; },
 	"angle": function() { return this._entity.angle; },
 
-	"isIdle": function() { return this._entity.idle; },
+	"isIdle": function() { return this.queryInterface(Sim.IID_UnitAI)?.IsIdle(); },
 
 	"getStance": function() { return this._entity.stance; },
 	"unitAIState": function() { return this._entity.unitAIState; },

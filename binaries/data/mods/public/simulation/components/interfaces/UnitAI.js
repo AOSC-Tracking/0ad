@@ -1,12 +1,6 @@
 Engine.RegisterInterface("UnitAI");
 
 /**
- * Message of the form { "idle": boolean }
- * sent from UnitAI whenever the unit's idle status changes.
- */
-Engine.RegisterMessageType("UnitIdleChanged");
-
-/**
  * Message of the form { "ableToMove": boolean }
  * sent from UnitAI whenever the unit's ability to move changes.
  */

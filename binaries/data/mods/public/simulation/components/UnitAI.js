@@ -1615,7 +1615,6 @@ UnitAI.prototype.UnitFsmSpec = {
 				}
 
 				this.isIdle = true;
-				Engine.PostMessage(this.entity, MT_UnitIdleChanged, { "idle": this.isIdle });
 
 				// TODO: figure out if we can move more things from Timer here/call timer directly
 				// without triggering infinite loops.
@@ -1654,7 +1653,6 @@ UnitAI.prototype.UnitFsmSpec = {
 					if (this.IsFormationMember())
 						Engine.QueryInterface(this.formationController, IID_Formation).UnsetIdleEntity(this.entity);
 					this.isIdle = false;
-					Engine.PostMessage(this.entity, MT_UnitIdleChanged, { "idle": this.isIdle });
 				}
 			},
 
@@ -1725,7 +1723,6 @@ UnitAI.prototype.UnitFsmSpec = {
 					}
 
 					this.isIdle = true;
-					Engine.PostMessage(this.entity, MT_UnitIdleChanged, { "idle": this.isIdle });
 				}
 
 				// Go linger first to prevent all roaming entities
@@ -3560,7 +3557,6 @@ UnitAI.prototype.ResetIdle = function()
 	if (this.isIdle == shouldBeIdle)
 		return;
 	this.isIdle = shouldBeIdle;
-	Engine.PostMessage(this.entity, MT_UnitIdleChanged, { "idle": this.isIdle });
 };
 
 UnitAI.prototype.SetGarrisoned = function()
