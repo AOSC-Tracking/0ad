@@ -3891,11 +3891,6 @@ UnitAI.prototype.GetCurrentState = function()
 	return this.UnitFsm.GetCurrentState(this);
 };
 
-UnitAI.prototype.FsmStateNameChanged = function(state)
-{
-	Engine.PostMessage(this.entity, MT_UnitAIStateChanged, { "to": state });
-};
-
 /**
  * Call when the current order has been completed (or failed).
  * Removes the current order from the queue, and processes the

@@ -85,9 +85,6 @@ which will define a few properties on 'this' (with names prefixed "fsm"),
 and then they can call the FSM functions on the object like
 	FsmSpec.SetNextState(this, "STATENAME.SUBSTATENAME");
 
-These objects must also define a function property that can be called as
-	this.FsmStateNameChanged(name);
-
 (This design aims to avoid storing any per-instance state that cannot be
 easily serialized - it only stores state-name strings.)
 
@@ -350,10 +347,7 @@ FSM.prototype.SwitchToNextState = function(obj, nextStateName)
 		{
 			obj.fsmStateName = fromState[i];
 			if (leave.apply(obj))
-			{
-				obj.FsmStateNameChanged(obj.fsmStateName);
 				return;
-			}
 		}
 	}
 
@@ -364,13 +358,9 @@ FSM.prototype.SwitchToNextState = function(obj, nextStateName)
 		{
 			obj.fsmStateName = toState[i];
 			if (enter.apply(obj))
-			{
-				obj.FsmStateNameChanged(obj.fsmStateName);
 				return;
-			}
 		}
 	}
 
 	obj.fsmStateName = nextStateName;
-	obj.FsmStateNameChanged(obj.fsmStateName);
 };

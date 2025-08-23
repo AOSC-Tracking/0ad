@@ -15,13 +15,6 @@ Engine.RegisterMessageType("UnitAbleToMoveChanged");
 Engine.RegisterMessageType("UnitStanceChanged");
 
 /**
- * Message of the form { "to": string }
- * where "to" value is a UnitAI state,
- * sent from UnitAI whenever the unit changes state.
- */
-Engine.RegisterMessageType("UnitAIStateChanged");
-
-/**
  * Message of the form { "to": number[] }
  * where "to" value is an array of data orders given by GetOrderData,
  * sent from UnitAI whenever the unit order data changes.

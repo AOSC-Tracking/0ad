@@ -604,7 +604,7 @@ export const Entity = Class({
 	"isIdle": function() { return this.queryInterface(Sim.IID_UnitAI)?.IsIdle(); },
 
 	"getStance": function() { return this._entity.stance; },
-	"unitAIState": function() { return this._entity.unitAIState; },
+	"unitAIState": function() { return this.queryInterface(Sim.IID_UnitAI)?.GetCurrentState(); },
 	"unitAIOrderData": function() { return this._entity.unitAIOrderData; },
 
 	"hitpoints": function() { return this._entity.hitpoints; },
