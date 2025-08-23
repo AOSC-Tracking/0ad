@@ -1587,10 +1587,7 @@ UnitAI.prototype.UnitFsmSpec = {
 				this.PushOrderFront("WalkAndFight", { "x": pos.x, "z": pos.z, "target": msg.data.attacker, "force": false });
 				// if we already had a WalkAndFight, keep only the most recent one in case the target has moved
 				if (this.orderQueue[1] && this.orderQueue[1].type == "WalkAndFight")
-				{
 					this.orderQueue.splice(1, 1);
-					Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
-				}
 			}
 		},
 
@@ -3671,10 +3668,7 @@ UnitAI.prototype.OnOwnershipChanged = function(msg)
 		// Switch to a virgin state to let states execute their leave handlers.
 		// Except if (un)packing, in which case we only clear the order queue.
 		if (this.IsPacking())
-		{
 			this.orderQueue.length = Math.min(this.orderQueue.length, 1);
-			Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
-		}
 		else
 		{
 			const state = this.GetCurrentState();
@@ -3740,7 +3734,6 @@ UnitAI.prototype.OnPickupCanceled = function(msg)
 			this.UnitFsm.ProcessMessage(this, { "type": "PickupCanceled", "data": msg });
 		else
 			this.orderQueue.splice(i, 1);
-		Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 		break;
 	}
 };
@@ -3920,8 +3913,6 @@ UnitAI.prototype.FinishOrder = function()
 			"data": this.order.data
 		});
 
-		Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
-
 		return ret;
 	}
 
@@ -3930,8 +3921,6 @@ UnitAI.prototype.FinishOrder = function()
 
 	// Switch to IDLE as a default state.
 	this.SetNextState("IDLE");
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 
 	// Check if there are queued formation orders
 	if (this.IsFormationMember())
@@ -3978,8 +3967,6 @@ UnitAI.prototype.PushOrder = function(type, data)
 			});
 		}
 	}
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
 /**
@@ -4010,9 +3997,6 @@ UnitAI.prototype.PushOrderFront = function(type, data, ignorePacking = false)
 			"data": this.order.data
 		});
 	}
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
-
 };
 
 /**
@@ -4032,13 +4016,10 @@ UnitAI.prototype.PushOrderAfterForced = function(type, data)
 			if (this.orderQueue[i].type == type)
 				continue;
 			this.orderQueue.splice(i, 0, { "type": type, "data": data });
-			Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 			return;
 		}
 		this.PushOrder(type, data);
 	}
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
 /**
@@ -4071,7 +4052,6 @@ UnitAI.prototype.EnsureCorrectPackStateForAttack = function(requirePacked)
 		// Delete the packing order.
 		this.orderQueue.splice(1, 1);
 		cmpPack.CancelPack();
-		Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 		// Continue with the attack order.
 		return true;
 	}
@@ -4079,7 +4059,6 @@ UnitAI.prototype.EnsureCorrectPackStateForAttack = function(requirePacked)
 	const tmp = this.orderQueue[0];
 	this.orderQueue[0] = this.orderQueue[1];
 	this.orderQueue[1] = tmp;
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 	return false;
 };
 
@@ -4147,8 +4126,6 @@ UnitAI.prototype.ReplaceOrder = function(type, data)
 		this.orderQueue = [];
 		this.PushOrder(type, data);
 	}
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
 UnitAI.prototype.GetOrders = function()
@@ -4225,7 +4202,6 @@ UnitAI.prototype.BackToWork = function()
 	this.orderQueue = [];
 
 	this.AddOrders(this.workOrders);
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 
 	if (this.IsFormationMember())
 	{
@@ -4338,8 +4314,6 @@ UnitAI.prototype.OnGlobalEntityRenamed = function(msg)
 
 	if (currentOrderChanged)
 		this.UnitFsm.ProcessMessage(this, { "type": "OrderTargetRenamed", "data": msg });
-
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
 UnitAI.prototype.OnAttacked = function(msg)
@@ -5409,7 +5383,6 @@ UnitAI.prototype.RemoveGuard = function()
 		for (let i = 1; i < this.orderQueue.length; ++i)
 			if (this.orderQueue[i].type == "Guard")
 				this.orderQueue.splice(i, 1);
-	Engine.PostMessage(this.entity, MT_UnitAIOrderDataChanged, { "to": this.GetOrderData() });
 };
 
 UnitAI.prototype.IsGuardOf = function()

@@ -120,13 +120,6 @@ AIProxy.prototype.OnCapturePointsChanged = function(msg)
 	this.changes.capturePoints = msg.capturePoints;
 };
 
-AIProxy.prototype.OnUnitAIOrderDataChanged = function(msg)
-{
-	if (!this.NotifyChange())
-		return;
-	this.changes.unitAIOrderData = msg.to;
-};
-
 AIProxy.prototype.OnProductionQueueChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -223,13 +216,6 @@ AIProxy.prototype.GetFullRepresentation = function()
 	{
 		// Updated by OnOwnershipChanged
 		ret.owner = cmpOwnership.GetOwner();
-	}
-
-	const cmpUnitAI = Engine.QueryInterface(this.entity, IID_UnitAI);
-	if (cmpUnitAI)
-	{
-		// Updated by OnUnitAIOrderDataChanged
-		ret.unitAIOrderData = cmpUnitAI.GetOrderData();
 	}
 
 	const cmpProductionQueue = Engine.QueryInterface(this.entity, IID_ProductionQueue);
