@@ -616,7 +616,7 @@ export const Entity = Class({
 	"capturePoints": function() {return this._entity.capturePoints; },
 	"isInvulnerable": function() { return !!this.queryInterface(Sim.IID_Resistance)?.IsInvulnerable(); },
 
-	"isSharedDropsite": function() { return this._entity.sharedDropsite === true; },
+	"isSharedDropsite": function() { return this.queryInterface(Sim.IID_ResourceDropsite)?.IsShared(); },
 
 	/**
 	 * Returns the current training queue state, of the form

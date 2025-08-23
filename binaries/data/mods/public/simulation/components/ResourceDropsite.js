@@ -72,7 +72,6 @@ ResourceDropsite.prototype.SetSharing = function(value)
 	if (!this.sharable)
 		return;
 	this.shared = value;
-	Engine.PostMessage(this.entity, MT_DropsiteSharingChanged, { "shared": this.shared });
 };
 
 Engine.RegisterComponentType(IID_ResourceDropsite, "ResourceDropsite", ResourceDropsite);
