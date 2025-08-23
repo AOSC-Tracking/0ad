@@ -5938,10 +5938,7 @@ UnitAI.prototype.CancelUnpack = function(queued, pushFront)
 UnitAI.prototype.SetStance = function(stance)
 {
 	if (g_Stances[stance])
-	{
 		this.stance = stance;
-		Engine.PostMessage(this.entity, MT_UnitStanceChanged, { "to": this.stance });
-	}
 	else
 		error("UnitAI: Setting to invalid stance '"+stance+"'");
 };

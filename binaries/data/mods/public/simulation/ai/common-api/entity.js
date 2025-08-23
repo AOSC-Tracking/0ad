@@ -603,7 +603,7 @@ export const Entity = Class({
 
 	"isIdle": function() { return this.queryInterface(Sim.IID_UnitAI)?.IsIdle(); },
 
-	"getStance": function() { return this._entity.stance; },
+	"getStance": function() { return this.queryInterface(Sim.IID_UnitAI)?.GetStanceName(); },
 	"unitAIState": function() { return this.queryInterface(Sim.IID_UnitAI)?.GetCurrentState(); },
 	"unitAIOrderData": function() { return this._entity.unitAIOrderData; },
 
