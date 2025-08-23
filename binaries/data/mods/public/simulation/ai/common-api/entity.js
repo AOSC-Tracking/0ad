@@ -635,11 +635,11 @@ export const Entity = Class({
 	},
 
 	"foundationProgress": function() {
-		return this._entity.foundationProgress;
+		return this.queryInterface(Sim.IID_Foundation)?.GetBuildPercentage();
 	},
 
 	"getBuilders": function() {
-		if (this._entity.foundationProgress === undefined)
+		if (this.foundationProgress() === undefined)
 			return undefined;
 		if (this._entity.foundationBuilders === undefined)
 			return [];
@@ -647,7 +647,7 @@ export const Entity = Class({
 	},
 
 	"getBuildersNb": function() {
-		if (this._entity.foundationProgress === undefined)
+		if (this.foundationProgress() === undefined)
 			return undefined;
 		if (this._entity.foundationBuilders === undefined)
 			return 0;

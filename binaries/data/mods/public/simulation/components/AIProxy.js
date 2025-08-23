@@ -136,13 +136,6 @@ AIProxy.prototype.OnGarrisonedUnitsChanged = function(msg)
 		this.cmpAIInterface.PushEvent("UnGarrison", { "entity": ent, "holder": this.entity });
 };
 
-AIProxy.prototype.OnFoundationProgressChanged = function(msg)
-{
-	if (!this.NotifyChange())
-		return;
-	this.changes.foundationProgress = msg.to;
-};
-
 AIProxy.prototype.OnFoundationBuildersChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -208,13 +201,6 @@ AIProxy.prototype.GetFullRepresentation = function()
 	{
 		// Updated by OnOwnershipChanged
 		ret.owner = cmpOwnership.GetOwner();
-	}
-
-	const cmpFoundation = Engine.QueryInterface(this.entity, IID_Foundation);
-	if (cmpFoundation)
-	{
-		// Updated by OnFoundationProgressChanged
-		ret.foundationProgress = cmpFoundation.GetBuildPercentage();
 	}
 
 	const cmpResourceDropsite = Engine.QueryInterface(this.entity, IID_ResourceDropsite);

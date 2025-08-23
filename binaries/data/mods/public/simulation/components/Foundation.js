@@ -67,8 +67,6 @@ Foundation.prototype.OnHealthChanged = function(msg)
 	const cmpPosition = Engine.QueryInterface(this.previewEntity, IID_Position);
 	if (cmpPosition)
 		cmpPosition.SetConstructionProgress(this.GetBuildProgress());
-
-	Engine.PostMessage(this.entity, MT_FoundationProgressChanged, { "to": this.GetBuildPercentage() });
 };
 
 /**
