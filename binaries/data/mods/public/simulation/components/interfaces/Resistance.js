@@ -1,11 +1,6 @@
 Engine.RegisterInterface("Resistance");
 
 /**
- * Message of the form { "entity": entity, "invulnerability": true/false }
- */
-Engine.RegisterMessageType("InvulnerabilityChanged");
-
-/**
  * Message of the form {
  *		"type": string,
  *		"target": number,

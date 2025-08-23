@@ -120,13 +120,6 @@ AIProxy.prototype.OnCapturePointsChanged = function(msg)
 	this.changes.capturePoints = msg.capturePoints;
 };
 
-AIProxy.prototype.OnInvulnerabilityChanged = function(msg)
-{
-	if (!this.NotifyChange())
-		return;
-	this.changes.invulnerability = msg.invulnerability;
-};
-
 AIProxy.prototype.OnUnitIdleChanged = function(msg)
 {
 	if (!this.NotifyChange())
@@ -245,10 +238,6 @@ AIProxy.prototype.GetFullRepresentation = function()
 		// Updated by OnHealthChanged
 		ret.hitpoints = cmpHealth.GetHitpoints();
 	}
-
-	const cmpResistance = Engine.QueryInterface(this.entity, IID_Resistance);
-	if (cmpResistance)
-		ret.invulnerability = cmpResistance.IsInvulnerable();
 
 	const cmpOwnership = Engine.QueryInterface(this.entity, IID_Ownership);
 	if (cmpOwnership)

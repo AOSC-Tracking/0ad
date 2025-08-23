@@ -106,7 +106,6 @@ Resistance.prototype.RemoveAttacker = function(attacker)
 Resistance.prototype.SetInvulnerability = function(invulnerability)
 {
 	this.invulnerable = invulnerability;
-	Engine.PostMessage(this.entity, MT_InvulnerabilityChanged, { "entity": this.entity, "invulnerability": invulnerability });
 };
 
 /**

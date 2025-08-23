@@ -614,7 +614,7 @@ export const Entity = Class({
 	"needsRepair": function() { return this.isHurt() && this.isRepairable(); },
 	"decaying": function() { return this._entity.decaying; },
 	"capturePoints": function() {return this._entity.capturePoints; },
-	"isInvulnerable": function() { return this._entity.invulnerability || false; },
+	"isInvulnerable": function() { return !!this.queryInterface(Sim.IID_Resistance)?.IsInvulnerable(); },
 
 	"isSharedDropsite": function() { return this._entity.sharedDropsite === true; },
 
