@@ -136,13 +136,6 @@ AIProxy.prototype.OnGarrisonedUnitsChanged = function(msg)
 		this.cmpAIInterface.PushEvent("UnGarrison", { "entity": ent, "holder": this.entity });
 };
 
-AIProxy.prototype.OnFoundationBuildersChanged = function(msg)
-{
-	if (!this.NotifyChange())
-		return;
-	this.changes.foundationBuilders = msg.to;
-};
-
 AIProxy.prototype.OnDropsiteSharingChanged = function(msg)
 {
 	if (!this.NotifyChange())

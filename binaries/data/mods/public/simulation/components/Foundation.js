@@ -210,8 +210,6 @@ Foundation.prototype.HandleBuildersChanged = function()
 	const cmpVisual = Engine.QueryInterface(this.entity, IID_Visual);
 	if (cmpVisual)
 		cmpVisual.SetVariable("numbuilders", this.GetNumBuilders());
-
-	Engine.PostMessage(this.entity, MT_FoundationBuildersChanged, { "to": this.GetBuilders() });
 };
 
 /**

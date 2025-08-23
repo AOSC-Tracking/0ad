@@ -6,10 +6,3 @@ Engine.RegisterInterface("Foundation");
  * Units can watch for this and change the task once it's complete.
  */
 Engine.RegisterMessageType("ConstructionFinished");
-
-/**
- * Message of the form { "to": number[] }
- * where "to" value is an array of builders entity ids,
- * sent from Foundation component whenever the foundation builders changes.
- */
-Engine.RegisterMessageType("FoundationBuildersChanged");

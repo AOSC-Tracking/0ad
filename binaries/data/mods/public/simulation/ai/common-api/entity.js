@@ -641,17 +641,13 @@ export const Entity = Class({
 	"getBuilders": function() {
 		if (this.foundationProgress() === undefined)
 			return undefined;
-		if (this._entity.foundationBuilders === undefined)
-			return [];
-		return this._entity.foundationBuilders;
+		return this.queryInterface(Sim.IID_Foundation)?.GetBuilders() ?? [];
 	},
 
 	"getBuildersNb": function() {
 		if (this.foundationProgress() === undefined)
 			return undefined;
-		if (this._entity.foundationBuilders === undefined)
-			return 0;
-		return this._entity.foundationBuilders.length;
+		return this.queryInterface(Sim.IID_Foundation)?.GetNumBuilders() ?? 0;
 	},
 
 	"owner": function() {
