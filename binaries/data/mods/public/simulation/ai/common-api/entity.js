@@ -698,7 +698,7 @@ export const Entity = Class({
 		{
 			let res;
 			// this is an abuse of "_ai" but it works.
-			if (this.unitAIState().split(".")[1] == "GATHER" && this.unitAIOrderData()[0].target !== undefined)
+			if (this.unitAIOrderData()[0].target !== undefined)
 				res = this._ai._entities.get(this.unitAIOrderData()[0].target);
 			else if (this.unitAIOrderData()[1] !== undefined && this.unitAIOrderData()[1].target !== undefined)
 				res = this._ai._entities.get(this.unitAIOrderData()[1].target);

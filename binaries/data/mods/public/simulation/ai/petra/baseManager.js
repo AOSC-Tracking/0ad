@@ -498,9 +498,10 @@ BaseManager.prototype.checkResourceLevels = function(gameState, queues)
 			continue;
 		for (const ent of this.gatherersByType(gameState, type).values())
 		{
-			if (ent.unitAIState() == "INDIVIDUAL.GATHER.GATHERING")
+			const state = ent.unitAIState();
+			if (state == "INDIVIDUAL.GATHER.GATHERING")
 				++this.gatherers[type].used;
-			else if (ent.unitAIState() == "INDIVIDUAL.GATHER.RETURNINGRESOURCE.APPROACHING")
+			else if (state == "INDIVIDUAL.GATHER.RETURNINGRESOURCE.APPROACHING")
 				++this.gatherers[type].lost;
 		}
 		// TODO  add also a test on remaining resources.

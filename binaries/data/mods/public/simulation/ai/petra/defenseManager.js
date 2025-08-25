@@ -101,7 +101,7 @@ DefenseManager.prototype.isDangerous = function(gameState, entity)
 		return false;
 	// Check if the entity is trying to build a new base near our buildings,
 	// and if yes, add this base in our target list.
-	if (entity.unitAIState() && entity.unitAIState() == "INDIVIDUAL.REPAIR.REPAIRING")
+	if (entity.unitAIState() == "INDIVIDUAL.REPAIR.REPAIRING")
 	{
 		const targetId = entity.unitAIOrderData()[0].target;
 		if (this.targetList.indexOf(targetId) != -1)
@@ -244,7 +244,7 @@ DefenseManager.prototype.checkEnemyUnits = function(gameState)
 		// Keep animals attacking us or our allies.
 		if (ent.hasClass("Animal"))
 		{
-			if (!ent.unitAIState() || ent.unitAIState().split(".")[1] != "COMBAT")
+			if (ent.unitAIState()?.split(".")[1] != "COMBAT")
 				continue;
 			const orders = ent.unitAIOrderData();
 			if (!orders || !orders.length || !orders[0].target)
@@ -574,7 +574,7 @@ DefenseManager.prototype.checkEvents = function(gameState, events)
 			// (enemy non-defensive structure are not considered to stay in sync with garrisonManager).
 			if (attacker.position() && attacker.isGarrisonHolder() && attacker.getArrowMultiplier() &&
 			    (target.owner() != 0 || !target.hasClass("Unit") ||
-			     target.unitAIState() && target.unitAIState().split(".")[1] == "COMBAT"))
+				target.unitAIState()?.split(".")[1] == "COMBAT"))
 				this.garrisonUnitsInside(gameState, attacker, { "attacker": target });
 		}
 

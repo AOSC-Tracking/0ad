@@ -144,7 +144,7 @@ GarrisonManager.prototype.update = function(gameState, events)
 				}
 				else if (ent.hasClass("Unit"))
 				{
-					if (ent.owner() == 0 && (!ent.unitAIState() || ent.unitAIState().split(".")[1] != "COMBAT"))
+					if (ent.owner() == 0 && (ent.unitAIState()?.split(".")[1] != "COMBAT"))
 						continue;
 				}
 				else
