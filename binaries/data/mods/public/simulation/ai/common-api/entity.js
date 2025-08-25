@@ -693,15 +693,16 @@ export const Entity = Class({
 		if (!this.get("ResourceGatherer"))
 			return undefined;
 
-		if (this.unitAIOrderData().length &&
+		const unitOrderData = this.unitAIOrderData();
+		if (unitOrderData.length &&
 			this.unitAIState().split(".")[1] == "GATHER")
 		{
 			let res;
 			// this is an abuse of "_ai" but it works.
-			if (this.unitAIOrderData()[0].target !== undefined)
-				res = this._ai._entities.get(this.unitAIOrderData()[0].target);
-			else if (this.unitAIOrderData()[1] !== undefined && this.unitAIOrderData()[1].target !== undefined)
-				res = this._ai._entities.get(this.unitAIOrderData()[1].target);
+			if (unitOrderData[0].target !== undefined)
+				res = this._ai._entities.get(unitOrderData[0].target);
+			else if (unitOrderData[1] !== undefined && unitOrderData[1].target !== undefined)
+				res = this._ai._entities.get(unitOrderData[1].target);
 			if (!res)
 				return 0;
 			const type = res.resourceSupplyType();

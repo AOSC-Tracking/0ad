@@ -321,11 +321,15 @@ DefenseArmy.prototype.assignUnit = function(gameState, entID)
 		if (!ent.canAttackTarget(eEnt, allowCapture(gameState, ent, eEnt)))
 			continue;
 
-		if (eEnt.hasClass("Unit") && eEnt.unitAIOrderData() && eEnt.unitAIOrderData().length &&
-			eEnt.unitAIOrderData()[0].target && eEnt.unitAIOrderData()[0].target == entID)
-		{   // being attacked  >>> target the unit
-			idMin = id;
-			break;
+		if (eEnt.hasClass("Unit"))
+		{
+			const unitOrderData = eEnt.unitAIOrderData();
+			if (unitOrderData && unitOrderData.length && unitOrderData[0].target &&
+				unitOrderData[0].target == entID)
+			{   // being attacked  >>> target the unit
+				idMin = id;
+				break;
+			}
 		}
 
 		// already enough units against it

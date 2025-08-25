@@ -107,6 +107,7 @@ Worker.prototype.update = function(gameState, ent)
 	this.ent = ent;
 
 	const unitAIState = ent.unitAIState();
+	const unitOrderData = ent.unitAIOrderData();
 	if ((subrole === Worker.SUBROLE_HUNTER || subrole === Worker.SUBROLE_GATHERER) &&
 	    (unitAIState == "INDIVIDUAL.GATHER.GATHERING" || unitAIState == "INDIVIDUAL.GATHER.APPROACHING" ||
 	     unitAIState == "INDIVIDUAL.COMBAT.APPROACHING"))
@@ -118,9 +119,9 @@ Worker.prototype.update = function(gameState, ent)
 			ent.stopMoving();
 		}
 
-		if (unitAIState == "INDIVIDUAL.COMBAT.APPROACHING" && ent.unitAIOrderData().length)
+		if (unitAIState == "INDIVIDUAL.COMBAT.APPROACHING" && unitOrderData.length)
 		{
-			const orderData = ent.unitAIOrderData()[0];
+			const orderData = unitOrderData[0];
 			if (orderData && orderData.target)
 			{
 				// Check that we have not drifted too far when hunting
@@ -182,10 +183,10 @@ Worker.prototype.update = function(gameState, ent)
 	{
 		if (subrole === Worker.SUBROLE_FISHER)
 			this.startFishing(gameState);
-		else if (unitAIState == "INDIVIDUAL.COMBAT.APPROACHING" && ent.unitAIOrderData().length &&
+		else if (unitAIState == "INDIVIDUAL.COMBAT.APPROACHING" && unitOrderData.length &&
 			!ent.getMetadata(PlayerID, "PartOfArmy"))
 		{
-			const orderData = ent.unitAIOrderData()[0];
+			const orderData = unitOrderData[0];
 			if (orderData && orderData.target)
 			{
 				const target = gameState.getEntityById(orderData.target);
@@ -197,10 +198,10 @@ Worker.prototype.update = function(gameState, ent)
 				}
 			}
 		}
-		else if (unitAIState == "INDIVIDUAL.COMBAT.ATTACKING" && ent.unitAIOrderData().length &&
+		else if (unitAIState == "INDIVIDUAL.COMBAT.ATTACKING" && unitOrderData.length &&
 			!ent.getMetadata(PlayerID, "PartOfArmy"))
 		{
-			const orderData = ent.unitAIOrderData()[0];
+			const orderData = unitOrderData[0];
 			if (orderData && orderData.target && orderData.attackType && orderData.attackType == "Capture")
 			{
 				// If we are here, an enemy structure must have targeted one of our workers
@@ -239,9 +240,9 @@ Worker.prototype.update = function(gameState, ent)
 		{
 			// we're already gathering. But let's check if there is nothing better
 			// in case UnitAI did something bad
-			if (ent.unitAIOrderData().length)
+			if (unitOrderData.length)
 			{
-				const supplyId = ent.unitAIOrderData()[0].target;
+				const supplyId = unitOrderData[0].target;
 				const supply = gameState.getEntityById(supplyId);
 				if (supply && !supply.hasClasses(["Field", "Animal"]) &&
 					supplyId != ent.getMetadata(PlayerID, "supply"))
@@ -282,7 +283,7 @@ Worker.prototype.update = function(gameState, ent)
 				if (gameState.ai.playedTurn % 10 == 0)
 				{
 					// Check from time to time that UnitAI does not send us to an inaccessible dropsite
-					const dropsite = gameState.getEntityById(ent.unitAIOrderData()[0].target);
+					const dropsite = gameState.getEntityById(unitOrderData[0].target);
 					if (dropsite && dropsite.position() &&
 						this.entAccess != getLandAccess(gameState, dropsite))
 					{
@@ -323,10 +324,10 @@ Worker.prototype.update = function(gameState, ent)
 		{
 			// Update our target in case UnitAI sent us to a different foundation because of autocontinue
 			// and abandon it if UnitAI has sent us to build a field (as we build them only when needed)
-			if (ent.unitAIOrderData()[0] && ent.unitAIOrderData()[0].target &&
-				ent.getMetadata(PlayerID, "target-foundation") != ent.unitAIOrderData()[0].target)
+			if (unitOrderData[0] && unitOrderData[0].target &&
+				ent.getMetadata(PlayerID, "target-foundation") != unitOrderData[0].target)
 			{
-				const targetId = ent.unitAIOrderData()[0].target;
+				const targetId = unitOrderData[0].target;
 				const target = gameState.getEntityById(targetId);
 				if (target && !target.hasClass("Field"))
 				{
@@ -418,7 +419,7 @@ Worker.prototype.update = function(gameState, ent)
 				else if (unitAIState == "INDIVIDUAL.GATHER.RETURNINGRESOURCE.APPROACHING")
 				{
 					// Check that UnitAI does not send us to an inaccessible dropsite
-					const dropsite = gameState.getEntityById(ent.unitAIOrderData()[0].target);
+					const dropsite = gameState.getEntityById(unitOrderData[0].target);
 					if (dropsite && dropsite.position() &&
 						this.entAccess != getLandAccess(gameState, dropsite))
 					{
@@ -1076,9 +1077,10 @@ Worker.prototype.moveToGatherer = function(gameState, ent, forced)
  */
 Worker.prototype.isInaccessibleSupply = function(gameState)
 {
-	if (!this.ent.unitAIOrderData()[0] || !this.ent.unitAIOrderData()[0].target)
+	const unitOrderData = this.ent.unitAIOrderData();
+	if (!unitOrderData[0] || !unitOrderData[0].target)
 		return false;
-	const targetId = this.ent.unitAIOrderData()[0].target;
+	const targetId = unitOrderData[0].target;
 	const target = gameState.getEntityById(targetId);
 	if (!target)
 		return true;

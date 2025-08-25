@@ -1787,10 +1787,12 @@ AttackPlan.prototype.update = function(gameState, events)
 						this.unitCollection.forEach(unit => {
 							if (!unit.position())
 								return;
-							if (unit.unitAIState().split(".")[1] != "COMBAT" || !unit.unitAIOrderData().length ||
-								!unit.unitAIOrderData()[0].target)
+							if (unit.unitAIState().split(".")[1] != "COMBAT")
 								return;
-							const target = gameState.getEntityById(unit.unitAIOrderData()[0].target);
+							const unitOrderData = unit.unitAIOrderData();
+							if (!unitOrderData.length || !unitOrderData[0].target)
+								return;
+							const target = gameState.getEntityById(unitOrderData[0].target);
 							if (!target)
 								return;
 							const dist = SquareVectorDistance(unit.position(), ent.position());
