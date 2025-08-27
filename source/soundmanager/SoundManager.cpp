@@ -37,6 +37,7 @@
 #include "soundmanager/ISoundManager.h"
 #include "soundmanager/data/OggData.h"
 #include "soundmanager/items/ISoundItem.h"
+#include "soundmanager/OpenALHelpers.h"
 #include "soundmanager/scripting/SoundGroup.h"
 
 #include <SDL_timer.h>
@@ -869,7 +870,17 @@ COggData* CSoundManager::GetSoundDataFromFile(const VfsPath& itemPath)
 		auto [it, inserted] = m_OggDataCache.try_emplace(key, itemPath);
 		return &it->second;
 	}
-	catch (OggDataError& e)
+	catch(PS::Audio::AlError& e)
+	{
+		LOGERROR("OpenAL error while loading sound data from '%s': %s", itemPath.string8(), e.what());
+		return nullptr;
+	}
+	catch(PS::Audio::AlcError& e)
+	{
+		LOGERROR("OpenAL error while loading sound data from '%s': %s", itemPath.string8(), e.what());
+		return nullptr;
+	}
+	catch(OggDataError& e)
 	{
 		LOGERROR("Failed to load sound data from '%s': %s", itemPath.string8(), e.what());
 		return nullptr;

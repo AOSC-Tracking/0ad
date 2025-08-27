@@ -24,12 +24,11 @@
 #include "lib/status.h"
 #include "lib/types.h"
 #include "ps/Filesystem.h"
-#include "soundmanager/SoundManager.h"
 #include "soundmanager/data/ogg.h"
+#include "soundmanager/OpenALHelpers.h"
 
 #include <AL/al.h>
 #include <algorithm>
-#include <fmt/format.h>
 #include <stdexcept>
 #include <span>
 #include <vector>
@@ -53,12 +52,7 @@ COggData::COggData(const VfsPath& itemPath)
 	SetFormatAndFreq(m_Stream->Format(), m_Stream->SamplingRate());
 	m_FileName = itemPath;
 
-	AL_CHECK;
-	alGenBuffers(m_Buffer.size(), m_Buffer.data());
-
-	ALenum err{alGetError()};
-	if (err != AL_NO_ERROR)
-		throw new OggDataError(fmt::format("Failed to create initial buffer. OpenAL error: {}", alGetString(err)));
+	PS_AUDIO_AL_CALL(alGenBuffers, m_Buffer.size(), m_Buffer.data());
 
 	m_BuffersCount = FetchDataIntoBuffer(m_Buffer.size(), m_Buffer.data());
 	if (!m_FileFinished)
@@ -66,19 +60,13 @@ COggData::COggData(const VfsPath& itemPath)
 
 	m_OneShot = true;
 	if (m_BuffersCount < OGG_DEFAULT_BUFFER_COUNT)
-		alDeleteBuffers(OGG_DEFAULT_BUFFER_COUNT - m_BuffersCount, &m_Buffer.at(m_BuffersCount));
-
-	AL_CHECK;
+		PS_AUDIO_AL_CALL(alDeleteBuffers, OGG_DEFAULT_BUFFER_COUNT - m_BuffersCount, &m_Buffer.at(m_BuffersCount));
 }
 
 COggData::~COggData()
 {
-	AL_CHECK;
 	if (m_BuffersCount > 0)
-		alDeleteBuffers(m_BuffersCount, &m_Buffer.at(0));
-
-	AL_CHECK;
-	m_BuffersCount = 0;
+		PS_AUDIO_AL_CALL(alDeleteBuffers, m_BuffersCount, &m_Buffer.at(0));
 }
 
 void COggData::SetFormatAndFreq(ALenum form, ALsizei freq)
@@ -127,7 +115,7 @@ int COggData::FetchDataIntoBuffer(int count, ALuint* buffers)
 			continue;
 
 		++buffersWritten;
-		alBufferData(buffers[i], m_Format, PCMOut.data(), static_cast<ALsizei>(totalRet), m_Frequency);
+		PS_AUDIO_AL_CALL(alBufferData, buffers[i], m_Format, PCMOut.data(), static_cast<ALsizei>(totalRet), m_Frequency);
 	}
 	return buffersWritten;
 }
