@@ -3,10 +3,10 @@ import { emergency as chatEmergency } from "simulation/ai/petra/chatHelper.js";
 /**
  * Checks for emergencies and acts accordingly
  */
-PETRA.EMERGENCY_NONE = 0;
-PETRA.EMERGENCY_LOW = 1;
-PETRA.EMERGENCY_HEAVY = 2;
-PETRA.EMERGENCY_FINAL = 3;
+const EMERGENCY_NONE = 0;
+const EMERGENCY_LOW = 1;
+const EMERGENCY_HEAVY = 2;
+const EMERGENCY_FINAL = 3;
 
 export function EmergencyManager(Config)
 {
@@ -15,7 +15,7 @@ export function EmergencyManager(Config)
 	this.referenceStructureCount = 0;
 	this.numRoots = 0;
 	this.hasEmergency = false;
-	this.emergencyState = PETRA.EMERGENCY_NONE;
+	this.emergencyState = EMERGENCY_NONE;
 };
 
 EmergencyManager.prototype.init = function(gameState)
@@ -67,11 +67,11 @@ EmergencyManager.prototype.emergencyUpdate = function(gameState)
 		return;
 	}
 	if (nRoots > 1) {
-		this.emergencyState = PETRA.EMERGENCY_LOW;
+		this.emergencyState = EMERGENCY_LOW;
 		return;
 	}
 	if (nRoots == 0) {
-		this.emergencyState = PETRA.EMERGENCY_FINAL;
+		this.emergencyState = EMERGENCY_FINAL;
 		return;
 	}
 
@@ -82,11 +82,11 @@ EmergencyManager.prototype.emergencyUpdate = function(gameState)
 		// TODO: Also check if it's nearly captured
 		const healthLevel = onlyRoot.healthLevel();
 		if (healthLevel < 0.2) {
-			this.emergencyState = PETRA.EMERGENCY_FINAL;
+			this.emergencyState = EMERGENCY_FINAL;
 		} else if (healthLevel < 0.4) {
-			this.emergencyState = PETRA.EMERGENCY_HEAVY;
+			this.emergencyState = EMERGENCY_HEAVY;
 		} else {
-			this.emergencyState = PETRA.EMERGENCY_LOW;
+			this.emergencyState = EMERGENCY_LOW;
 		}
 	}
 };
@@ -103,7 +103,7 @@ EmergencyManager.prototype.rootCount = function(gameState)
 
 EmergencyManager.prototype.startEmergency = function(gameState)
 {
-	this.emergencyState = PETRA.EMERGENCY_LOW;
+	this.emergencyState = EMERGENCY_LOW;
 	this.setEmergency(gameState, true);
 };
 
