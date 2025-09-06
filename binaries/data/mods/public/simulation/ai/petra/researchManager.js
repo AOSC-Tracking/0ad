@@ -160,7 +160,7 @@ ResearchManager.prototype.researchPreferredTechs = function(gameState, techs)
 
 ResearchManager.prototype.update = function(gameState, queues)
 {
-	if (queues.minorTech.hasQueuedUnits() || queues.majorTech.hasQueuedUnits())
+	if (queues.minorTech.hasQueuedUnits() || queues.majorTech.hasQueuedUnits() || gameState.ai.HQ.emergencyManager.hasEmergency)
 		return;
 
 	const techs = gameState.findAvailableTech();
