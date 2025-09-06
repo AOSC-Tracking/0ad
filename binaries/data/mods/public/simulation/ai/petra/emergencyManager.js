@@ -105,6 +105,7 @@ EmergencyManager.prototype.startEmergency = function(gameState)
 {
 	this.emergencyState = EMERGENCY_LOW;
 	this.setEmergency(gameState, true);
+	gameState.ai.HQ.attackManager.cancelAllAttacks(gameState);
 };
 
 EmergencyManager.prototype.setEmergency = function(gameState, enable)

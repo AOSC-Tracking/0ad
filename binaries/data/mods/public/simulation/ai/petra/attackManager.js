@@ -71,7 +71,7 @@ AttackManager.prototype.checkEvents = function(gameState, events)
 	let targetPlayer;
 	for (const evt of events.AttackRequest)
 	{
-		if (evt.source === PlayerID || !gameState.isPlayerAlly(evt.source) || !gameState.isPlayerEnemy(evt.player))
+		if (evt.source === PlayerID || !gameState.isPlayerAlly(evt.source) || !gameState.isPlayerEnemy(evt.player) || gameState.ai.HQ.emergencyManager.hasEmergency)
 			continue;
 		targetPlayer = evt.player;
 		let available = 0;
@@ -301,7 +301,7 @@ AttackManager.prototype.update = function(gameState, queues, events)
 
 			const updateStep = attack.updatePreparation(gameState);
 			// now we're gonna check if the preparation time is over
-			if (updateStep === AttackPlan.PREPARATION_KEEP_GOING || attack.isPaused())
+			if (updateStep === AttackPlan.PREPARATION_KEEP_GOING || attack.isPaused() || gameState.ai.HQ.emergencyManager.hasEmergency)
 			{
 				// just chillin'
 				if (attack.state === AttackPlan.STATE_UNEXECUTED)
@@ -319,7 +319,7 @@ AttackManager.prototype.update = function(gameState, queues, events)
 			}
 			else if (updateStep === AttackPlan.PREPARATION_START)
 			{
-				if (attack.StartAttack(gameState))
+				if (!attack.StartAttack(gameState))
 				{
 					if (this.Config.debug > 1)
 					{
@@ -693,6 +693,22 @@ AttackManager.prototype.cancelAttacksAgainstPlayer = function(gameState, player)
 				attack.Abort(gameState);
 				this.startedAttacks[attackType].splice(i--, 1);
 			}
+		}
+};
+
+/** Used when e.g. an emergency is declared */
+AttackManager.prototype.cancelAllAttacks = function(gameState)
+{
+	for (const attackType in this.upcomingAttacks)
+		for (const attack of this.upcomingAttacks[attackType])
+			attack.targetPlayer = undefined;
+
+	for (const attackType in this.startedAttacks)
+		for (let i = 0; i < this.startedAttacks[attackType].length; ++i)
+		{
+			const attack = this.startedAttacks[attackType][i];
+			attack.Abort(gameState);
+			this.startedAttacks[attackType].splice(i--, 1);
 		}
 };
 
