@@ -36,10 +36,10 @@ EmergencyManager.prototype.update = function(gameState)
 	const nStructures = gameState.getOwnStructures().length;
 	const nRoots = this.rootCount(gameState);
 	const factors = this.Config.emergencyValues;
-	if (((pop / this.referencePopulation) < factors.population || pop == 0) &&
-		((nStructures / this.referenceStructureCount) < factors.structures || nStructures == 0))
+	if (((pop / this.referencePopulation) < factors.population || pop === 0) &&
+		((nStructures / this.referenceStructureCount) < factors.structures || nStructures === 0))
 		this.startEmergency(gameState);
-	else if ((nRoots / this.numRoots) <= factors.roots || (nRoots == 0 && this.numRoots != 0))
+	else if ((nRoots / this.numRoots) <= factors.roots || (nRoots === 0 && this.numRoots !== 0))
 		this.startEmergency(gameState);
 
 	if (pop > this.referencePopulation || this.hasEmergency)
