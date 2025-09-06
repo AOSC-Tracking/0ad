@@ -36,10 +36,10 @@ EmergencyManager.prototype.update = function(gameState)
 	const nStructures = gameState.getOwnStructures().length;
 	const nRoots = this.rootCount(gameState);
 	const factors = this.Config.emergencyValues;
-	if (((pop / this.referencePopulation) < factors.population || pop === 0) &&
-		((nStructures / this.referenceStructureCount) < factors.structures || nStructures === 0))
-		this.startEmergency(gameState);
-	else if ((nRoots / this.numRoots) <= factors.roots || (nRoots === 0 && this.numRoots !== 0))
+	const hasEmergencyPopulation = ((pop / this.referencePopulation) < factors.population || pop === 0);
+	const hasEmergencyStructureCount = ((nStructures / this.referenceStructureCount) < factors.structures || nStructures === 0);
+	const hasEmergencyRootCount = (nRoots / this.numRoots) <= factors.roots || (nRoots === 0 && this.numRoots !== 0);
+	if ((hasEmergencyPopulation && hasEmergencyStructureCount) || hasEmergencyRootCount)
 		this.startEmergency(gameState);
 
 	if (pop > this.referencePopulation || this.hasEmergency)
@@ -70,12 +70,12 @@ EmergencyManager.prototype.emergencyUpdate = function(gameState)
 		this.emergencyState = EMERGENCY_LOW;
 		return;
 	}
-	if (nRoots == 0) {
+	if (nRoots === 0) {
 		this.emergencyState = EMERGENCY_FINAL;
 		return;
 	}
 
-	if (nRoots == 1) {
+	if (nRoots === 1) {
 		const onlyRoot = gameState.getOwnStructures().filter(ent => {
 			return ent?.get("TerritoryInfluence")?.Root === "true"
 		}).toEntityArray()[0];
