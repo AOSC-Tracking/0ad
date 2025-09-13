@@ -66,4 +66,9 @@ GameSettings.prototype.Attributes.PlayerCount = class PlayerCount extends GameSe
 	{
 		this.nbPlayers = Math.max(1, Math.min(this.maxPlayers, nb));
 	}
+
+	getNb()
+	{
+		return this.nbPlayers;
+	}
 };
