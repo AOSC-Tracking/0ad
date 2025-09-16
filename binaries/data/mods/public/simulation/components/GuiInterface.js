@@ -38,6 +38,7 @@ GuiInterface.prototype.Init = function()
 	this.enabledVisualRangeOverlayTypes = {};
 	this.templateModified = {};
 	this.selectionDirty = {};
+	this.cachedEntityBaseStates = {};
 	this.obstructionSnap = new ObstructionSnap();
 };
 
@@ -250,22 +251,29 @@ GuiInterface.prototype.AddMiragedEntity = function(player, entity, mirage)
 	this.miragedEntities[player].push({ "entity": entity, "newentity": mirage });
 };
 
-/**
- * Get common entity info, often used in the gui.
- */
-GuiInterface.prototype.GetEntityState = function(player, ent)
+GuiInterface.prototype.ClearCachedEntityStates = function()
 {
-	if (!ent)
-		return null;
+	for (const player of Engine.QueryInterface(SYSTEM_ENTITY, IID_PlayerManager).GetAllPlayers())
+		this.cachedEntityBaseStates[player] = {};
+};
 
-	// All units must have a template; if not then it's a nonexistent entity id.
+/**
+ * Helper method for GetEntityState.
+ * Loads in the parts of the entity state that are only dependent on the entity's template.
+ * Caches and reuses the returned data (within a turn) to save redundant recomputation.
+ * This is especially beneficial because GetEntityState queries are performed for all entities
+ * in the player's selection, which typically contains many with the same template.
+ */
+GuiInterface.prototype.GetEntityBaseState = function(owner, ent)
+{
 	const template = Engine.QueryInterface(SYSTEM_ENTITY, IID_TemplateManager).GetCurrentTemplateName(ent);
 	if (!template)
 		return null;
 
+	if (owner != INVALID_PLAYER && this.cachedEntityBaseStates[owner][template])
+		return this.cachedEntityBaseStates[owner][template];
+
 	const ret = {
-		"id": ent,
-		"player": INVALID_PLAYER,
 		"template": template
 	};
 
@@ -288,31 +296,13 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"controllable": cmpIdentity.IsControllable()
 		};
 
-	const cmpFormation = Engine.QueryInterface(ent, IID_Formation);
-	if (cmpFormation)
-		ret.formation = {
-			"members": cmpFormation.GetMembers()
-		};
-
-	const cmpPosition = Engine.QueryInterface(ent, IID_Position);
-	if (cmpPosition && cmpPosition.IsInWorld())
-		ret.position = cmpPosition.GetPosition();
-
 	const cmpHealth = QueryMiragedInterface(ent, IID_Health);
 	if (cmpHealth)
-	{
-		ret.hitpoints = cmpHealth.GetHitpoints();
 		ret.maxHitpoints = cmpHealth.GetMaxHitpoints();
-		ret.needsRepair = cmpHealth.IsRepairable() && cmpHealth.IsInjured();
-		ret.needsHeal = !cmpHealth.IsUnhealable();
-	}
 
 	const cmpCapturable = QueryMiragedInterface(ent, IID_Capturable);
 	if (cmpCapturable)
-	{
-		ret.capturePoints = cmpCapturable.GetCapturePoints();
 		ret.maxCapturePoints = cmpCapturable.GetMaxCapturePoints();
-	}
 
 	const cmpBuilder = Engine.QueryInterface(ent, IID_Builder);
 	if (cmpBuilder)
@@ -325,13 +315,6 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"naval": cmpMarket.HasType("naval")
 		};
 
-	const cmpPack = Engine.QueryInterface(ent, IID_Pack);
-	if (cmpPack)
-		ret.pack = {
-			"packed": cmpPack.IsPacked(),
-			"progress": cmpPack.GetProgress()
-		};
-
 	const cmpPopulation = Engine.QueryInterface(ent, IID_Population);
 	if (cmpPopulation)
 		ret.population = {
@@ -341,10 +324,7 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 	const cmpUpgrade = Engine.QueryInterface(ent, IID_Upgrade);
 	if (cmpUpgrade)
 		ret.upgrade = {
-			"upgrades": cmpUpgrade.GetUpgrades(),
-			"progress": cmpUpgrade.GetProgress(),
-			"template": cmpUpgrade.GetUpgradingTo(),
-			"isUpgrading": cmpUpgrade.IsUpgrading()
+			"upgrades": cmpUpgrade.GetUpgrades()
 		};
 
 	const cmpResearcher = Engine.QueryInterface(ent, IID_Researcher);
@@ -354,59 +334,18 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"techCostMultiplier": cmpResearcher.GetTechCostMultiplier()
 		};
 
-	const cmpStatusEffects = Engine.QueryInterface(ent, IID_StatusEffectsReceiver);
-	if (cmpStatusEffects)
-		ret.statusEffects = cmpStatusEffects.GetActiveStatuses();
-
-	const cmpProductionQueue = Engine.QueryInterface(ent, IID_ProductionQueue);
-	if (cmpProductionQueue)
-		ret.production = {
-			"queue": cmpProductionQueue.GetQueue(),
-			"autoqueue": cmpProductionQueue.IsAutoQueueing()
-		};
-
 	const cmpTrainer = Engine.QueryInterface(ent, IID_Trainer);
 	if (cmpTrainer)
 		ret.trainer = {
 			"entities": cmpTrainer.GetEntitiesList()
 		};
 
-	const cmpTrader = Engine.QueryInterface(ent, IID_Trader);
-	if (cmpTrader)
-		ret.trader = {
-			"goods": cmpTrader.GetGoods()
-		};
-
-	const cmpFoundation = QueryMiragedInterface(ent, IID_Foundation);
-	if (cmpFoundation)
-		ret.foundation = {
-			"numBuilders": cmpFoundation.GetNumBuilders(),
-			"buildTime": cmpFoundation.GetBuildTime()
-		};
-
-	const cmpRepairable = QueryMiragedInterface(ent, IID_Repairable);
-	if (cmpRepairable)
-		ret.repairable = {
-			"numBuilders": cmpRepairable.GetNumBuilders(),
-			"buildTime": cmpRepairable.GetBuildTime()
-		};
-
-	const cmpOwnership = Engine.QueryInterface(ent, IID_Ownership);
-	if (cmpOwnership)
-		ret.player = cmpOwnership.GetOwner();
-
-	const cmpRallyPoint = Engine.QueryInterface(ent, IID_RallyPoint);
-	if (cmpRallyPoint)
-		ret.rallyPoint = { "position": cmpRallyPoint.GetPositions()[0] }; // undefined or {x,z} object
-
 	const cmpGarrisonHolder = Engine.QueryInterface(ent, IID_GarrisonHolder);
 	if (cmpGarrisonHolder)
 		ret.garrisonHolder = {
-			"entities": cmpGarrisonHolder.GetEntities(),
 			"buffHeal": cmpGarrisonHolder.GetHealRate(),
 			"allowedClasses": cmpGarrisonHolder.GetAllowedClasses(),
-			"capacity": cmpGarrisonHolder.GetCapacity(),
-			"occupiedSlots": cmpGarrisonHolder.OccupiedSlots()
+			"capacity": cmpGarrisonHolder.GetCapacity()
 		};
 
 	const cmpTurretHolder = Engine.QueryInterface(ent, IID_TurretHolder);
@@ -415,62 +354,29 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"turretPoints": cmpTurretHolder.GetTurretPoints()
 		};
 
-	const cmpTurretable = Engine.QueryInterface(ent, IID_Turretable);
-	if (cmpTurretable)
-		ret.turretable = {
-			"ejectable": cmpTurretable.IsEjectable(),
-			"holder": cmpTurretable.HolderID()
-		};
-
 	const cmpGarrisonable = Engine.QueryInterface(ent, IID_Garrisonable);
 	if (cmpGarrisonable)
 		ret.garrisonable = {
-			"holder": cmpGarrisonable.HolderID(),
 			"size": cmpGarrisonable.UnitSize()
 		};
 
 	const cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
 	if (cmpUnitAI)
 		ret.unitAI = {
-			"state": cmpUnitAI.GetCurrentState(),
-			"orders": cmpUnitAI.GetOrders(),
-			"hasWorkOrders": cmpUnitAI.HasWorkOrders(),
 			"canGuard": cmpUnitAI.CanGuard(),
-			"isGuarding": cmpUnitAI.IsGuardOf(),
 			"canPatrol": cmpUnitAI.CanPatrol(),
-			"selectableStances": cmpUnitAI.GetSelectableStances(),
-			"isIdle": cmpUnitAI.IsIdle(),
-			"formations": cmpUnitAI.GetFormationsList(),
-			"formation": cmpUnitAI.GetFormationController()
-		};
-
-	const cmpGuard = Engine.QueryInterface(ent, IID_Guard);
-	if (cmpGuard)
-		ret.guard = {
-			"entities": cmpGuard.GetEntities()
+			"formations": cmpUnitAI.GetFormationsList()
 		};
 
 	const cmpResourceGatherer = Engine.QueryInterface(ent, IID_ResourceGatherer);
 	if (cmpResourceGatherer)
-	{
-		ret.resourceCarrying = cmpResourceGatherer.GetCarryingStatus();
 		ret.resourceGatherRates = cmpResourceGatherer.GetGatherRates();
-	}
-
-	const cmpGate = Engine.QueryInterface(ent, IID_Gate);
-	if (cmpGate)
-		ret.gate = {
-			"locked": cmpGate.IsLocked()
-		};
 
 	const cmpAlertRaiser = Engine.QueryInterface(ent, IID_AlertRaiser);
 	if (cmpAlertRaiser)
 		ret.alertRaiser = {
 			"classes": cmpAlertRaiser.GetTargetClasses()
 		};
-
-	const cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
-	ret.visibility = cmpRangeManager.GetLosVisibility(ent, player);
 
 	const cmpAttack = Engine.QueryInterface(ent, IID_Attack);
 	if (cmpAttack)
@@ -501,24 +407,13 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			ret.attack[type].repeatTime = timers.repeat;
 
 			if (type != "Ranged")
-			{
-				ret.attack[type].elevationAdaptedRange = ret.attack.maxRange;
-				continue;
-			}
-
-			if (cmpPosition && cmpPosition.IsInWorld())
-				// For units, take the range in front of it, no spread, so angle = 0,
-				// else, take the average elevation around it: angle = 2 * pi.
-				ret.attack[type].elevationAdaptedRange = cmpRangeManager.GetElevationAdaptedRange(cmpPosition.GetPosition(), cmpPosition.GetRotation(), range.max, ret.attack[type].yOrigin, cmpUnitAI ? 0 : 2 * Math.PI);
-			else
-				// Not in world, set a default?
 				ret.attack[type].elevationAdaptedRange = ret.attack.maxRange;
 		}
 	}
 
 	const cmpResistance = QueryMiragedInterface(ent, IID_Resistance);
 	if (cmpResistance)
-		ret.resistance = cmpResistance.GetResistanceOfForm(cmpFoundation ? "Foundation" : "Entity");
+		ret.resistance = cmpResistance.GetResistanceOfForm("Entity");
 
 	const cmpBuildingAI = Engine.QueryInterface(ent, IID_BuildingAI);
 	if (cmpBuildingAI)
@@ -530,38 +425,28 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"arrowCount": cmpBuildingAI.GetArrowCount()
 		};
 
-	if (cmpPosition && cmpPosition.GetTurretParent() != INVALID_ENTITY)
-		ret.turretParent = cmpPosition.GetTurretParent();
-
 	const cmpResourceSupply = QueryMiragedInterface(ent, IID_ResourceSupply);
 	if (cmpResourceSupply)
 		ret.resourceSupply = {
 			"isInfinite": cmpResourceSupply.IsInfinite(),
 			"max": cmpResourceSupply.GetMaxAmount(),
-			"amount": cmpResourceSupply.GetCurrentAmount(),
 			"type": cmpResourceSupply.GetType(),
 			"killBeforeGather": cmpResourceSupply.GetKillBeforeGather(),
-			"maxGatherers": cmpResourceSupply.GetMaxGatherers(),
-			"numGatherers": cmpResourceSupply.GetNumGatherers()
+			"maxGatherers": cmpResourceSupply.GetMaxGatherers()
 		};
 
 	const cmpResourceDropsite = Engine.QueryInterface(ent, IID_ResourceDropsite);
 	if (cmpResourceDropsite)
 		ret.resourceDropsite = {
 			"types": cmpResourceDropsite.GetTypes(),
-			"sharable": cmpResourceDropsite.IsSharable(),
-			"shared": cmpResourceDropsite.IsShared()
+			"sharable": cmpResourceDropsite.IsSharable()
 		};
 
 	const cmpPromotion = Engine.QueryInterface(ent, IID_Promotion);
 	if (cmpPromotion)
 		ret.promotion = {
-			"curr": cmpPromotion.GetCurrentXp(),
 			"req": cmpPromotion.GetRequiredXp()
 		};
-
-	if (!cmpFoundation && cmpIdentity && cmpIdentity.HasClass("Barter"))
-		ret.isBarterMarket = true;
 
 	const cmpHeal = Engine.QueryInterface(ent, IID_Heal);
 	if (cmpHeal)
@@ -612,6 +497,210 @@ GuiInterface.prototype.GetEntityState = function(player, ent)
 			"interval": cmpUpkeep.GetInterval(),
 			"rates": cmpUpkeep.GetRates()
 		};
+
+
+	if (owner && owner != INVALID_PLAYER)
+		this.cachedEntityBaseStates[owner][template] = ret;
+
+	return ret;
+};
+
+/**
+ * Get common entity info, often used in the gui.
+ */
+GuiInterface.prototype.GetEntityState = function(player, ent)
+{
+	if (!ent)
+		return null;
+
+	const ret = {
+		"id": ent,
+		"player": INVALID_PLAYER
+	};
+
+	const cmpOwnership = Engine.QueryInterface(ent, IID_Ownership);
+	if (cmpOwnership)
+		ret.player = cmpOwnership.GetOwner();
+
+	const baseState = this.GetEntityBaseState(ret.player, ent);
+	// All units must have a template; if not then it's a nonexistent entity id.
+	if (!baseState?.template)
+		return null;
+
+	Object.assign(ret, baseState);
+
+	// The base state contains all data dependent on entity's template -- the "predictable" parts, so to speak.
+	// Now we only have to compute the rest of the values, which can actually differ from entity to entity (even with the same template).
+
+	const cmpFormation = Engine.QueryInterface(ent, IID_Formation);
+	if (cmpFormation)
+		ret.formation = {
+			"members": cmpFormation.GetMembers()
+		};
+
+	const cmpPosition = Engine.QueryInterface(ent, IID_Position);
+	if (cmpPosition && cmpPosition.IsInWorld())
+		ret.position = cmpPosition.GetPosition();
+
+	const cmpHealth = QueryMiragedInterface(ent, IID_Health);
+	if (cmpHealth)
+	{
+		ret.hitpoints = cmpHealth.GetHitpoints();
+		ret.needsRepair = cmpHealth.IsRepairable() && cmpHealth.IsInjured();
+		ret.needsHeal = !cmpHealth.IsUnhealable();
+	}
+
+	const cmpCapturable = QueryMiragedInterface(ent, IID_Capturable);
+	if (cmpCapturable)
+		ret.capturePoints = cmpCapturable.GetCapturePoints();
+
+	const cmpPack = Engine.QueryInterface(ent, IID_Pack);
+	if (cmpPack)
+		ret.pack = {
+			"packed": cmpPack.IsPacked(),
+			"progress": cmpPack.GetProgress()
+		};
+
+	const cmpUpgrade = Engine.QueryInterface(ent, IID_Upgrade);
+	if (cmpUpgrade)
+		Object.assign(ret.upgrade, {
+			"progress": cmpUpgrade.GetProgress(),
+			"template": cmpUpgrade.GetUpgradingTo(),
+			"isUpgrading": cmpUpgrade.IsUpgrading()
+		});
+
+	const cmpStatusEffects = Engine.QueryInterface(ent, IID_StatusEffectsReceiver);
+	if (cmpStatusEffects)
+		ret.statusEffects = cmpStatusEffects.GetActiveStatuses();
+
+	const cmpProductionQueue = Engine.QueryInterface(ent, IID_ProductionQueue);
+	if (cmpProductionQueue)
+		ret.production = {
+			"queue": cmpProductionQueue.GetQueue(),
+			"autoqueue": cmpProductionQueue.IsAutoQueueing()
+		};
+
+	const cmpTrader = Engine.QueryInterface(ent, IID_Trader);
+	if (cmpTrader)
+		ret.trader = {
+			"goods": cmpTrader.GetGoods()
+		};
+
+	const cmpFoundation = QueryMiragedInterface(ent, IID_Foundation);
+	if (cmpFoundation)
+		ret.foundation = {
+			"numBuilders": cmpFoundation.GetNumBuilders(),
+			"buildTime": cmpFoundation.GetBuildTime()
+		};
+
+	const cmpRepairable = QueryMiragedInterface(ent, IID_Repairable);
+	if (cmpRepairable)
+		ret.repairable = {
+			"numBuilders": cmpRepairable.GetNumBuilders(),
+			"buildTime": cmpRepairable.GetBuildTime()
+		};
+
+	const cmpRallyPoint = Engine.QueryInterface(ent, IID_RallyPoint);
+	if (cmpRallyPoint)
+		ret.rallyPoint = { "position": cmpRallyPoint.GetPositions()[0] }; // undefined or {x,z} object
+
+	const cmpGarrisonHolder = Engine.QueryInterface(ent, IID_GarrisonHolder);
+	if (cmpGarrisonHolder)
+		Object.assign(ret.garrisonHolder, {
+			"entities": cmpGarrisonHolder.GetEntities(),
+			"occupiedSlots": cmpGarrisonHolder.OccupiedSlots()
+		});
+
+	const cmpTurretable = Engine.QueryInterface(ent, IID_Turretable);
+	if (cmpTurretable)
+		ret.turretable = {
+			"ejectable": cmpTurretable.IsEjectable(),
+			"holder": cmpTurretable.HolderID()
+		};
+
+	const cmpGarrisonable = Engine.QueryInterface(ent, IID_Garrisonable);
+	if (cmpGarrisonable)
+		Object.assign(ret.garrisonable, {
+			"holder": cmpGarrisonable.HolderID()
+		});
+
+	const cmpUnitAI = Engine.QueryInterface(ent, IID_UnitAI);
+	if (cmpUnitAI)
+		Object.assign(ret.unitAI, {
+			"state": cmpUnitAI.GetCurrentState(),
+			"orders": cmpUnitAI.GetOrders(),
+			"hasWorkOrders": cmpUnitAI.HasWorkOrders(),
+			"isGuarding": cmpUnitAI.IsGuardOf(),
+			"selectableStances": cmpUnitAI.GetSelectableStances(),
+			"isIdle": cmpUnitAI.IsIdle(),
+			"formation": cmpUnitAI.GetFormationController()
+		});
+
+	const cmpGuard = Engine.QueryInterface(ent, IID_Guard);
+	if (cmpGuard)
+		ret.guard = {
+			"entities": cmpGuard.GetEntities()
+		};
+
+	const cmpResourceGatherer = Engine.QueryInterface(ent, IID_ResourceGatherer);
+	if (cmpResourceGatherer)
+		ret.resourceCarrying = cmpResourceGatherer.GetCarryingStatus();
+
+	const cmpGate = Engine.QueryInterface(ent, IID_Gate);
+	if (cmpGate)
+		ret.gate = {
+			"locked": cmpGate.IsLocked()
+		};
+
+	const cmpRangeManager = Engine.QueryInterface(SYSTEM_ENTITY, IID_RangeManager);
+	ret.visibility = cmpRangeManager.GetLosVisibility(ent, player);
+
+	const cmpAttack = Engine.QueryInterface(ent, IID_Attack);
+	if (cmpAttack)
+	{
+		const types = cmpAttack.GetAttackTypes();
+		for (const type of types)
+		{
+			if (type == "Ranged")
+				if (cmpPosition && cmpPosition.IsInWorld())
+				// For units, take the range in front of it, no spread, so angle = 0,
+				// else, take the average elevation around it: angle = 2 * pi.
+					ret.attack[type].elevationAdaptedRange = cmpRangeManager.GetElevationAdaptedRange(cmpPosition.GetPosition(), cmpPosition.GetRotation(), cmpAttack.GetRange(type).max, ret.attack[type].yOrigin, cmpUnitAI ? 0 : 2 * Math.PI);
+				else
+				// Not in world, set a default?
+					ret.attack[type].elevationAdaptedRange = ret.attack.maxRange;
+		}
+	}
+
+	const cmpResistance = QueryMiragedInterface(ent, IID_Resistance);
+	if (cmpResistance && cmpFoundation)
+		ret.resistance = cmpResistance.GetResistanceOfForm("Foundation");
+
+	if (cmpPosition && cmpPosition.GetTurretParent() != INVALID_ENTITY)
+		ret.turretParent = cmpPosition.GetTurretParent();
+
+	const cmpResourceSupply = QueryMiragedInterface(ent, IID_ResourceSupply);
+	if (cmpResourceSupply)
+		Object.assign(ret.resourceSupply, {
+			"amount": cmpResourceSupply.GetCurrentAmount(),
+			"numGatherers": cmpResourceSupply.GetNumGatherers()
+		});
+
+	const cmpResourceDropsite = Engine.QueryInterface(ent, IID_ResourceDropsite);
+	if (cmpResourceDropsite)
+		Object.assign(ret.resourceDropsite, {
+			"shared": cmpResourceDropsite.IsShared()
+		});
+
+	const cmpPromotion = Engine.QueryInterface(ent, IID_Promotion);
+	if (cmpPromotion)
+		Object.assign(ret.promotion, {
+			"curr": cmpPromotion.GetCurrentXp(),
+		});
+
+	const cmpIdentity = Engine.QueryInterface(ent, IID_Identity);
+	if (!cmpFoundation && cmpIdentity && cmpIdentity.HasClass("Barter"))
+		ret.isBarterMarket = true;
 
 	return ret;
 };
@@ -2047,6 +2136,18 @@ GuiInterface.prototype.GetTradingGoods = function(player)
 	return cmpPlayer.GetTradingGoods();
 };
 
+GuiInterface.prototype.OnGlobalInitGame = function()
+{
+	// At this point, the cache is obviously still empty, this call here actually only initializes it for the first time.
+	// This is necessary because the cache could be needed even before OnUpdate is invoked for the very first time.
+	this.ClearCachedEntityStates();
+};
+
+GuiInterface.prototype.OnUpdate = function()
+{
+	this.ClearCachedEntityStates();
+};
+
 GuiInterface.prototype.OnGlobalEntityRenamed = function(msg)
 {
 	this.renamedEntities.push(msg);
@@ -2068,6 +2169,7 @@ GuiInterface.prototype.exposedFunctions = {
 	"GetCampaignGameEndData": 1,
 	"GetRenamedEntities": 1,
 	"ClearRenamedEntities": 1,
+	"ClearCachedEntityStates": 1,
 	"GetEntityState": 1,
 	"GetMultipleEntityStates": 1,
 	"GetAverageRangeForBuildings": 1,
