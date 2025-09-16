@@ -38,6 +38,7 @@
   <ProductionQueue/>
   <Researcher>
     <Technologies datatype="tokens">
+      pair_forge_techs
       soldier_attack_melee_01
       soldier_attack_melee_02
       soldier_attack_melee_03

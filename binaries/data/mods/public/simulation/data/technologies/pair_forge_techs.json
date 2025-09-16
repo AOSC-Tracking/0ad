@@ -1,0 +1,5 @@
+{
+	"genericName": "Forge tech cost vs. research time",
+	"top": "forge_techs_cost",
+	"bottom": "forge_techs_speed"
+}
