@@ -18,6 +18,7 @@ var g_DiplomacyDialog;
 var g_GameSpeedControl;
 var g_MatchSettingsDialog;
 var g_Menu;
+var g_NarrativeOverlay;
 var g_MiniMapPanel;
 var g_NetworkStatusOverlay;
 var g_NetworkDelayOverlay;
@@ -282,6 +283,7 @@ function init(initData, hotloadData)
 	g_DiplomacyColors.registerDiplomacyColorsChangeHandler(g_PlayerViewControl.rebuild.bind(g_PlayerViewControl));
 	g_DiplomacyColors.registerDiplomacyColorsChangeHandler(updateGUIObjects);
 	g_PauseControl = new PauseControl();
+	g_PauseOverlay = new PauseOverlay(g_PauseControl);
 	g_PlayerViewControl.registerPreViewedPlayerChangeHandler(removeStatusBarDisplay);
 	g_PlayerViewControl.registerViewedPlayerChangeHandler(resetTemplates);
 
@@ -292,14 +294,14 @@ function init(initData, hotloadData)
 	g_DiplomacyDialog = new DiplomacyDialog(g_PlayerViewControl, g_DiplomacyColors);
 	g_GameSpeedControl = new GameSpeedControl(g_PlayerViewControl);
 	g_MatchSettingsDialog = new MatchSettingsDialog(g_PlayerViewControl, mapCache);
-	g_Menu = new Menu(g_PauseControl, g_PlayerViewControl, g_Chat);
+	g_NarrativeOverlay = new NarrativeOverlay(g_PauseControl, g_PauseOverlay);
+	g_Menu = new Menu(g_PauseControl, g_PlayerViewControl, g_Chat, g_NarrativeOverlay);
 	g_MiniMapPanel = new MiniMapPanel(g_PlayerViewControl, g_DiplomacyColors, g_WorkerTypes);
 	g_NetworkStatusOverlay = new NetworkStatusOverlay();
 	g_NetworkDelayOverlay = new NetworkDelayOverlay();
 	g_OutOfSyncNetwork = new OutOfSyncNetwork();
 	g_OutOfSyncReplay = new OutOfSyncReplay();
 	g_PanelEntityManager = new PanelEntityManager(g_PlayerViewControl, g_Selection, g_PanelEntityOrder);
-	g_PauseOverlay = new PauseOverlay(g_PauseControl);
 	g_QuitConfirmationDefeat = new QuitConfirmationDefeat();
 	g_QuitConfirmationReplay = new QuitConfirmationReplay();
 	g_RangeOverlayManager = new RangeOverlayManager(g_Selection);

@@ -12,7 +12,8 @@ GuiInterface.prototype.Serialize = function()
 	// Return an object with a small selection of deterministic data.
 	return {
 		"timeNotifications": this.timeNotifications,
-		"timeNotificationID": this.timeNotificationID
+		"timeNotificationID": this.timeNotificationID,
+		"narrativePages": this.initialNarrativePages.concat(this.newNarrativePages)
 	};
 };
 
@@ -21,6 +22,8 @@ GuiInterface.prototype.Deserialize = function(data)
 	this.Init();
 	this.timeNotifications = data.timeNotifications;
 	this.timeNotificationID = data.timeNotificationID;
+	this.initialNarrativePages = data.narrativePages;
+	deepfreeze(this.initialNarrativePages);
 };
 
 GuiInterface.prototype.Init = function()
@@ -39,6 +42,8 @@ GuiInterface.prototype.Init = function()
 	this.templateModified = {};
 	this.selectionDirty = {};
 	this.obstructionSnap = new ObstructionSnap();
+	this.initialNarrativePages = []; // Contains exclusively the deserialized pages.
+	this.newNarrativePages = []; // Contains all pages actively added over the course of the game (including in InitGame).
 };
 
 /*
@@ -777,6 +782,17 @@ GuiInterface.prototype.ResetSelectionDirty = function()
 	this.selectionDirty = {};
 };
 
+GuiInterface.prototype.AddNarrativePage = function(page)
+{
+	this.newNarrativePages.push(page);
+	this.PushNotification({
+		"type": "narrative",
+		// Ugly workaround to make all players process the notification exactly once. It is globally relevant.
+		"players": [0],
+		...page
+	});
+};
+
 /**
  * Add a timed notification.
  * Warning: timed notifacations are serialised
@@ -814,6 +830,11 @@ GuiInterface.prototype.GetTimeNotifications = function(player)
 	const time = Engine.QueryInterface(SYSTEM_ENTITY, IID_Timer).GetTime();
 	// Filter on players and time, since the delete timer might be executed with a delay.
 	return this.timeNotifications.filter(n => n.players.indexOf(player) != -1 && n.endTime > time);
+};
+
+GuiInterface.prototype.GetInitialNarrativePages = function()
+{
+	return this.initialNarrativePages;
 };
 
 GuiInterface.prototype.PushNotification = function(notification)
@@ -2080,6 +2101,7 @@ GuiInterface.prototype.exposedFunctions = {
 	"GetNeededResources": 1,
 	"GetNotifications": 1,
 	"GetTimeNotifications": 1,
+	"GetInitialNarrativePages": 1,
 
 	"GetAvailableFormations": 1,
 	"GetFormationRequirements": 1,

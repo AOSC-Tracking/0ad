@@ -3,7 +3,7 @@
  */
 class Menu
 {
-	constructor(pauseControl, playerViewControl, chat)
+	constructor(pauseControl, playerViewControl, chat, narrativeOverlay)
 	{
 		this.menuButton = Engine.GetGUIObjectByName("menuButton");
 		this.menuButton.onPress = this.toggle.bind(this);
@@ -24,7 +24,7 @@ class Menu
 				"but only " + menuButtons.length + " objects!");
 
 		this.buttons = handlerNames.map((handlerName, i) => {
-			const handler = new MenuButtons.prototype[handlerName](menuButtons[i], pauseControl, playerViewControl, chat);
+			const handler = new MenuButtons.prototype[handlerName](menuButtons[i], pauseControl, playerViewControl, chat, narrativeOverlay);
 			this.initButton(handler, menuButtons[i], i);
 			return handler;
 		});

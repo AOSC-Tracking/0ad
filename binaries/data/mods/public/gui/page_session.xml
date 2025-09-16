@@ -14,5 +14,10 @@
 	<include>session/setup.xml</include>
 	<include>session/sprites.xml</include>
 	<include>session/styles.xml</include>
+
+	<include>session/narrative/setup.xml</include>
+	<include>session/narrative/sprites.xml</include>
+	<include>session/narrative/styles.xml</include>
+
 	<include>session/session.xml</include>
 </page>

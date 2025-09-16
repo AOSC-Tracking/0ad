@@ -602,4 +602,28 @@ TriggerHelper.SpawnAndTurretAtClasses = function(playerID, classes, templates, c
 	return results;
 };
 
+/**
+ * Push a narrative page to the GUI.
+ * @param {Object} page
+ * @param {number} page.type - The type (i.e. size) of the page, either 0 (SMALL), 1 (MEDIUM) or 2 (LARGE)
+ * @param {string} page.text - The text content to display. Virtually any length can work in combination with the fitting page type.
+ * @param {string} [page.textSize] - The text container's size relative to a padded safe area above the buttons. See art/narratives/templates/.
+ * @param {string} [page.textAlign] - Which side the text is aligned to (corresponding to the text_align property of GUI objects): "left", "center", or "right" with "center" being the default.
+ * @param {string} [page.title] - The page's title, by default displayed in the top center.
+ * @param {string} [page.titleSize] - The title container's size relative to a padded safe area above the buttons. See art/narratives/templates/.
+ * @param {string} [page.image] - An image to be displayed over the parchment, but behind the text. It's laid directly over the full parchment texture of the chosen page type and should therefore have the same dimensions as that.
+ */
+TriggerHelper.DisplayNarrativePage = function(page) {
+	Engine.QueryInterface(SYSTEM_ENTITY, IID_GuiInterface).AddNarrativePage(page);
+};
+
+/**
+ * Same enum as in gui/session/narrative/NarrativeOverlay.js
+ */
+TriggerHelper.NARRATIVE_PAGE_TYPE = Object.freeze({
+	"SMALL": 0,
+	"MEDIUM": 1,
+	"LARGE": 2
+});
+
 Engine.RegisterGlobal("TriggerHelper", TriggerHelper);

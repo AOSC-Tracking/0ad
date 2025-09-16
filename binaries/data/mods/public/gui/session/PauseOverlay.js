@@ -26,6 +26,11 @@ class PauseOverlay
 			this.pauseControl.setPaused(false, true);
 	}
 
+	setButtonEnabled(enabled)
+	{
+		this.pauseOverlay.enabled = enabled;
+	}
+
 	rebuild()
 	{
 		const hidden = !this.pauseControl.explicitPause && !this.pauseControl.pausingClients.length || g_Disconnected;

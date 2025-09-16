@@ -290,6 +290,18 @@ var g_NotificationsTypes =
 		}
 
 		global.music.setLocked(notification.lock);
+	},
+	"narrative": function(notification, player)
+	{
+		g_NarrativeOverlay.addPage({
+			"type": notification.pageType,
+			"title": notification.title,
+			"titleSize": notification.titleSize,
+			"text": notification.text,
+			"textSize": notification.textSize,
+			"image": notification.image,
+			"textAlign": notification.textAlign
+		});
 	}
 };
 

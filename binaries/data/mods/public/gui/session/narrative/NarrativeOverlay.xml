@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object name="narrativeOverlay">
+    <object name="narrativeOverlayBackgroundUnderlay" type="image"/>
+    <object name="narrativeOverlayBackground" type="image">
+        <object name="narrativeOverlayPage">
+            <object name="narrativeOverlayContent" type="image">
+                <object name="narrativeOverlayTitle" type="text" style="NarrativeOverlayTitle"/>
+                <object name="narrativeOverlayText" type="text" style="NarrativeOverlayText" buffer_zone="0" scrollbar="true" scrollbar_style="BlackScrollBar">
+                    <object name="narrativeOverlayOrnamentTop" type="image" size="70 -17 100%-70 -5" sprite="NarrativeOrnamentTop"/>
+                    <object name="narrativeOverlayOrnamentBottom" type="image" size="70 100%+5 100%-70 100%+17" sprite="NarrativeOrnamentBottom"/>
+                </object>
+            </object>
+            <object name="narrativeOverlayButtons" size="0 100%-86 100% 100%">
+                <object name="narrativeOverlayPreviousButton" type="button" style="BrownButton" size="30%-80 22 30%+80 54">
+                    <object type="image" sprite="stretched:session/narrative_overlay/button_glow.png" size="50%-128 50%-64 50%+128 50%+64" ghost="true"/>
+                </object>
+                <object name="narrativeOverlayNextButton" type="button" style="BrownButton" size="70%-80 22 70%+80 54">
+                    <object type="image" sprite="stretched:session/narrative_overlay/button_glow.png" size="50%-128 50%-64 50%+128 50%+64" ghost="true"/>
+                </object>
+            </object>
+        </object>
+    </object>
+    <object name="narrativeOverlayImage" type="image"/>
+</object>
