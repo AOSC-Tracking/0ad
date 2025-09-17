@@ -23,12 +23,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Wildfire Games"
             VALUE "FileDescription", "Pyrogenesis engine"
-            VALUE "FileVersion", PYROGENESIS_VERSION
+            VALUE "FileVersion", PYROGENESIS_DISPLAY_VERSION
             VALUE "InternalName", "pyrogenesis.rc"
-            VALUE "LegalCopyright", "Copyright (C) 2024 Wildfire Games"
+            VALUE "LegalCopyright", "Copyright (C) 2025 Wildfire Games"
             VALUE "OriginalFilename", "pyrogenesis.rc"
             VALUE "ProductName", "Pyrogenesis"
-            VALUE "ProductVersion", PYROGENESIS_VERSION
+            VALUE "ProductVersion", PYROGENESIS_DISPLAY_VERSION
         END
     END
     BLOCK "VarFileInfo"

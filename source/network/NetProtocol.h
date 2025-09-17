@@ -44,7 +44,7 @@ Message CreateHandshake() {
 		handshake.m_Magic = PS_PROTOCOL_MAGIC;
 
 	handshake.m_ProtocolVersion = PS_PROTOCOL_VERSION;
-	handshake.m_EngineVersion = engine_version;
+	handshake.m_EngineVersion = engine_compat_version;
 
 	for (const Mod::ModData* mod : Mod::Instance().GetEnabledModsData())
 	{

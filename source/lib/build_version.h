@@ -20,6 +20,24 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#define PYROGENESIS_VERSION "0.28.0"
+/*
+ * The compatibility version should not be changed as long as the simulation
+ * stays compatible (no OOS in multiplayer, identical outcomes in replays, etc.)
+ * and as long as the engine modding API is not modified.
+ * Upon main releases, the compat version is set to 0.x: patch releases are not
+ * supposed to break compatibility.
+ * In case a patch release is forced to lose compatibility because of a breaking
+ * issue, this value is set to the patch version 0.x.y, and stays at that value
+ * for subsequent patch releases of the same main release. This will warrant the
+ * opening of a new lobby room.
+ */
+#define PYROGENESIS_COMPAT_VERSION "0.28"
+
+/*
+ * The display version and its Windows WORD representation is only used for logging,
+ * reports, etc. It is bumped at each patch release and can be safely changed downstream.
+ */
+#define PYROGENESIS_DISPLAY_VERSION "0.28.0"
 #define PYROGENESIS_VERSION_WORD 0,28,0,0
+
 extern wchar_t build_version[];

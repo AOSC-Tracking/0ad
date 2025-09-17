@@ -29,7 +29,15 @@ Standard declarations which are included in all projects.
 class Path;
 using OsPath = Path;
 
-extern const char* engine_version;
+/*
+ * Engine version values are set in "lib/build_version.h".
+ * The compat_version signals compatibility when playing over the network, when replaying simulation commands,
+ * and with respect to the modding API.
+ * The display_version can be freely modified and must only be used in logging and reporting.
+ */
+extern const char* engine_compat_version;
+extern const char* engine_display_version;
+
 extern const char* main_window_name;
 
 extern void psBundleLogs(FILE* f); // set during InitVfs
