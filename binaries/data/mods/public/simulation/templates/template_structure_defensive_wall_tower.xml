@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Entity parent="template_structure_defensive_wall">
   <Cost>
-    <BuildTime>48</BuildTime>
+    <BuildTime>27</BuildTime>
     <Resources>
-      <stone>48</stone>
+      <stone>27</stone>
     </Resources>
   </Cost>
   <GarrisonHolder>
@@ -25,7 +25,7 @@
     <Icon>structures/tower.png</Icon>
   </Identity>
   <Loot>
-    <stone>10</stone>
+    <stone>9</stone>
   </Loot>
   <Obstruction>
     <ControlPersist/>
