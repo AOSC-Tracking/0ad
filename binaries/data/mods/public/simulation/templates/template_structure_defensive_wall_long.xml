@@ -4,9 +4,9 @@
     structures/wall_garrisoned
   </Auras>
   <Cost>
-    <BuildTime>36</BuildTime>
+    <BuildTime>27</BuildTime>
     <Resources>
-      <stone>36</stone>
+      <stone>27</stone>
     </Resources>
   </Cost>
   <Health>
@@ -18,7 +18,7 @@
     <Classes datatype="tokens">WallLong</Classes>
   </Identity>
   <Loot>
-    <stone>7</stone>
+    <stone>5</stone>
   </Loot>
   <Upgrade>
     <Gate>
