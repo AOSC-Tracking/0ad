@@ -132,7 +132,7 @@ class TemplateLoader
 	{
 		const template = this.loadTechnologyTemplate(templateName);
 		return {
-			"techs": [template.top, template.bottom],
+			"techs": [template.first, template.second],
 			"reqs": DeriveTechnologyRequirements(template, civCode)
 		};
 	}
@@ -307,7 +307,7 @@ class TemplateLoader
 
 	isPairTech(technologyCode)
 	{
-		return !!this.loadTechnologyTemplate(technologyCode).top;
+		return !!this.loadTechnologyTemplate(technologyCode).first;
 	}
 
 	isPhaseTech(technologyCode)

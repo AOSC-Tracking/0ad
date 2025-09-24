@@ -11,11 +11,11 @@ export function Technology(templateName)
 	if (this._isPair)
 	{
 		const pairTech = TechnologyTemplates.Get(template.pair);
-		this._pairedWith = pairTech.top == templateName ? pairTech.bottom : pairTech.top;
+		this._pairedWith = pairTech.first == templateName ? pairTech.second : pairTech.first;
 	}
 
 	// check if it only defines a pair:
-	this._definesPair = template.top !== undefined;
+	this._definesPair = template.first !== undefined;
 	this._template = template;
 }
 
@@ -42,8 +42,8 @@ Technology.prototype.getPairedTechs = function()
 		return undefined;
 
 	return [
-		new Technology(this._template.top),
-		new Technology(this._template.bottom)
+		new Technology(this._template.first),
+		new Technology(this._template.second)
 	];
 };
 

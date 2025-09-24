@@ -257,8 +257,8 @@ Researcher.prototype.GetTechnologiesList = function()
 		}
 
 		const template = TechnologyTemplates.Get(tech);
-		if (template.top)
-			ret[i] = { "pair": true, "top": template.top, "bottom": template.bottom };
+		if (template.first)
+			ret[i] = { "pair": true, "first": template.first, "second": template.second };
 		else
 			ret[i] = tech;
 	}
@@ -294,11 +294,11 @@ Researcher.prototype.IsTechnologyResearchedOrInProgress = function(tech)
 		return false;
 
 	const template = TechnologyTemplates.Get(tech);
-	if (template.top)
-		return cmpTechnologyManager.IsTechnologyResearched(template.top) ||
-		    cmpTechnologyManager.IsInProgress(template.top) ||
-		    cmpTechnologyManager.IsTechnologyResearched(template.bottom) ||
-		    cmpTechnologyManager.IsInProgress(template.bottom);
+	if (template.first)
+		return cmpTechnologyManager.IsTechnologyResearched(template.first) ||
+		    cmpTechnologyManager.IsInProgress(template.first) ||
+		    cmpTechnologyManager.IsTechnologyResearched(template.second) ||
+		    cmpTechnologyManager.IsInProgress(template.second);
 
 	return cmpTechnologyManager.IsTechnologyResearched(tech) || cmpTechnologyManager.IsInProgress(tech);
 };
@@ -312,7 +312,7 @@ Researcher.prototype.QueueTechnology = function(templateName, metadata)
 {
 	if (!this.GetTechnologiesList().some(tech =>
 		tech && (tech == templateName ||
-			tech.pair && (tech.top == templateName || tech.bottom == templateName))))
+			tech.pair && (tech.first == templateName || tech.second == templateName))))
 	{
 		error("This entity cannot research " + templateName + ".");
 		return -1;

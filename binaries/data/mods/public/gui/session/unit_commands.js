@@ -55,15 +55,11 @@ function setupUnitPanel(guiName, unitEntStates, playerState)
 		return;
 	}
 
-	const items = g_SelectionPanels[guiName].getItems(unitEntStates);
-
-	if (!items || !items.length)
-		return;
-
+	const items = g_SelectionPanels[guiName].getItems(unitEntStates) || [];
 	const numberOfItems = Math.min(items.length, g_SelectionPanels[guiName].getMaxNumberOfItems());
 	const rowLength = g_SelectionPanels[guiName].rowLength || 8;
 
-	if (g_SelectionPanels[guiName].resizePanel)
+	if (numberOfItems && g_SelectionPanels[guiName].resizePanel)
 		g_SelectionPanels[guiName].resizePanel(numberOfItems, rowLength);
 
 	for (let i = 0; i < numberOfItems; ++i)
@@ -108,7 +104,7 @@ function setupUnitPanel(guiName, unitEntStates, playerState)
 			Engine.GetGUIObjectByName("unit" + guiName + "Button[" + i + "]").hidden = true;
 
 	g_unitPanelButtons[guiName] = numberOfItems;
-	g_SelectionPanels[guiName].used = true;
+	g_SelectionPanels[guiName].used = numberOfItems > 0;
 }
 
 /**
@@ -126,7 +122,11 @@ function setupUnitPanel(guiName, unitEntStates, playerState)
 function updateUnitCommands(entStates, supplementalDetailsPanel, commandsPanel)
 {
 	for (const panel in g_SelectionPanels)
+	{
 		g_SelectionPanels[panel].used = false;
+		if (g_SelectionPanels[panel].reset)
+			g_SelectionPanels[panel].reset();
+	}
 
 	// Get player state to check some constraints
 	// e.g. presence of a hero or build limits.
@@ -146,11 +146,9 @@ function updateUnitCommands(entStates, supplementalDetailsPanel, commandsPanel)
 	{
 		for (const guiName of g_PanelsOrder)
 		{
-			if (g_SelectionPanels[guiName].conflictsWith &&
-			    g_SelectionPanels[guiName].conflictsWith.some(p => g_SelectionPanels[p].used))
-				continue;
-
-			setupUnitPanel(guiName, entStates, playerStates[entStates[0].player]);
+			if (!g_SelectionPanels[guiName].conflictsWith ||
+			    g_SelectionPanels[guiName].conflictsWith.every(p => !g_SelectionPanels[p].used))
+				setupUnitPanel(guiName, entStates, playerStates[entStates[0].player]);
 		}
 
 		supplementalDetailsPanel.hidden = false;
