@@ -26,7 +26,7 @@
 	"tooltip": "Champion Cavalry Spearmen +20% health, but +10% training time.",
 	"modifications": [
 		{ "value": "Cost/BuildTime", "multiply": 1.1 },
-		{ "value": "Health/Max", "multiply": 1.2 }
+		{ "value": "Health/Max", "multiply": 1.1 }
 	],
 	"affects": ["Champion Cavalry Spearman"],
 	"soundComplete": "interface/alarm/alarm_upgradearmory.xml"
