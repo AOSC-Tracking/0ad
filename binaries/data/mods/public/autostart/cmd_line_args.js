@@ -130,8 +130,7 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 		if (!Array.isArray(value))
 			value = [value];
 
-		// TODO: support more than 8 players
-		const players = value.map(x => +(x[0]));
+		const players = value.map(x => +(x.split(':')[0]));
 		maxPlayerInArgs = Math.max(maxPlayerInArgs, ...players);
 	}
 	if (maxPlayerInArgs > settings.playerCount.getNb())
@@ -154,8 +153,7 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 		var value = cmdLineArgs['autostart-' + key];
 		if (!Array.isArray(value))
 			value = [value];
-		// TODO: support more than 8 players
-		return value.find(x => x[0] == i)?.substring(2);
+		return value.find(x => x.includes(':') && +(x.split(':')[0]) === i)?.split(':')[1];
 	};
 
 	for (let i = 1; i <= settings.playerCount.nbPlayers; ++i)
