@@ -122,11 +122,11 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 
 	// The following player settings options can be used to avoid specifying autostart-players
 	let maxPlayerInArgs = 0;
-	for (const key in ["civ", "team", "ai"])
+	for (const key of ["civ", "team", "ai", "aidiff", "aibehavior"])
 	{
-		if (!(("autostart-" + key) in cmdLineArgs))
+		if (!(('autostart-' + key) in cmdLineArgs))
 			continue;
-		let value = cmdLineArgs[arg];
+		let value = cmdLineArgs['autostart-' + key];
 		if (!Array.isArray(value))
 			value = [value];
 
