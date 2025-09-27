@@ -120,23 +120,17 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 			settings.playerCount.setNb(+cmdLineArgs['autostart-players']);
 	}
 
-	// Handle PLAYER:VALUE options.
-
-	// These can be used to avoid specifying 'autostart-players':
+	// The following player settings options can be used to avoid specifying autostart-players
 	let maxPlayerInArgs = 0;
-	for (const arg in cmdLineArgs)
+	for (const key in ["civ", "team", "ai"])
 	{
-		if (arg.indexOf('autostart-') != 0)
+		if (!(("autostart-" + key) in cmdLineArgs))
 			continue;
 		let value = cmdLineArgs[arg];
 		if (!Array.isArray(value))
-		{
-			// TODO: support more than 8 players
-			if (value[1] == ':')
-				value = [value];
-			else
-				continue;
-		}
+			value = [value];
+
+		// TODO: support more than 8 players
 		const players = value.map(x => +(x[0]));
 		maxPlayerInArgs = Math.max(maxPlayerInArgs, ...players);
 	}
@@ -147,12 +141,12 @@ function parseCmdLineArgs(settings, cmdLineArgs)
 				", but this map only has " + settings.playerCount.getNb() + " players.");
 		else if (cmdLineArgs['autostart-players'])
 			warn("Specified autostart option for player " + maxPlayerInArgs +
-				", but you asked for only " + cmdLineArgs['autostart-players'] + " players.");
+				", conflicting with autostart-players=" + cmdLineArgs['autostart-players'] + ".");
 		else
 			settings.playerCount.setNb(maxPlayerInArgs);
 	}
 
-	// Now actually parse these options:
+	// Now parse player settings options
 
 	const getPlayer = (key, i) => {
 		if (!(('autostart-' + key) in cmdLineArgs))
