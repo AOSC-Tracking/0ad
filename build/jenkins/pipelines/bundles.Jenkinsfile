@@ -137,9 +137,9 @@ pipeline {
             }
         }
 
-        stage('Create Windows Installer & Tarballs') {
+        stage('Create Unix Tarballs') {
             steps {
-                sh "BUNDLE_VERSION=${params.BUNDLE_VERSION} DO_GZIP=${params.DO_GZIP} source/tools/dist/build-unix-win32.sh"
+                sh "BUNDLE_VERSION=${params.BUNDLE_VERSION} DO_GZIP=${params.DO_GZIP} source/tools/dist/build-unix-tarballs.sh"
                 stash(name: 'unix-sources', includes: '*.tar.gz')
             }
         }
@@ -181,6 +181,12 @@ pipeline {
                         stash(name: 'appimage', includes: '*AppImage')
                     }
                 }
+            }
+        }
+
+        stage('Create Windows Installer') {
+            steps {
+                sh "BUNDLE_VERSION=${params.BUNDLE_VERSION} source/tools/dist/build-win-installer.sh"
             }
         }
 
