@@ -57,8 +57,8 @@ const cmpPlayer = AddMock(playerEnt, IID_Player, {
 		sold = amounts[Object.keys(amounts)[0]];
 		return true;
 	},
-	"AddResource": (type, amount) => {
-		bought = amount;
+	"AddResource": (type, amountGained) => {
+		bought = amountGained;
 		return true;
 	},
 	"CanBarter": () => true,
