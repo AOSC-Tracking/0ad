@@ -57,6 +57,7 @@
 #include <fcntl.h>
 #include <memory>
 #include <string>
+#include <zip.h>
 
 //-----------------------------------------------------------------------------
 // timestamp conversion: DOS FAT <-> Unix time_t
@@ -613,18 +614,6 @@ private:
 	off_t m_fileSize;
 };
 
-PIArchiveReader CreateArchiveReader_Zip(const OsPath& archivePathname)
-{
-	try
-	{
-		return PIArchiveReader(new ArchiveReader_Zip(archivePathname));
-	}
-	catch(Status)
-	{
-		return PIArchiveReader();
-	}
-}
-
 
 //-----------------------------------------------------------------------------
 // ArchiveWriter_Zip
@@ -789,11 +778,215 @@ private:
 	bool m_noDeflate;
 };
 
+// ----------------------------------------------------------------------------------------------
+
+class ArchiveFile_LIBZIP : public IArchiveFile
+{
+public:
+	ArchiveFile_LIBZIP(std::shared_ptr<zip_t> zip, zip_uint64_t index)
+		: m_Zip(std::move(zip)), m_Index(index)
+	{
+	}
+
+	size_t Precedence() const override
+	{
+		return 2u;
+	}
+
+	wchar_t LocationCode() const override
+	{
+		return 'A';
+	}
+
+	OsPath Path() const override
+	{
+		int ret;
+		zip_stat_t zipStat;
+		if ((ret = zip_stat_index(m_Zip.get(), m_Index, 0, &zipStat)) < 0)
+		{
+			// handle error
+		}
+		return OsPath(zipStat.name);
+	}
+
+	Status Load(const OsPath& /*name*/, const std::shared_ptr<u8>& buf, size_t size) const override
+	{
+		zip_file_t *zipFile;
+		if ((zipFile = zip_fopen_index(m_Zip.get(), m_Index, 0)) == nullptr)
+		{
+			// handle error
+		}
+
+		zip_int64_t bytesRead;
+		if ((bytesRead = zip_fread(zipFile, buf.get(), size)) < 0)
+		{
+			// handle error
+		}
+
+		int ret;
+		if ((ret = zip_fclose(zipFile)) != 0)
+		{
+			// handle error
+		}
+
+		return INFO::OK;
+	}
+
+private:
+	std::shared_ptr<zip_t> m_Zip;
+	zip_uint64_t m_Index;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+struct ZipArchiveDeleter
+{
+    void operator()(zip_t* zip) const
+    {
+		if ((zip_close(zip)) < 0)
+		{
+        	debug_printf("archive-reader-deleter: cannot close archive : %s\n", zip_strerror(zip));
+        	zip_discard(zip);
+		}
+    }
+};
+
+class ArchiveReader_LIBZIP : public IArchiveReader
+{
+public:
+	ArchiveReader_LIBZIP(const OsPath& archivePath)
+	{
+		int err;
+		zip_t* zip;
+		if ((zip = zip_open(OsString(archivePath).c_str(), 0, &err)) == nullptr)
+		{
+			zip_error_t error;
+			zip_error_init_with_code(&error, err);
+			std::runtime_error exception = std::runtime_error("archive-reader: cannot open input archive " + OsString(archivePath) + ": " + zip_error_strerror(&error));
+			zip_error_fini(&error);
+			throw exception;
+		}
+		m_Zip = std::shared_ptr<zip_t>(zip, ZipArchiveDeleter());
+	}
+
+	Status ReadEntries(ArchiveEntryCallback cb, uintptr_t cbData) override
+	{
+		zip_int64_t numEntries;
+		if ((numEntries = zip_get_num_entries(m_Zip.get(), 0)) < 0)
+		{
+			// handle error
+		}
+		//debug_printf("-------------------- num entries %ld\n", numEntries);
+
+		zip_uint64_t indices = static_cast<std::make_unsigned_t<zip_int64_t>>(numEntries);
+		for (zip_uint64_t index = 0; index < indices; ++index)
+		{
+			int ret;
+			zip_stat_t zipStat;
+			if ((ret = zip_stat_index(m_Zip.get(), index, 0, &zipStat)) < 0)
+			{
+				// handle error
+			}
+			const Path relativePathname(zipStat.name);
+			if(!relativePathname.IsDirectory())
+			{
+				const OsPath name = relativePathname.Filename();
+				// debug_printf("gen fileinfo: name %s, size %ld, mtime %ld\n", OsString(name).c_str(), zipStat.size, zipStat.mtime);
+				CFileInfo fileInfo(name, zipStat.size, zipStat.mtime);
+				std::shared_ptr<ArchiveFile_LIBZIP> archiveFile = std::make_shared<ArchiveFile_LIBZIP>(m_Zip, index);
+				cb(relativePathname, fileInfo, archiveFile, cbData);
+			}
+		}
+
+		return INFO::OK;
+	}
+
+private:
+	std::shared_ptr<zip_t> m_Zip;
+};
+
+// ----------------------------------------------------------------------------------------------
+
+class ArchiveWriter_LIBZIP : public IArchiveWriter
+{
+public:
+	ArchiveWriter_LIBZIP(const OsPath& archivePath, bool noDeflate)
+		: m_NoDeflate(noDeflate)
+	{
+		int err;
+		zip_t* zip;
+		if ((zip = zip_open(OsString(archivePath).c_str(), ZIP_CREATE | ZIP_EXCL, &err)) == nullptr)
+		{
+			zip_error_t error;
+			zip_error_init_with_code(&error, err);
+			std::runtime_error exception = std::runtime_error("archive-writer: cannot open output archive " + OsString(archivePath) + ": " + zip_error_strerror(&error));
+			zip_error_fini(&error);
+			throw exception;
+		}
+		m_Zip = std::unique_ptr<zip_t, ZipArchiveDeleter>(zip);
+	}
+
+	Status AddFile(const OsPath& pathname, const OsPath& pathnameInArchive) override
+	{
+		zip_source_t* zipSource;
+		zip_error_t error;
+		if ((zipSource = zip_source_file_create(OsString(pathname).c_str(), 0, ZIP_LENGTH_TO_END, &error)) == nullptr)
+		{
+			// handle error
+		}
+		return AddZipSource(zipSource, pathnameInArchive);
+	}
+
+	Status AddMemory(const u8* data, size_t size, time_t /*mtime*/, const OsPath& pathnameInArchive) override
+	{
+		zip_source_t* zipSource;
+		zip_error_t error;
+		if ((zipSource = zip_source_buffer_create(data, size, 0, &error)) == nullptr)
+		{
+			// handle error
+		}
+		return AddZipSource(zipSource, pathnameInArchive);
+	}
+
+private:
+	std::unique_ptr<zip_t, ZipArchiveDeleter> m_Zip;
+	bool m_NoDeflate;
+
+	Status AddZipSource(zip_source_t* zipSource, const OsPath& pathnameInArchive)
+	{
+		zip_int64_t index;
+		if ((index = zip_file_add(m_Zip.get(), OsString(pathnameInArchive).c_str(), zipSource, ZIP_FL_ENC_UTF_8)) < 0)
+		{
+			// handle error
+		}
+		zip_int32_t comp = m_NoDeflate ? ZIP_CM_STORE : ZIP_CM_DEFLATE;
+		if ((zip_set_file_compression(m_Zip.get(), index, comp, 0)) < 0)
+		{
+			// handle error
+		}
+		return INFO::OK;
+	}
+};
+
+// ----------------------------------------------------------------------------------------------
+
+PIArchiveReader CreateArchiveReader_Zip(const OsPath& archivePathname)
+{
+	try
+	{
+		return PIArchiveReader(new ArchiveReader_LIBZIP(archivePathname));
+	}
+	catch(Status)
+	{
+		return PIArchiveReader();
+	}
+}
+
 PIArchiveWriter CreateArchiveWriter_Zip(const OsPath& archivePathname, bool noDeflate)
 {
 	try
 	{
-		return PIArchiveWriter(new ArchiveWriter_Zip(archivePathname, noDeflate));
+		return PIArchiveWriter(new ArchiveWriter_LIBZIP(archivePathname, noDeflate));
 	}
 	catch(Status)
 	{
