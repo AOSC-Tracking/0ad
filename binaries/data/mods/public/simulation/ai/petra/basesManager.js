@@ -788,7 +788,8 @@ BasesManager.prototype.Serialize = function()
 
 	return {
 		"properties": properties,
-		"noBase": this.noBase.Serialize(),
+		// noBase can be undefined if the region analysis failed and the managers haven't been initialised.
+		"noBase": this.noBase?.Serialize(),
 		"baseManagers": baseManagers
 	};
 };
