@@ -5,7 +5,7 @@
 		"Description" : "A typical map without any water. Balanced resource start.\n\n[color=\"red\"]IMPORTANT: This map requires the mod Feldmap, download it using the in-game mod downloader.[/color]",
 		"Preview" : "mainland_balanced.png",
 		"Keywords": ["multiplayer"],
-		"SupportedBiomes": "mainland_balanced/",
+		"SupportedBiomes": "generic/",
 		"CircularMap" : true,
 		"PlayerPlacements": [
 			"circle",

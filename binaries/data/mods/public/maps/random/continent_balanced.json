@@ -5,7 +5,7 @@
 		"Description" : "All players starts on a continent surrounded by water.",
 		"Preview" : "continent.png",
 		"Keywords": ["multiplayer"],
-		"SupportedBiomes": "mainland_balanced/",
+		"SupportedBiomes": "generic/",
 		"CircularMap" : true,
 		"PlayerPlacements": [
 			"circle",

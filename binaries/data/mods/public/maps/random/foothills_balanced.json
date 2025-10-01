@@ -5,7 +5,7 @@
 		"Description" : "A land map with rolling hills and no obstructions.",
 		"Preview" : "foothills.png",
 		"Keywords": ["multiplayer"],
-		"SupportedBiomes": "mainland_balanced/",
+		"SupportedBiomes": "generic/",
 		"CircularMap" : true,
 		"PlayerPlacements": [
 			"circle",
