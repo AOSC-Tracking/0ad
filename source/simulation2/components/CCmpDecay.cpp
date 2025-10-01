@@ -125,7 +125,7 @@ public:
 
 		m_SinkProb < 1.f ? m_Stochastic = true : m_Stochastic = false;
 
-		std::negative_binomial_distribution<int>::param_type new_params(6, m_SinkProb*4);
+		std::negative_binomial_distribution<int>::param_type new_params(6, m_SinkProb);
 		m_Distribution.param(new_params);
 
 		// Detect unsafe misconfiguration
